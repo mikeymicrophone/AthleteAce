@@ -1,0 +1,47 @@
+<%= form_with(model: league) do |form| %>
+  <% if league.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(league.errors.count, "error") %> prohibited this league from being saved:</h2>
+
+      <ul>
+        <% league.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :name, style: "display: block" %>
+    <%= form.text_field :name %>
+  </div>
+
+  <div>
+    <%= form.label :url, style: "display: block" %>
+    <%= form.text_field :url %>
+  </div>
+
+  <div>
+    <%= form.label :ios_app_url, style: "display: block" %>
+    <%= form.text_field :ios_app_url %>
+  </div>
+
+  <div>
+    <%= form.label :year_of_origin, style: "display: block" %>
+    <%= form.number_field :year_of_origin %>
+  </div>
+
+  <div>
+    <%= form.label :official_rules_url, style: "display: block" %>
+    <%= form.text_field :official_rules_url %>
+  </div>
+
+  <div>
+    <%= form.label :sport_id, style: "display: block" %>
+    <%= form.text_field :sport_id %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

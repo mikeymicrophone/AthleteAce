@@ -1,0 +1,11 @@
+<% content_for :title, "New sport" %>
+
+<h1>New sport</h1>
+
+<%= render "form", sport: @sport %>
+
+<br>
+
+<div>
+  <%= link_to "Back to sports", sports_path %>
+</div>
