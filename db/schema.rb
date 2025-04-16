@@ -15,12 +15,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_16_155123) do
   enable_extension "pg_catalog.plpgsql"
 
   create_table "leagues", force: :cascade do |t|
+    t.bigint "sport_id", null: false
     t.string "name"
+    t.string "abbreviation"
     t.string "url"
     t.string "ios_app_url"
     t.integer "year_of_origin"
     t.string "official_rules_url"
-    t.bigint "sport_id", null: false
+    t.string "logo_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["sport_id"], name: "index_leagues_on_sport_id"
