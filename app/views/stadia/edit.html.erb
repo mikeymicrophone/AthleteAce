@@ -1,0 +1,12 @@
+<% content_for :title, "Editing stadium" %>
+
+<h1>Editing stadium</h1>
+
+<%= render "form", stadium: @stadium %>
+
+<br>
+
+<div>
+  <%= link_to "Show this stadium", @stadium %> |
+  <%= link_to "Back to stadia", stadia_path %>
+</div>

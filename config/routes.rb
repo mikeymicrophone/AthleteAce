@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  resources :countries
+  resources :stadia
+  resources :cities
+  resources :states
   resources :leagues
   resources :sports
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
