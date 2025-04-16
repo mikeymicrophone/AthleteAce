@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_16_165522) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_16_193315) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -43,6 +43,30 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_16_165522) do
     t.index ["sport_id"], name: "index_leagues_on_sport_id"
   end
 
+  create_table "players", force: :cascade do |t|
+    t.string "first_name"
+    t.string "last_name"
+    t.string "nicknames", default: [], array: true
+    t.date "birthdate"
+    t.bigint "birth_city_id"
+    t.bigint "birth_country_id"
+    t.integer "height_in"
+    t.integer "weight_lb"
+    t.integer "jersey_number"
+    t.string "current_position"
+    t.integer "debut_year"
+    t.integer "draft_year"
+    t.boolean "active"
+    t.text "bio", default: [], array: true
+    t.text "photo_urls", default: [], array: true
+    t.bigint "team_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["birth_city_id"], name: "index_players_on_birth_city_id"
+    t.index ["birth_country_id"], name: "index_players_on_birth_country_id"
+    t.index ["team_id"], name: "index_players_on_team_id"
+  end
+
   create_table "sports", force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -71,8 +95,31 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_16_165522) do
     t.index ["country_id"], name: "index_states_on_country_id"
   end
 
+  create_table "teams", force: :cascade do |t|
+    t.string "mascot"
+    t.string "territory"
+    t.bigint "league_id", null: false
+    t.bigint "stadium_id", null: false
+    t.integer "founded_year"
+    t.string "abbreviation"
+    t.string "url"
+    t.string "logo_url"
+    t.string "primary_color"
+    t.string "secondary_color"
+    t.string "coach_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["league_id"], name: "index_teams_on_league_id"
+    t.index ["stadium_id"], name: "index_teams_on_stadium_id"
+  end
+
   add_foreign_key "cities", "states"
   add_foreign_key "leagues", "sports"
+  add_foreign_key "players", "cities", column: "birth_city_id"
+  add_foreign_key "players", "countries", column: "birth_country_id"
+  add_foreign_key "players", "teams"
   add_foreign_key "stadia", "cities"
   add_foreign_key "states", "countries"
+  add_foreign_key "teams", "leagues"
+  add_foreign_key "teams", "stadia"
 end

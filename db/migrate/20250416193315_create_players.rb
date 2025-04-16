@@ -5,9 +5,8 @@ class CreatePlayers < ActiveRecord::Migration[8.0]
       t.string :last_name
       t.string :nicknames, array: true, default: []
       t.date :birthdate
-      t.references :birth_city, null: true, foreign_key: true
-      t.references :birth_country, null: true, foreign_key: true
-      t.integer :height_ft
+      t.references :birth_city, null: true, foreign_key: { to_table: :cities }
+      t.references :birth_country, null: true, foreign_key: { to_table: :countries }
       t.integer :height_in
       t.integer :weight_lb
       t.integer :jersey_number
