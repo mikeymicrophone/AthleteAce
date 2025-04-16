@@ -1,0 +1,2 @@
+# Boston Celtics Players
+players = []

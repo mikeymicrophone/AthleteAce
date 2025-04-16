@@ -1,0 +1,2 @@
+# Utah Jazz Players
+players = []

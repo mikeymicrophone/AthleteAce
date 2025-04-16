@@ -1,0 +1,2 @@
+# Brooklyn Nets Players
+players = []

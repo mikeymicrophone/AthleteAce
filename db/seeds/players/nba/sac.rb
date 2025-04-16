@@ -1,0 +1,2 @@
+# Sacramento Kings Players
+players = []

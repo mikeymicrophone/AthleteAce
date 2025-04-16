@@ -1,0 +1,2 @@
+# Orlando Magic Players
+players = []

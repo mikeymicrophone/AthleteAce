@@ -1,0 +1,2 @@
+# Charlotte Hornets Players
+players = []

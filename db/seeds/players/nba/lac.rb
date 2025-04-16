@@ -1,0 +1,2 @@
+# LA Clippers Players
+players = []

@@ -1,0 +1,2 @@
+# Washington Wizards Players
+players = []

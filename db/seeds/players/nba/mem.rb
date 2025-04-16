@@ -1,0 +1,2 @@
+# Memphis Grizzlies Players
+players = []

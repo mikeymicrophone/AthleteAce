@@ -1,8 +1,7 @@
-# MLB 2025 Playoff Teams - Player Rosters
-# This file seeds players for MLB playoff teams (or top teams as of 2025 season)
-# Includes comprehensive data for key teams, with structure to expand for others.
+# MLB Teams - Player Rosters
+# This file seeds players for all 30 MLB teams
 
-mlb_playoff_teams = [
+mlb_teams = [
   { territory: "Los Angeles", mascot: "Dodgers", players: [
     { first_name: "Mookie", last_name: "Betts", nicknames: [], birthdate: "1992-10-07", jersey_number: 50, current_position: "RF", height_in: 69, weight_lb: 180, debut_year: 2014, draft_year: 2011, active: true },
     { first_name: "Shohei", last_name: "Ohtani", nicknames: ["Showtime"], birthdate: "1994-07-05", jersey_number: 17, current_position: "DH/P", height_in: 76, weight_lb: 210, debut_year: 2018, draft_year: 0, active: true },
@@ -39,11 +38,33 @@ mlb_playoff_teams = [
     { first_name: "Fernando", last_name: "Tatis Jr.", nicknames: ["El Nino"], birthdate: "1999-01-02", jersey_number: 23, current_position: "RF", height_in: 75, weight_lb: 217, debut_year: 2019, draft_year: 0, active: true },
     { first_name: "Yu", last_name: "Darvish", nicknames: [], birthdate: "1986-08-16", jersey_number: 11, current_position: "P", height_in: 77, weight_lb: 220, debut_year: 2012, draft_year: 0, active: true }
     # Add more Padres players as needed
-  ]}
-  # Additional playoff teams can be added here (e.g., Texas Rangers, Baltimore Orioles, etc.)
+  ]},
+  { territory: "Arizona", mascot: "Diamondbacks", players: [] },
+  { territory: "Baltimore", mascot: "Orioles", players: [] },
+  { territory: "Boston", mascot: "Red Sox", players: [] },
+  { territory: "Chicago", mascot: "Cubs", players: [] },
+  { territory: "Chicago", mascot: "White Sox", players: [] },
+  { territory: "Cincinnati", mascot: "Reds", players: [] },
+  { territory: "Cleveland", mascot: "Guardians", players: [] },
+  { territory: "Colorado", mascot: "Rockies", players: [] },
+  { territory: "Detroit", mascot: "Tigers", players: [] },
+  { territory: "Kansas City", mascot: "Royals", players: [] },
+  { territory: "Miami", mascot: "Marlins", players: [] },
+  { territory: "Milwaukee", mascot: "Brewers", players: [] },
+  { territory: "Minnesota", mascot: "Twins", players: [] },
+  { territory: "New York", mascot: "Mets", players: [] },
+  { territory: "Oakland", mascot: "Athletics", players: [] },
+  { territory: "Pittsburgh", mascot: "Pirates", players: [] },
+  { territory: "San Francisco", mascot: "Giants", players: [] },
+  { territory: "Seattle", mascot: "Mariners", players: [] },
+  { territory: "St. Louis", mascot: "Cardinals", players: [] },
+  { territory: "Tampa Bay", mascot: "Rays", players: [] },
+  { territory: "Texas", mascot: "Rangers", players: [] },
+  { territory: "Toronto", mascot: "Blue Jays", players: [] },
+  { territory: "Washington", mascot: "Nationals", players: [] }
 ]
 
-mlb_playoff_teams.each do |team_data|
+mlb_teams.each do |team_data|
   team = Team.find_by(territory: team_data[:territory], mascot: team_data[:mascot])
   if team
     team_data[:players].each do |attrs|
@@ -67,4 +88,4 @@ mlb_playoff_teams.each do |team_data|
     puts "Team #{team_data[:territory]} #{team_data[:mascot]} not found"
   end
 end
-puts 'MLB playoff player seeding complete.'
+puts 'MLB team player seeding complete.'

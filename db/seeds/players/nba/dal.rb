@@ -1,0 +1,2 @@
+# Dallas Mavericks Players
+players = []

@@ -1,0 +1,2 @@
+# Phoenix Suns Players
+players = []
