@@ -7,3 +7,8 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+# Seed five sports
+["Baseball", "Basketball", "Football", "Soccer", "Hockey"].each do |sport_name|
+  Sport.find_or_create_by!(name: sport_name)
+end
