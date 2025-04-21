@@ -3,4 +3,5 @@ class State < ApplicationRecord
   has_many :cities
   has_many :players, through: :cities
   has_many :stadia, through: :cities
+  has_many :teams, through: :cities
 end
