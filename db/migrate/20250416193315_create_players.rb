@@ -7,9 +7,6 @@ class CreatePlayers < ActiveRecord::Migration[8.0]
       t.date :birthdate
       t.references :birth_city, null: true, foreign_key: { to_table: :cities }
       t.references :birth_country, null: true, foreign_key: { to_table: :countries }
-      t.integer :height_in
-      t.integer :weight_lb
-      t.integer :jersey_number
       t.string :current_position
       t.integer :debut_year
       t.integer :draft_year
