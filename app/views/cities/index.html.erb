@@ -6,7 +6,9 @@
 
 <div id="cities">
   <% @cities.each do |city| %>
-    <%= render city %>
+    <%= tag.div(id: dom_id(city), class: [index_record_base_classes, city_index_record_classes].join(' ')) do %>
+  <%= render city %>
+<% end %>
     <p>
       <%= link_to "Show this city", city %>
     </p>

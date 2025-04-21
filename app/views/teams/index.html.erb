@@ -6,7 +6,9 @@
 
 <div id="teams">
   <% @teams.each do |team| %>
-    <%= render team %>
+    <%= tag.div(id: dom_id(team), class: [index_record_base_classes, team_index_record_classes].join(' ')) do %>
+  <%= render team %>
+<% end %>
     <p>
       <%= link_to "Show this team", team %>
     </p>

@@ -6,7 +6,9 @@
 
 <div id="countries">
   <% @countries.each do |country| %>
-    <%= render country %>
+    <%= tag.div(id: dom_id(country), class: [index_record_base_classes, country_index_record_classes].join(' ')) do %>
+  <%= render country %>
+<% end %>
     <p>
       <%= link_to "Show this country", country %>
     </p>

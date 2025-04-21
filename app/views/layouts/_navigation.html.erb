@@ -6,15 +6,13 @@
           <span class="text-xl font-bold tracking-tight">Athlete Ace</span>
         </a>
         <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-          <a href="<%= leagues_path %>" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium <%= active_class(leagues_path) %>">
-            Leagues
-          </a>
-          <a href="<%= teams_path %>" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium <%= active_class(teams_path) %>">
-            Teams
-          </a>
-          <a href="<%= players_path %>" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium <%= active_class(players_path) %>">
-            Players
-          </a>
+          <%= link_to 'Leagues', leagues_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(leagues_path)}" %>
+          <%= link_to 'Teams', teams_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(teams_path)}" %>
+          <%= link_to 'Players', players_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(players_path)}" %>
+          <%= link_to 'Stadia', stadia_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(stadia_path)}" %>
+          <%= link_to 'Countries', countries_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(countries_path)}" %>
+          <%= link_to 'States', states_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(states_path)}" %>
+          <%= link_to 'Cities', cities_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(cities_path)}" %>
         </div>
       </div>
     </div>

@@ -6,7 +6,9 @@
 
 <div id="states">
   <% @states.each do |state| %>
-    <%= render state %>
+    <%= tag.div(id: dom_id(state), class: [index_record_base_classes, state_index_record_classes].join(' ')) do %>
+  <%= render state %>
+<% end %>
     <p>
       <%= link_to "Show this state", state %>
     </p>
