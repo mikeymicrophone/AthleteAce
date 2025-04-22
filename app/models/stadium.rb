@@ -3,4 +3,6 @@ class Stadium < ApplicationRecord
   has_many :teams
   has_many :players, through: :teams
   has_many :leagues, through: :teams
+
+  delegate :state, :country, to: :city
 end

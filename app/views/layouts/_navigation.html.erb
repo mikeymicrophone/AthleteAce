@@ -6,6 +6,7 @@
           <span class="text-xl font-bold tracking-tight">Athlete Ace</span>
         </a>
         <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+          <%= link_to 'Sports', sports_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(sports_path)}" %>
           <%= link_to 'Leagues', leagues_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(leagues_path)}" %>
           <%= link_to 'Teams', teams_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(teams_path)}" %>
           <%= link_to 'Players', players_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(players_path)}" %>

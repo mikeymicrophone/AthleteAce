@@ -50,9 +50,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_16_193315) do
     t.date "birthdate"
     t.bigint "birth_city_id"
     t.bigint "birth_country_id"
-    t.integer "height_in"
-    t.integer "weight_lb"
-    t.integer "jersey_number"
     t.string "current_position"
     t.integer "debut_year"
     t.integer "draft_year"
@@ -99,7 +96,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_16_193315) do
     t.string "mascot"
     t.string "territory"
     t.bigint "league_id", null: false
-    t.bigint "stadium_id", null: false
+    t.bigint "stadium_id"
     t.integer "founded_year"
     t.string "abbreviation"
     t.string "url"

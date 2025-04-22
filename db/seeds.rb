@@ -12,15 +12,24 @@
 # Loads sub-seed files for modular seeding
 
 # Seed sports (keep here as a base dependency)
-["Baseball", "Basketball", "Football", "Soccer", "Hockey", "Lacrosse", "Rugby", "Cricket"].each do |sport_name|
-  Sport.find_or_create_by!(name: sport_name)
-end
+load Rails.root.join('db/seeds/sports.rb')
 
 # Seed locations (countries, states, cities)
 load Rails.root.join('db/seeds/locations.rb')
 
 # Seed leagues and stadia
-load Rails.root.join('db/seeds/leagues_and_stadia.rb')
+load Rails.root.join('db/seeds/leagues.rb')
+
+# Seed stadia
+load Rails.root.join('db/seeds/stadia.rb')
 
 # Teams seeds should go in db/seeds/teams/
+Dir.glob(Rails.root.join('db/seeds/teams/**/*.rb')).each do |file|
+  load file
+end
+
 # Players seeds should go in db/seeds/players/
+Dir.glob(Rails.root.join('db/seeds/players/**/*.rb')).each do |file|
+  load file
+end
+
