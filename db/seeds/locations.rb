@@ -1,16 +1,31 @@
 # Seeds for Country, State, and City
+country_file = File.read(Rails.root.join('db/seeds/athlete_ace_data/locations/countries/countries.json'))
+countries = JSON.parse(country_file)
 
-# Example country
-usa = Country.find_or_create_by!(name: "United States", abbreviation: "US")
-canada = Country.find_or_create_by!(name: "Canada", abbreviation: "CA")
+countries.each do |country|
+  Country.find_or_create_by!(name: country["name"], abbreviation: country["abbreviation"])
+end
 
-# Example states
-california = State.find_or_create_by!(name: "California", abbreviation: "CA", country: usa)
-new_york = State.find_or_create_by!(name: "New York", abbreviation: "NY", country: usa)
-ontario = State.find_or_create_by!(name: "Ontario", abbreviation: "ON", country: canada)
+Dir.glob('db/seeds/athlete_ace_data/locations/states/*.json').each do |file|
+  state_file = File.read(Rails.root.join(file))
+  state_data = JSON.parse(state_file)
+  country_name = state_data["country_name"]
+  states = state_data["states"]
 
-# Example cities
-City.find_or_create_by!(name: "Los Angeles", state: california)
-City.find_or_create_by!(name: "San Francisco", state: california)
-City.find_or_create_by!(name: "New York City", state: new_york)
-City.find_or_create_by!(name: "Toronto", state: ontario)
+  states.each do |state|
+    State.find_or_create_by!(name: state["name"], abbreviation: state["abbreviation"], country: Country.find_by(name: country_name))
+  end
+end
+
+Dir.glob('db/seeds/athlete_ace_data/locations/cities/*.json').each do |file|
+  city_file = File.read(Rails.root.join(file))
+  city_data = JSON.parse(city_file)
+  country_name = city_data["country_name"]
+  country = Country.find_by(name: country_name)
+  cities = city_data["cities"]
+
+  cities.each do |city|
+    puts city
+    City.find_or_create_by!(name: city["name"], state: country.states.find_by(abbreviation: city["state"]))
+  end
+end
