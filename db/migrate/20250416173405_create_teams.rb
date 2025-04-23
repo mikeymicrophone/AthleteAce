@@ -11,7 +11,6 @@ class CreateTeams < ActiveRecord::Migration[8.0]
       t.string :logo_url
       t.string :primary_color
       t.string :secondary_color
-      t.string :coach_name
 
       t.timestamps
     end

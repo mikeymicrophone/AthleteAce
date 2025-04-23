@@ -103,7 +103,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_16_193315) do
     t.string "logo_url"
     t.string "primary_color"
     t.string "secondary_color"
-    t.string "coach_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["league_id"], name: "index_teams_on_league_id"

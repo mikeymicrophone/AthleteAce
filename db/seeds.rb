@@ -24,9 +24,7 @@ load Rails.root.join('db/seeds/leagues.rb')
 load Rails.root.join('db/seeds/stadiums.rb')
 
 # Teams seeds should go in db/seeds/teams/
-Dir.glob(Rails.root.join('db/seeds/teams/**/*.rb')).each do |file|
-  load file
-end
+load Rails.root.join('db/seeds/teams.rb')
 
 # Players seeds should go in db/seeds/players/
 Dir.glob(Rails.root.join('db/seeds/players/**/*.rb')).each do |file|
