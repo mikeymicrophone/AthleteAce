@@ -25,7 +25,6 @@ Dir.glob('db/seeds/athlete_ace_data/locations/cities/*.json').each do |file|
   cities = city_data["cities"]
 
   cities.each do |city|
-    puts city
     City.find_or_create_by!(name: city["name"], state: country.states.find_by(abbreviation: city["state"]))
   end
 end
