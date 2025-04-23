@@ -61,3 +61,5 @@ group :development do
 end
 
 gem "tailwindcss-rails", "~> 4.2"
+
+gem "nokogiri", "~> 1.18"
