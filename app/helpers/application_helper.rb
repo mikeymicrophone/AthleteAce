@@ -1,4 +1,6 @@
 module ApplicationHelper
+  include Pagy::Frontend
+
   # Returns the active class for navigation links
   def active_class(link_path)
     current_page?(link_path) ? 'border-indigo-500 text-orange-400' : 'border-transparent text-white hover:border-gray-300 hover:text-orange-200'

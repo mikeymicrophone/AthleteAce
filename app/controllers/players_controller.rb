@@ -3,7 +3,7 @@ class PlayersController < ApplicationController
 
   # GET /players or /players.json
   def index
-    @players = Player.all
+    @pagy, @players = pagy(Player.all)
   end
 
   # GET /players/1 or /players/1.json
