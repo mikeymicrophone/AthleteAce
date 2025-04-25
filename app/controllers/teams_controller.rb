@@ -5,6 +5,8 @@ class TeamsController < ApplicationController
   def index
     if params[:sport_id]
       @teams = Sport.find(params[:sport_id]).teams
+    elsif params[:league_id]
+      @teams = League.find(params[:league_id]).teams
     else
       @teams = Team.all
     end

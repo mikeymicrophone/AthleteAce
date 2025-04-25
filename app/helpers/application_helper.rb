@@ -12,7 +12,7 @@ module ApplicationHelper
 
   # Shared Tailwind classes for all index records
   def index_record_base_classes
-    'flex items-center p-4 mb-2 bg-white rounded shadow hover:bg-orange-50 transition-colors duration-150'
+    'flex items-center justify-between p-4 mb-2 bg-white rounded shadow hover:bg-orange-50 transition-colors duration-150'
   end
 
   # Resource-specific example: Teams

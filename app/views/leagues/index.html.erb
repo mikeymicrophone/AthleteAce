@@ -2,17 +2,13 @@
 
 <% content_for :title, "Leagues" %>
 
-<h1>Leagues</h1>
-
 <div id="leagues">
   <% @leagues.each do |league| %>
     <%= tag.div(id: dom_id(league), class: [index_record_base_classes, league_index_record_classes].join(' ')) do %>
-  <%= render league %>
-<% end %>
-    <p>
-      <%= link_to "Show this league", league %>
-    </p>
+      <%= link_to_name league %>
+      <%= link_to_name league.sport %>
+      <%= link_to pluralize(league.teams.count, "team"), [league, :teams] %>
+      <%= link_to pluralize(league.players.count, "player"), [league, :players] %>
+    <% end %>
   <% end %>
 </div>
-
-<%= link_to "New league", new_league_path %>
