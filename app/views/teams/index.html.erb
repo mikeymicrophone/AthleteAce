@@ -7,12 +7,17 @@
 <div id="teams">
   <% @teams.each do |team| %>
     <%= tag.div(id: dom_id(team), class: [index_record_base_classes, team_index_record_classes].join(' ')) do %>
-  <%= render team %>
-<% end %>
-    <p>
-      <%= link_to "Show this team", team %>
-    </p>
+      <div class="flex items-center gap-4">
+        <%= image_tag team.logo_url, class: "h-12 w-12 object-contain rounded bg-white border border-gray-200 shadow" if team.logo_url.present? %>
+        <div>
+          <div class="text-xl font-semibold text-gray-900"><%= link_to_name team %></div>
+          <div class="text-sm text-gray-500 mt-1">
+            <span><%= link_to_name team.stadium %></span>
+            <span class="mx-2">&bull;</span>
+            <span><%= link_to_name team.league %></span>
+          </div>
+        </div>
+      </div>
+    <% end %>
   <% end %>
 </div>
-
-<%= link_to "New team", new_team_path %>

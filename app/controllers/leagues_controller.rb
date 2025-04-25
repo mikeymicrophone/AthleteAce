@@ -3,7 +3,11 @@ class LeaguesController < ApplicationController
 
   # GET /leagues or /leagues.json
   def index
-    @leagues = League.all
+    if params[:sport_id]
+      @leagues = Sport.find(params[:sport_id]).leagues
+    else
+      @leagues = League.all
+    end
   end
 
   # GET /leagues/1 or /leagues/1.json

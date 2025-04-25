@@ -7,7 +7,7 @@ module ApplicationHelper
   end
 
   def link_to_name record
-    link_to record.name, record
+    link_to record.name, record, class: 'flex' rescue ''
   end
 
   # Shared Tailwind classes for all index records

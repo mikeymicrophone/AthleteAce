@@ -3,7 +3,12 @@ class PlayersController < ApplicationController
 
   # GET /players or /players.json
   def index
-    @pagy, @players = pagy(Player.all)
+    if params[:sport_id]
+      @players = Sport.find(params[:sport_id]).players
+    else
+      @players = Player.all
+    end
+    @pagy, @players = pagy(@players)
   end
 
   # GET /players/1 or /players/1.json

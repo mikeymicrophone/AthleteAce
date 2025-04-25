@@ -2,17 +2,13 @@
 
 <% content_for :title, "Sports" %>
 
-<h1>Sports</h1>
-
 <div id="sports">
   <% @sports.each do |sport| %>
     <%= tag.div(id: dom_id(sport), class: [index_record_base_classes, sport_index_record_classes].join(' ')) do %>
-  <%= render sport %>
-<% end %>
-    <p>
-      <%= link_to "Show this sport", sport %>
-    </p>
+      <%= link_to_name sport %>
+      <%= link_to pluralize(sport.leagues.count, "league"), [sport, :leagues] %>
+      <%= link_to pluralize(sport.teams.count, "team"), [sport, :teams] %>
+      <%= link_to pluralize(sport.players.count, "player"), [sport, :players] %>
+    <% end %>
   <% end %>
 </div>
-
-<%= link_to "New sport", new_sport_path %>
