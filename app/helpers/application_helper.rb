@@ -6,6 +6,10 @@ module ApplicationHelper
     current_page?(link_path) ? 'border-indigo-500 text-orange-400' : 'border-transparent text-white hover:border-gray-300 hover:text-orange-200'
   end
 
+  def link_to_name record
+    link_to record.name, record
+  end
+
   # Shared Tailwind classes for all index records
   def index_record_base_classes
     'flex items-center p-4 mb-2 bg-white rounded shadow hover:bg-orange-50 transition-colors duration-150'

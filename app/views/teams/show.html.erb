@@ -1,10 +1,13 @@
+<% content_for :title, @team.name %>
+
 <p style="color: green"><%= notice %></p>
 
-<%= render @team %>
+<h1><%= @team.name %></h1>
+<%= link_to_name @team.stadium %>
 
-<div>
-  <%= link_to "Edit this team", edit_team_path(@team) %> |
-  <%= link_to "Back to teams", teams_path %>
-
-  <%= button_to "Destroy this team", @team, method: :delete %>
-</div>
+<%= tag.div(id: dom_id(@team, :players_on), class: '') do %>
+  <h2>Players</h2>
+  <% @team.players.each do |player| %>
+    <%= link_to_name player %>
+  <% end %>
+<% end %>

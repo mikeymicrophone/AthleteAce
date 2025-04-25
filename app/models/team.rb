@@ -4,4 +4,8 @@ class Team < ApplicationRecord
   has_many :players
 
   delegate :city, :state, :country, to: :stadium
+
+  def name
+    "#{territory} #{mascot}"
+  end
 end
