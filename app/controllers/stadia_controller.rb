@@ -3,7 +3,15 @@ class StadiaController < ApplicationController
 
   # GET /stadia or /stadia.json
   def index
-    @stadia = Stadium.all
+    if params[:city_id]
+      @stadia = City.find(params[:city_id]).stadia
+    elsif params[:state_id]
+      @stadia = State.find(params[:state_id]).stadia
+    elsif params[:country_id]
+      @stadia = Country.find(params[:country_id]).stadia
+    else
+      @stadia = Stadium.all
+    end
   end
 
   # GET /stadia/1 or /stadia/1.json

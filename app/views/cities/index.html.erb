@@ -7,12 +7,12 @@
 <div id="cities">
   <% @cities.each do |city| %>
     <%= tag.div(id: dom_id(city), class: [index_record_base_classes, city_index_record_classes].join(' ')) do %>
-  <%= render city %>
-<% end %>
-    <p>
-      <%= link_to "Show this city", city %>
-    </p>
+      <%= link_to_name city %>
+      <%= link_to_name city.state %>
+      <%= link_to_name city.country %>
+      <%= link_to pluralize(city.stadia.count, "stadium"), [city, :stadia] %>
+      <%= link_to pluralize(city.teams.count, "team"), [city, :teams] %>
+      <%= link_to pluralize(city.players.count, "player"), [city, :players] %>
+    <% end %>
   <% end %>
 </div>
-
-<%= link_to "New city", new_city_path %>
