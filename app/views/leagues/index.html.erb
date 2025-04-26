@@ -9,6 +9,7 @@
       <%= link_to_name league.sport %>
       <%= link_to pluralize(league.teams.count, "team"), [league, :teams] %>
       <%= link_to pluralize(league.players.count, "player"), [league, :players] %>
+      <%= link_to_name league.jurisdiction %>
     <% end %>
   <% end %>
 </div>

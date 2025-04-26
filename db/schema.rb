@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_16_193315) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_25_235654) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -29,6 +29,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_16_193315) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "federations", force: :cascade do |t|
+    t.string "name"
+    t.string "abbreviation"
+    t.text "description"
+    t.string "url"
+    t.string "logo_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "leagues", force: :cascade do |t|
     t.bigint "sport_id", null: false
     t.string "name"
@@ -40,6 +50,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_16_193315) do
     t.string "logo_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "jurisdiction_type"
+    t.bigint "jurisdiction_id"
+    t.index ["jurisdiction_type", "jurisdiction_id"], name: "index_leagues_on_jurisdiction"
     t.index ["sport_id"], name: "index_leagues_on_sport_id"
   end
 

@@ -1,7 +1,15 @@
 Rails.application.routes.draw do
+  resources :federations
   resources :players
   resources :teams
-  resources :countries
+  resources :countries do
+    resources :leagues, shallow: true
+    resources :teams, shallow: true
+    resources :players, shallow: true
+    resources :stadia, shallow: true
+    resources :cities, shallow: true
+    resources :states, shallow: true
+  end
   resources :stadia
   resources :cities
   resources :states
