@@ -10,9 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_25_235654) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_26_053233) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "achievements", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.bigint "quest_id", null: false
+    t.string "target_type", null: false
+    t.bigint "target_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["quest_id"], name: "index_achievements_on_quest_id"
+    t.index ["target_type", "target_id"], name: "index_achievements_on_target"
+  end
 
   create_table "cities", force: :cascade do |t|
     t.string "name"
@@ -77,6 +89,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_25_235654) do
     t.index ["team_id"], name: "index_players_on_team_id"
   end
 
+  create_table "quests", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "sports", force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -122,6 +141,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_25_235654) do
     t.index ["stadium_id"], name: "index_teams_on_stadium_id"
   end
 
+  add_foreign_key "achievements", "quests"
   add_foreign_key "cities", "states"
   add_foreign_key "leagues", "sports"
   add_foreign_key "players", "cities", column: "birth_city_id"

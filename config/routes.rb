@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  resources :achievements
+  resources :quests do
+    resources :achievements
+  end
   resources :federations
   resources :players
   resources :teams

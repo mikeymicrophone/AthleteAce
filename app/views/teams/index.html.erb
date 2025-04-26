@@ -2,8 +2,6 @@
 
 <% content_for :title, "Teams" %>
 
-<h1>Teams</h1>
-
 <div id="teams">
   <% @teams.each do |team| %>
     <%= tag.div(id: dom_id(team), class: [index_record_base_classes, team_index_record_classes].join(' ')) do %>
