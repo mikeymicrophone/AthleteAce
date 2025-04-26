@@ -7,6 +7,8 @@ class PlayersController < ApplicationController
       @players = Sport.find(params[:sport_id]).players
     elsif params[:league_id]
       @players = League.find(params[:league_id]).players
+    elsif params[:stadium_id]
+      @players = Stadium.find(params[:stadium_id]).players
     else
       @players = Player.all
     end
