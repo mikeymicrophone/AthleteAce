@@ -11,8 +11,17 @@ Rails.application.routes.draw do
     resources :states, shallow: true
   end
   resources :stadia
-  resources :cities
-  resources :states
+  resources :cities do
+    resources :leagues, shallow: true
+    resources :teams, shallow: true
+    resources :players, shallow: true
+  end
+  resources :states do
+    resources :teams, shallow: true
+    resources :players, shallow: true
+    resources :cities, shallow: true
+    resources :stadia, shallow: true
+  end
   resources :leagues do
     resources :teams, shallow: true
     resources :players, shallow: true

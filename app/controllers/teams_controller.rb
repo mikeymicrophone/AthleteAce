@@ -7,6 +7,10 @@ class TeamsController < ApplicationController
       @teams = Sport.find(params[:sport_id]).teams
     elsif params[:league_id]
       @teams = League.find(params[:league_id]).teams
+    elsif params[:state_id]
+      @teams = State.find(params[:state_id]).teams
+    elsif params[:city_id]
+      @teams = City.find(params[:city_id]).teams
     else
       @teams = Team.all
     end
