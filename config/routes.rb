@@ -1,5 +1,9 @@
 Rails.application.routes.draw do
-  resources :achievements
+  resources :achievements do
+    collection do
+      get :target_options
+    end
+  end
   resources :quests do
     resources :achievements
   end

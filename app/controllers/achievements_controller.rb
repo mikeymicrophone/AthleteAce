@@ -59,6 +59,17 @@ class AchievementsController < ApplicationController
     end
   end
 
+  # GET /achievements/target_options
+  def target_options
+    model = params[:type].safe_constantize
+    if model && model.respond_to?(:all)
+      options = model.all.map { |obj| { id: obj.id, name: obj.try(:name) || obj.try(:title) || obj.to_s } }
+      render json: options
+    else
+      render json: []
+    end
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_achievement
