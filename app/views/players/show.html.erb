@@ -7,6 +7,14 @@
     <div class="info-item"><%= link_to_name @player.team, class: 'fadeout-underline' %></div>
     <div class="section-title">Stadium</div>
     <div class="info-item"><%= link_to_name @player.team.stadium, class: 'fadeout-underline' %></div>
+    
+    <% if @player.primary_position.present? %>
+      <div class="section-title">Primary Position</div>
+      <div class="info-item position-badge primary-position">
+        <%= @player.primary_position.abbreviation || @player.primary_position.name %>
+        <span class="position-tooltip"><%= @player.primary_position.name %></span>
+      </div>
+    <% end %>
   </div>
   
   <!-- Center column: Player Name -->
@@ -15,6 +23,12 @@
       <div class="name-part"><%= @player.first_name %></div>
       <div class="name-part"><%= @player.last_name %></div>
     </div>
+    
+    <% if @player.photo_urls.present? %>
+      <div class="player-photo">
+        <%= image_tag @player.photo_urls.first, alt: @player.name, class: "player-headshot" %>
+      </div>
+    <% end %>
   </div>
   
   <!-- Right column: League and Sport -->
@@ -23,6 +37,18 @@
     <div class="info-item"><%= link_to_name @player.league, class: 'fadeout-underline' %></div>
     <div class="section-title">Sport</div>
     <div class="info-item"><%= link_to_name @player.sport, class: 'fadeout-underline' %></div>
+    
+    <% if @player.secondary_positions.any? %>
+      <div class="section-title">Secondary Positions</div>
+      <div class="info-item positions-container">
+        <% @player.secondary_positions.each do |position| %>
+          <div class="position-badge secondary-position">
+            <%= position.abbreviation || position.name %>
+            <span class="position-tooltip"><%= position.name %></span>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
   </div>
   
   <!-- Bottom row: City and State -->

@@ -31,6 +31,7 @@
 .center-section {
   grid-area: center;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
@@ -52,6 +53,7 @@
   flex-direction: column;
   gap: 0.5rem;
   align-items: center;
+  margin-bottom: 1.5rem;
 }
 
 .name-part {
@@ -80,6 +82,79 @@
   gap: 1rem;
   justify-content: center;
   align-items: center;
+}
+
+/* Position badges */
+.position-badge {
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  position: relative;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  cursor: help;
+}
+
+.primary-position {
+  background-color: #3498db;
+  color: white;
+}
+
+.secondary-position {
+  background-color: #ecf0f1;
+  color: #2c3e50;
+  border: 1px solid #bdc3c7;
+}
+
+.position-tooltip {
+  visibility: hidden;
+  background-color: #34495e;
+  color: white;
+  text-align: center;
+  padding: 0.5rem;
+  border-radius: 4px;
+  position: absolute;
+  z-index: 1;
+  width: max-content;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.position-badge:hover .position-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.positions-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Player photo */
+.player-photo {
+  width: 200px;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 4px solid #e74c3c;
+  margin: 0 auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.player-headshot {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
 }
 
 /* Fadeout underline effect */
