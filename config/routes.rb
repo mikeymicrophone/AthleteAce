@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+  # Strength training routes for learning athlete names
+  get "strength" => "strength#index"
+  get "strength/multiple_choice" => "strength#multiple_choice"
+  get "strength/phased_repetition" => "strength#phased_repetition"
+  get "strength/images" => "strength#images"
+  get "strength/ciphers" => "strength#ciphers"
+  post "strength/check_answer" => "strength#check_answer", as: :check_answer
   resources :achievements do
     collection do
       get :target_options

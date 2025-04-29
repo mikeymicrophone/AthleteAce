@@ -1,0 +1,77 @@
+<% content_for :title, "Multiple Choice Training" %>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Multiple Choice Training</h1>
+    <%= link_to strength_path, class: "text-blue-600 hover:text-blue-800 flex items-center" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+      </svg>
+      Back to Training Hub
+    <% end %>
+  </div>
+
+  <% if notice.present? %>
+    <div class="<%= notice.include?("Correct") ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800" %> p-4 rounded-md mb-6">
+      <%= notice %>
+    </div>
+  <% end %>
+
+  <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
+    <div class="p-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Who is this athlete?</h2>
+      
+      <% if @correct_player.photo_urls.present? %>
+        <div class="flex justify-center mb-6">
+          <img src="<%= @correct_player.photo_urls.first %>" alt="Athlete photo" class="h-64 w-64 object-cover rounded-lg shadow-md">
+        </div>
+      <% else %>
+        <div class="flex justify-center mb-6 bg-gray-200 h-64 w-64 mx-auto rounded-lg flex items-center justify-center">
+          <span class="text-gray-500 text-lg">No photo available</span>
+        </div>
+      <% end %>
+      
+      <div class="text-center mb-6">
+        <div class="text-lg font-medium text-gray-600 mb-1">
+          <% if @correct_player.team.present? %>
+            Team: <%= @correct_player.team.name %>
+          <% end %>
+        </div>
+        <div class="text-md text-gray-500">
+          <% if @correct_player.current_position.present? %>
+            Position: <%= @correct_player.current_position %>
+          <% end %>
+        </div>
+      </div>
+
+      <%= form_with url: check_answer_path, method: :post, class: "space-y-4" do |f| %>
+        <%= f.hidden_field :player_id, value: @correct_player.id %>
+        
+        <div class="grid grid-cols-1 gap-3">
+          <% @options.each do |player| %>
+            <label class="relative flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg cursor-pointer transition-colors">
+              <%= f.radio_button :selected_id, player.id, class: "h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300" %>
+              <span class="ml-3 block text-lg font-medium text-gray-700 flex-grow">
+                <%= player.first_name %> <%= player.last_name %>
+              </span>
+            </label>
+          <% end %>
+        </div>
+        
+        <div class="flex justify-center mt-6">
+          <%= f.submit "Submit Answer", class: "py-2 px-6 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+    <h3 class="text-lg font-semibold text-blue-800 mb-2">Training Tips</h3>
+    <ul class="list-disc pl-5 text-blue-700 space-y-1">
+      <li>Look for visual cues that might help you remember the athlete</li>
+      <li>Associate the athlete with their team colors or logo</li>
+      <li>Try to recall recent news or achievements about the athlete</li>
+      <li>Practice regularly to build long-term memory</li>
+    </ul>
+  </div>
+</div>

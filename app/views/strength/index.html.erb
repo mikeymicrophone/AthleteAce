@@ -1,0 +1,87 @@
+<% content_for :title, "Athlete Name Training" %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="text-center mb-10">
+    <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Strengthen Your Athlete Name Knowledge</h1>
+    <p class="text-lg text-gray-600 max-w-3xl mx-auto">Choose a training method below to improve your ability to recognize and recall athlete names.</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+    <%= link_to strength_multiple_choice_path, class: "bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md overflow-hidden transition duration-300 transform hover:scale-105" do %>
+      <div class="p-6 text-center">
+        <div class="text-3xl mb-2">🎯</div>
+        <h2 class="text-xl font-bold mb-2">Multiple Choice</h2>
+        <p class="text-blue-100">Test your knowledge with multiple choice questions about athletes.</p>
+      </div>
+    <% end %>
+
+    <%= link_to strength_phased_repetition_path, class: "bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md overflow-hidden transition duration-300 transform hover:scale-105" do %>
+      <div class="p-6 text-center">
+        <div class="text-3xl mb-2">🔄</div>
+        <h2 class="text-xl font-bold mb-2">Phased Repetition</h2>
+        <p class="text-green-100">Learn names through spaced repetition for better long-term retention.</p>
+      </div>
+    <% end %>
+
+    <%= link_to strength_images_path, class: "bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-md overflow-hidden transition duration-300 transform hover:scale-105" do %>
+      <div class="p-6 text-center">
+        <div class="text-3xl mb-2">🖼️</div>
+        <h2 class="text-xl font-bold mb-2">Image Recognition</h2>
+        <p class="text-purple-100">Match athlete faces with their names to build visual recognition.</p>
+      </div>
+    <% end %>
+
+    <%= link_to strength_ciphers_path, class: "bg-orange-600 hover:bg-orange-700 text-white rounded-lg shadow-md overflow-hidden transition duration-300 transform hover:scale-105" do %>
+      <div class="p-6 text-center">
+        <div class="text-3xl mb-2">🔍</div>
+        <h2 class="text-xl font-bold mb-2">Name Ciphers</h2>
+        <p class="text-orange-100">Decode scrambled athlete names to strengthen your recall.</p>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="bg-gray-100 rounded-lg p-6 mb-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Filter Your Training</h2>
+    <%= form_with url: strength_path, method: :get, class: "space-y-4" do |f| %>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <%= f.label :sport_id, "Sport", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.collection_select :sport_id, @sports, :id, :name, { include_blank: "All Sports" }, 
+              class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+        </div>
+        
+        <div>
+          <%= f.label :league_id, "League", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.collection_select :league_id, @leagues, :id, :name, { include_blank: "All Leagues" }, 
+              class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+        </div>
+        
+        <div>
+          <%= f.label :team_id, "Team", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.collection_select :team_id, @teams, :id, :name, { include_blank: "All Teams" }, 
+              class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+        </div>
+      </div>
+      
+      <div class="flex items-center">
+        <%= f.check_box :include_inactive, { class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" }, "true", "false" %>
+        <%= f.label :include_inactive, "Include inactive players", class: "ml-2 block text-sm text-gray-700" %>
+      </div>
+      
+      <div class="flex justify-end">
+        <%= f.submit "Apply Filters", class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+    <h2 class="text-2xl font-bold text-blue-800 mb-2">Why Train Your Name Recognition?</h2>
+    <p class="text-blue-700 mb-4">Recognizing athletes by name enhances your enjoyment of sports and deepens your connection to the games you love. Regular practice helps you:</p>
+    <ul class="list-disc pl-5 text-blue-700 space-y-2">
+      <li>Follow games more easily when commentators mention players</li>
+      <li>Engage in more meaningful conversations with other fans</li>
+      <li>Appreciate player achievements and career trajectories</li>
+      <li>Build a stronger connection to your favorite teams</li>
+    </ul>
+  </div>
+</div>
