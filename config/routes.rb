@@ -14,15 +14,15 @@ Rails.application.routes.draw do
     resources :leagues, shallow: true
     resources :teams, shallow: true
     resources :players, shallow: true
-    resources :stadia, shallow: true
+    resources :stadiums, shallow: true
     resources :cities, shallow: true do
-      resources :stadia, shallow: true
+      resources :stadiums, shallow: true
       resources :teams, shallow: true
       resources :players, shallow: true
     end
     resources :states, shallow: true
   end
-  resources :stadia do
+  resources :stadiums do
     resources :teams, shallow: true
     resources :players, shallow: true
   end
@@ -35,7 +35,7 @@ Rails.application.routes.draw do
     resources :teams, shallow: true
     resources :players, shallow: true
     resources :cities, shallow: true
-    resources :stadia, shallow: true
+    resources :stadiums, shallow: true
   end
   resources :leagues do
     resources :teams, shallow: true

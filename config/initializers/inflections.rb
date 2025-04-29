@@ -14,3 +14,8 @@
 # ActiveSupport::Inflector.inflections(:en) do |inflect|
 #   inflect.acronym "RESTful"
 # end
+
+# Override the default pluralization of 'stadium' from 'stadia' to 'stadiums'
+ActiveSupport::Inflector.inflections(:en) do |inflect|
+  inflect.irregular 'stadium', 'stadiums'
+end

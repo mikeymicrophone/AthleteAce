@@ -9,7 +9,7 @@
     <%= tag.div(id: dom_id(state), class: [index_record_base_classes, state_index_record_classes].join(' ')) do %>
       <%= link_to_name state %>
       <%= link_to_name state.country %>
-      <%= link_to pluralize(state.stadia.count, "stadium"), [state, :stadia] %>
+      <%= link_to pluralize(state.stadiums.count, "stadium"), [state, :stadiums] %>
       <%= link_to pluralize(state.teams.count, "team"), [state, :teams] %>
       <%= link_to pluralize(state.players.count, "player"), [state, :players] %>
       <%= link_to pluralize(state.cities.count, "city"), [state, :cities] %>

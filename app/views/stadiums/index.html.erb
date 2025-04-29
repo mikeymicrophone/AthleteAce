@@ -1,0 +1,18 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Stadia" %>
+
+<h1>Stadia</h1>
+
+<div id="stadiums">
+  <% @stadiums.each do |stadium| %>
+    <%= tag.div(id: dom_id(stadium), class: [index_record_base_classes, stadium_index_record_classes].join(' ')) do %>
+      <%= link_to_name stadium %>
+      <%= link_to_name stadium.city %>
+      <%= link_to_name stadium.state %>
+      <%= link_to_name stadium.country %>
+      <%= link_to pluralize(stadium.teams.count, "team"), [stadium, :teams] %>
+      <%= link_to pluralize(stadium.players.count, "player"), [stadium, :players] %>
+    <% end %>
+  <% end %>
+</div>

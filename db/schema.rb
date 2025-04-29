@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_26_053233) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_29_001550) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -103,7 +103,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_26_053233) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "stadia", force: :cascade do |t|
+  create_table "stadiums", force: :cascade do |t|
     t.string "name"
     t.bigint "city_id", null: false
     t.integer "capacity"
@@ -112,7 +112,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_26_053233) do
     t.string "address"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["city_id"], name: "index_stadia_on_city_id"
+    t.index ["city_id"], name: "index_stadiums_on_city_id"
   end
 
   create_table "states", force: :cascade do |t|
@@ -147,8 +147,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_26_053233) do
   add_foreign_key "players", "cities", column: "birth_city_id"
   add_foreign_key "players", "countries", column: "birth_country_id"
   add_foreign_key "players", "teams"
-  add_foreign_key "stadia", "cities"
+  add_foreign_key "stadiums", "cities"
   add_foreign_key "states", "countries"
   add_foreign_key "teams", "leagues"
-  add_foreign_key "teams", "stadia"
+  add_foreign_key "teams", "stadiums"
 end

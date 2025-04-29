@@ -10,7 +10,7 @@
       <%= link_to_name city %>
       <%= link_to_name city.state %>
       <%= link_to_name city.country %>
-      <%= link_to pluralize(city.stadia.count, "stadium"), [city, :stadia] %>
+      <%= link_to pluralize(city.stadiums.count, "stadium"), [city, :stadiums] %>
       <%= link_to pluralize(city.teams.count, "team"), [city, :teams] %>
       <%= link_to pluralize(city.players.count, "player"), [city, :players] %>
     <% end %>
