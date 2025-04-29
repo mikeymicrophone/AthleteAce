@@ -64,7 +64,7 @@ class StrengthController < ApplicationController
     players = players.joins(team: :league).where(leagues: { id: params[:league_id] }) if params[:league_id].present?
     
     # Limit to active players by default unless specifically requesting inactive
-    players = players.where(active: true) unless params[:include_inactive] == 'true'
+    # players = players.where(active: true) unless params[:include_inactive] == 'true'
     
     # Return a reasonable number of players for the exercise
     players.limit(50)

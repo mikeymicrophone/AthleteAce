@@ -1,4 +1,6 @@
 <div>
-  <h1 class="font-bold text-4xl">Strength#phased_repetition</h1>
-  <p>Find me in app/views/strength/phased_repetition.html.erb</p>
+  <%= tag.div(@current_player.first_name, id: dom_id(@current_player, :first_name_of)) %>
+  <%= tag.div(@current_player.last_name, id: dom_id(@current_player, :last_name_of)) %>
+  <%= tag.div("is on the ", id: dom_id(@current_player, :is_on_the)) %>
+  <%= tag.div(link_to_name(@current_player.team), id: dom_id(@current_player, :team_of)) %>
 </div>
