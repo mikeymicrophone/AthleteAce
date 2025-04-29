@@ -1,10 +1,65 @@
 <p style="color: green"><%= notice %></p>
 
-<%= render @player %>
-
-<div>
-  <%= link_to "Edit this player", edit_player_path(@player) %> |
-  <%= link_to "Back to players", players_path %>
-
-  <%= button_to "Destroy this player", @player, method: :delete %>
+<div class="player-details">
+  <div class="player-name">
+    <span class="name-part"><%= @player.first_name %></span>
+    <span class="name-part"><%= @player.last_name %></span>
+  </div>
+  
+  <div class="player-info">
+    <div class="info-item"><%= link_to_name @player.team, class: 'fadeout-underline' %></div>
+    <div class="info-item"><%= link_to_name @player.team.stadium, class: 'fadeout-underline' %></div>
+    <div class="info-item"><%= link_to_name @player.team.city, class: 'fadeout-underline' %></div>
+    <div class="info-item"><%= link_to_name @player.team.state, class: 'fadeout-underline' %></div>
+    <div class="info-item"><%= link_to_name @player.league, class: 'fadeout-underline' %></div>
+    <div class="info-item"><%= link_to_name @player.sport, class: 'fadeout-underline' %></div>
+  </div>
 </div>
+
+<style>
+  .player-details {
+    padding: 2rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  
+  .player-name {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+  }
+  
+  .player-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .info-item {
+    font-size: 1.2rem;
+  }
+  
+  /* Fadeout underline effect */
+  .fadeout-underline {
+    position: relative;
+    text-decoration: none;
+    color: #2563eb;
+    display: inline-block;
+  }
+  
+  .fadeout-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to left, rgba(37, 99, 235, 0), rgba(37, 99, 235, 1));
+  }
+  
+  .fadeout-underline:hover::after {
+    background: linear-gradient(to left, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 1));
+    height: 3px;
+  }
+</style>

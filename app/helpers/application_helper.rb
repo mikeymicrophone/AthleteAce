@@ -6,8 +6,10 @@ module ApplicationHelper
     current_page?(link_path) ? 'border-indigo-500 text-orange-400' : 'border-transparent text-white hover:border-gray-300 hover:text-orange-200'
   end
 
-  def link_to_name record
-    link_to record.name, record, class: 'flex' rescue ''
+  def link_to_name(record, **options)
+    default_options = { class: 'flex' }
+    merged_options = default_options.merge(options)
+    link_to record.name, record, **merged_options rescue ''
   end
 
   # Shared Tailwind classes for all index records
