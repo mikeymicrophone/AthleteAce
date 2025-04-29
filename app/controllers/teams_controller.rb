@@ -16,6 +16,18 @@ class TeamsController < ApplicationController
     else
       @teams = Team.all
     end
+
+    # Apply sorting if requested
+    case params[:sort]
+    when 'mascot'
+      @teams = @teams.order(:mascot)
+    when 'territory'
+      @teams = @teams.order(:territory)
+    when 'sport'
+      @teams = @teams.includes(league: :sport).order('sports.name')
+    when 'city'
+      @teams = @teams.includes(:stadium).order('stadiums.city_id')
+    end
   end
 
   # GET /teams/1 or /teams/1.json

@@ -2,6 +2,14 @@
 
 <% content_for :title, "Teams" %>
 
+<div class="mb-4 flex gap-2">
+  <div class="text-sm text-gray-600">Sort by:</div>
+  <%= link_to "Mascot", teams_path(sort: "mascot"), class: "text-sm text-blue-600 hover:underline #{params[:sort] == 'mascot' ? 'font-bold' : ''}" %>
+  <%= link_to "Territory", teams_path(sort: "territory"), class: "text-sm text-blue-600 hover:underline #{params[:sort] == 'territory' ? 'font-bold' : ''}" %>
+  <%= link_to "Sport", teams_path(sort: "sport"), class: "text-sm text-blue-600 hover:underline #{params[:sort] == 'sport' ? 'font-bold' : ''}" %>
+  <%= link_to "City", teams_path(sort: "city"), class: "text-sm text-blue-600 hover:underline #{params[:sort] == 'city' ? 'font-bold' : ''}" %>
+</div>
+
 <div id="teams">
   <% @teams.each do |team| %>
     <%= tag.div(id: dom_id(team), class: [index_record_base_classes, team_index_record_classes].join(' ')) do %>
