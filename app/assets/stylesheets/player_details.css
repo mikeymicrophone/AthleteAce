@@ -1,0 +1,106 @@
+/* Player card layout */
+.player-card {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "left center right"
+    "bottom bottom bottom";
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.card-section {
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.left-section {
+  grid-area: left;
+  border-left: 4px solid #3498db;
+}
+
+.center-section {
+  grid-area: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-left: 4px solid #e74c3c;
+}
+
+.right-section {
+  grid-area: right;
+  border-left: 4px solid #2ecc71;
+}
+
+.bottom-section {
+  grid-area: bottom;
+  border-left: 4px solid #f39c12;
+}
+
+.player-name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.name-part {
+  font-size: 2.5rem;
+  font-weight: bold;
+  line-height: 1.2;
+  color: #2c3e50;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #7f8c8d;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.info-item {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.location-info {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Fadeout underline effect */
+.fadeout-underline {
+  position: relative;
+  text-decoration: none;
+  color: #2563eb;
+  display: inline-block;
+}
+
+.fadeout-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to left, rgba(37, 99, 235, 0), rgba(37, 99, 235, 1));
+}
+
+.fadeout-underline:hover::after {
+  background: linear-gradient(to left, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 1));
+  height: 3px;
+}

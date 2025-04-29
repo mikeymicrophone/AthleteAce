@@ -1,65 +1,35 @@
 <p style="color: green"><%= notice %></p>
 
-<div class="player-details">
-  <div class="player-name">
-    <span class="name-part"><%= @player.first_name %></span>
-    <span class="name-part"><%= @player.last_name %></span>
+<div class="player-card">
+  <!-- Left column: Team and Stadium -->
+  <div class="card-section left-section">
+    <div class="section-title">Team</div>
+    <div class="info-item"><%= link_to_name @player.team, class: 'fadeout-underline' %></div>
+    <div class="section-title">Stadium</div>
+    <div class="info-item"><%= link_to_name @player.team.stadium, class: 'fadeout-underline' %></div>
   </div>
   
-  <div class="player-info">
-    <div class="info-item"><%= link_to_name @player.team, class: 'fadeout-underline' %></div>
-    <div class="info-item"><%= link_to_name @player.team.stadium, class: 'fadeout-underline' %></div>
-    <div class="info-item"><%= link_to_name @player.team.city, class: 'fadeout-underline' %></div>
-    <div class="info-item"><%= link_to_name @player.team.state, class: 'fadeout-underline' %></div>
+  <!-- Center column: Player Name -->
+  <div class="card-section center-section">
+    <div class="player-name">
+      <div class="name-part"><%= @player.first_name %></div>
+      <div class="name-part"><%= @player.last_name %></div>
+    </div>
+  </div>
+  
+  <!-- Right column: League and Sport -->
+  <div class="card-section right-section">
+    <div class="section-title">League</div>
     <div class="info-item"><%= link_to_name @player.league, class: 'fadeout-underline' %></div>
+    <div class="section-title">Sport</div>
     <div class="info-item"><%= link_to_name @player.sport, class: 'fadeout-underline' %></div>
   </div>
+  
+  <!-- Bottom row: City and State -->
+  <div class="card-section bottom-section">
+    <div class="location-info">
+      <div class="info-item"><%= link_to_name @player.team.city, class: 'fadeout-underline' %></div>
+      <div class="info-item"><%= link_to_name @player.team.state, class: 'fadeout-underline' %></div>
+    </div>
+  </div>
 </div>
-
-<style>
-  .player-details {
-    padding: 2rem;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  }
-  
-  .player-name {
-    display: flex;
-    gap: 0.5rem;
-    font-size: 2rem;
-    font-weight: bold;
-    margin-bottom: 1.5rem;
-  }
-  
-  .player-info {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .info-item {
-    font-size: 1.2rem;
-  }
-  
-  /* Fadeout underline effect */
-  .fadeout-underline {
-    position: relative;
-    text-decoration: none;
-    color: #2563eb;
-    display: inline-block;
-  }
-  
-  .fadeout-underline::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: -2px;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(to left, rgba(37, 99, 235, 0), rgba(37, 99, 235, 1));
-  }
-  
-  .fadeout-underline:hover::after {
-    background: linear-gradient(to left, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 1));
-    height: 3px;
-  }
-</style>
