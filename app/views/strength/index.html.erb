@@ -15,7 +15,7 @@
       </div>
     <% end %>
 
-    <%= link_to strength_phased_repetition_path, class: "bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md overflow-hidden transition duration-300 transform hover:scale-105" do %>
+    <%= link_to strength_phased_repetition_path(team_id: @team_id, sport_id: @sport_id, league_id: @league_id, include_inactive: @include_inactive), class: "bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md overflow-hidden transition duration-300 transform hover:scale-105" do %>
       <div class="p-6 text-center">
         <div class="text-3xl mb-2">🔄</div>
         <h2 class="text-xl font-bold mb-2">Phased Repetition</h2>
@@ -46,31 +46,41 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <%= f.label :sport_id, "Sport", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.collection_select :sport_id, @sports, :id, :name, { include_blank: "All Sports" }, 
-              class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+          <%= f.collection_select :sport_id, @sports, :id, :name, 
+              { include_blank: "All Sports", selected: @sport_id }, 
+              class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500",
+              onchange: "this.form.submit();" %>
         </div>
         
         <div>
           <%= f.label :league_id, "League", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.collection_select :league_id, @leagues, :id, :name, { include_blank: "All Leagues" }, 
-              class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+          <%= f.collection_select :league_id, @leagues, :id, :name, 
+              { include_blank: "All Leagues", selected: @league_id }, 
+              class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500",
+              onchange: "this.form.submit();" %>
         </div>
         
         <div>
           <%= f.label :team_id, "Team", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.collection_select :team_id, @teams, :id, :name, { include_blank: "All Teams" }, 
-              class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+          <%= f.collection_select :team_id, @teams, :id, :name, 
+              { include_blank: "All Teams", selected: @team_id }, 
+              class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500",
+              onchange: "this.form.submit();" %>
         </div>
       </div>
       
       <div class="flex items-center">
-        <%= f.check_box :include_inactive, { class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" }, "true", "false" %>
+        <%= f.check_box :include_inactive, 
+            { 
+              class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500",
+              checked: @include_inactive == "true",
+              onchange: "this.form.submit();" 
+            }, 
+            "true", "false" %>
         <%= f.label :include_inactive, "Include inactive players", class: "ml-2 block text-sm text-gray-700" %>
       </div>
       
-      <div class="flex justify-end">
-        <%= f.submit "Apply Filters", class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
-      </div>
+      <!-- Apply Filters button removed as filters now apply automatically when changed -->
     <% end %>
   </div>
 
