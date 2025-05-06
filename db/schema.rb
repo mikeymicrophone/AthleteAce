@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_06_222323) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_06_234409) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -71,6 +71,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_06_222323) do
     t.string "logo_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "goals", force: :cascade do |t|
+    t.bigint "ace_id", null: false
+    t.bigint "quest_id", null: false
+    t.string "status"
+    t.integer "progress"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ace_id"], name: "index_goals_on_ace_id"
+    t.index ["quest_id"], name: "index_goals_on_quest_id"
   end
 
   create_table "leagues", force: :cascade do |t|
@@ -188,6 +199,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_06_222323) do
 
   add_foreign_key "achievements", "quests"
   add_foreign_key "cities", "states"
+  add_foreign_key "goals", "aces"
+  add_foreign_key "goals", "quests"
   add_foreign_key "leagues", "sports"
   add_foreign_key "players", "cities", column: "birth_city_id"
   add_foreign_key "players", "countries", column: "birth_country_id"
