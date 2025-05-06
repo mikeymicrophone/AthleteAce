@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  devise_for :aces
   # Strength training routes for learning athlete names
   get "strength" => "strength#index"
   get "strength/multiple_choice" => "strength#multiple_choice"
