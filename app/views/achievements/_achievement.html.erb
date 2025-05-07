@@ -8,8 +8,16 @@
     <%= achievement.description %>
   </div>
   <div>
-    <strong class="block font-medium mb-1">Quest:</strong>
-    <%= link_to_name achievement.quest %>
+    <strong class="block font-medium mb-1">Quests:</strong>
+    <% if achievement.quests.any? %>
+      <ul class="list-disc ml-5">
+        <% achievement.quests.each do |quest| %>
+          <li><%= link_to quest.name, quest, class: "text-blue-600 hover:text-blue-800" %></li>
+        <% end %>
+      </ul>
+    <% else %>
+      <span class="text-gray-500 italic">Not part of any quests</span>
+    <% end %>
   </div>
   <div>
     <strong class="block font-medium mb-1">Target:</strong>

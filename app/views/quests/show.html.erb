@@ -10,28 +10,71 @@
   <%= render @quest %>
 
   <div class="mt-8">
-    <h2 class="font-semibold text-2xl mb-4">Achievements in this Quest</h2>
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="font-semibold text-2xl">Achievements in this Quest</h2>
+      <%= link_to "Add Achievement", new_quest_highlight_path(@quest), class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white block font-medium" %>
+    </div>
+    
     <% if @quest.achievements.any? %>
-      <ul class="divide-y divide-gray-200 bg-white rounded-lg shadow">
-        <% @quest.achievements.each do |achievement| %>
-          <li class="p-4 hover:bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between">
-            <div>
-              <div class="font-bold text-lg text-gray-900">
-                <%= link_to achievement.name, achievement_path(achievement), class: "hover:underline" %>
-              </div>
-              <div class="text-gray-500 mt-1"><%= achievement.description %></div>
-            </div>
-            <div class="mt-2 sm:mt-0">
-              <span class="inline-block px-2 py-1 text-xs bg-gray-100 rounded text-gray-700">
-                Target: <%= link_to_name achievement.target %> (<%= achievement.target_type %>)
-              </span>
-            </div>
-          </li>
+      <div class="mb-6">
+        <h3 class="font-semibold text-xl mb-2">Required Achievements</h3>
+        <% required = @quest.highlights.required.includes(:achievement).ordered %>
+        <% if required.any? %>
+          <ul class="divide-y divide-gray-200 bg-white rounded-lg shadow">
+            <% required.each do |highlight| %>
+              <% achievement = highlight.achievement %>
+              <li class="p-4 hover:bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between">
+                <div>
+                  <div class="font-bold text-lg text-gray-900">
+                    <%= link_to achievement.name, achievement_path(achievement), class: "hover:underline" %>
+                  </div>
+                  <div class="text-gray-500 mt-1"><%= achievement.description %></div>
+                </div>
+                <div class="mt-2 sm:mt-0 flex items-center space-x-2">
+                  <span class="inline-block px-2 py-1 text-xs bg-gray-100 rounded text-gray-700">
+                    Target: <%= link_to_name achievement.target %>
+                  </span>
+                  <%= link_to "Edit", edit_quest_highlight_path(@quest, highlight), class: "text-blue-600 hover:text-blue-800" %>
+                  <%= button_to "Remove", quest_highlight_path(@quest, highlight), method: :delete, class: "text-red-600 hover:text-red-800", data: { turbo_confirm: "Are you sure?" } %>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-gray-500 italic">No required achievements added yet.</p>
         <% end %>
-      </ul>
+      </div>
+      
+      <div>
+        <h3 class="font-semibold text-xl mb-2">Optional Achievements</h3>
+        <% optional = @quest.highlights.optional.includes(:achievement).ordered %>
+        <% if optional.any? %>
+          <ul class="divide-y divide-gray-200 bg-white rounded-lg shadow">
+            <% optional.each do |highlight| %>
+              <% achievement = highlight.achievement %>
+              <li class="p-4 hover:bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between">
+                <div>
+                  <div class="font-bold text-lg text-gray-900">
+                    <%= link_to achievement.name, achievement_path(achievement), class: "hover:underline" %>
+                  </div>
+                  <div class="text-gray-500 mt-1"><%= achievement.description %></div>
+                </div>
+                <div class="mt-2 sm:mt-0 flex items-center space-x-2">
+                  <span class="inline-block px-2 py-1 text-xs bg-gray-100 rounded text-gray-700">
+                    Target: <%= link_to_name achievement.target %>
+                  </span>
+                  <%= link_to "Edit", edit_quest_highlight_path(@quest, highlight), class: "text-blue-600 hover:text-blue-800" %>
+                  <%= button_to "Remove", quest_highlight_path(@quest, highlight), method: :delete, class: "text-red-600 hover:text-red-800", data: { turbo_confirm: "Are you sure?" } %>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-gray-500 italic">No optional achievements added yet.</p>
+        <% end %>
+      </div>
     <% else %>
       <p class="text-gray-500">No achievements added yet.</p>
-      <%= link_to "Add Achievement", new_quest_achievement_path(@quest), class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white block font-medium" %>
     <% end %>
   </div>
 </div>

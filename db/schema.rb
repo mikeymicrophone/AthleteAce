@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_06_234409) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_06_235445) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -39,12 +39,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_06_234409) do
   create_table "achievements", force: :cascade do |t|
     t.string "name"
     t.text "description"
-    t.bigint "quest_id", null: false
     t.string "target_type", null: false
     t.bigint "target_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["quest_id"], name: "index_achievements_on_quest_id"
     t.index ["target_type", "target_id"], name: "index_achievements_on_target"
   end
 
@@ -82,6 +80,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_06_234409) do
     t.datetime "updated_at", null: false
     t.index ["ace_id"], name: "index_goals_on_ace_id"
     t.index ["quest_id"], name: "index_goals_on_quest_id"
+  end
+
+  create_table "highlights", force: :cascade do |t|
+    t.bigint "quest_id", null: false
+    t.bigint "achievement_id", null: false
+    t.integer "position"
+    t.boolean "required", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["achievement_id"], name: "index_highlights_on_achievement_id"
+    t.index ["quest_id", "achievement_id"], name: "index_highlights_on_quest_id_and_achievement_id", unique: true
+    t.index ["quest_id"], name: "index_highlights_on_quest_id"
   end
 
   create_table "leagues", force: :cascade do |t|
@@ -197,10 +207,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_06_234409) do
     t.index ["stadium_id"], name: "index_teams_on_stadium_id"
   end
 
-  add_foreign_key "achievements", "quests"
   add_foreign_key "cities", "states"
   add_foreign_key "goals", "aces"
   add_foreign_key "goals", "quests"
+  add_foreign_key "highlights", "achievements"
+  add_foreign_key "highlights", "quests"
   add_foreign_key "leagues", "sports"
   add_foreign_key "players", "cities", column: "birth_city_id"
   add_foreign_key "players", "countries", column: "birth_country_id"

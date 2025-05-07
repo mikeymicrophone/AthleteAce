@@ -24,12 +24,20 @@ class AchievementsController < ApplicationController
   # POST /achievements or /achievements.json
   def create
     @achievement = Achievement.new(achievement_params)
+    quest_id = params[:achievement][:quest_id]
 
     respond_to do |format|
       if @achievement.save
+        # Create a highlight if a quest was selected
+        if quest_id.present?
+          quest = Quest.find(quest_id)
+          @achievement.add_to_quest(quest)
+        end
+
         format.html { redirect_to @achievement, notice: "Achievement was successfully created." }
         format.json { render :show, status: :created, location: @achievement }
       else
+        @target_type = @achievement.target_type || params[:achievement][:target_type] || 'Team'
         format.html { render :new, status: :unprocessable_entity }
         format.json { render json: @achievement.errors, status: :unprocessable_entity }
       end
@@ -73,11 +81,11 @@ class AchievementsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_achievement
-      @achievement = Achievement.find(params.expect(:id))
+      @achievement = Achievement.find(params.require(:id))
     end
 
     # Only allow a list of trusted parameters through.
     def achievement_params
-      params.expect(achievement: [ :name, :description, :quest_id, :target_id, :target_type ])
+      params.require(:achievement).permit(:name, :description, :target_id, :target_type)
     end
 end

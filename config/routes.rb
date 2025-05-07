@@ -12,9 +12,15 @@ Rails.application.routes.draw do
       get :target_options
     end
   end
+  
   resources :quests do
-    resources :achievements
+    resources :highlights
+    resources :goals, only: [:create]
   end
+  
+  resources :highlights, only: [:new, :create]
+  
+  resources :goals, except: [:create, :new]
   resources :federations
   resources :players
   resources :teams

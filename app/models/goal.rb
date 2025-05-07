@@ -14,9 +14,24 @@ class Goal < ApplicationRecord
   end
   
   def percent_complete
-    total_achievements = quest.achievements.count
-    return 0 if total_achievements.zero?
+    total_required = quest.highlights.required.count
+    return 0 if total_required.zero?
     
-    (progress.to_f / total_achievements * 100).round
+    (progress.to_f / total_required * 100).round
+  end
+  
+  # Get all the required achievements for this goal's quest
+  def required_achievements
+    quest.achievements.merge(Highlight.required)
+  end
+  
+  # Get all the optional achievements for this goal's quest
+  def optional_achievements
+    quest.achievements.merge(Highlight.optional)
+  end
+  
+  # Get all achievements (both required and optional) for this goal's quest
+  def all_achievements
+    quest.achievements
   end
 end
