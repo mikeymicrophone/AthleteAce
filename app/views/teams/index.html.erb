@@ -2,45 +2,67 @@
 
 <% content_for :title, "Teams" %>
 
-<div class="flex justify-between items-center mb-4">
-  <div>
-    <div class="text-sm text-gray-600 mb-2">Sort by:</div>
-    <div class="flex gap-2">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+  <div class="mb-4 sm:mb-0">
+    <div class="text-sm text-gray-600 mb-1">Sort by:</div>
+    <div class="flex flex-wrap gap-2">
       <%= link_to "Mascot", teams_path(sort: "mascot"), class: "text-sm text-blue-600 hover:underline #{params[:sort] == 'mascot' ? 'font-bold' : ''}" %>
       <%= link_to "Territory", teams_path(sort: "territory"), class: "text-sm text-blue-600 hover:underline #{params[:sort] == 'territory' ? 'font-bold' : ''}" %>
       <%= link_to "Sport", teams_path(sort: "sport"), class: "text-sm text-blue-600 hover:underline #{params[:sort] == 'sport' ? 'font-bold' : ''}" %>
       <%= link_to "City", teams_path(sort: "city"), class: "text-sm text-blue-600 hover:underline #{params[:sort] == 'city' ? 'font-bold' : ''}" %>
     </div>
   </div>
-  
-  <div class="text-lg font-medium">
-    <span class="text-gray-600">Rating teams for:</span>
-    <span id="current-spectrum" class="ml-2 font-semibold text-blue-600"><%= current_spectrum.name %></span>
-  </div>
-  
-  <div>
-    <%= render partial: "shared/spectrum_picker", locals: { 
-      spectrums: @spectrums, 
-      default_spectrum: current_spectrum 
-    } %>
-  </div>
 </div>
 
-<div id="teams">
+<%# Page-level Spectrum Picker %>
+<div class="mb-6 p-4 border rounded-lg shadow-sm bg-gray-50">
+  <%= form_with url: url_for, method: :get, local: true, data: { controller: 'autosubmit' } do |form| %>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+      <div class="flex-grow mb-2 sm:mb-0">
+        <%= form.label :spectrum_ids, "Select Spectrums (up to 4):", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.select :spectrum_ids, 
+                        options_for_select(spectrum_picker_options, selected_spectrum_ids), 
+                        { include_blank: false }, 
+                        { multiple: true, 
+                          size: default_spectrums.count > 4 ? 4 : default_spectrums.count, 
+                          class: "block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                          data: { action: 'change->autosubmit#submit' } 
+                        }
+        %>
+        <%= form.hidden_field :spectrum_ids, value: '', multiple: true unless selected_spectrum_ids.present? %> 
+      </div>
+      <div class="mt-2 sm:mt-0">
+        <%# form.submit "Update Spectrums", class: "px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" %>
+      </div>
+    </div>
+  <% end %>
+  <p class="text-xs text-gray-500 mt-1">Ratings will update automatically when spectrum selection changes.</p>
+</div>
+
+
+<div id="teams" class="space-y-4">
   <% @teams.each do |team| %>
-    <%= tag.div(id: dom_id(team), class: [index_record_base_classes, team_index_record_classes].join(' ')) do %>
-      <div class="flex items-center gap-4">
-        <%= image_tag team.logo_url, class: "h-12 w-12 object-contain rounded bg-white border border-gray-200 shadow" if team.logo_url.present? %>
-        <div>
-          <div class="text-xl font-semibold text-gray-900"><%= link_to_name team %></div>
-          <div class="text-sm text-gray-500 mt-1">
-            <span><%= link_to_name team.stadium %></span>
-            <span class="mx-2">&bull;</span>
-            <span><%= link_to_name team.league %></span>
+    <%= tag.div(id: dom_id(team), class: [index_record_base_classes, team_index_record_classes, "p-4 rounded-lg shadow-sm"].join(' ')) do %>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+        <div class="team-info md:col-span-1 flex items-center gap-4">
+          <%= image_tag team.logo_url, class: "h-12 w-12 object-contain rounded bg-white border border-gray-200 shadow" if team.logo_url.present? %>
+          <div>
+            <div class="text-xl font-semibold text-gray-900"><%= link_to_name team %></div>
+            <div class="text-sm text-gray-500 mt-1">
+              <span><%= link_to_name team.stadium %></span>
+              <span class="mx-1">&bull;</span>
+              <span><%= link_to_name team.league %></span>
+            </div>
           </div>
         </div>
-        <%= render "shared/rating_slider", target: team, spectrums: @spectrums %>
-        <%= link_to pluralize(team.players.count, "player"), [team, :players] %>
+        
+        <div class="rating-container md:col-span-1">
+          <%= render "shared/rating_slider", target: team, selected_spectrums: selected_spectrums %>
+        </div>
+
+        <div class="team-links md:col-span-1 text-right">
+          <%= link_to pluralize(team.players.count, "player"), [team, :players], class: "text-sm text-blue-600 hover:underline" %>
+        </div>
       </div>
     <% end %>
   <% end %>
