@@ -62,25 +62,21 @@
     <input type="range" 
            min="-10000" 
            max="10000" 
-           value="0" 
+           value="<%= target.ratings.find_by(spectrum_id: current_spectrum_id)&.value || 0 %>" 
            step="100" 
            class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
            data-rating-slider-target="slider"
-           data-action="input->rating-slider#updateValue">
+           data-action="input->rating-slider#updateValue change->rating-slider#submitRating">
     <span class="text-xs text-gray-500">+10k</span>
   </div>
   
   <%# Value Display %>
   <div class="text-center mt-1">
-    <span data-rating-slider-target="value" class="text-sm font-semibold">0</span>
+    <span data-rating-slider-target="value" class="text-sm font-semibold"><%= target.ratings.find_by(spectrum_id: current_spectrum_id)&.value || 0 %></span>
   </div>
   
-  <%# Submit Button %>
-  <div class="mt-2 text-center">
-    <button type="button" 
-            class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            data-action="click->rating-slider#submitRating">
-      Save Rating
-    </button>
+  <%# Status Indicator %>
+  <div class="text-center mt-1">
+    <span data-rating-slider-target="status" class="text-xs text-gray-500"></span>
   </div>
 </div>

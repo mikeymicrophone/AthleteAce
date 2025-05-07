@@ -13,8 +13,17 @@
 </div>
 
 <% if params[:team_id].present? %>
-  <div class="mb-6 flex justify-end">
-    <%= render partial: "shared/spectrum_picker", locals: { spectrums: @spectrums } %>
+  <div class="mb-6 flex justify-between items-center">
+    <div class="text-lg font-medium">
+      <span class="text-gray-600">Rating players for:</span>
+      <span id="current-spectrum" class="ml-2 font-semibold text-blue-600"><%= current_spectrum.name %></span>
+    </div>
+    <div>
+      <%= render partial: "shared/spectrum_picker", locals: { 
+        spectrums: @spectrums, 
+        default_spectrum: current_spectrum 
+      } %>
+    </div>
   </div>
 <% end %>
 

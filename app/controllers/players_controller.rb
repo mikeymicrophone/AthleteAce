@@ -19,6 +19,9 @@ class PlayersController < ApplicationController
     # Load available spectrums for the rating selector
     @spectrums = Spectrum.all
     
+    # Set current spectrum ID if provided in params
+    set_current_spectrum_id(params[:spectrum_id]) if params[:spectrum_id].present?
+    
     @pagy, @players = pagy(@players)
   end
 

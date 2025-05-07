@@ -5,7 +5,9 @@
   - spectrums: Collection of available spectrums
 %>
 
-<div class="spectrum-picker-container" data-controller="spectrum-picker">
+<div class="spectrum-picker-container" 
+     data-controller="spectrum-picker"
+     <%= "data-spectrum-picker-current-spectrum-value=#{default_spectrum.id}" if local_assigns[:default_spectrum].present? %>>
   <div class="flex items-center justify-end space-x-2">
     <button type="button" 
             class="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"

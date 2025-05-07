@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="rating-slider"
 export default class extends Controller {
-  static targets = ["slider", "value", "spectrumSelector", "spectrumPicker", "multiToggle", "spectrumItem"]
+  static targets = ["slider", "value", "spectrumSelector", "spectrumPicker", "multiToggle", "spectrumItem", "status"]
   static values = { 
     playerId: Number,
     teamId: Number,
@@ -161,9 +161,52 @@ export default class extends Controller {
 
   // Submit the rating
   submitRating(event) {
-    event.preventDefault()
+    // Don't use event.preventDefault() as we want the slider to work normally
     
-    if (this.selectedSpectrumsValue.length === 0 || !this.hasSliderTarget) {
+    // Get the current spectrum ID from the page-level picker or use default (Familiarity)
+    let currentSpectrumId = null
+    const pageSpectrumPicker = document.querySelector('[data-controller="spectrum-picker"]')
+    
+    if (pageSpectrumPicker) {
+      const spectrumPickerController = this.application.getControllerForElementAndIdentifier(
+        pageSpectrumPicker, 'spectrum-picker'
+      )
+      
+      if (spectrumPickerController && spectrumPickerController.selectedSpectrumsValue.length > 0) {
+        currentSpectrumId = spectrumPickerController.selectedSpectrumsValue[0]
+      }
+    }
+    
+    // If no spectrum is selected, try to find Familiarity spectrum
+    if (!currentSpectrumId) {
+      // Find all spectrum options
+      const spectrumOptions = document.querySelectorAll('[data-spectrum-picker-target="option"]')
+      
+      // Look for one containing the text "Familiarity"
+      for (const option of spectrumOptions) {
+        if (option.textContent.includes('Familiarity')) {
+          currentSpectrumId = parseInt(option.dataset.spectrumId)
+          break
+        }
+      }
+      
+      // If still not found, use a default value (will be set in the controller)
+      if (!currentSpectrumId) {
+        // We'll handle this with a default in the controller
+        currentSpectrumId = this.currentSpectrumValue || 1 // Default to ID 1 if nothing else works
+      }
+    }
+    
+    // If we still don't have a spectrum ID, we can't proceed
+    if (!currentSpectrumId) {
+      if (this.hasStatusTarget) {
+        this.statusTarget.textContent = 'No spectrum selected'
+        this.statusTarget.classList.add('text-red-500')
+        setTimeout(() => {
+          this.statusTarget.textContent = ''
+          this.statusTarget.classList.remove('text-red-500')
+        }, 2000)
+      }
       return
     }
     
@@ -171,47 +214,67 @@ export default class extends Controller {
     const playerId = this.playerIdValue
     const teamId = this.teamIdValue
     
+    // Show saving status
+    if (this.hasStatusTarget) {
+      this.statusTarget.textContent = 'Saving...'
+      this.statusTarget.classList.remove('text-red-500', 'text-green-500')
+      this.statusTarget.classList.add('text-gray-500')
+    }
+    
     // Create a form data object for the request
     const formData = new FormData()
     formData.append('rating[value]', value)
+    formData.append('rating[spectrum_id]', currentSpectrumId)
     
-    // Submit a rating for each selected spectrum
-    this.selectedSpectrumsValue.forEach(spectrumId => {
-      // Clone the form data and add the spectrum ID
-      const spectrumFormData = new FormData(formData)
-      spectrumFormData.append('rating[spectrum_id]', spectrumId)
-      
-      // Determine the target URL based on what we're rating
-      let url
-      if (playerId) {
-        url = `/players/${playerId}/ratings`
-      } else if (teamId) {
-        url = `/teams/${teamId}/ratings`
-      } else {
-        return
+    // Determine the target URL based on what we're rating
+    let url
+    if (playerId) {
+      url = `/players/${playerId}/ratings`
+    } else if (teamId) {
+      url = `/teams/${teamId}/ratings`
+    } else {
+      return
+    }
+    
+    // Send the AJAX request
+    fetch(url, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
       }
+    })
+    .then(response => {
+      if (response.ok) {
+        // Show success status
+        if (this.hasStatusTarget) {
+          this.statusTarget.textContent = 'Saved'
+          this.statusTarget.classList.remove('text-gray-500', 'text-red-500')
+          this.statusTarget.classList.add('text-green-500')
+          
+          // Clear status after a delay
+          setTimeout(() => {
+            this.statusTarget.textContent = ''
+          }, 1500)
+        }
+      } else {
+        // Show error status
+        if (this.hasStatusTarget) {
+          this.statusTarget.textContent = 'Failed to save'
+          this.statusTarget.classList.remove('text-gray-500', 'text-green-500')
+          this.statusTarget.classList.add('text-red-500')
+        }
+      }
+    })
+    .catch(error => {
+      console.error('Error saving rating:', error)
       
-      // Send the AJAX request
-      fetch(url, {
-        method: 'POST',
-        body: spectrumFormData,
-        headers: {
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
-        }
-      })
-      .then(response => {
-        if (response.ok) {
-          // Show success feedback
-          this.showFeedback('Rating saved', 'success')
-        } else {
-          // Show error feedback
-          this.showFeedback('Failed to save rating', 'error')
-        }
-      })
-      .catch(error => {
-        console.error('Error saving rating:', error)
-        this.showFeedback('Error saving rating', 'error')
-      })
+      // Show error status
+      if (this.hasStatusTarget) {
+        this.statusTarget.textContent = 'Error saving'
+        this.statusTarget.classList.remove('text-gray-500', 'text-green-500')
+        this.statusTarget.classList.add('text-red-500')
+      }
     })
   }
   

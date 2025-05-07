@@ -5,12 +5,35 @@ export default class extends Controller {
   static targets = ["dropdown", "buttonText", "multiToggle", "option"]
   static values = { 
     selectedSpectrums: Array,
-    multiMode: Boolean
+    multiMode: Boolean,
+    currentSpectrum: Number
   }
 
   connect() {
     this.multiModeValue = false
-    this.selectedSpectrumsValue = []
+    
+    // Initialize with default spectrum if provided
+    if (this.hasCurrentSpectrumValue) {
+      this.selectedSpectrumsValue = [this.currentSpectrumValue]
+      
+      // Update the button text with the default spectrum
+      this.updateButtonText()
+      
+      // Update the current spectrum display in the UI
+      this.updateCurrentSpectrumDisplay()
+      
+      // Mark the default spectrum as selected in the dropdown
+      setTimeout(() => {
+        this.updateOptionDisplay()
+      }, 100)
+      
+      // Broadcast the selected spectrum to all rating sliders
+      setTimeout(() => {
+        this.broadcastSelectedSpectrums()
+      }, 200)
+    } else {
+      this.selectedSpectrumsValue = []
+    }
     
     // Close dropdown when clicking outside
     document.addEventListener('click', this.handleOutsideClick.bind(this))
@@ -85,9 +108,24 @@ export default class extends Controller {
   applySelection() {
     this.closeDropdown()
     this.updateButtonText()
+    this.updateCurrentSpectrumDisplay()
     
     // Broadcast the selected spectrums to all rating sliders
     this.broadcastSelectedSpectrums()
+  }
+  
+  // Update the current spectrum display in the UI
+  updateCurrentSpectrumDisplay() {
+    if (this.selectedSpectrumsValue.length > 0) {
+      const currentSpectrumId = this.selectedSpectrumsValue[0]
+      const spectrumName = this.getSpectrumNameById(currentSpectrumId)
+      
+      // Update the current spectrum display if it exists
+      const currentSpectrumElement = document.getElementById('current-spectrum')
+      if (currentSpectrumElement) {
+        currentSpectrumElement.textContent = spectrumName
+      }
+    }
   }
   
   // Update the display of options based on selection
