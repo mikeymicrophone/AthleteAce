@@ -9,9 +9,16 @@ class PlayersController < ApplicationController
       @players = League.find(params[:league_id]).players
     elsif params[:stadium_id]
       @players = Stadium.find(params[:stadium_id]).players
+    elsif params[:team_id]
+      @team = Team.find(params[:team_id])
+      @players = @team.players
     else
       @players = Player.all
     end
+    
+    # Load available spectrums for the rating selector
+    @spectrums = Spectrum.all
+    
     @pagy, @players = pagy(@players)
   end
 

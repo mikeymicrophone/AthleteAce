@@ -1,0 +1,69 @@
+<%# 
+  Spectrum picker component for the top of the page
+  
+  Required parameters:
+  - spectrums: Collection of available spectrums
+%>
+
+<div class="spectrum-picker-container" data-controller="spectrum-picker">
+  <div class="flex items-center justify-end space-x-2">
+    <button type="button" 
+            class="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            data-action="click->spectrum-picker#togglePicker">
+      <span data-spectrum-picker-target="buttonText">Select spectrums</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
+    
+    <div class="relative">
+      <label class="flex items-center space-x-2 text-sm">
+        <input type="checkbox" 
+               class="rounded text-blue-600 focus:ring-blue-500" 
+               data-spectrum-picker-target="multiToggle"
+               data-action="change->spectrum-picker#toggleMultiMode">
+        <span>Multi-select</span>
+      </label>
+    </div>
+  </div>
+  
+  <%# Dropdown content %>
+  <div data-spectrum-picker-target="dropdown" 
+       class="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-md border border-gray-200 z-20 hidden">
+    <div class="p-3">
+      <h3 class="text-sm font-medium text-gray-700 mb-2">Select spectrums to rate</h3>
+      
+      <div class="space-y-2 max-h-60 overflow-y-auto">
+        <% spectrums.each_with_index do |spectrum, index| %>
+          <div class="spectrum-option flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100"
+               data-spectrum-picker-target="option"
+               data-spectrum-id="<%= spectrum.id %>"
+               data-action="click->spectrum-picker#selectSpectrum">
+            <div class="w-3 h-3 rounded-full spectrum-color-<%= index % 4 %>-bg"></div>
+            <div>
+              <div class="text-sm font-medium"><%= spectrum.name %></div>
+              <div class="text-xs text-gray-500">
+                <span class="text-red-500"><%= spectrum.low_label %></span> → 
+                <span class="text-green-500"><%= spectrum.high_label %></span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <div class="mt-3 flex justify-between">
+        <button type="button"
+                class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none"
+                data-action="click->spectrum-picker#clearSelection">
+          Clear
+        </button>
+        
+        <button type="button"
+                class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none"
+                data-action="click->spectrum-picker#applySelection">
+          Apply
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

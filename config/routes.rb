@@ -32,6 +32,7 @@ Rails.application.routes.draw do
   end
   
   resources :teams do
+    resources :players, shallow: true
     resources :ratings, only: [:new, :create]
   end
   resources :countries do

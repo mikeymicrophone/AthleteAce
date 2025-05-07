@@ -2,19 +2,66 @@
 
 <% content_for :title, "Players" %>
 
-<h1>Players</h1>
+<div class="flex justify-between items-center mb-4">
+  <h1 class="text-2xl font-bold">Players</h1>
+  
+  <% if params[:team_id].present? %>
+    <div class="text-lg font-medium">
+      Team: <%= link_to @team.name, @team, class: "text-blue-600 hover:underline" %>
+    </div>
+  <% end %>
+</div>
 
-<div id="players">
+<% if params[:team_id].present? %>
+  <div class="mb-6 flex justify-end">
+    <%= render partial: "shared/spectrum_picker", locals: { spectrums: @spectrums } %>
+  </div>
+<% end %>
+
+<div id="players" class="space-y-4">
   <% @players.each do |player| %>
-    <%= tag.div(id: dom_id(player), class: [index_record_base_classes, player_index_record_classes].join(' ')) do %>
-      <%= link_to_name player %>
-      <%= link_to_name player.team %>
-      <%= link_to_name player.league %>
-      <%= link_to_name player.sport %>
+    <%= tag.div(id: dom_id(player), class: [index_record_base_classes, player_index_record_classes, "grid grid-cols-3 gap-4 items-center p-4 rounded-lg shadow-sm"].join(' ')) do %>
+      <div class="player-info">
+        <div class="font-medium text-lg"><%= link_to_name player %></div>
+        <div class="text-sm text-gray-600">
+          <%= link_to_name player.team %> | 
+          <%= link_to_name player.league %> | 
+          <%= link_to_name player.sport %>
+        </div>
+        <% if player.primary_position %>
+          <div class="text-xs mt-1 inline-block bg-gray-100 px-2 py-0.5 rounded">
+            <%= player.primary_position.name %>
+          </div>
+        <% end %>
+      </div>
+      
+      <div class="rating-container">
+        <%= render partial: "shared/rating_slider", locals: { target: player, spectrums: @spectrums } %>
+      </div>
+      
+      <div class="player-stats text-right">
+        <% if player.ratings.any? %>
+          <div class="text-sm">
+            <span class="font-medium"><%= player.ratings.count %></span> ratings
+          </div>
+          <% player.ratings.group(:spectrum_id).count.first(3).each do |spectrum_id, count| %>
+            <% spectrum = Spectrum.find(spectrum_id) %>
+            <div class="text-xs text-gray-600">
+              <%= spectrum.name %>: <%= player.normalized_average_rating_on(spectrum)&.*(100)&.round || 'N/A' %>%
+            </div>
+          <% end %>
+        <% else %>
+          <div class="text-sm text-gray-500 italic">No ratings yet</div>
+        <% end %>
+      </div>
     <% end %>
   <% end %>
 </div>
 
-<%= pagy_nav(@pagy).html_safe %>
+<div class="mt-6">
+  <%= pagy_nav(@pagy).html_safe %>
+</div>
 
-<%= link_to "New player", new_player_path %>
+<div class="mt-4">
+  <%= link_to "New player", new_player_path, class: "px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" %>
+</div>

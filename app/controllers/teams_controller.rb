@@ -28,6 +28,8 @@ class TeamsController < ApplicationController
     when 'city'
       @teams = @teams.includes(:stadium).order('stadiums.city_id')
     end
+
+    @spectrums = Spectrum.all
   end
 
   # GET /teams/1 or /teams/1.json

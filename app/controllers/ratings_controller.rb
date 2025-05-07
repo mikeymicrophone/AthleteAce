@@ -45,11 +45,19 @@ class RatingsController < ApplicationController
     
     @rating.assign_attributes(rating_params)
 
-    if @rating.save
-      redirect_to after_rating_path, notice: 'Rating was successfully saved.'
-    else
-      @spectrum = Spectrum.find(rating_params[:spectrum_id])
-      render :new, status: :unprocessable_entity
+    respond_to do |format|
+      if @rating.save
+        format.html { redirect_to after_rating_path, notice: 'Rating was successfully saved.' }
+        format.json { render json: { success: true, rating: @rating }, status: :created }
+        format.js { head :ok }
+      else
+        format.html do
+          @spectrum = Spectrum.find(rating_params[:spectrum_id])
+          render :new, status: :unprocessable_entity
+        end
+        format.json { render json: { success: false, errors: @rating.errors.full_messages }, status: :unprocessable_entity }
+        format.js { head :unprocessable_entity }
+      end
     end
   end
 

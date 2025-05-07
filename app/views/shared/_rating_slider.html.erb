@@ -1,0 +1,86 @@
+<%# 
+  Shared rating slider component
+  
+  Required parameters:
+  - target: The object being rated (player, team, etc.)
+  - spectrums: Collection of available spectrums
+  
+  Optional parameters:
+  - current_spectrum_id: ID of the initially selected spectrum
+%>
+
+<div class="rating-slider-container" 
+     data-controller="rating-slider"
+     <%= "data-rating-slider-player-id-value=#{target.id}" if target.is_a?(Player) %>
+     <%= "data-rating-slider-team-id-value=#{target.id}" if target.is_a?(Team) %>
+     <%= "data-rating-slider-current-spectrum-value=#{current_spectrum_id}" if local_assigns[:current_spectrum_id].present? %>>
+  
+  <%# Spectrum Selector %>
+  <div class="relative">
+    <button type="button" 
+            class="flex items-center justify-between w-full px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            data-action="click->rating-slider#toggleSpectrumPicker">
+      <span data-rating-slider-target="spectrumSelector">Select spectrum</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
+    
+    <%# Spectrum Picker Dropdown %>
+    <div data-rating-slider-target="spectrumPicker" 
+         class="absolute left-0 z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 hidden">
+      <div class="p-2 border-b border-gray-200">
+        <label class="flex items-center space-x-2 text-sm">
+          <input type="checkbox" 
+                 class="rounded text-blue-600 focus:ring-blue-500" 
+                 data-rating-slider-target="multiToggle"
+                 data-action="change->rating-slider#toggleMultiMode">
+          <span>Multi-spectrum mode (up to 4)</span>
+        </label>
+      </div>
+      
+      <div class="max-h-60 overflow-y-auto p-1">
+        <% spectrums.each do |spectrum| %>
+          <div class="spectrum-item px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer rounded-md"
+               data-rating-slider-target="spectrumItem"
+               data-spectrum-id="<%= spectrum.id %>"
+               data-action="click->rating-slider#selectSpectrum">
+            <%= spectrum.name %>
+            <div class="text-xs text-gray-500 mt-0.5">
+              <span class="text-red-500"><%= spectrum.low_label %></span> → 
+              <span class="text-green-500"><%= spectrum.high_label %></span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  
+  <%# Rating Slider %>
+  <div class="mt-2 flex items-center space-x-2">
+    <span class="text-xs text-gray-500">-10k</span>
+    <input type="range" 
+           min="-10000" 
+           max="10000" 
+           value="0" 
+           step="100" 
+           class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
+           data-rating-slider-target="slider"
+           data-action="input->rating-slider#updateValue">
+    <span class="text-xs text-gray-500">+10k</span>
+  </div>
+  
+  <%# Value Display %>
+  <div class="text-center mt-1">
+    <span data-rating-slider-target="value" class="text-sm font-semibold">0</span>
+  </div>
+  
+  <%# Submit Button %>
+  <div class="mt-2 text-center">
+    <button type="button" 
+            class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            data-action="click->rating-slider#submitRating">
+      Save Rating
+    </button>
+  </div>
+</div>

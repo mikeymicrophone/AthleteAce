@@ -23,6 +23,8 @@
             <span><%= link_to_name team.league %></span>
           </div>
         </div>
+        <%= render "shared/rating_slider", target: team, spectrums: @spectrums %>
+        <%= link_to pluralize(team.players.count, "player"), [team, :players] %>
       </div>
     <% end %>
   <% end %>
