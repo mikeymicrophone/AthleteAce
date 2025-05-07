@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_06_235445) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_07_030100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -150,6 +150,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_06_235445) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "ratings", force: :cascade do |t|
+    t.bigint "ace_id", null: false
+    t.bigint "spectrum_id", null: false
+    t.string "target_type", null: false
+    t.bigint "target_id", null: false
+    t.bigint "value", null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ace_id", "spectrum_id", "target_type", "target_id"], name: "index_ratings_on_ace_spectrum_and_target", unique: true
+    t.index ["ace_id"], name: "index_ratings_on_ace_id"
+    t.index ["spectrum_id"], name: "index_ratings_on_spectrum_id"
+    t.index ["target_type", "target_id"], name: "index_ratings_on_target"
+  end
+
   create_table "roles", force: :cascade do |t|
     t.bigint "player_id", null: false
     t.bigint "position_id", null: false
@@ -160,6 +175,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_06_235445) do
     t.index ["player_id", "primary"], name: "index_roles_on_player_id_and_primary"
     t.index ["player_id"], name: "index_roles_on_player_id"
     t.index ["position_id"], name: "index_roles_on_position_id"
+  end
+
+  create_table "spectrums", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.string "low_label", default: "Low"
+    t.string "high_label", default: "High"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_spectrums_on_name", unique: true
   end
 
   create_table "sports", force: :cascade do |t|
@@ -217,6 +242,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_06_235445) do
   add_foreign_key "players", "countries", column: "birth_country_id"
   add_foreign_key "players", "teams"
   add_foreign_key "positions", "sports"
+  add_foreign_key "ratings", "aces"
+  add_foreign_key "ratings", "spectrums"
   add_foreign_key "roles", "players"
   add_foreign_key "roles", "positions"
   add_foreign_key "stadiums", "cities"

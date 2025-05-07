@@ -1,0 +1,66 @@
+<%= form_with(model: rating, url: url, class: "contents") do |form| %>
+  <% if rating.errors.any? %>
+    <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-md mt-3 mb-5">
+      <h2><%= pluralize(rating.errors.count, "error") %> prohibited this rating from being saved:</h2>
+
+      <ul class="list-disc ml-6">
+        <% rating.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if local_assigns[:spectrum].nil? %>
+    <div class="my-5">
+      <%= form.label :spectrum_id, "Select Spectrum" %>
+      <%= form.collection_select :spectrum_id, Spectrum.all.order(:name), :id, :name, 
+          { prompt: "-- Select a Spectrum --" }, 
+          { class: "block shadow-sm rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full" } %>
+    </div>
+  <% else %>
+    <%= form.hidden_field :spectrum_id, value: spectrum.id %>
+    <div class="my-5">
+      <h2 class="font-semibold text-xl mb-2"><%= spectrum.name %></h2>
+      <p class="text-gray-600 mb-4"><%= spectrum.description %></p>
+    </div>
+  <% end %>
+
+  <div class="my-5">
+    <%= form.label :value, "Your Rating (-10,000 to +10,000)" %>
+    <div class="flex items-center space-x-4 mt-2">
+      <span class="text-red-500 text-sm"><%= local_assigns[:spectrum]&.low_label || "Low" %></span>
+      <%= form.range_field :value, min: -10000, max: 10000, step: 100, 
+          class: "w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer", 
+          data: { action: "input->rating#updateValue" } %>
+      <span class="text-green-500 text-sm"><%= local_assigns[:spectrum]&.high_label || "High" %></span>
+    </div>
+    <div class="text-center mt-2">
+      <span id="rating-value" class="font-bold text-lg"><%= rating.value || 0 %></span>
+    </div>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :notes, "Notes (Optional)" %>
+    <%= form.text_area :notes, rows: 3, class: "block shadow-sm rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full" %>
+    <p class="text-sm text-gray-500 mt-1">Add any additional thoughts or context for your rating</p>
+  </div>
+
+  <div class="inline">
+    <%= form.submit "Save Rating", class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
+    <%= link_to "Cancel", cancel_path, class: "ml-2 rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-200 inline-block font-medium" %>
+  </div>
+<% end %>
+
+<script>
+  document.addEventListener("turbo:load", function() {
+    const rangeInput = document.querySelector('input[type="range"]');
+    const valueDisplay = document.getElementById('rating-value');
+    
+    if (rangeInput && valueDisplay) {
+      rangeInput.addEventListener('input', function() {
+        valueDisplay.textContent = this.value;
+      });
+    }
+  });
+</script>

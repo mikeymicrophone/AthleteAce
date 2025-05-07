@@ -22,8 +22,18 @@ Rails.application.routes.draw do
   
   resources :goals, except: [:create, :new]
   resources :federations
-  resources :players
-  resources :teams
+  
+  # Rating system
+  resources :spectrums
+  resources :ratings
+  
+  resources :players do
+    resources :ratings, only: [:new, :create]
+  end
+  
+  resources :teams do
+    resources :ratings, only: [:new, :create]
+  end
   resources :countries do
     resources :leagues, shallow: true
     resources :teams, shallow: true

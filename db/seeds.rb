@@ -308,4 +308,7 @@ soccer_positions = [
 ]
 create_sport_positions("Soccer", soccer_positions)
 
+puts "Creating Spectrums..."
+require_relative 'seeds/spectrums.rb'
+
 puts "\n===== Database Seeding Complete! ====="

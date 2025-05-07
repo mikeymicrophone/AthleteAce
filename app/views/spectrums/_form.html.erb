@@ -1,0 +1,40 @@
+<%= form_with(model: spectrum, class: "contents") do |form| %>
+  <% if spectrum.errors.any? %>
+    <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-md mt-3 mb-5">
+      <h2><%= pluralize(spectrum.errors.count, "error") %> prohibited this spectrum from being saved:</h2>
+
+      <ul class="list-disc ml-6">
+        <% spectrum.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="my-5">
+    <%= form.label :name %>
+    <%= form.text_field :name, class: "block shadow-sm rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full" %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :description %>
+    <%= form.text_area :description, rows: 4, class: "block shadow-sm rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full" %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :low_label, "Label for Low Values" %>
+    <%= form.text_field :low_label, class: "block shadow-sm rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full" %>
+    <p class="text-sm text-gray-500 mt-1">This label describes the negative end of the spectrum (-10,000)</p>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :high_label, "Label for High Values" %>
+    <%= form.text_field :high_label, class: "block shadow-sm rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full" %>
+    <p class="text-sm text-gray-500 mt-1">This label describes the positive end of the spectrum (+10,000)</p>
+  </div>
+
+  <div class="inline">
+    <%= form.submit class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
+    <%= link_to "Cancel", spectrum.persisted? ? spectrum_path(spectrum) : spectrums_path, class: "ml-2 rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-200 inline-block font-medium" %>
+  </div>
+<% end %>

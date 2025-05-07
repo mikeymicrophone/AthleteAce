@@ -2,11 +2,47 @@ class Team < ApplicationRecord
   belongs_to :league
   belongs_to :stadium, optional: true
   has_many :players
+  has_many :ratings, as: :target, dependent: :destroy
   delegate :sport, to: :league
 
   delegate :city, :state, :country, to: :stadium
 
   def name
     "#{territory} #{mascot}"
+  end
+  
+  # Rating methods
+  
+  # Get all ratings for this team
+  # @return [ActiveRecord::Relation] All ratings for this team
+  def all_ratings
+    ratings
+  end
+  
+  # Get ratings for this team on a specific spectrum
+  # @param spectrum [Spectrum] The spectrum to get ratings for
+  # @return [ActiveRecord::Relation] Ratings for this team on the spectrum
+  def ratings_on(spectrum)
+    ratings.where(spectrum: spectrum)
+  end
+  
+  # Get the average rating value for this team on a spectrum
+  # @param spectrum [Spectrum] The spectrum to get the average for
+  # @return [Float, nil] The average rating or nil if no ratings
+  def average_rating_on(spectrum)
+    ratings = ratings_on(spectrum)
+    return nil if ratings.empty?
+    
+    ratings.average(:value)&.to_f
+  end
+  
+  # Get the normalized average rating (0-1) for this team on a spectrum
+  # @param spectrum [Spectrum] The spectrum to get the average for
+  # @return [Float, nil] The normalized average rating or nil if no ratings
+  def normalized_average_rating_on(spectrum)
+    avg = average_rating_on(spectrum)
+    return nil if avg.nil?
+    
+    (avg + 10_000) / 20_000
   end
 end
