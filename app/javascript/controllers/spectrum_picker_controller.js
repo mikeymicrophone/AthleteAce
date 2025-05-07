@@ -2,177 +2,104 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="spectrum-picker"
 export default class extends Controller {
-  static targets = ["dropdown", "buttonText", "multiToggle", "option"]
-  static values = { 
-    selectedSpectrums: Array,
-    multiMode: Boolean,
-    currentSpectrum: Number
+  static targets = [
+    "form",
+    "summaryDisplay",
+    "toggleIcon",
+    "expandableContent",
+    "multiSelectToggle",
+    "checkboxContainer", // For the div holding all checkboxes
+    "spectrumCheckbox"   // For individual spectrum checkboxes
+  ]
+
+  static values = {
+    // We might pass initial selected IDs or all spectrums as JSON if needed later
+    // For now, ERB handles initial state of checkboxes
   }
 
   connect() {
-    this.multiModeValue = false
-    
-    // Initialize with default spectrum if provided
-    if (this.hasCurrentSpectrumValue) {
-      this.selectedSpectrumsValue = [this.currentSpectrumValue]
-      
-      // Update the button text with the default spectrum
-      this.updateButtonText()
-      
-      // Update the current spectrum display in the UI
-      this.updateCurrentSpectrumDisplay()
-      
-      // Mark the default spectrum as selected in the dropdown
-      setTimeout(() => {
-        this.updateOptionDisplay()
-      }, 100)
-      
-      // Broadcast the selected spectrum to all rating sliders
-      setTimeout(() => {
-        this.broadcastSelectedSpectrums()
-      }, 200)
+    this.isExpanded = false;
+    this.updateSummaryDisplay();
+    // Ensure multi-select toggle reflects current selection state accurately
+    this.updateMultiSelectToggleState();
+  }
+
+  toggleExpand() {
+    this.isExpanded = !this.isExpanded;
+    this.expandableContentTarget.classList.toggle("hidden", !this.isExpanded);
+    this.toggleIconTarget.classList.toggle("rotate-180", this.isExpanded);
+  }
+
+  updateSummaryDisplay() {
+    const checkedCheckboxes = this.spectrumCheckboxTargets.filter(cb => cb.checked);
+    const selectedNames = checkedCheckboxes.map(cb => {
+      const label = cb.closest('label').querySelector('span');
+      return label ? label.textContent.trim() : 'Unknown';
+    });
+
+    if (selectedNames.length > 0) {
+      this.summaryDisplayTarget.textContent = `Spectrums: ${selectedNames.join(', ')}`;
     } else {
-      this.selectedSpectrumsValue = []
+      this.summaryDisplayTarget.textContent = "Spectrums: None";
     }
-    
-    // Close dropdown when clicking outside
-    document.addEventListener('click', this.handleOutsideClick.bind(this))
-  }
-  
-  disconnect() {
-    document.removeEventListener('click', this.handleOutsideClick.bind(this))
-  }
-  
-  // Handle clicks outside the dropdown to close it
-  handleOutsideClick(event) {
-    if (this.element.contains(event.target)) return
-    this.closeDropdown()
-  }
-  
-  // Toggle the dropdown visibility
-  togglePicker(event) {
-    event.stopPropagation()
-    this.dropdownTarget.classList.toggle('hidden')
-  }
-  
-  // Close the dropdown
-  closeDropdown() {
-    this.dropdownTarget.classList.add('hidden')
-  }
-  
-  // Toggle between single and multi-spectrum mode
-  toggleMultiMode() {
-    this.multiModeValue = !this.multiModeValue
-    
-    // Clear selected spectrums if switching to single mode and multiple are selected
-    if (!this.multiModeValue && this.selectedSpectrumsValue.length > 1) {
-      this.selectedSpectrumsValue = this.selectedSpectrumsValue.slice(0, 1)
+    // Truncate if too long (optional, can be done with CSS too)
+    if (selectedNames.join(', ').length > 25) { // Adjust character limit as needed
+        this.summaryDisplayTarget.textContent = `Spectrums: ${selectedNames.length} selected`;
     }
-    
-    this.updateOptionDisplay()
   }
   
-  // Select a spectrum from the picker
-  selectSpectrum(event) {
-    const spectrumId = parseInt(event.currentTarget.dataset.spectrumId)
-    
-    if (this.multiModeValue) {
-      // Multi-mode: toggle the spectrum in the array
-      const index = this.selectedSpectrumsValue.indexOf(spectrumId)
-      
-      if (index === -1 && this.selectedSpectrumsValue.length < 4) {
-        // Add spectrum if not already selected and under the limit
-        this.selectedSpectrumsValue = [...this.selectedSpectrumsValue, spectrumId]
-      } else if (index !== -1) {
-        // Remove spectrum if already selected
-        this.selectedSpectrumsValue = [
-          ...this.selectedSpectrumsValue.slice(0, index),
-          ...this.selectedSpectrumsValue.slice(index + 1)
-        ]
-      }
-    } else {
-      // Single mode: replace the current selection
-      this.selectedSpectrumsValue = [spectrumId]
+  updateMultiSelectToggleState() {
+    const checkedCount = this.spectrumCheckboxTargets.filter(cb => cb.checked).length;
+    // If more than one is checked, or if none are checked but multi-select was intended (e.g. from previous state), keep it checked.
+    // The ERB handles the initial 'checked' state of the multi-select toggle based on selected_spectrum_ids.count.
+    // This JS primarily ensures consistency if we manipulate checkboxes client-side before form submission.
+    if (this.hasMultiSelectToggleTarget) {
+        // this.multiSelectToggleTarget.checked should already be set by ERB based on selected_spectrum_ids
+        // This is more for future dynamic client-side updates if needed
     }
-    
-    this.updateOptionDisplay()
   }
-  
-  // Clear all selected spectrums
-  clearSelection() {
-    this.selectedSpectrumsValue = []
-    this.updateOptionDisplay()
-  }
-  
-  // Apply the selection and close the dropdown
-  applySelection() {
-    this.closeDropdown()
-    this.updateButtonText()
-    this.updateCurrentSpectrumDisplay()
-    
-    // Broadcast the selected spectrums to all rating sliders
-    this.broadcastSelectedSpectrums()
-  }
-  
-  // Update the current spectrum display in the UI
-  updateCurrentSpectrumDisplay() {
-    if (this.selectedSpectrumsValue.length > 0) {
-      const currentSpectrumId = this.selectedSpectrumsValue[0]
-      const spectrumName = this.getSpectrumNameById(currentSpectrumId)
-      
-      // Update the current spectrum display if it exists
-      const currentSpectrumElement = document.getElementById('current-spectrum')
-      if (currentSpectrumElement) {
-        currentSpectrumElement.textContent = spectrumName
+
+  handleMultiSelectToggle(event) {
+    const isMultiSelectEnabled = event.target.checked;
+    if (!isMultiSelectEnabled) {
+      // If multi-select is disabled, ensure only one (or zero) checkbox is selected.
+      // Keep the last interacted one or the first checked one.
+      const checkedCheckboxes = this.spectrumCheckboxTargets.filter(cb => cb.checked);
+      if (checkedCheckboxes.length > 1) {
+        // Uncheck all but the first one found (or based on a specific logic, e.g. last clicked prior to disabling)
+        // For simplicity, let's keep the first one in the DOM order that's checked.
+        const firstChecked = checkedCheckboxes[0];
+        checkedCheckboxes.forEach(cb => {
+          if (cb !== firstChecked) {
+            cb.checked = false;
+          }
+        });
       }
     }
+    this.updateSummaryDisplay();
   }
-  
-  // Update the display of options based on selection
-  updateOptionDisplay() {
-    if (this.hasOptionTargets) {
-      this.optionTargets.forEach(option => {
-        const spectrumId = parseInt(option.dataset.spectrumId)
-        const selected = this.selectedSpectrumsValue.includes(spectrumId)
-        
-        option.classList.toggle('bg-blue-100', selected)
-        option.classList.toggle('font-semibold', selected)
-      })
-    }
-    
-    this.updateButtonText()
-  }
-  
-  // Update the button text based on selection
-  updateButtonText() {
-    if (this.hasButtonTextTarget) {
-      if (this.selectedSpectrumsValue.length === 0) {
-        this.buttonTextTarget.textContent = "Select spectrums"
-      } else if (this.selectedSpectrumsValue.length === 1) {
-        const spectrumName = this.getSpectrumNameById(this.selectedSpectrumsValue[0])
-        this.buttonTextTarget.textContent = spectrumName
-      } else {
-        this.buttonTextTarget.textContent = `${this.selectedSpectrumsValue.length} spectrums selected`
+
+  handleCheckboxChange(event) {
+    if (this.hasMultiSelectToggleTarget && !this.multiSelectToggleTarget.checked) {
+      // Single-select mode: uncheck others if this one is checked
+      if (event.target.checked) {
+        this.spectrumCheckboxTargets.forEach(cb => {
+          if (cb !== event.target) {
+            cb.checked = false;
+          }
+        });
       }
     }
+    this.updateSummaryDisplay();
+  }
+
+  submitForm(event) {
+    event.preventDefault(); // Prevent default if called from an explicit button click within the form
+    this.formTarget.requestSubmit();
   }
   
-  // Helper to get spectrum name by ID
-  getSpectrumNameById(id) {
-    const spectrumElement = document.querySelector(`[data-spectrum-id="${id}"]`)
-    return spectrumElement ? spectrumElement.textContent.trim() : `Spectrum ${id}`
-  }
-  
-  // Broadcast the selected spectrums to all rating sliders
-  broadcastSelectedSpectrums() {
-    const event = new CustomEvent('spectrum-picker:selection-changed', {
-      detail: {
-        selectedSpectrums: this.selectedSpectrumsValue,
-        multiMode: this.multiModeValue
-      },
-      bubbles: true
-    })
-    
-    this.element.dispatchEvent(event)
+  // Helper to get all spectrum IDs that are currently checked
+  getCheckedSpectrumIds() {
+    return this.spectrumCheckboxTargets.filter(cb => cb.checked).map(cb => cb.value);
   }
 }
