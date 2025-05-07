@@ -21,14 +21,25 @@
   <% @teams.each do |team| %>
     <%= tag.div(id: dom_id(team), class: [index_record_base_classes, team_index_record_classes, "p-4 rounded-lg shadow-sm"].join(' ')) do %>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-        <div class="team-info md:col-span-1 flex items-center gap-4">
-          <%= image_tag team.logo_url, class: "h-12 w-12 object-contain rounded bg-white border border-gray-200 shadow" if team.logo_url.present? %>
+        <div class="team-info md:col-span-1">
           <div>
-            <div class="text-xl font-semibold text-gray-900"><%= link_to_name team %></div>
+            <div class="text-xl font-semibold text-gray-900">
+              <%= link_to team do %>
+                <%= display_name_with_lazy_logo(team) %>
+              <% end %>
+            </div>
             <div class="text-sm text-gray-500 mt-1">
-              <span><%= link_to_name team.stadium %></span>
+              <span>
+                <%= link_to team.stadium do %>
+                  <%= display_name_with_lazy_logo(team.stadium) %>
+                <% end %>
+              </span>
               <span class="mx-1">&bull;</span>
-              <span><%= link_to_name team.league %></span>
+              <span>
+                <%= link_to team.league do %>
+                  <%= display_name_with_lazy_logo(team.league) %>
+                <% end %>
+              </span>
             </div>
           </div>
         </div>
