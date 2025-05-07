@@ -9,7 +9,8 @@ sports_file = File.read(Rails.root.join('db/seeds/athlete_ace_data/sports/sports
 sports = JSON.parse(sports_file)
 
 sports.each do |sport_name|
-  Sport.find_or_create_by!(name: sport_name)
+  sport = Sport.find_or_initialize_by(name: sport_name)
+  sport.save!
   puts "Created sport: #{sport_name}"
 end
 
@@ -22,7 +23,8 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/locations/countries/*.json')
   countries_file = File.read(file)
   countries = JSON.parse(countries_file)
   countries.each do |country|
-    Country.find_or_create_by!(name: country["name"])
+    country_record = Country.find_or_initialize_by(name: country["name"])
+    country_record.save!
     puts "Created country: #{country['name']}"
   end
 end
@@ -34,11 +36,12 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/locations/states/*.json')).e
   states = JSON.parse(states_file)
   country = Country.find_by(name: states["country_name"])
   states["states"].each do |state|
-    State.find_or_create_by!(
+    state_record = State.find_or_initialize_by(
       name: state["name"],
-      abbreviation: state["abbreviation"],
-      country: country
+      abbreviation: state["abbreviation"]
     )
+    state_record.country = country
+    state_record.save!
     puts "Created state: #{state['name']}"
   end
 end
@@ -55,10 +58,11 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/locations/cities/*.json')).e
     state = State.find_by(abbreviation: city["state"], country: country)
     
     if state
-      City.find_or_create_by!(
-        name: city["name"],
-        state: state
+      city_record = City.find_or_initialize_by(
+        name: city["name"]
       )
+      city_record.state = state
+      city_record.save!
       puts "Created city: #{city['name']}, #{state.abbreviation}"
     else
       puts "Warning: Could not find state with abbreviation #{city['state']} in #{cities['country_name']}"
@@ -91,13 +95,15 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/locations/stadiums/*.json'))
     
     if city
       # Create the stadium
-      stadium_record = Stadium.find_or_create_by!(name: stadium["name"]) do |s|
-        s.city = city
-        s.capacity = stadium["capacity"] if stadium["capacity"].present?
-        s.opened_year = stadium["opened_year"] if stadium["opened_year"].present?
-        s.address = stadium["address"] if stadium["address"].present?
-        s.url = stadium["url"] if stadium["url"].present?
-      end
+      stadium_record = Stadium.find_or_initialize_by(name: stadium["name"])
+      stadium_record.assign_attributes(
+        city: city,
+        capacity: stadium["capacity"],
+        opened_year: stadium["opened_year"],
+        address: stadium["address"],
+        url: stadium["url"]
+      )
+      stadium_record.save!
       
       puts "Created stadium: #{stadium['name']} in #{city.name}, #{city.state.abbreviation}"
     else
@@ -113,8 +119,10 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/*/leagues.json')).eac
   leagues = JSON.parse(leagues_file)
   sport = Sport.find_by(name: leagues["sport_name"])
   leagues["leagues"].each do |league|
-    League.find_or_create_by!(
-      name: league["name"],
+    league_record = League.find_or_initialize_by(
+      name: league["name"]
+    )
+    league_record.assign_attributes(
       abbreviation: league["abbreviation"],
       sport: sport,
       url: league["url"],
@@ -122,6 +130,7 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/*/leagues.json')).eac
       official_rules_url: league["official_rules_url"],
       logo_url: league["logo_url"]
     )
+    league_record.save!
     puts "Created league: #{league['name']}"
   end
 end
@@ -134,18 +143,22 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/**/teams.json')).each
   league = League.find_by(name: teams["league_name"])
   teams["teams"].each do |team|
     stadium = Stadium.find_by(name: team["stadium_name"])
-    Team.find_or_create_by!(
+    
+    # Remove keys that aren't attributes but references to other objects
+    team_attributes = team.except("stadium_name")
+    
+    # Find or initialize the team
+    team_record = Team.find_or_initialize_by(
       mascot: team["mascot"],
-      territory: team["territory"],
-      abbreviation: team["abbreviation"],
-      league: league,
-      stadium: stadium,
-      founded_year: team["founded_year"],
-      url: team["url"],
-      logo_url: team["logo_url"],
-      primary_color: team["primary_color"],
-      secondary_color: team["secondary_color"]
+      territory: team["territory"]
     )
+    
+    # Assign all attributes from JSON
+    team_record.assign_attributes(team_attributes)
+    team_record.league = league
+    team_record.stadium = stadium
+    team_record.save!
+    
     puts "Created team: #{team['territory']} #{team['mascot']}"
   end
 end
@@ -160,24 +173,26 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/**/players/*.json')).
   next unless team # Skip if team not found
   
   players["players"].each do |player|
-    player_record = Player.find_or_create_by!(
+    # Find or initialize the player
+    player_record = Player.find_or_initialize_by(
       first_name: player["first_name"],
       last_name: player["last_name"],
       team: team
     )
     
-    # Update additional player attributes if provided
-    player_attrs = {}
-    player_attrs[:current_position] = player["current_position"] if player["current_position"].present?
-    player_attrs[:birthdate] = player["birthdate"] if player["birthdate"].present?
-    player_attrs[:debut_year] = player["debut_year"] if player["debut_year"].present?
-    player_attrs[:draft_year] = player["draft_year"] if player["draft_year"].present?
-    player_attrs[:active] = player["active"] if player.has_key?("active")
-    player_attrs[:nicknames] = player["nicknames"] if player["nicknames"].present?
-    player_attrs[:bio] = player["bio"] if player["bio"].present?
-    player_attrs[:photo_urls] = player["photo_urls"] if player["photo_urls"].present?
+    # Assign all attributes from JSON
+    player_record.assign_attributes(
+      current_position: player["current_position"],
+      birthdate: player["birthdate"],
+      debut_year: player["debut_year"],
+      draft_year: player["draft_year"],
+      active: player["active"],
+      nicknames: player["nicknames"],
+      bio: player["bio"],
+      photo_urls: player["photo_urls"]
+    )
     
-    player_record.update(player_attrs) if player_attrs.present?
+    player_record.save!
     puts "Created/updated player: #{player['first_name']} #{player['last_name']}"
   end
 end
@@ -186,15 +201,23 @@ end
 puts "\n----- Creating Sport Positions -----"
 
 # Define position creation helper method
-def create_sport_positions(sport_name, positions_data)
+def create_sport_positions(sport_name)
   sport = Sport.find_by(name: sport_name)
   return unless sport
   
+  # Load positions from JSON file
+  positions_file = Rails.root.join('db', 'seeds', 'athlete_ace_data', 'sports', 'positions', "#{sport_name.downcase}.json")
+  return unless File.exist?(positions_file)
+  
+  positions_data = JSON.parse(File.read(positions_file))
+  
   positions_data.each do |pos_data|
-    position = Position.find_or_create_by!(name: pos_data[:name], sport: sport) do |p|
-      p.abbreviation = pos_data[:abbreviation] if pos_data[:abbreviation].present?
-      p.description = pos_data[:description] if pos_data[:description].present?
-    end
+    position = Position.find_or_initialize_by(name: pos_data['name'], sport: sport)
+    position.assign_attributes(
+      abbreviation: pos_data['abbreviation'],
+      description: pos_data['description']
+    )
+    position.save!
     puts "Created position: #{position.name} (#{position.abbreviation}) for #{sport_name}"
   end
   
@@ -220,95 +243,33 @@ def create_sport_positions(sport_name, positions_data)
     
     # Create role with this position as primary
     if position
-      player.roles.find_or_create_by(position: position) do |role|
-        role.primary = true
-      end
+      role = player.roles.find_or_initialize_by(position: position)
+      role.assign_attributes(primary: true)
+      role.save!
       puts "Assigned #{position.name} to #{player.name}"
     end
   end
 end
 
-# Basketball positions
-puts "Creating Basketball positions..."
-basketball_positions = [
-  { name: "Point Guard", abbreviation: "PG", description: "The point guard is typically the team's best ball handler and passer, responsible for organizing the team's offense and setting up scoring opportunities for teammates." },
-  { name: "Shooting Guard", abbreviation: "SG", description: "The shooting guard is usually a good perimeter shooter and scorer, often serving as a secondary ball handler and perimeter defender." },
-  { name: "Small Forward", abbreviation: "SF", description: "The small forward is typically a versatile player who can score from inside and outside, rebound, and defend multiple positions." },
-  { name: "Power Forward", abbreviation: "PF", description: "The power forward typically plays near the basket, providing rebounding, interior defense, and scoring in the post, though modern power forwards often have perimeter skills as well." },
-  { name: "Center", abbreviation: "C", description: "The center is usually the tallest player on the team, providing rebounding, shot blocking, and interior scoring." },
-  { name: "Guard-Forward", abbreviation: "G-F", description: "A versatile player who can play both guard and forward positions, typically with good perimeter skills and size." },
-  { name: "Forward-Center", abbreviation: "F-C", description: "A player who can play both forward and center positions, typically with good size and a mix of perimeter and post skills." },
-  { name: "Forward", abbreviation: "F", description: "A general position for players who can play either small forward or power forward roles." },
-  { name: "Guard", abbreviation: "G", description: "A general position for players who can play either point guard or shooting guard roles." }
-]
-create_sport_positions("Basketball", basketball_positions)
+# Step 7: Create sport positions
+puts "\n----- Seeding Sport Positions -----"
 
-# Baseball positions
-puts "Creating Baseball positions..."
-baseball_positions = [
-  { name: "Pitcher", abbreviation: "P", description: "The player who throws the ball to the batter from the pitcher's mound." },
-  { name: "Catcher", abbreviation: "C", description: "Positioned behind home plate, receives pitches and calls the game." },
-  { name: "First Baseman", abbreviation: "1B", description: "Defends first base and receives throws from infielders." },
-  { name: "Second Baseman", abbreviation: "2B", description: "Defends second base and turns double plays." },
-  { name: "Third Baseman", abbreviation: "3B", description: "Defends third base, requires quick reflexes and a strong arm." },
-  { name: "Shortstop", abbreviation: "SS", description: "Positioned between second and third base, usually the most athletic infielder." },
-  { name: "Left Fielder", abbreviation: "LF", description: "Defends the left portion of the outfield." },
-  { name: "Center Fielder", abbreviation: "CF", description: "Covers the middle portion of the outfield, usually the fastest outfielder." },
-  { name: "Right Fielder", abbreviation: "RF", description: "Defends the right portion of the outfield, typically with the strongest arm." },
-  { name: "Designated Hitter", abbreviation: "DH", description: "In American League games, bats in place of the pitcher." }
-]
-create_sport_positions("Baseball", baseball_positions)
-
-# Football positions
-puts "Creating Football positions..."
-football_positions = [
-  { name: "Quarterback", abbreviation: "QB", description: "The leader of the offense who receives the snap and either passes, hands off, or runs with the ball." },
-  { name: "Running Back", abbreviation: "RB", description: "Carries the ball on running plays and sometimes catches passes." },
-  { name: "Wide Receiver", abbreviation: "WR", description: "Lines up on the outside and runs routes to catch passes." },
-  { name: "Tight End", abbreviation: "TE", description: "A hybrid position that combines elements of an offensive lineman and a receiver." },
-  { name: "Offensive Tackle", abbreviation: "OT", description: "Offensive linemen positioned on the ends of the line who protect the quarterback." },
-  { name: "Offensive Guard", abbreviation: "OG", description: "Offensive linemen positioned between the center and tackles." },
-  { name: "Center", abbreviation: "C", description: "The offensive lineman who snaps the ball to the quarterback." },
-  { name: "Defensive End", abbreviation: "DE", description: "Defensive linemen positioned at the ends of the line who rush the passer." },
-  { name: "Defensive Tackle", abbreviation: "DT", description: "Interior defensive linemen who stop running plays and pressure the quarterback." },
-  { name: "Linebacker", abbreviation: "LB", description: "Second-level defenders who stop running plays, rush the passer, and cover receivers." },
-  { name: "Cornerback", abbreviation: "CB", description: "Defensive backs who primarily cover wide receivers." },
-  { name: "Safety", abbreviation: "S", description: "Defensive backs who line up deep in the secondary." },
-  { name: "Kicker", abbreviation: "K", description: "Specialist who handles kickoffs and field goal attempts." },
-  { name: "Punter", abbreviation: "P", description: "Specialist who punts the ball on fourth down." }
-]
-create_sport_positions("Football", football_positions)
-
-# Hockey positions
-puts "Creating Hockey positions..."
-hockey_positions = [
-  { name: "Center", abbreviation: "C", description: "The forward who plays in the middle of the ice, responsible for faceoffs and playmaking." },
-  { name: "Left Wing", abbreviation: "LW", description: "The forward who plays on the left side of the ice." },
-  { name: "Right Wing", abbreviation: "RW", description: "The forward who plays on the right side of the ice." },
-  { name: "Defenseman", abbreviation: "D", description: "Players who primarily focus on preventing the opposing team from scoring." },
-  { name: "Goaltender", abbreviation: "G", description: "The player responsible for directly preventing the opposing team from scoring." }
-]
-create_sport_positions("Hockey", hockey_positions)
-
-# Soccer positions
-puts "Creating Soccer positions..."
-soccer_positions = [
-  { name: "Goalkeeper", abbreviation: "GK", description: "The player who defends the team's goal, the only player allowed to use hands within their penalty area." },
-  { name: "Center Back", abbreviation: "CB", description: "Central defender whose primary responsibility is to prevent the opposition from scoring." },
-  { name: "Left Back", abbreviation: "LB", description: "Defender who plays on the left side of the defense." },
-  { name: "Right Back", abbreviation: "RB", description: "Defender who plays on the right side of the defense." },
-  { name: "Defensive Midfielder", abbreviation: "DM", description: "Midfielder who plays in front of the defense, focusing on breaking up opposition attacks." },
-  { name: "Central Midfielder", abbreviation: "CM", description: "Midfielder who plays centrally, balancing defensive and offensive responsibilities." },
-  { name: "Attacking Midfielder", abbreviation: "AM", description: "Midfielder who focuses primarily on creating scoring opportunities for forwards." },
-  { name: "Left Midfielder", abbreviation: "LM", description: "Midfielder who plays on the left side, providing width to the team's attack." },
-  { name: "Right Midfielder", abbreviation: "RM", description: "Midfielder who plays on the right side, providing width to the team's attack." },
-  { name: "Striker", abbreviation: "ST", description: "Forward whose main responsibility is scoring goals." },
-  { name: "Left Winger", abbreviation: "LW", description: "Attacking player who plays on the left wing, providing width to the attack." },
-  { name: "Right Winger", abbreviation: "RW", description: "Attacking player who plays on the right wing, providing width to the attack." }
-]
-create_sport_positions("Soccer", soccer_positions)
+# Iterate through all sports and create positions
+Sport.all.each do |sport|
+  puts "Creating #{sport.name} positions..."
+  create_sport_positions(sport.name)
+end
 
 puts "Creating Spectrums..."
-require_relative 'seeds/spectrums.rb'
+spectrum_data = JSON.parse(File.read(Rails.root.join('db', 'seeds', 'athlete_ace_data', 'ratings', 'spectrums.json')))
+
+spectrum_data.each do |attributes|
+  spectrum = Spectrum.find_or_initialize_by(name: attributes['name'])
+  spectrum.assign_attributes(attributes)
+  spectrum.save!
+  puts "  Created spectrum: #{spectrum.name}"
+end
+
+puts "Created #{Spectrum.count} spectrums"
 
 puts "\n===== Database Seeding Complete! ====="
