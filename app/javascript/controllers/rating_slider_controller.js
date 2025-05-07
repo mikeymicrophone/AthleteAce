@@ -36,12 +36,9 @@ export default class extends Controller {
   updateValue(event) {
     const slider = event.target;
     const spectrumId = slider.dataset.ratingSliderSpectrumIdParam;
-    console.log('[RatingSlider] updateValue triggered for slider:', slider);
-    console.log('[RatingSlider] Spectrum ID from dataset:', spectrumId);
     
     const valueDisplay = this.element.querySelector(`[data-rating-slider-target="value_${spectrumId}"]`);
-    console.log('[RatingSlider] Value display element found:', valueDisplay);
-
+    
     if (valueDisplay) {
       this.updateValueDisplay(slider.value, valueDisplay);
     } else {
@@ -62,11 +59,8 @@ export default class extends Controller {
     const slider = event.target;
     const ratingValue = slider.value;
     const spectrumId = slider.dataset.ratingSliderSpectrumIdParam;
-    console.log('[RatingSlider] submitRating triggered for slider:', slider);
-    console.log('[RatingSlider] Rating Value:', ratingValue, 'Spectrum ID:', spectrumId);
-
+    
     const statusDisplay = this.element.querySelector(`[data-rating-slider-target="status_${spectrumId}"]`);
-    console.log('[RatingSlider] Status display element found:', statusDisplay);
 
     if (!spectrumId) {
       console.error("[RatingSlider] Spectrum ID not found for this slider in submitRating.");
