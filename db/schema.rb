@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_07_030100) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_07_201045) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -59,6 +59,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_07_030100) do
     t.string "abbreviation"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "flag_url"
   end
 
   create_table "federations", force: :cascade do |t|
@@ -192,6 +193,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_07_030100) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "icon_url"
   end
 
   create_table "stadiums", force: :cascade do |t|
@@ -203,6 +205,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_07_030100) do
     t.string "address"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "logo_url"
     t.index ["city_id"], name: "index_stadiums_on_city_id"
   end
 
@@ -212,6 +215,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_07_030100) do
     t.bigint "country_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "flag_url"
     t.index ["country_id"], name: "index_states_on_country_id"
   end
 

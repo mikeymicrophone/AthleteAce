@@ -8,10 +8,11 @@ puts "\n----- Seeding Sports -----"
 sports_file = File.read(Rails.root.join('db/seeds/athlete_ace_data/sports/sports.json'))
 sports = JSON.parse(sports_file)
 
-sports.each do |sport_name|
-  sport = Sport.find_or_initialize_by(name: sport_name)
+sports.each do |sport_data|
+  sport = Sport.find_or_initialize_by(name: sport_data["name"])
+  sport.icon_url = sport_data["icon_url"]
   sport.save!
-  puts "Created sport: #{sport_name}"
+  puts "Created sport: #{sport_data['name']}"
 end
 
 # Step 2: Load location data
@@ -24,6 +25,7 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/locations/countries/*.json')
   countries = JSON.parse(countries_file)
   countries.each do |country|
     country_record = Country.find_or_initialize_by(name: country["name"])
+    country_record.flag_url = country["flag_url"] || ""
     country_record.save!
     puts "Created country: #{country['name']}"
   end
@@ -41,6 +43,7 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/locations/states/*.json')).e
       abbreviation: state["abbreviation"]
     )
     state_record.country = country
+    state_record.flag_url = state["flag_url"] || ""
     state_record.save!
     puts "Created state: #{state['name']}"
   end
@@ -101,7 +104,8 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/locations/stadiums/*.json'))
         capacity: stadium["capacity"],
         opened_year: stadium["opened_year"],
         address: stadium["address"],
-        url: stadium["url"]
+        url: stadium["url"],
+        logo_url: stadium["logo_url"] || ""
       )
       stadium_record.save!
       
