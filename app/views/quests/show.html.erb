@@ -1,11 +1,38 @@
-<% content_for :title, "Showing quest" %>
+<% content_for :title, @quest.name %>
 
-<div class="md:w-2/3 w-full">
+<div class="md:w-2/3 w-full quest-container">
   <% if notice.present? %>
     <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
   <% end %>
+  
+  <% if @random_mode %>
+    <div id="quest_discovery" class="flex flex-col sm:flex-row justify-between items-center mb-6 bg-indigo-50 p-4 rounded-lg shadow-sm">
+      <div class="text-indigo-800 mb-3 sm:mb-0">
+        <h2 class="font-bold text-xl">Quest Discovery</h2>
+        <p>Explore this quest or find another one</p>
+      </div>
+      <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
+        <%= begin_quest_button(@quest, class: 'w-full sm:w-auto py-2.5') %>
+        <%= link_to random_quests_path, class: "rounded-md px-3.5 py-2.5 bg-green-600 hover:bg-green-500 text-white font-medium w-full sm:w-auto text-center" do %>
+          <span class="flex items-center justify-center">
+            <i class="fa-solid fa-dice mr-2"></i>
+            <span>Next Quest</span>
+          </span>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
 
-  <h1 class="font-bold text-4xl">Showing quest</h1>
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="font-bold text-4xl"><%= @quest.name %></h1>
+    <div>
+      <%= begin_quest_button(@quest) %>
+    </div>
+  </div>
+  
+  <div class="mb-6 flex items-center space-x-4">
+    <%= quest_participants_badge(@quest) %>
+  </div>
 
   <%= render @quest %>
 

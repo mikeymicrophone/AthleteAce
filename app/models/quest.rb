@@ -5,7 +5,6 @@ class Quest < ApplicationRecord
   has_many :aces, through: :goals
   
   validates :name, presence: true
-  validates :description, presence: true
   
   # Add an achievement to this quest
   def add_achievement(achievement, position: nil, required: true)

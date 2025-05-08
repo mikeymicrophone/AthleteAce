@@ -16,6 +16,9 @@ Rails.application.routes.draw do
   resources :quests do
     resources :highlights
     resources :goals, only: [:create]
+    collection do
+      get :random
+    end
   end
   
   resources :highlights, only: [:new, :create]
