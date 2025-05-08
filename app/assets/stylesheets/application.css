@@ -12,7 +12,9 @@
 /* Font Awesome is loaded via CDN in the application layout */
 
 body {
-  font-family: 'Cinzel', serif;
+  font-family: 'Lora', serif;
+  line-height: 1.6;
+  color: #333;
 }
 
 /* Add some spacing to accommodate the fixed navigation */

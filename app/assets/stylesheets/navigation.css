@@ -2,6 +2,8 @@
 .navigation-container {
   font-family: 'Cinzel', serif;
   position: relative;
+  background: linear-gradient(to bottom, #3a3a3a, #1a1a1a);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .nav-menu {
@@ -16,7 +18,14 @@
   font-weight: 600;
   font-size: 1.1rem;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+}
+
+.nav-group-title:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
 }
 
 .nav-dropdown {
@@ -26,14 +35,15 @@
   background-color: white;
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
   padding: 0.75rem;
-  min-width: 200px;
+  min-width: 220px;
   z-index: 50;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
-  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+  margin-top: 0.5rem;
 }
 
 .nav-group:hover .nav-dropdown,
@@ -46,30 +56,46 @@
 .nav-dropdown-item {
   display: flex;
   align-items: center;
-  padding: 0.5rem 0.75rem;
+  padding: 0.6rem 0.85rem;
   border-radius: 0.25rem;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
   color: #4b5563;
   text-decoration: none;
+  margin-bottom: 0.2rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
 }
 
 .nav-dropdown-item:hover {
   background-color: #f3f4f6;
   color: #f97316;
+  transform: translateX(2px);
 }
 
 .nav-dropdown-item i {
   margin-right: 0.75rem;
   width: 1.25rem;
   text-align: center;
+  color: #6b7280;
+  transition: color 0.2s ease;
+}
+
+.nav-dropdown-item:hover i {
+  color: #f97316;
 }
 
 .nav-dropdown-item.active {
   background-color: #f97316;
+  color: white;
+  box-shadow: 0 2px 5px rgba(249, 115, 22, 0.3);
+}
+
+.nav-dropdown-item.active i {
   color: white;
 }
 
 .nav-dropdown-item.active:hover {
   background-color: #ea580c;
   color: white;
+  transform: translateX(2px);
 }
