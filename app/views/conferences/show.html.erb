@@ -1,0 +1,67 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, @conference.name %>
+
+<div id="<%= dom_id(@conference) %>" class="show-container">
+  <h1>
+    <%= display_name_with_lazy_logo(@conference) %>
+  </h1>
+
+  <div class="details">
+    <div class="detail-item">
+      <strong>League:</strong>
+      <%= link_to @conference.league.name, @conference.league %>
+    </div>
+
+    <div class="detail-item">
+      <strong>Abbreviation:</strong>
+      <%= @conference.abbreviation %>
+    </div>
+  </div>
+
+  <div class="divisions-section">
+    <h2>Divisions</h2>
+    <% if @divisions.any? %>
+      <div id="divisions">
+        <% @divisions.each do |division| %>
+          <%= tag.div(id: dom_id(division), class: [index_record_base_classes, division_index_record_classes].join(' ')) do %>
+            <%= link_to division do %>
+              <%= display_name_with_lazy_logo(division) %>
+            <% end %>
+            <%= link_to pluralize(division.teams.count, "team"), [division, :teams] %>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <p>No divisions found.</p>
+    <% end %>
+    
+    <div class="actions">
+      <%= link_to "Add division", new_division_path(conference_id: @conference.id), class: "button" %>
+    </div>
+  </div>
+
+  <div class="teams-section">
+    <h2>Teams</h2>
+    <% if @teams.any? %>
+      <div id="teams">
+        <% @teams.each do |team| %>
+          <%= tag.div(id: dom_id(team), class: [index_record_base_classes, team_index_record_classes].join(' ')) do %>
+            <%= link_to team do %>
+              <%= display_name_with_lazy_logo(team) %>
+            <% end %>
+            <%= link_to team.division.name, team.division if team.division %>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <p>No teams found.</p>
+    <% end %>
+  </div>
+
+  <div class="actions">
+    <%= link_to "Edit", edit_conference_path(@conference), class: "button" %>
+    <%= link_to "Back", conferences_path, class: "button" %>
+    <%= button_to "Delete", @conference, method: :delete, class: "button delete", data: { confirm: "Are you sure?" } %>
+  </div>
+</div>

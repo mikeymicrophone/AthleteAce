@@ -3,8 +3,12 @@ class Team < ApplicationRecord
   belongs_to :stadium, optional: true
   has_many :players
   has_many :ratings, as: :target, dependent: :destroy
+  has_many :memberships, dependent: :destroy
+  has_one :active_membership, -> { where(active: true) }, class_name: 'Membership'
+  has_one :division, through: :active_membership
+  has_one :conference, through: :division
+  
   delegate :sport, to: :league
-
   delegate :city, :state, :country, to: :stadium
 
   def name

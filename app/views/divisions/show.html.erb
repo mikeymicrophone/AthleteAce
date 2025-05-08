@@ -1,0 +1,55 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, @division.name %>
+
+<div id="<%= dom_id(@division) %>" class="show-container">
+  <h1>
+    <%= display_name_with_lazy_logo(@division) %>
+  </h1>
+
+  <div class="details">
+    <div class="detail-item">
+      <strong>Conference:</strong>
+      <%= link_to @division.conference.name, @division.conference %>
+    </div>
+
+    <div class="detail-item">
+      <strong>League:</strong>
+      <%= link_to @division.conference.league.name, @division.conference.league %>
+    </div>
+
+    <div class="detail-item">
+      <strong>Abbreviation:</strong>
+      <%= @division.abbreviation %>
+    </div>
+  </div>
+
+  <div class="teams-section">
+    <h2>Teams</h2>
+    <% if @teams.any? %>
+      <div id="teams">
+        <% @teams.each do |team| %>
+          <%= tag.div(id: dom_id(team), class: [index_record_base_classes, team_index_record_classes].join(' ')) do %>
+            <%= link_to team do %>
+              <%= display_name_with_lazy_logo(team) %>
+            <% end %>
+            <%= link_to team.stadium.name, team.stadium if team.stadium %>
+            <%= link_to pluralize(team.players.count, "player"), [team, :players] %>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <p>No teams found in this division.</p>
+    <% end %>
+    
+    <div class="actions">
+      <%= link_to "Add team to division", new_membership_path(division_id: @division.id), class: "button" %>
+    </div>
+  </div>
+
+  <div class="actions">
+    <%= link_to "Edit", edit_division_path(@division), class: "button" %>
+    <%= link_to "Back", divisions_path, class: "button" %>
+    <%= button_to "Delete", @division, method: :delete, class: "button delete", data: { confirm: "Are you sure?" } %>
+  </div>
+</div>

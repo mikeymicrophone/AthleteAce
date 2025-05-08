@@ -31,9 +31,22 @@ Rails.application.routes.draw do
     resources :ratings, only: [:new, :create]
   end
   
+  # League organization
+  resources :conferences do
+    resources :divisions, shallow: true
+    resources :teams, only: [:index]
+  end
+  
+  resources :divisions do
+    resources :teams, shallow: true
+  end
+  
+  resources :memberships
+  
   resources :teams do
     resources :players, shallow: true
     resources :ratings, only: [:new, :create]
+    resources :memberships, only: [:new, :create]
   end
   resources :countries do
     resources :leagues, shallow: true

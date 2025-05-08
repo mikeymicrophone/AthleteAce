@@ -1,0 +1,10 @@
+<% content_for :title, "Editing Membership" %>
+
+<h1>Editing Membership</h1>
+
+<%= render "form", membership: @membership %>
+
+<div class="actions">
+  <%= link_to "Show this membership", @membership, class: "button" %>
+  <%= link_to "Back to memberships", memberships_path, class: "button" %>
+</div>

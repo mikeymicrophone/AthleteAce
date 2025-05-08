@@ -1,0 +1,22 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Conferences" %>
+
+<h1>Conferences</h1>
+
+<div id="conferences">
+  <% @conferences.each do |conference| %>
+    <%= tag.div(id: dom_id(conference), class: [index_record_base_classes, conference_index_record_classes].join(' ')) do %>
+      <%= link_to conference do %>
+        <%= display_name_with_lazy_logo(conference) %>
+      <% end %>
+      <%= link_to conference.league.name, conference.league %>
+      <%= link_to pluralize(conference.divisions.count, "division"), [conference, :divisions] %>
+      <%= link_to pluralize(conference.teams.count, "team"), [conference, :teams] %>
+    <% end %>
+  <% end %>
+</div>
+
+<div class="actions">
+  <%= link_to "New conference", new_conference_path, class: "button" %>
+</div>

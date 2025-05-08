@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_07_201045) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_07_213500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -54,12 +54,32 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_07_201045) do
     t.index ["state_id"], name: "index_cities_on_state_id"
   end
 
+  create_table "conferences", force: :cascade do |t|
+    t.string "name"
+    t.string "abbreviation"
+    t.string "logo_url"
+    t.bigint "league_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["league_id"], name: "index_conferences_on_league_id"
+  end
+
   create_table "countries", force: :cascade do |t|
     t.string "name"
     t.string "abbreviation"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "flag_url"
+  end
+
+  create_table "divisions", force: :cascade do |t|
+    t.string "name"
+    t.string "abbreviation"
+    t.string "logo_url"
+    t.bigint "conference_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["conference_id"], name: "index_divisions_on_conference_id"
   end
 
   create_table "federations", force: :cascade do |t|
@@ -110,6 +130,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_07_201045) do
     t.bigint "jurisdiction_id"
     t.index ["jurisdiction_type", "jurisdiction_id"], name: "index_leagues_on_jurisdiction"
     t.index ["sport_id"], name: "index_leagues_on_sport_id"
+  end
+
+  create_table "memberships", force: :cascade do |t|
+    t.bigint "team_id", null: false
+    t.bigint "division_id", null: false
+    t.date "start_date"
+    t.date "end_date"
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["division_id"], name: "index_memberships_on_division_id"
+    t.index ["team_id"], name: "index_memberships_on_team_id"
   end
 
   create_table "players", force: :cascade do |t|
@@ -237,11 +269,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_07_201045) do
   end
 
   add_foreign_key "cities", "states"
+  add_foreign_key "conferences", "leagues"
+  add_foreign_key "divisions", "conferences"
   add_foreign_key "goals", "aces"
   add_foreign_key "goals", "quests"
   add_foreign_key "highlights", "achievements"
   add_foreign_key "highlights", "quests"
   add_foreign_key "leagues", "sports"
+  add_foreign_key "memberships", "divisions"
+  add_foreign_key "memberships", "teams"
   add_foreign_key "players", "cities", column: "birth_city_id"
   add_foreign_key "players", "countries", column: "birth_country_id"
   add_foreign_key "players", "teams"

@@ -1,0 +1,42 @@
+<%= form_with(model: membership) do |form| %>
+  <% if membership.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(membership.errors.count, "error") %> prohibited this membership from being saved:</h2>
+
+      <ul>
+        <% membership.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :team_id %>
+    <%= form.collection_select :team_id, @teams, :id, :name, { prompt: "Select a team" } %>
+  </div>
+
+  <div class="field">
+    <%= form.label :division_id %>
+    <%= form.collection_select :division_id, @divisions, :id, :display_name, { prompt: "Select a division" } %>
+  </div>
+
+  <div class="field">
+    <%= form.label :start_date %>
+    <%= form.date_field :start_date %>
+  </div>
+
+  <div class="field">
+    <%= form.label :end_date %>
+    <%= form.date_field :end_date %>
+  </div>
+
+  <div class="field">
+    <%= form.label :active %>
+    <%= form.check_box :active %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit class: "button" %>
+  </div>
+<% end %>

@@ -50,6 +50,18 @@ module ApplicationHelper
     'border-l-4 border-teal-400 hover:border-indigo-500'
   end
 
+  def conference_index_record_classes
+    'border-l-4 border-red-400 hover:border-indigo-500'
+  end
+
+  def division_index_record_classes
+    'border-l-4 border-indigo-400 hover:border-indigo-500'
+  end
+
+  def membership_index_record_classes
+    'border-l-4 border-cyan-400 hover:border-indigo-500'
+  end
+
   # Displays a record's name with a placeholder for a lazy-loaded logo.
   # The Stimulus 'lazy-logo_controller.js' will handle loading the actual image.
   #

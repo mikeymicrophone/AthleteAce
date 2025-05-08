@@ -1,0 +1,10 @@
+<% content_for :title, "Editing #{@division.name}" %>
+
+<h1>Editing Division</h1>
+
+<%= render "form", division: @division %>
+
+<div class="actions">
+  <%= link_to "Show this division", @division, class: "button" %>
+  <%= link_to "Back to divisions", divisions_path, class: "button" %>
+</div>
