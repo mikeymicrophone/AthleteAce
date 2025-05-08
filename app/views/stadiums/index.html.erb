@@ -11,8 +11,8 @@
         <%= display_name_with_lazy_logo(stadium) %>
       <% end %>
       <%= link_to_name stadium.city %>
-      <%= link_to_name stadium.state %>
-      <%= link_to_name stadium.country %>
+      <%= display_name_with_lazy_logo stadium.state, logo_attribute: :flag_url %>
+      <%= display_name_with_lazy_logo stadium.country, logo_attribute: :flag_url %>
       <%= link_to pluralize(stadium.teams.count, "team"), [stadium, :teams] %>
       <%= link_to pluralize(stadium.players.count, "player"), [stadium, :players] %>
     <% end %>
