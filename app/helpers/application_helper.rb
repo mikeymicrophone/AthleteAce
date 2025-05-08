@@ -95,6 +95,10 @@ module ApplicationHelper
       # Name (Stimulus target, though not strictly necessary if only displaying name)
       name_span = content_tag(:span, entity_name, data: { lazy_logo_target: "name" })
       
+      unless options[:link] == false
+        name_span = link_to name_span, record
+      end
+      
       logo_placeholder + name_span
     end
   rescue => e

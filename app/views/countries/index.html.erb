@@ -7,7 +7,7 @@
 <div id="countries">
   <% @countries.each do |country| %>
     <%= tag.div(id: dom_id(country), class: [index_record_base_classes, country_index_record_classes].join(' ')) do %>
-      <%= link_to_name country %>
+      <%= display_name_with_lazy_logo country, logo_attribute: :flag_url %>
       <%= link_to pluralize(country.leagues.count, "league"), [country, :leagues] %>
       <%= link_to pluralize(country.teams.count, "team"), [country, :teams] %>
       <%= link_to pluralize(country.players.count, "player"), [country, :players] %>

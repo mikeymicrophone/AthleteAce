@@ -7,9 +7,7 @@
     <div class="info-item"><%= link_to_name @player.team, class: 'fadeout-underline' %></div>
     <div class="section-title">Stadium</div>
     <div class="info-item">
-      <%= link_to @player.team.stadium, class: 'fadeout-underline' do %>
-        <%= display_name_with_lazy_logo(@player.team.stadium) %>
-      <% end %>
+      <%= display_name_with_lazy_logo(@player.team.stadium) %>
     </div>
     
     <% if @player.primary_position.present? %>
@@ -39,15 +37,11 @@
   <div class="card-section right-section">
     <div class="section-title">League</div>
     <div class="info-item">
-      <%= link_to @player.league, class: 'fadeout-underline' do %>
-        <%= display_name_with_lazy_logo(@player.league) %>
-      <% end %>
+      <%= display_name_with_lazy_logo(@player.league) %>
     </div>
     <div class="section-title">Sport</div>
     <div class="info-item">
-      <%= link_to @player.sport, class: 'fadeout-underline' do %>
-        <%= display_name_with_lazy_logo(@player.sport, logo_attribute: :icon_url) %>
-      <% end %>
+      <%= display_name_with_lazy_logo(@player.sport, logo_attribute: :icon_url) %>
     </div>
     
     <% if @player.secondary_positions.any? %>

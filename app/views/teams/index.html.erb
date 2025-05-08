@@ -24,21 +24,15 @@
         <div class="team-info md:col-span-1">
           <div>
             <div class="text-xl font-semibold text-gray-900">
-              <%= link_to team do %>
-                <%= display_name_with_lazy_logo(team) %>
-              <% end %>
+              <%= display_name_with_lazy_logo(team) %>
             </div>
             <div class="text-sm text-gray-500 mt-1">
               <span>
-                <%= link_to team.stadium do %>
-                  <%= display_name_with_lazy_logo(team.stadium) %>
-                <% end %>
+                <%= display_name_with_lazy_logo(team.stadium) %>
               </span>
               <span class="mx-1">&bull;</span>
               <span>
-                <%= link_to team.league do %>
-                  <%= display_name_with_lazy_logo(team.league) %>
-                <% end %>
+                <%= display_name_with_lazy_logo(team.league) %>
               </span>
             </div>
           </div>

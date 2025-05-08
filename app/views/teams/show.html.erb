@@ -12,9 +12,7 @@
   <div class="w-full md:w-auto text-right">
     <span class="text-lg text-gray-600 font-medium">Stadium:</span>
     <span class="text-xl font-semibold text-orange-700">
-      <%= link_to @team.stadium do %>
-        <%= display_name_with_lazy_logo(@team.stadium) %>
-      <% end %>
+      <%= display_name_with_lazy_logo(@team.stadium) %>
     </span>
   </div>
 </div>
