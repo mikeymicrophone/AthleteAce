@@ -1,25 +1,100 @@
-<nav class="bg-blue-600 text-white shadow-lg">
-  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between h-16">
-      <div class="flex items-center">
-        <a href="<%= root_path %>" class="flex-shrink-0 flex items-center">
-          <span class="text-xl font-bold tracking-tight">Athlete Ace</span>
-        </a>
-        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-          <%= link_to 'Sports', sports_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(sports_path)}" %>
-          <%= link_to 'Leagues', leagues_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(leagues_path)}" %>
-          <%= link_to 'Teams', teams_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(teams_path)}" %>
-          <%= link_to 'Players', players_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(players_path)}" %>
-          <%= link_to 'Stadiums', stadiums_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(stadiums_path)}" %>
-          <%= link_to 'Countries', countries_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(countries_path)}" %>
-          <%= link_to 'States', states_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(states_path)}" %>
-          <%= link_to 'Cities', cities_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(cities_path)}" %>
+<nav class="bg-gray-800 fixed w-full z-10 top-0 navigation-container">
+  <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+    <div class="relative flex items-center justify-between h-16">
+      <div class="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
+        <div class="flex-shrink-0 flex items-center">
+          <%= link_to root_path, class: "text-white text-xl font-bold" do %>
+            <i class="fa-solid fa-medal mr-2"></i> Athlete Ace
+          <% end %>
         </div>
-        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-          <%= link_to 'Quests', quests_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(quests_path)}" %>
-          <%= link_to 'Strength', strength_path, :class => "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium #{active_class(strength_path)}" %>
+        
+        <div class="hidden sm:ml-6 sm:flex sm:space-x-8 nav-menu">
+          <!-- Entities Group -->
+          <div class="nav-group" data-controller="dropdown">
+            <div class="inline-flex items-center px-3 pt-1 border-b-2 border-transparent text-white hover:text-orange-200 nav-group-title" data-action="click->dropdown#toggle">
+              <i class="fa-solid fa-trophy mr-2"></i> Sports & Teams
+              <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
+            </div>
+            <div class="nav-dropdown" data-dropdown-target="menu">
+              <%= link_to sports_path, class: "nav-dropdown-item #{current_page?(sports_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:sports) %>"></i> Sports
+              <% end %>
+              <%= link_to leagues_path, class: "nav-dropdown-item #{current_page?(leagues_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:leagues) %>"></i> Leagues
+              <% end %>
+              <%= link_to conferences_path, class: "nav-dropdown-item #{current_page?(conferences_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:conferences) %>"></i> Conferences
+              <% end %>
+              <%= link_to divisions_path, class: "nav-dropdown-item #{current_page?(divisions_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:divisions) %>"></i> Divisions
+              <% end %>
+              <%= link_to teams_path, class: "nav-dropdown-item #{current_page?(teams_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:teams) %>"></i> Teams
+              <% end %>
+              <%= link_to players_path, class: "nav-dropdown-item #{current_page?(players_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:players) %>"></i> Players
+              <% end %>
+              <%= link_to stadiums_path, class: "nav-dropdown-item #{current_page?(stadiums_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:stadiums) %>"></i> Stadiums
+              <% end %>
+              <%= link_to memberships_path, class: "nav-dropdown-item #{current_page?(memberships_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:memberships) %>"></i> Memberships
+              <% end %>
+            </div>
+          </div>
+          
+          <!-- Locations Group -->
+          <div class="nav-group" data-controller="dropdown">
+            <div class="inline-flex items-center px-3 pt-1 border-b-2 border-transparent text-white hover:text-orange-200 nav-group-title" data-action="click->dropdown#toggle">
+              <i class="fa-solid fa-earth-americas mr-2"></i> Locations
+              <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
+            </div>
+            <div class="nav-dropdown" data-dropdown-target="menu">
+              <%= link_to countries_path, class: "nav-dropdown-item #{current_page?(countries_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:countries) %>"></i> Countries
+              <% end %>
+              <%= link_to states_path, class: "nav-dropdown-item #{current_page?(states_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:states) %>"></i> States
+              <% end %>
+              <%= link_to cities_path, class: "nav-dropdown-item #{current_page?(cities_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:cities) %>"></i> Cities
+              <% end %>
+            </div>
+          </div>
+          
+          <!-- Quests & Ratings Group -->
+          <div class="nav-group" data-controller="dropdown">
+            <div class="inline-flex items-center px-3 pt-1 border-b-2 border-transparent text-white hover:text-orange-200 nav-group-title" data-action="click->dropdown#toggle">
+              <i class="fa-solid fa-scroll mr-2"></i> Quests & Ratings
+              <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
+            </div>
+            <div class="nav-dropdown" data-dropdown-target="menu">
+              <%= link_to quests_path, class: "nav-dropdown-item #{current_page?(quests_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:quests) %>"></i> Quests
+              <% end %>
+              <%= link_to goals_path, class: "nav-dropdown-item #{controller_name == 'goals' ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:goals) %>"></i> Goals
+              <% end %>
+              <%= link_to highlights_path, class: "nav-dropdown-item #{controller_name == 'highlights' ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:highlights) %>"></i> Highlights
+              <% end %>
+              <%= link_to achievements_path, class: "nav-dropdown-item #{current_page?(achievements_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:achievements) %>"></i> Achievements
+              <% end %>
+              <%= link_to strength_path, class: "nav-dropdown-item #{current_page?(strength_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:strength) %>"></i> Strength
+              <% end %>
+              <%= link_to ratings_path, class: "nav-dropdown-item #{controller_name == 'ratings' ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:ratings) %>"></i> Ratings
+              <% end %>
+              <%= link_to spectrums_path, class: "nav-dropdown-item #{current_page?(spectrums_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:spectrums) %>"></i> Spectrums
+              <% end %>
+            </div>
+          </div>
         </div>
       </div>
+      
       <div class="flex items-center">
         <%= ace_auth_links %>
       </div>
