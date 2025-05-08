@@ -58,6 +58,18 @@ end
 
 group :development, :test do
   gem 'rspec-rails', '~> 6.0'
+  gem 'factory_bot_rails', '~> 6.2'
+  gem 'faker', '~> 3.2'
+end
+
+group :test do
+  gem 'capybara', '~> 3.39'
+  gem 'selenium-webdriver', '~> 4.10'
+  gem 'webdrivers', '~> 5.3'
+  gem 'database_cleaner-active_record', '~> 2.1'
+  gem 'shoulda-matchers', '~> 5.3'
+  gem 'rails-controller-testing', '~> 1.0'
+  gem 'simplecov', '~> 0.22.0', require: false
 end
 
 group :development do
