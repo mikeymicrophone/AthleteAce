@@ -1,10 +1,20 @@
-<p style="color: green"><%= notice %></p>
+<%= tag.header @country.name, class: "country-name" %>
 
-<%= render @country %>
-
-<div>
-  <%= link_to "Edit this country", edit_country_path(@country) %> |
-  <%= link_to "Back to countries", countries_path %>
-
-  <%= button_to "Destroy this country", @country, method: :delete %>
-</div>
+<%= tag.div class: "states" do %>
+  <%= pluralize @country.states.count, "State" %>
+  <% @country.states.each do |state| %>
+    <%= tag.div id: dom_id(state), class: "state" do %>
+      <%= display_name_with_lazy_logo state %>
+      <% state.cities.each do |city| %>
+        <%= tag.div id: dom_id(city), class: "city" do %>
+          <%= display_name_with_lazy_logo city %>
+          <% city.stadiums.each do |stadium| %>
+            <%= tag.div id: dom_id(stadium), class: "stadium" do %>
+              <%= display_name_with_lazy_logo stadium %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
