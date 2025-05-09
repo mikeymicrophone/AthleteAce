@@ -1,10 +1,21 @@
-<p style="color: green"><%= notice %></p>
 
-<%= render @stadium %>
+<%= tag.header @stadium.name, class: "stadium-name" %>
+<%= display_name_with_lazy_logo @stadium.city %>
+<%= display_name_with_lazy_logo @stadium.state %>
+<%= display_name_with_lazy_logo @stadium.country %>
+<br>
+<%= @stadium.capacity %>
 
-<div>
-  <%= link_to "Edit this stadium", edit_stadium_path(@stadium) %> |
-  <%= link_to "Back to stadiums", stadiums_path %>
-
-  <%= button_to "Destroy this stadium", @stadium, method: :delete %>
-</div>
+<% @stadium.teams.each do |team| %>
+  <%= tag.div id: dom_id(team), class: "team" do %>
+    <%= display_name_with_lazy_logo team %>
+    <%= display_name_with_lazy_logo team.league %>
+    <%= display_name_with_lazy_logo team.sport %>
+    <%= tag.div class: "players" do %>
+      <%= pluralize team.players.count, "#{team.sport.name} Player" %>
+      <% team.players.each do |player| %>
+        <%= display_name_with_lazy_logo player %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

@@ -7,9 +7,7 @@
 <div id="stadiums">
   <% @stadiums.each do |stadium| %>
     <%= tag.div(id: dom_id(stadium), class: [index_record_base_classes, stadium_index_record_classes].join(' ')) do %>
-      <%= link_to stadium do %>
-        <%= display_name_with_lazy_logo(stadium) %>
-      <% end %>
+      <%= display_name_with_lazy_logo(stadium) %>
       <%= link_to_name stadium.city %>
       <%= display_name_with_lazy_logo stadium.state, logo_attribute: :flag_url %>
       <%= display_name_with_lazy_logo stadium.country, logo_attribute: :flag_url %>
