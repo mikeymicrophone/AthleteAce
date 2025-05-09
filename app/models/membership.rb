@@ -2,6 +2,10 @@ class Membership < ApplicationRecord
   belongs_to :team
   belongs_to :division
   
+  has_one :conference, through: :division
+  has_one :league, through: :conference
+  has_one :sport, through: :league
+
   validates :team_id, presence: true
   validates :division_id, presence: true
   

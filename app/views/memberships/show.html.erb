@@ -2,50 +2,11 @@
 
 <% content_for :title, "#{@membership.team.name} in #{@membership.division.name}" %>
 
-<div id="<%= dom_id(@membership) %>" class="show-container">
-  <h1>
-    Membership: <%= @membership.team.name %> in <%= @membership.division.name %>
-  </h1>
+<%= tag.header "#{@membership.team.name} in #{@membership.division.name}", class: "membership-title" %>
 
-  <div class="membership-status <%= @membership.active? ? 'active' : 'inactive' %>">
-    Status: <%= @membership.active? ? 'Active' : 'Inactive' %>
-  </div>
-
-  <div class="details">
-    <div class="detail-item">
-      <strong>Team:</strong>
-      <%= link_to @membership.team.name, @membership.team %>
-    </div>
-
-    <div class="detail-item">
-      <strong>Division:</strong>
-      <%= link_to @membership.division.name, @membership.division %>
-    </div>
-
-    <div class="detail-item">
-      <strong>Conference:</strong>
-      <%= link_to @membership.division.conference.name, @membership.division.conference %>
-    </div>
-
-    <div class="detail-item">
-      <strong>League:</strong>
-      <%= link_to @membership.division.conference.league.name, @membership.division.conference.league %>
-    </div>
-
-    <div class="detail-item">
-      <strong>Start Date:</strong>
-      <%= @membership.start_date&.strftime('%Y-%m-%d') || 'Not specified' %>
-    </div>
-
-    <div class="detail-item">
-      <strong>End Date:</strong>
-      <%= @membership.end_date&.strftime('%Y-%m-%d') || 'Present' %>
-    </div>
-  </div>
-
-  <div class="actions">
-    <%= link_to "Edit", edit_membership_path(@membership), class: "button" %>
-    <%= link_to "Back", memberships_path, class: "button" %>
-    <%= button_to "Delete", @membership, method: :delete, class: "button delete", data: { confirm: "Are you sure?" } %>
-  </div>
-</div>
+<%= tag.div class: "membership-details" do %>
+  <%= display_name_with_lazy_logo @membership.team %>
+  <%= display_name_with_lazy_logo @membership.division %>
+  <%= display_name_with_lazy_logo @membership.conference %>
+  <%= display_name_with_lazy_logo @membership.league %>
+<% end %>
