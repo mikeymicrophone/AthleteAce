@@ -1,10 +1,12 @@
-<p style="color: green"><%= notice %></p>
+<%= tag.header @league.name, class: "league-name" %>
 
-<%= render @league %>
+<%= display_name_with_lazy_logo @league.jurisdiction, logo_attribute: :flag_url %>
+<%= display_name_with_lazy_logo @league.sport, logo_attribute: :icon_url %>
 
-<div>
-  <%= link_to "Edit this league", edit_league_path(@league) %> |
-  <%= link_to "Back to leagues", leagues_path %>
+<%= render_collection(@league.conferences) %>
 
-  <%= button_to "Destroy this league", @league, method: :delete %>
-</div>
+<%= render_collection(@league.divisions) %>
+
+<%= render_teams_collection(@league.teams, parent: @league) %>
+
+<%= render_players_collection(@league.players, parent: @league, link_to_collection: true) %>

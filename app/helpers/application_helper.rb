@@ -62,6 +62,65 @@ module ApplicationHelper
     'border-l-4 border-cyan-400 hover:border-indigo-500'
   end
 
+  # Renders a collection of records with their names and logos
+  # 
+  # @param collection [ActiveRecord::Relation] A collection of ActiveRecord objects
+  # @param options [Hash] Additional options for customization
+  # @option options [String] :title Custom title for the collection (defaults to humanized collection name)
+  # @option options [Boolean] :link_to_collection Whether to link to the collection (default: false)
+  # @option options [ActiveRecord::Base] :parent Parent record for nested routes
+  # @option options [String] :css_class CSS class for the collection container (defaults to collection name)
+  # @option options [String] :item_css_class CSS class for each item in the collection (defaults to singularized collection name)
+  # @option options [Symbol] :logo_attribute The attribute to use for the logo URL (defaults to :logo_url)
+  # @return [ActiveSupport::SafeBuffer] HTML for the collection
+  def render_collection(collection, **options)
+    return content_tag(:div, "No items", class: "empty-collection") if collection.empty? && !options[:show_empty]
+    
+    # Determine collection name and CSS classes
+    collection_name = collection.model_name.plural
+    item_name = collection.model_name.singular
+    
+    # Set up options with defaults
+    title = options.fetch(:title, collection.model_name.human.pluralize)
+    link_to_collection = options.fetch(:link_to_collection, false)
+    parent = options.fetch(:parent, nil)
+    css_class = options.fetch(:css_class, collection_name)
+    item_css_class = options.fetch(:item_css_class, item_name)
+    logo_attribute = options.fetch(:logo_attribute, :logo_url)
+    
+    content_tag :div, class: css_class do
+      # Display the count/title, optionally as a link
+      concat(
+        if link_to_collection && parent
+          link_to pluralize(collection.count, title), [parent, collection_name.to_sym]
+        else
+          pluralize(collection.count, title)
+        end
+      )
+      
+      # Display each item in the collection
+      collection.each do |item|
+        concat(
+          content_tag(:div, id: dom_id(item), class: item_css_class) do
+            display_name_with_lazy_logo(item, logo_attribute: logo_attribute)
+          end
+        )
+      end
+    end
+  end
+  
+  # For backward compatibility - uses the generic render_collection helper
+  def render_teams_collection(teams, **options)
+    render_collection(teams, **options)
+  end
+  
+  # For backward compatibility - uses the generic render_collection helper
+  def render_players_collection(players, **options)
+    # Remove sport_name from options as it's no longer needed
+    options.delete(:sport_name)
+    render_collection(players, **options)
+  end
+
   # Displays a record's name with a placeholder for a lazy-loaded logo.
   # The Stimulus 'lazy-logo_controller.js' will handle loading the actual image.
   #

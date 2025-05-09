@@ -2,28 +2,19 @@
 <%= display_name_with_lazy_logo @city.state, logo_attribute: :flag_url %>
 <%= display_name_with_lazy_logo @city.country, logo_attribute: :flag_url %>
 
-<%= tag.div class: "stadiums" do %>
-  <%= pluralize @city.stadiums.count, "Stadium" %>
-  <% @city.stadiums.each do |stadium| %>
-    <%= tag.div id: dom_id(stadium), class: "stadium" do %>
-      <%= display_name_with_lazy_logo stadium %>
-      <%= stadium.address %>
-      <%= stadium.capacity %> capacity
-    <% end %>
+<%= render_collection(@city.stadiums) %>
+
+<% @city.stadiums.each do |stadium| %>
+  <%= tag.div class: "stadium-details" do %>
+    <%= stadium.address %>
+    <%= stadium.capacity %> capacity
   <% end %>
 <% end %>
 
-<%= tag.div class: "teams" do %>
-  <%= pluralize @city.teams.count, "Team" %>
-  <% @city.teams.each do |team| %>
-    <%= display_name_with_lazy_logo team %>
-    <%= display_name_with_lazy_logo team.league %>
-    <%= display_name_with_lazy_logo team.sport %>
-    <%= tag.div class: "players" do %>
-      <%= pluralize team.players.count, "#{team.sport.name} Player" %>
-      <% team.players.each do |player| %>
-        <%= display_name_with_lazy_logo player %>
-      <% end %>
-    <% end %>
-  <% end %>
+<%= render_teams_collection(@city.teams) %>
+
+<% @city.teams.each do |team| %>
+  <%= display_name_with_lazy_logo team.league %>
+  <%= display_name_with_lazy_logo team.sport %>
+  <%= render_players_collection(team.players, sport_name: team.sport.name) %>
 <% end %>

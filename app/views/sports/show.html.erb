@@ -1,10 +1,15 @@
-<p style="color: green"><%= notice %></p>
+<%= tag.header @sport.name, class: "sport-name" %>
 
-<%= render @sport %>
-
-<div>
-  <%= link_to "Edit this sport", edit_sport_path(@sport) %> |
-  <%= link_to "Back to sports", sports_path %>
-
-  <%= button_to "Destroy this sport", @sport, method: :delete %>
-</div>
+<%= tag.div class: "leagues" do %>
+  <%= pluralize @sport.leagues.count, "League" %>
+  <% @sport.leagues.each do |league| %>
+    <%= tag.div id: dom_id(league), class: "league" do %>
+      <%= tag.header display_name_with_lazy_logo(league), class: "league-name" %>
+      <%= display_name_with_lazy_logo league.jurisdiction, logo_attribute: :flag_url %>
+      <%= render_collection(league.conferences) %>
+      <%= render_collection(league.divisions) %>
+      <%= render_teams_collection(league.teams, parent: league, link_to_collection: true, title: "team") %>
+      <%= render_players_collection(league.players, parent: league, link_to_collection: true, title: "player") %>
+    <% end %>
+  <% end %>
+<% end %>

@@ -1,19 +1,14 @@
 <%= tag.header @country.name, class: "country-name" %>
 
-<%= tag.div class: "states" do %>
-  <%= pluralize @country.states.count, "State" %>
-  <% @country.states.each do |state| %>
-    <%= tag.div id: dom_id(state), class: "state" do %>
-      <%= display_name_with_lazy_logo state %>
-      <% state.cities.each do |city| %>
-        <%= tag.div id: dom_id(city), class: "city" do %>
-          <%= display_name_with_lazy_logo city %>
-          <% city.stadiums.each do |stadium| %>
-            <%= tag.div id: dom_id(stadium), class: "stadium" do %>
-              <%= display_name_with_lazy_logo stadium %>
-            <% end %>
-          <% end %>
-        <% end %>
+<%= render_collection(@country.states) %>
+
+<% @country.states.each do |state| %>
+  <%= tag.div class: "state-details" do %>
+    <%= render_collection(state.cities) %>
+    
+    <% state.cities.each do |city| %>
+      <%= tag.div class: "city-details" do %>
+        <%= render_collection(city.stadiums) %>
       <% end %>
     <% end %>
   <% end %>
