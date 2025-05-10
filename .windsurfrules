@@ -1,3 +1,6 @@
+A lot of the time, parentheses will not be needed.  Method parameter declarations and lines with just one method call that doesn't have complex parameter are examples.
+However this does not need to be absolute.
+
 While editing erb templates, use Rails tag builders rather than HTML.
 Be aware of opportunities to turn reusable blocks into helper methods.  While parametrizing the methods, be mindful that they might be used for multiple domain models.
 

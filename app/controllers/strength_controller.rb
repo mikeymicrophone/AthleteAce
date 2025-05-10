@@ -145,7 +145,7 @@ class StrengthController < ApplicationController
       
       filter_params.delete(:team_id)
       filter_params[:team_ids] = teams_for_choices.map(&:id)
-    elsif ace_signed_in? && no_scope_specified?  
+    elsif ace_signed_in? && no_scope_specified?
       quest_teams = current_ace.active_goals.map { |goal| goal.quest.associated_teams }.flatten.uniq
       if quest_teams.any?
         teams_for_choices = quest_teams
@@ -179,6 +179,7 @@ class StrengthController < ApplicationController
     end
     
     @current_player = @players.sample
+    @correct_team = @current_player.team
     
     if teams_for_choices.present?
       other_teams = (teams_for_choices - [@current_player.team]).sample(3)
