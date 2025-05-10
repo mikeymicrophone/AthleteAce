@@ -13,6 +13,7 @@
       <%= link_to division.conference.name, division.conference %>
       <%= link_to division.conference.league.name, division.conference.league %>
       <%= link_to pluralize(division.teams.count, "team"), [division, :teams] %>
+      <%= link_to "Quiz Me", division_strength_team_match_path(division), class: "button quiz-button", title: "Test your knowledge of teams in this division" %>
     <% end %>
   <% end %>
 </div>

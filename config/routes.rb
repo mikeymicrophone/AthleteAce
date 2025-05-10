@@ -43,6 +43,7 @@ Rails.application.routes.draw do
   
   resources :divisions do
     resources :teams, shallow: true
+    get 'strength/team_match', to: 'strength#division_team_match'
   end
   
   resources :memberships

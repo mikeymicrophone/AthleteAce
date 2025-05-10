@@ -168,6 +168,48 @@ class StrengthController < ApplicationController
     # Combine and shuffle all choices
     @team_choices = ([@correct_team] + @other_teams).shuffle
   end
+  
+  # Division-specific team matching game
+  def division_team_match
+    # Find the division
+    @division = Division.find(params[:division_id])
+    
+    # Get all teams in this division
+    division_teams = @division.teams.to_a
+    
+    if division_teams.empty?
+      flash.now[:alert] = "No teams found in this division. Redirecting to all divisions."
+      redirect_to divisions_path and return
+    end
+    
+    # Get players from teams in this division
+    @players = Player.includes(:team).where(team_id: division_teams.map(&:id)).to_a
+    
+    if @players.empty?
+      flash.now[:alert] = "No players found in teams of this division. Redirecting to division page."
+      redirect_to division_path(@division) and return
+    end
+    
+    # Get a random player to match
+    @current_player = @players.sample
+    
+    # The correct team is the player's team
+    @correct_team = @current_player.team
+    
+    # For the choices, use only teams from this division
+    # Get up to 3 other teams from the division (or all remaining if fewer than 3)
+    other_division_teams = (division_teams - [@correct_team])
+    @other_teams = other_division_teams.sample([3, other_division_teams.size].min)
+    
+    # Combine and shuffle all choices
+    @team_choices = ([@correct_team] + @other_teams).shuffle
+    
+    # Set the division name for display in the view
+    @division_name = @division.name
+    
+    # Use the same view template as the regular team_match
+    render :team_match
+  end
 
   # Cipher-based learning (scrambled names)
   def ciphers
