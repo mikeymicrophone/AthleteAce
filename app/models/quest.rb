@@ -29,4 +29,23 @@ class Quest < ApplicationRecord
   def optional_achievements
     achievements.merge(Highlight.optional)
   end
+  
+  # Get teams associated with this quest's achievements
+  def associated_teams
+    teams = []
+    achievements.each do |achievement|
+      case achievement.target
+      when Team
+        teams << achievement.target
+      when League
+        teams.concat(achievement.target.teams)
+      when Division
+        teams.concat(achievement.target.teams)
+      when Conference
+        teams.concat(achievement.target.divisions.flat_map(&:teams))
+      # Add other target types if needed
+      end
+    end
+    teams.uniq
+  end
 end

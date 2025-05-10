@@ -107,31 +107,3 @@
     </svg>
   <% end %>
 </div>
-
-<!-- Debug information (only visible during development) -->
-<% if Rails.env.development? %>
-  <div class="debug-info">
-    <h4>Debug Information</h4>
-    <div class="debug-section">
-      <h5>Filter Parameters</h5>
-      <p>Team ID: <%= @team_id.inspect %> (<%= @team_id.class.name if @team_id.present? %>)</p>
-      <p>Sport ID: <%= @sport_id.inspect %> (<%= @sport_id.class.name if @sport_id.present? %>)</p>
-      <p>League ID: <%= @league_id.inspect %> (<%= @league_id.class.name if @league_id.present? %>)</p>
-      <p>Include Inactive: <%= @include_inactive.inspect %></p>
-    </div>
-    
-    <div class="debug-section">
-      <h5>Current Player</h5>
-      <p>ID: <%= @current_player.id if @current_player %></p>
-      <p>Name: <%= "#{@current_player.first_name} #{@current_player.last_name}" if @current_player %></p>
-      <p>Team ID: <%= @current_player.team.id if @current_player&.team %></p>
-      <p>Team Name: <%= "#{@current_player.team.territory} #{@current_player.team.mascot}" if @current_player&.team %></p>
-    </div>
-    
-    <div class="debug-section">
-      <h5>Player Count</h5>
-      <p>Total Players Found: <%= @players.count if @players %></p>
-      <p>Filter Params Used: <%= filter_params.inspect %></p>
-    </div>
-  </div>
-<% end %>

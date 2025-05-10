@@ -39,11 +39,12 @@ Rails.application.routes.draw do
   resources :conferences do
     resources :divisions, shallow: true
     resources :teams, only: [:index]
+    get 'strength/team_match', to: 'strength#team_match'
   end
   
   resources :divisions do
     resources :teams, shallow: true
-    get 'strength/team_match', to: 'strength#division_team_match'
+    get 'strength/team_match', to: 'strength#team_match'
   end
   
   resources :memberships
@@ -73,16 +74,19 @@ Rails.application.routes.draw do
     resources :leagues, shallow: true
     resources :teams, shallow: true
     resources :players, shallow: true
+    get 'strength/team_match', to: 'strength#team_match'
   end
   resources :states do
     resources :teams, shallow: true
     resources :players, shallow: true
     resources :cities, shallow: true
     resources :stadiums, shallow: true
+    get 'strength/team_match', to: 'strength#team_match'
   end
   resources :leagues do
     resources :teams, shallow: true
     resources :players, shallow: true
+    get 'strength/team_match', to: 'strength#team_match'
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

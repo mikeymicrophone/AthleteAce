@@ -10,6 +10,9 @@
       <%= link_to pluralize(league.players.count, "player"), [league, :players] %>
       <%= link_to_name league.jurisdiction %>
       <%= display_name_with_lazy_logo(league.sport, logo_attribute: :icon_url) %>
+      <% if league.teams.any? %>
+        <%= link_to "Quiz Me", league_strength_team_match_path(league), class: "quiz-button", title: "Test your knowledge of teams in #{league.name}" %>
+      <% end %>
     <% end %>
   <% end %>
 </div>

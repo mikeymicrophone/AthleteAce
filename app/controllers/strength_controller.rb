@@ -16,20 +16,9 @@ class StrengthController < ApplicationController
 
   # Multiple choice quiz for learning names
   def multiple_choice
-    # Collect filter parameters
-    id_collect
-    
-    # Create filter params hash
-    filter_params = {}
-    filter_params[:team_id] = @team_id if @team_id.present?
-    filter_params[:sport_id] = @sport_id if @sport_id.present?
-    filter_params[:league_id] = @league_id if @league_id.present?
-    filter_params[:include_inactive] = @include_inactive if @include_inactive.present?
-    
-    # Fetch players using explicit filter parameters
+    filter_params = strength_filter_params
     @players = fetch_players_with_params(filter_params)
     
-    # If no players found, clear filters and try again
     if @players.empty?
       flash.now[:alert] = "No players found with the selected filters. Showing all players instead."
       @players = Player.limit(50).to_a
@@ -42,7 +31,6 @@ class StrengthController < ApplicationController
 
   # Phased repetition for spaced learning
   def phased_repetition
-    # Log incoming parameters for debugging
     Rails.logger.debug "PHASED REPETITION PARAMS: #{params.inspect}"
     
     # Collect and process filter parameters
@@ -53,7 +41,6 @@ class StrengthController < ApplicationController
     
     # Double-check team_id is properly set
     if @team_id.present?
-      # Explicitly verify the team exists and has players
       team = Team.find_by(id: @team_id)
       if team
         player_count = Player.where(team_id: @team_id).count
@@ -64,20 +51,12 @@ class StrengthController < ApplicationController
       end
     end
     
-    # Fetch players based on filters - this time with explicit team_id parameter
-    filter_params = {}
-    filter_params[:team_id] = @team_id if @team_id.present?
-    filter_params[:sport_id] = @sport_id if @sport_id.present?
-    filter_params[:league_id] = @league_id if @league_id.present?
-    filter_params[:include_inactive] = @include_inactive if @include_inactive.present?
-    
+    filter_params = strength_filter_params
     Rails.logger.debug "USING FILTER PARAMS: #{filter_params.inspect}"
     
-    # Use the filter params directly instead of relying on instance variables
     @players = fetch_players_with_params(filter_params)
     Rails.logger.debug "PLAYERS FOUND: #{@players.count}"
     
-    # If no players found with the current filters, clear filters and try again
     if @players.empty?
       flash.now[:alert] = "No players found with the selected filters. Showing all players instead."
       @team_id = @sport_id = @league_id = nil
@@ -85,31 +64,17 @@ class StrengthController < ApplicationController
       Rails.logger.debug "AFTER CLEARING FILTERS, players found: #{@players.count}"
     end
     
-    # Get a random player from the filtered list
     @current_player = @players.sample
     Rails.logger.debug "SELECTED PLAYER: #{@current_player.inspect}"
     
-    # In a real implementation, you would track the user's progress
-    # and show players based on their repetition schedule
     @phase = params[:phase].present? ? params[:phase].to_i : 1
   end
 
   # Image-based learning
   def images
-    # Collect filter parameters
-    id_collect
-    
-    # Create filter params hash
-    filter_params = {}
-    filter_params[:team_id] = @team_id if @team_id.present?
-    filter_params[:sport_id] = @sport_id if @sport_id.present?
-    filter_params[:league_id] = @league_id if @league_id.present?
-    filter_params[:include_inactive] = @include_inactive if @include_inactive.present?
-    
-    # Fetch players using explicit filter parameters
+    filter_params = strength_filter_params
     @players = fetch_players_with_params(filter_params).select { |p| p.photo_urls.present? }
     
-    # If no players found, clear filters and try again
     if @players.empty?
       flash.now[:alert] = "No players with photos found with the selected filters. Showing all players with photos instead."
       @players = Player.where.not(photo_urls: [nil, '']).limit(50).to_a
@@ -120,113 +85,116 @@ class StrengthController < ApplicationController
 
   # Team matching game
   def team_match
-    # Collect filter parameters
     id_collect
     
-    # Create filter params hash
-    filter_params = {}
-    filter_params[:team_id] = @team_id if @team_id.present?
-    filter_params[:sport_id] = @sport_id if @sport_id.present?
-    filter_params[:league_id] = @league_id if @league_id.present?
-    filter_params[:include_inactive] = @include_inactive if @include_inactive.present?
+    filter_params = strength_filter_params
+    teams_for_choices = nil
     
-    # If the user has active quests, prioritize players from those teams
-    if ace_signed_in? && params[:quest_mode] == 'true'
-      quest_teams = current_ace.active_goals.includes(quest: :teams).map(&:quest).flatten.map(&:teams).flatten.uniq
+    if params[:division_id].present?
+      @division = Division.find(params[:division_id])
+      teams_for_choices = @division.teams.to_a
       
+      if teams_for_choices.empty?
+        flash.now[:alert] = "No teams found in this division. Redirecting to all divisions."
+        redirect_to divisions_path and return
+      end
+      
+      filter_params.delete(:team_id)
+      filter_params[:team_ids] = teams_for_choices.map(&:id)
+    elsif params[:conference_id].present?
+      @conference = Conference.find(params[:conference_id])
+      teams_for_choices = @conference.teams.to_a
+      
+      if teams_for_choices.empty?
+        flash.now[:alert] = "No teams found in this conference. Redirecting to all conferences."
+        redirect_to conferences_path and return
+      end
+      
+      filter_params.delete(:team_id)
+      filter_params[:team_ids] = teams_for_choices.map(&:id)
+    elsif params[:league_id].present? && params[:controller] == "leagues"
+      @league = League.find(params[:league_id])
+      teams_for_choices = @league.teams.to_a
+      
+      if teams_for_choices.empty?
+        flash.now[:alert] = "No teams found in this league. Redirecting to all leagues."
+        redirect_to leagues_path and return
+      end
+      
+      filter_params.delete(:team_id)
+      filter_params[:team_ids] = teams_for_choices.map(&:id)
+    elsif params[:city_id].present?
+      @city = City.find(params[:city_id])
+      teams_for_choices = @city.teams.to_a
+      
+      if teams_for_choices.empty?
+        flash.now[:alert] = "No teams found in this city. Redirecting to all cities."
+        redirect_to cities_path and return
+      end
+      
+      filter_params.delete(:team_id)
+      filter_params[:team_ids] = teams_for_choices.map(&:id)
+    elsif params[:state_id].present?
+      @state = State.find(params[:state_id])
+      teams_for_choices = @state.teams.to_a
+      
+      if teams_for_choices.empty?
+        flash.now[:alert] = "No teams found in this state. Redirecting to all states."
+        redirect_to states_path and return
+      end
+      
+      filter_params.delete(:team_id)
+      filter_params[:team_ids] = teams_for_choices.map(&:id)
+    elsif ace_signed_in? && no_scope_specified?  
+      quest_teams = current_ace.active_goals.map { |goal| goal.quest.associated_teams }.flatten.uniq
       if quest_teams.any?
-        # Override any existing team filter with quest teams
-        filter_params.delete(:team_id)
-        filter_params[:team_ids] = quest_teams.map(&:id)
+        teams_for_choices = quest_teams
+        cross_sport = params[:cross_sport] == 'true'
+        unless cross_sport
+          if teams_for_choices.first
+            sport_id = teams_for_choices.first.sport.id
+            teams_for_choices = teams_for_choices.select { |team| team.sport.id == sport_id }
+          end
+        end
+        if teams_for_choices.empty?
+          flash.now[:alert] = "No teams found for your quest. Showing all teams instead."
+          teams_for_choices = nil
+        else
+          filter_params.delete(:team_id)
+          filter_params[:team_ids] = teams_for_choices.map(&:id)
+        end
       end
     end
     
-    # Fetch players using explicit filter parameters
     @players = if filter_params[:team_ids].present?
-                # Custom query for multiple teams
-                Player.includes(:team).where(team_id: filter_params[:team_ids]).to_a
-              else
-                fetch_players_with_params(filter_params)
-              end
+                   Player.includes(:team).where(team_id: filter_params[:team_ids]).to_a
+                 else
+                   fetch_players_with_params(filter_params)
+                 end
     
-    # If no players found, clear filters and try again
     if @players.empty?
       flash.now[:alert] = "No players found with the selected filters. Showing all players instead."
       @players = Player.includes(:team).limit(50).to_a
+      teams_for_choices = nil  # Reset to avoid confusion
     end
     
-    # Get a random player to match
     @current_player = @players.sample
     
-    # Get teams for choices (including the correct team)
-    all_teams = Team.all.to_a
-    @correct_team = @current_player.team
-    
-    # Get 3 other random teams different from the correct one
-    @other_teams = (all_teams - [@correct_team]).sample(3)
-    
-    # Combine and shuffle all choices
-    @team_choices = ([@correct_team] + @other_teams).shuffle
-  end
-  
-  # Division-specific team matching game
-  def division_team_match
-    # Find the division
-    @division = Division.find(params[:division_id])
-    
-    # Get all teams in this division
-    division_teams = @division.teams.to_a
-    
-    if division_teams.empty?
-      flash.now[:alert] = "No teams found in this division. Redirecting to all divisions."
-      redirect_to divisions_path and return
+    if teams_for_choices.present?
+      other_teams = (teams_for_choices - [@current_player.team]).sample(3)
+      @team_choices = ([@current_player.team] + other_teams).shuffle
+    else
+      all_teams = Team.all.to_a
+      other_teams = (all_teams - [@current_player.team]).sample(3)
+      @team_choices = ([@current_player.team] + other_teams).shuffle
     end
-    
-    # Get players from teams in this division
-    @players = Player.includes(:team).where(team_id: division_teams.map(&:id)).to_a
-    
-    if @players.empty?
-      flash.now[:alert] = "No players found in teams of this division. Redirecting to division page."
-      redirect_to division_path(@division) and return
-    end
-    
-    # Get a random player to match
-    @current_player = @players.sample
-    
-    # The correct team is the player's team
-    @correct_team = @current_player.team
-    
-    # For the choices, use only teams from this division
-    # Get up to 3 other teams from the division (or all remaining if fewer than 3)
-    other_division_teams = (division_teams - [@correct_team])
-    @other_teams = other_division_teams.sample([3, other_division_teams.size].min)
-    
-    # Combine and shuffle all choices
-    @team_choices = ([@correct_team] + @other_teams).shuffle
-    
-    # Set the division name for display in the view
-    @division_name = @division.name
-    
-    # Use the same view template as the regular team_match
-    render :team_match
   end
 
   # Cipher-based learning (scrambled names)
   def ciphers
-    # Collect filter parameters
-    id_collect
-    
-    # Create filter params hash
-    filter_params = {}
-    filter_params[:team_id] = @team_id if @team_id.present?
-    filter_params[:sport_id] = @sport_id if @sport_id.present?
-    filter_params[:league_id] = @league_id if @league_id.present?
-    filter_params[:include_inactive] = @include_inactive if @include_inactive.present?
-    
-    # Fetch players using explicit filter parameters
+    filter_params = strength_filter_params
     @players = fetch_players_with_params(filter_params)
     
-    # If no players found, clear filters and try again
     if @players.empty?
       flash.now[:alert] = "No players found with the selected filters. Showing all players instead."
       @players = Player.limit(50).to_a
@@ -234,7 +202,6 @@ class StrengthController < ApplicationController
     
     @current_player = @players.sample
     
-    # Create a simple cipher by scrambling the letters
     full_name = "#{@current_player.first_name} #{@current_player.last_name}"
     @scrambled_name = full_name.chars.shuffle.join
   end
@@ -252,6 +219,14 @@ class StrengthController < ApplicationController
   end
   
   private
+  
+  def no_scope_specified?
+    params[:division_id].blank? && params[:conference_id].blank? && params[:league_id].blank? && params[:city_id].blank? && params[:state_id].blank?
+  end
+
+  def strength_filter_params
+    params.permit(:team_id, :sport_id, :league_id, :include_inactive, :cross_sport)
+  end
   
   # Fetch players based on filters
   def fetch_players

@@ -13,6 +13,9 @@
       <%= link_to pluralize(city.stadiums.count, "stadium"), [city, :stadiums] %>
       <%= link_to pluralize(city.teams.count, "team"), [city, :teams] %>
       <%= link_to pluralize(city.players.count, "player"), [city, :players] %>
+      <% if city.teams.any? %>
+        <%= link_to "Quiz Me", city_strength_team_match_path(city), class: "quiz-button", title: "Test your knowledge of teams in #{city.name}" %>
+      <% end %>
     <% end %>
   <% end %>
 </div>

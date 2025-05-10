@@ -34,4 +34,6 @@ class Goal < ApplicationRecord
   def all_achievements
     quest.achievements
   end
+  
+  scope :active, -> { where.not(status: 'completed') }
 end

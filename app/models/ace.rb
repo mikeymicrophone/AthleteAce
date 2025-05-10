@@ -6,6 +6,7 @@ class Ace < ApplicationRecord
          :trackable, :confirmable
          
   has_many :goals, dependent: :destroy
+  has_many :active_goals, -> { Goal.active }, class_name: 'Goal'
   has_many :quests, through: :goals
   has_many :ratings, dependent: :destroy
   

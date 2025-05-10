@@ -1,11 +1,6 @@
 <% content_for :title, @division.present? ? "#{@division.name} Division Quiz - Team Match" : "Team Match - Strength Training" %>
 
 <div class="team-match-container" data-controller="team-match">
-  <% if flash[:alert].present? %>
-    <div class="flash-message alert">
-      <%= flash[:alert] %>
-    </div>
-  <% end %>
 
   <!-- Filter indicators section -->
   <div class="filter-indicators mb-4">
@@ -14,18 +9,6 @@
         <div class="filter-badge division-badge">
           <span class="filter-label">Division Quiz:</span>
           <span class="filter-value"><%= @division.name %></span>
-        </div>
-      </div>
-      <div class="filter-indicator">
-        <div class="filter-badge">
-          <span class="filter-label">Conference:</span>
-          <span class="filter-value"><%= @division.conference.name %></span>
-        </div>
-      </div>
-      <div class="filter-indicator">
-        <div class="filter-badge">
-          <span class="filter-label">League:</span>
-          <span class="filter-value"><%= @division.conference.league.name %></span>
         </div>
       </div>
     <% else %>
@@ -65,11 +48,7 @@
   <div class="team-match-game" data-team-match-target="gameContainer">
     <!-- Player info -->
     <div class="player-info mb-6 text-center">
-      <% if @division.present? %>
-        <h2 class="text-2xl font-bold mb-2">Which <%= @division.name %> Division team does this player play for?</h2>
-      <% else %>
-        <h2 class="text-2xl font-bold mb-2">Which team does this player play for?</h2>
-      <% end %>
+      <h2 class="text-2xl font-bold mb-2">Who does <%= @current_player.full_name %> play for?</h2>
       <div class="player-card bg-white rounded-lg shadow-lg p-4 max-w-md mx-auto">
         <% if @current_player.photo_urls.present? %>
           <div class="player-image-container h-64 mb-4">
@@ -88,28 +67,30 @@
     </div>
 
     <!-- Team choices grid -->
-    <div class="team-choices-grid grid grid-cols-2 gap-4 max-w-2xl mx-auto" data-team-match-target="choicesGrid">
-      <% @team_choices.each do |team| %>
-        <button 
-          class="team-choice bg-white rounded-lg shadow-md p-4 flex flex-col items-center transition-all duration-300 hover:shadow-lg"
-          data-team-match-target="teamChoice"
-          data-team-id="<%= team.id %>"
-          data-correct="<%= team.id == @correct_team.id %>"
-          data-action="click->team-match#checkAnswer">
-          
-          <div class="team-logo-container h-24 w-24 mb-2">
-            <% if team.logo_url.present? %>
-              <img src="<%= team.logo_url %>" alt="<%= team.name %> logo" class="h-full w-full object-contain">
-            <% else %>
-              <div class="team-logo-placeholder h-full w-full bg-gray-200 flex items-center justify-center rounded-full">
-                <i class="fa-solid fa-shield-alt text-4xl text-gray-400"></i>
-              </div>
-            <% end %>
-          </div>
-          
-          <span class="team-name text-lg font-medium"><%= "#{team.territory} #{team.mascot}" %></span>
-        </button>
-      <% end %>
+    <div class="team-choices-container max-w-2xl mx-auto">
+      <div class="team-choices-grid grid grid-cols-2 gap-6" data-team-match-target="choicesGrid">
+        <% @team_choices.each do |team| %>
+          <button 
+            class="team-choice bg-white rounded-lg shadow-md p-4 flex flex-col items-center justify-center transition-all duration-300 hover:shadow-lg w-full h-48"
+            data-team-match-target="teamChoice"
+            data-team-id="<%= team.id %>"
+            data-correct="<%= team.id == @correct_team.id %>"
+            data-action="click->team-match#checkAnswer">
+            
+            <div class="team-logo-container h-20 w-20 mb-3 flex items-center justify-center">
+              <% if team.logo_url.present? %>
+                <img src="<%= team.logo_url %>" alt="<%= team.name %> logo" class="max-h-full max-w-full object-contain">
+              <% else %>
+                <div class="team-logo-placeholder h-full w-full bg-gray-200 flex items-center justify-center rounded-full">
+                  <i class="fa-solid fa-shield-alt text-4xl text-gray-400"></i>
+                </div>
+              <% end %>
+            </div>
+            
+            <span class="team-name text-lg font-medium text-center"><%= "#{team.territory} #{team.mascot}" %></span>
+          </button>
+        <% end %>
+      </div>
     </div>
 
     <!-- Floating team name overlay (hidden by default) -->
@@ -136,42 +117,3 @@
     </div>
   </div>
 </div>
-
-<style>
-  .team-name-overlay {
-    background-color: rgba(0, 0, 0, 0.5);
-    transition: opacity 0.5s ease;
-  }
-  
-  .text-shadow-lg {
-    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  }
-  
-  .team-choice.correct {
-    background-color: #10b981;
-    color: white;
-    transform: scale(1.05);
-  }
-  
-  .team-choice.incorrect {
-    background-color: #ef4444;
-    color: white;
-  }
-  
-  .team-choice.correct-answer {
-    background-color: #10b981;
-    color: white;
-    border: 3px solid #fff;
-    box-shadow: 0 0 0 2px #10b981, 0 0 15px rgba(16, 185, 129, 0.7);
-  }
-  
-  @keyframes pulse {
-    0% { transform: scale(1.05); background-color: #10b981; }
-    50% { transform: scale(1.1); background-color: #059669; }
-    100% { transform: scale(1.05); background-color: #10b981; }
-  }
-  
-  .team-choice.pulsing {
-    animation: pulse 1.5s ease-in-out;
-  }
-</style>
