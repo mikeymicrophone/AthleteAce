@@ -75,12 +75,10 @@ export default class extends Controller {
 
     if (!imageUrl && this.hasUrlValue && this.urlValue) {
         imageUrl = this.urlValue;
-        // console.log(`LazyLogo#loadLogo - From data-url: '${imageUrl}' for ${this.entityTypeValue} ${this.entityIdValue}`);
-        if (imageUrl) localStorage.setItem(cacheKey, imageUrl);
+        // console.log(`LazyLogo#loadLogo - Using URL from data attribute: '${imageUrl}' for ${this.entityTypeValue} ${this.entityIdValue}`);
     }
-    
+
     if (imageUrl) {
-      // console.log(`LazyLogo#loadLogo - Creating img tag with src: '${imageUrl}' for ${this.entityTypeValue} ${this.entityIdValue}`);
       const img = document.createElement("img");
       img.src = imageUrl;
       const altText = (this.hasNameTarget && this.nameTarget.textContent.trim()) 
@@ -88,6 +86,19 @@ export default class extends Controller {
                       : `${this.entityTypeValue} ${this.entityIdValue} logo`;
       img.alt = altText;
       img.classList.add("h-full", "w-full", "object-contain");
+      
+      // Add load event listener to cache only on successful load
+      img.onload = () => {
+        localStorage.setItem(cacheKey, imageUrl);
+        // console.log(`LazyLogo#loadLogo - Cached image URL: '${imageUrl}' for ${this.entityTypeValue} ${this.entityIdValue}`);
+      };
+      
+      // Add error event listener to prevent caching on failure
+      img.onerror = () => {
+        // console.warn(`LazyLogo#loadLogo - Failed to load image: '${imageUrl}' for ${this.entityTypeValue} ${this.entityIdValue}`);
+        // Optionally, remove from cache if it exists
+        localStorage.removeItem(cacheKey);
+      };
 
       this.imageTarget.innerHTML = '';
       this.imageTarget.appendChild(img);

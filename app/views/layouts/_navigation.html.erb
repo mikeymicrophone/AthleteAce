@@ -75,9 +75,6 @@
               <%= link_to goals_path, class: "nav-dropdown-item #{controller_name == 'goals' ? 'active' : ''}" do %>
                 <i class="<%= icon_for_resource(:goals) %>"></i> Goals
               <% end %>
-              <%= link_to highlights_path, class: "nav-dropdown-item #{controller_name == 'highlights' ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:highlights) %>"></i> Highlights
-              <% end %>
               <%= link_to achievements_path, class: "nav-dropdown-item #{current_page?(achievements_path) ? 'active' : ''}" do %>
                 <i class="<%= icon_for_resource(:achievements) %>"></i> Achievements
               <% end %>
