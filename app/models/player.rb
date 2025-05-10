@@ -12,6 +12,7 @@ class Player < ApplicationRecord
   def name
     "#{first_name} #{last_name}"
   end
+  alias_method :full_name, :name
   
   def primary_position
     roles.find_by(primary: true)&.position

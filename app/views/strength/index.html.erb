@@ -6,7 +6,7 @@
     <p class="text-lg text-gray-600 max-w-3xl mx-auto">Choose a training method below to improve your ability to recognize and recall athlete names.</p>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-12">
     <%= link_to strength_multiple_choice_path, class: "bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md overflow-hidden transition duration-300 transform hover:scale-105" do %>
       <div class="p-6 text-center">
         <div class="text-3xl mb-2">🎯</div>
@@ -36,6 +36,14 @@
         <div class="text-3xl mb-2">🔍</div>
         <h2 class="text-xl font-bold mb-2">Name Ciphers</h2>
         <p class="text-orange-100">Decode scrambled athlete names to strengthen your recall.</p>
+      </div>
+    <% end %>
+
+    <%= link_to strength_team_match_path(team_id: @team_id, sport_id: @sport_id, league_id: @league_id, include_inactive: @include_inactive), class: "bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-md overflow-hidden transition duration-300 transform hover:scale-105" do %>
+      <div class="p-6 text-center">
+        <div class="text-3xl mb-2">🏆</div>
+        <h2 class="text-xl font-bold mb-2">Team Match</h2>
+        <p class="text-indigo-100">Match players to their correct teams to build your team knowledge.</p>
       </div>
     <% end %>
   </div>

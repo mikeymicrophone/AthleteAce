@@ -1,4 +1,5 @@
 class StrengthController < ApplicationController
+  before_action :authenticate_ace!, except: [:index]
   # Main dashboard for strength training
   def index
     # Load all sports, leagues, and teams for the filter dropdowns
@@ -115,6 +116,57 @@ class StrengthController < ApplicationController
     end
     
     @current_player = @players.sample
+  end
+
+  # Team matching game
+  def team_match
+    # Collect filter parameters
+    id_collect
+    
+    # Create filter params hash
+    filter_params = {}
+    filter_params[:team_id] = @team_id if @team_id.present?
+    filter_params[:sport_id] = @sport_id if @sport_id.present?
+    filter_params[:league_id] = @league_id if @league_id.present?
+    filter_params[:include_inactive] = @include_inactive if @include_inactive.present?
+    
+    # If the user has active quests, prioritize players from those teams
+    if ace_signed_in? && params[:quest_mode] == 'true'
+      quest_teams = current_ace.active_goals.includes(quest: :teams).map(&:quest).flatten.map(&:teams).flatten.uniq
+      
+      if quest_teams.any?
+        # Override any existing team filter with quest teams
+        filter_params.delete(:team_id)
+        filter_params[:team_ids] = quest_teams.map(&:id)
+      end
+    end
+    
+    # Fetch players using explicit filter parameters
+    @players = if filter_params[:team_ids].present?
+                # Custom query for multiple teams
+                Player.includes(:team).where(team_id: filter_params[:team_ids]).to_a
+              else
+                fetch_players_with_params(filter_params)
+              end
+    
+    # If no players found, clear filters and try again
+    if @players.empty?
+      flash.now[:alert] = "No players found with the selected filters. Showing all players instead."
+      @players = Player.includes(:team).limit(50).to_a
+    end
+    
+    # Get a random player to match
+    @current_player = @players.sample
+    
+    # Get teams for choices (including the correct team)
+    all_teams = Team.all.to_a
+    @correct_team = @current_player.team
+    
+    # Get 3 other random teams different from the correct one
+    @other_teams = (all_teams - [@correct_team]).sample(3)
+    
+    # Combine and shuffle all choices
+    @team_choices = ([@correct_team] + @other_teams).shuffle
   end
 
   # Cipher-based learning (scrambled names)

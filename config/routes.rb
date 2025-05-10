@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   get "strength/phased_repetition" => "strength#phased_repetition"
   get "strength/images" => "strength#images"
   get "strength/ciphers" => "strength#ciphers"
+  get "strength/team_match" => "strength#team_match"
   post "strength/check_answer" => "strength#check_answer", as: :check_answer
   resources :achievements do
     collection do
