@@ -1,47 +1,8 @@
 <% content_for :title, @division.present? ? "#{@division.name} Division Quiz - Team Match" : "Team Match - Strength Training" %>
 
 <div class="team-match-container" data-controller="team-match">
-
-  <!-- Filter indicators section -->
   <div class="filter-indicators mb-4">
-    <% if @division.present? %>
-      <div class="filter-indicator">
-        <div class="filter-badge division-badge">
-          <span class="filter-label">Division Quiz:</span>
-          <span class="filter-value"><%= @division.name %></span>
-        </div>
-      </div>
-    <% else %>
-      <% if @team_id.present? %>
-        <div class="filter-indicator">
-          <div class="filter-badge">
-            <span class="filter-label">Team:</span>
-            <% team = Team.find_by(id: @team_id) %>
-            <span class="filter-value"><%= team ? "#{team.territory} #{team.mascot}" : "Unknown Team" %></span>
-          </div>
-        </div>
-      <% end %>
-      
-      <% if @sport_id.present? %>
-        <div class="filter-indicator">
-          <div class="filter-badge">
-            <span class="filter-label">Sport:</span>
-            <% sport = Sport.find_by(id: @sport_id) %>
-            <span class="filter-value"><%= sport ? sport.name : "Unknown Sport" %></span>
-          </div>
-        </div>
-      <% end %>
-      
-      <% if @league_id.present? %>
-        <div class="filter-indicator">
-          <div class="filter-badge">
-            <span class="filter-label">League:</span>
-            <% league = League.find_by(id: @league_id) %>
-            <span class="filter-value"><%= league ? league.name : "Unknown League" %></span>
-          </div>
-        </div>
-      <% end %>
-    <% end %>
+    <%= teams_filter_label @parent %>
   </div>
 
   <div class="team-match-game" data-team-match-target="gameContainer">

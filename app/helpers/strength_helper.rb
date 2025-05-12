@@ -60,4 +60,14 @@ module StrengthHelper
         }
     end
   end
+
+  def teams_filter_label parent
+    tag.div class: "filter-indicator" do
+      tag.div class: "filter-badge" do
+        tag.span("#{parent.class.name}:", class: "filter-label") +
+        tag.span(parent.name, class: "filter-value")
+      end
+    end if parent
+  end
+
 end

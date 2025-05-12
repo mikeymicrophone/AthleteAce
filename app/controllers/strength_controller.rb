@@ -87,6 +87,8 @@ class StrengthController < ApplicationController
   def team_match
     id_collect
     
+    @parent = Division.find_by(id: params[:division_id]) || Conference.find_by(id: params[:conference_id]) || League.find_by(id: params[:league_id]) || City.find_by(id: params[:city_id]) || State.find_by(id: params[:state_id])
+
     filter_params = strength_filter_params
     teams_for_choices = nil
     
