@@ -313,3 +313,37 @@
 .debug-info p {
   margin: 0.25rem 0;
 }
+
+/* Team Match Layout Adjustments */
+.team-match-container {
+  padding-top: 0.5rem; /* reduce gap below nav */
+}
+
+.team-match-game {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 2rem; /* space between card and choices */
+}
+
+.team-match-game .player-info {
+  flex: 1 1 40%; /* card takes ~40% width */
+}
+
+.team-match-game .team-choices-container {
+  flex: 1 1 55%; /* choices take remaining width */
+  max-width: none; /* allow full flex width */
+  margin: 0; /* remove extra vertical spacing */
+}
+
+@media (max-width: 768px) {
+  .team-match-game {
+    flex-direction: column; /* stack on small screens */
+    align-items: center;
+  }
+
+  .team-match-game .player-info,
+  .team-match-game .team-choices-container {
+    flex: 1 1 100%;
+  }
+}
