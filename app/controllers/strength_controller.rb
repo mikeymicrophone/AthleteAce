@@ -187,7 +187,7 @@ class StrengthController < ApplicationController
       other_teams = (teams_for_choices - [@current_player.team]).sample(3)
       @team_choices = ([@current_player.team] + other_teams).shuffle
     else
-      all_teams = Team.all.to_a
+      all_teams = @correct_team.league.teams.to_a
       other_teams = (all_teams - [@current_player.team]).sample(3)
       @team_choices = ([@current_player.team] + other_teams).shuffle
     end
