@@ -70,25 +70,7 @@
     <div class="team-choices-container max-w-2xl mx-auto">
       <div class="team-choices-grid grid grid-cols-2 gap-6" data-team-match-target="choicesGrid">
         <% @team_choices.each do |team| %>
-          <button 
-            class="team-choice bg-white rounded-lg shadow-md p-4 flex flex-col items-center justify-center transition-all duration-300 hover:shadow-lg w-full h-48"
-            data-team-match-target="teamChoice"
-            data-team-id="<%= team.id %>"
-            data-correct="<%= team.id == @correct_team.id %>"
-            data-action="click->team-match#checkAnswer">
-            
-            <div class="team-logo-container h-20 w-20 mb-3 flex items-center justify-center">
-              <% if team.logo_url.present? %>
-                <img src="<%= team.logo_url %>" alt="<%= team.name %> logo" class="max-h-full max-w-full object-contain">
-              <% else %>
-                <div class="team-logo-placeholder h-full w-full bg-gray-200 flex items-center justify-center rounded-full">
-                  <i class="fa-solid fa-shield-alt text-4xl text-gray-400"></i>
-                </div>
-              <% end %>
-            </div>
-            
-            <span class="team-name text-lg font-medium text-center"><%= "#{team.territory} #{team.mascot}" %></span>
-          </button>
+          <%= team_choice_button team, team.id == @correct_team.id %>
         <% end %>
       </div>
     </div>
