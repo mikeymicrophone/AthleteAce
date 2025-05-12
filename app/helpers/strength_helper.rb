@@ -1,6 +1,23 @@
 module StrengthHelper
 
-
+  def player_card player
+    tag.div class: "player-info mb-6 text-center" do
+      tag.h2("Who does #{player.full_name} play for?", class: "text-2xl font-bold mb-2") +
+      tag.div(class: "player-card bg-white rounded-lg shadow-lg p-4 max-w-md mx-auto") do
+        if player.photo_urls.present?
+          tag.div class: "player-image-container h-64 mb-4" do
+            tag.img src: player.photo_urls.first, alt: player.full_name, class: "h-full mx-auto object-contain"
+          end
+        else
+          tag.div class: "player-image-placeholder h-64 mb-4 bg-gray-200 flex items-center justify-center" do
+            tag.i class: "fa-solid fa-user text-6xl text-gray-400"
+          end
+        end +
+        tag.h3(player.full_name, class: "text-xl font-bold") + 
+        (player.primary_position ? tag.p(player.primary_position.name, class: "text-gray-600") : '')
+      end
+    end
+  end
 
   def team_choice_button team, correct = false
     tag.button class: "team-choice bg-white rounded-lg shadow-md p-4 flex flex-col items-center justify-center transition-all duration-300 hover:shadow-lg w-full h-48",

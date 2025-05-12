@@ -47,24 +47,7 @@
   <!-- Main game container -->
   <div class="team-match-game" data-team-match-target="gameContainer">
     <!-- Player info -->
-    <%= tag.div class: "player-info mb-6 text-center" do %>
-      <%= tag.h2 "Who does #{@current_player.full_name} play for?", class: "text-2xl font-bold mb-2" %>
-      <%= tag.div class: "player-card bg-white rounded-lg shadow-lg p-4 max-w-md mx-auto" do %>
-        <% if @current_player.photo_urls.present? %>
-          <%= tag.div class: "player-image-container h-64 mb-4" do %>
-            <%= tag.img src: @current_player.photo_urls.first, alt: @current_player.full_name, class: "h-full mx-auto object-contain" %>
-          <% end %>
-        <% else %>
-          <%= tag.div class: "player-image-placeholder h-64 mb-4 bg-gray-200 flex items-center justify-center" do %>
-            <%= tag.i class: "fa-solid fa-user text-6xl text-gray-400" %>
-          <% end %>
-        <% end %>
-        <%= tag.h3 @current_player.full_name, class: "text-xl font-bold" %>
-        <% if @current_player.primary_position %>
-          <%= tag.p @current_player.primary_position.name, class: "text-gray-600" %>
-        <% end %>
-      <% end %>
-    <% end %>
+    <%= player_card @current_player %>
 
     <!-- Team choices grid -->
     <div class="team-choices-container max-w-2xl mx-auto">
