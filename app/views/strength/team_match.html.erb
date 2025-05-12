@@ -106,14 +106,7 @@
         <span class="text-gray-600">Progress: <span data-team-match-target="progressCounter">0</span> correct</span>
       </div>
       
-      <div class="pause-button">
-        <button 
-          class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-          data-team-match-target="pauseButton"
-          data-action="click->team-match#togglePause">
-          <i class="fa-solid fa-pause mr-2"></i> Pause
-        </button>
-      </div>
+      <%= pause_button "team-match" %>
     </div>
   </div>
 </div>
