@@ -19,6 +19,16 @@ module StrengthHelper
     end
   end
 
+  def team_choice_group teams, correct_team_id
+    tag.div class: "team-choices-container max-w-2xl mx-auto" do
+      tag.div class: "team-choices-grid grid grid-cols-2 gap-6", data: {team_match_target: "choicesGrid"} do
+        teams.map do |team|
+          team_choice_button team, team.id == correct_team_id
+        end.join.html_safe
+      end
+    end
+  end
+
   def team_choice_button team, correct = false
     tag.button class: "team-choice bg-white rounded-lg shadow-md p-4 flex flex-col items-center justify-center transition-all duration-300 hover:shadow-lg w-full h-48",
       data: {

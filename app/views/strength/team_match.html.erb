@@ -44,19 +44,9 @@
     <% end %>
   </div>
 
-  <!-- Main game container -->
   <div class="team-match-game" data-team-match-target="gameContainer">
-    <!-- Player info -->
     <%= player_card @current_player %>
-
-    <!-- Team choices grid -->
-    <div class="team-choices-container max-w-2xl mx-auto">
-      <div class="team-choices-grid grid grid-cols-2 gap-6" data-team-match-target="choicesGrid">
-        <% @team_choices.each do |team| %>
-          <%= team_choice_button team, team.id == @correct_team.id %>
-        <% end %>
-      </div>
-    </div>
+    <%= team_choice_group @team_choices, @correct_team.id %>
 
     <!-- Floating team name overlay (hidden by default) -->
     <div class="team-name-overlay fixed inset-0 flex items-center justify-center pointer-events-none opacity-0 z-50" data-team-match-target="teamNameOverlay">
