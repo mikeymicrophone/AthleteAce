@@ -9,7 +9,8 @@ export default class extends Controller {
     "teamNameOverlay", 
     "teamNameText",
     "progressCounter",
-    "pauseButton"
+    "pauseButton",
+    "pauseButtonText"
   ]
   
   connect() {
@@ -97,16 +98,26 @@ export default class extends Controller {
   }
   
   togglePause() {
+    console.log('Pause Text Target:', this.pauseButtonTextTarget);
     this.isPaused = !this.isPaused
-    
+    const icon = this.pauseButtonTarget.querySelector('i')
+
+    // Always remove both color classes and border first
+    this.pauseButtonTextTarget.classList.remove('!text-white', '!text-gray-800', 'bg-yellow-300') // Remove temp bg
+    this.pauseButtonTarget.classList.remove('border-2', 'border-black') // Use new border classes
+
     if (this.isPaused) {
-      this.pauseButtonTarget.innerHTML = '<i class="fa-solid fa-play mr-2"></i> Resume'
+      icon.className = 'fa-solid fa-play mr-2'
+      this.pauseButtonTextTarget.textContent = 'Resume'
       this.pauseButtonTarget.classList.remove('bg-gray-200', 'hover:bg-gray-300')
-      this.pauseButtonTarget.classList.add('bg-blue-500', 'hover:bg-blue-600', 'text-white')
+      this.pauseButtonTarget.classList.add('bg-blue-500', 'hover:bg-blue-600', 'border-2', 'border-black') // Add obvious border
+      this.pauseButtonTextTarget.classList.add('!text-white', 'bg-yellow-300') // Add !important white text and temp yellow bg
     } else {
-      this.pauseButtonTarget.innerHTML = '<i class="fa-solid fa-pause mr-2"></i> Pause'
-      this.pauseButtonTarget.classList.remove('bg-blue-500', 'hover:bg-blue-600', 'text-white')
+      icon.className = 'fa-solid fa-pause mr-2'
+      this.pauseButtonTextTarget.textContent = 'Pause'   
+      this.pauseButtonTarget.classList.remove('bg-blue-500', 'hover:bg-blue-600', 'border-2', 'border-black') // Remove obvious border
       this.pauseButtonTarget.classList.add('bg-gray-200', 'hover:bg-gray-300')
+      this.pauseButtonTextTarget.classList.add('!text-gray-800') // Add !important gray text
       
       // If we're not currently animating, load the next question
       if (!this.isAnimating) {

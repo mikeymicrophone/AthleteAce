@@ -3,18 +3,20 @@ module StrengthHelper
   def player_card player
     tag.div class: "player-info mb-6 text-center" do
       tag.h2("Who does #{player.full_name} play for?", class: "text-2xl font-bold mb-2") +
-      tag.div(class: "player-card bg-white rounded-lg shadow-lg p-4 max-w-md mx-auto") do
+      tag.div(class: "player-card bg-white rounded-lg shadow-lg p-4 max-w-md mx-auto flex flex-col") do
         if player.photo_urls.present?
-          tag.div class: "player-image-container h-64 mb-4" do
+          tag.div class: "player-image-container h-64 mb-4 w-full" do
             tag.img src: player.photo_urls.first, alt: player.full_name, class: "h-full mx-auto object-contain"
           end
         else
-          tag.div class: "player-image-placeholder h-64 mb-4 bg-gray-200 flex items-center justify-center" do
+          tag.div class: "player-image-placeholder h-64 mb-4 bg-gray-200 flex items-center justify-center w-full" do
             tag.i class: "fa-solid fa-user text-6xl text-gray-400"
           end
         end +
-        tag.h3(player.full_name, class: "text-xl font-bold") + 
-        (player.primary_position ? tag.p(player.primary_position.name, class: "text-gray-600") : '')
+        tag.div(class: "player-text-container mt-4 text-center w-full") do
+          tag.h3(player.full_name, class: "text-xl font-bold") + 
+          (player.primary_position ? tag.p(player.primary_position.name, class: "text-gray-600") : '')
+        end
       end
     end
   end
@@ -52,12 +54,15 @@ module StrengthHelper
 
   def pause_button stimulus_controller = "team-match"
     tag.div class: "pause-button" do
-      tag.button "<i class='fa-solid fa-pause mr-2'></i> Pause".html_safe,
-        class: "bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200",
+      tag.button(
+        tag.i(class: 'fa-solid fa-pause mr-2') + 
+        tag.span('Pause', data: { "#{stimulus_controller}_target": "pauseButtonText" }),
+        class: "flex items-center bg-gray-200 hover:bg-gray-300 font-medium py-2 px-4 rounded-lg transition-colors duration-200",
         data: {
-          (stimulus_controller.underscore + "_target") => "pauseButton",
+          "#{stimulus_controller}_target": "pauseButton",
           action: "click->#{stimulus_controller}#togglePause"
         }
+      )
     end
   end
 
