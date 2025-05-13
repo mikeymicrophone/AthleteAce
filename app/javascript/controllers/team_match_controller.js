@@ -11,7 +11,14 @@ export default class extends Controller {
     "teamNameText",
     "progressCounter",
     "pauseButton",
-    "pauseButtonText"
+    "pauseButtonText",
+    "currentPlayerCardDisplay", 
+    "lastAttemptContainer",     
+    "lastAttemptPlayerCard",    
+    "lastAttemptChosenTeamDisplay", 
+    "lastAttemptChosenTeamLogo",  
+    "lastAttemptChosenTeamLogoPlaceholder", 
+    "lastAttemptChosenTeamName"   
   ]
   
   static values = {
@@ -20,23 +27,32 @@ export default class extends Controller {
   }
 
   connect() {
+    console.log("[TM Controller] connect() called");
     this.correctAnswers = 0
     this.isPaused = false
     this.isAnimating = false 
+    console.log("[TM Controller] connect() - isAnimating set to:", this.isAnimating);
     this.nextQuestionTimer = null
     this.startTime = Date.now() 
-    console.log("Team Match Controller connected. Player ID:", this.playerIdValue, "Correct Team ID:", this.correctTeamIdValue);
+    // console.log("Team Match Controller connected. Player ID:", this.playerIdValue, "Correct Team ID:", this.correctTeamIdValue);
   }
   
   disconnect() {
+    console.log("[TM Controller] disconnect() called");
     if (this.nextQuestionTimer) {
       clearTimeout(this.nextQuestionTimer)
     }
   }
   
   checkAnswer(event) {
-    if (this.isAnimating) return
+    console.log("[TM Controller] checkAnswer() called");
+    if (this.isAnimating) {
+      console.log("[TM Controller] checkAnswer() - bailing: isAnimating is true");
+      return
+    }
+    console.log("[TM Controller] checkAnswer() - proceeding: isAnimating is false");
     this.isAnimating = true
+    console.log("[TM Controller] checkAnswer() - isAnimating set to true");
     
     const endTime = Date.now();
     const timeElapsedMs = endTime - this.startTime;
@@ -44,6 +60,7 @@ export default class extends Controller {
     const isCorrect = button.dataset.correct === "true"
     const chosenTeamId = parseInt(button.dataset.teamId)
     const teamName = button.querySelector(".team-name").textContent
+    const chosenTeamLogoUrl = button.dataset.teamLogoUrl;
 
     const optionsPresented = this.teamChoiceTargets.map(choice => ({
       id: parseInt(choice.dataset.teamId),
@@ -67,12 +84,30 @@ export default class extends Controller {
 
     this.sendAttemptData(attemptData);
 
+    // --- Update Last Attempt Display --- 
+    console.log("[TM Controller] checkAnswer() - updating last attempt display");
+    this.lastAttemptPlayerCardTarget.innerHTML = this.currentPlayerCardDisplayTarget.innerHTML;
+    this.lastAttemptChosenTeamNameTarget.textContent = teamName;
+
+    if (chosenTeamLogoUrl) {
+      this.lastAttemptChosenTeamLogoTarget.src = chosenTeamLogoUrl;
+      this.lastAttemptChosenTeamLogoTarget.alt = `${teamName} Logo`;
+      this.lastAttemptChosenTeamLogoTarget.classList.remove('hidden');
+      this.lastAttemptChosenTeamLogoPlaceholderTarget.classList.add('hidden');
+    } else {
+      this.lastAttemptChosenTeamLogoTarget.classList.add('hidden');
+      this.lastAttemptChosenTeamLogoPlaceholderTarget.classList.remove('hidden');
+      this.lastAttemptChosenTeamLogoPlaceholderTarget.textContent = "Logo N/A";
+    }
+
+    // Clear previous color coding
+    this.lastAttemptPlayerCardTarget.classList.remove('bg-green-100', 'border-green-500', 'bg-red-100', 'border-red-500');
+    this.lastAttemptChosenTeamDisplayTarget.classList.remove('bg-green-100', 'border-green-500', 'bg-red-100', 'border-red-500');
+
     if (isCorrect) {
+      console.log("[TM Controller] checkAnswer() - answer IS correct");
       this.correctAnswers++
       this.progressCounterTarget.textContent = this.correctAnswers
-    }
-    
-    if (isCorrect) {
       button.classList.add("correct", "pulsing")
       
       this.teamNameTextTarget.textContent = teamName
@@ -81,24 +116,13 @@ export default class extends Controller {
       setTimeout(() => {
         this.teamNameOverlayTarget.classList.remove("opacity-100")
       }, 750)
-
-      const correctTeamLogoUrl = button.dataset.teamLogoUrl; 
-      const staticLogoEl = document.getElementById('lastCorrectTeamLogo');
-      const staticNameEl = document.getElementById('lastCorrectTeamName');
-      const staticPlaceholderEl = document.getElementById('lastCorrectTeamLogoPlaceholder');
-
-      if (staticLogoEl && staticNameEl && staticPlaceholderEl && correctTeamLogoUrl) {
-        staticLogoEl.src = correctTeamLogoUrl;
-        staticLogoEl.alt = `${teamName} Logo`;
-        staticLogoEl.classList.remove('hidden');
-        staticNameEl.textContent = teamName;
-        staticPlaceholderEl.classList.add('hidden');
-      } else {
-        if (!correctTeamLogoUrl) console.warn('Team logo URL not found on button dataset for static display.');
-        if (!staticLogoEl || !staticNameEl || !staticPlaceholderEl) console.warn('Static display elements for last correct answer not found.');
-      }
       
+      // Apply correct styling to last attempt display
+      this.lastAttemptPlayerCardTarget.classList.add('bg-green-100', 'border-green-500');
+      this.lastAttemptChosenTeamDisplayTarget.classList.add('bg-green-100', 'border-green-500');
+
     } else {
+      console.log("[TM Controller] checkAnswer() - answer IS NOT correct");
       button.classList.add("incorrect")
       
       setTimeout(() => {
@@ -116,14 +140,25 @@ export default class extends Controller {
           }
         })
       }, 500)
+
+      // Apply incorrect styling to last attempt display
+      this.lastAttemptPlayerCardTarget.classList.add('bg-red-100', 'border-red-500');
+      this.lastAttemptChosenTeamDisplayTarget.classList.add('bg-red-100', 'border-red-500');
     }
+
+    this.lastAttemptContainerTarget.classList.remove('hidden'); // Show the container
+    console.log("[TM Controller] checkAnswer() - lastAttemptContainer shown");
     
     if (this.nextQuestionTimer) clearTimeout(this.nextQuestionTimer);
-
+    console.log("[TM Controller] checkAnswer() - scheduling nextQuestionTimer");
     this.nextQuestionTimer = setTimeout(() => {
+      console.log("[TM Controller] setTimeout callback - setting isAnimating to false");
       this.isAnimating = false
       if (!this.isPaused) {
+        console.log("[TM Controller] setTimeout callback - calling loadNextQuestion()");
         this.loadNextQuestion()
+      } else {
+        console.log("[TM Controller] setTimeout callback - game is paused, not loading next question");
       }
     }, 3000)
   }
@@ -158,6 +193,7 @@ export default class extends Controller {
   }
   
   loadNextQuestion() {
+    console.log("[TM Controller] loadNextQuestion() called");
     const url = new URL(window.location.href)
     
     Turbo.visit(url.toString())
