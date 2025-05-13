@@ -95,7 +95,8 @@ class StrengthController < ApplicationController
       teams_pool = @parent.teams
       return redirect_back(fallback_location: root_path, alert: "No teams found in this scope.") if teams_pool.empty?
       filter_params[:team_ids] = teams_pool.map(&:id)
-    elsif ace_signed_in? && no_scope_specified?
+    elsif ace_signed_in? && no_scope_specified? &&
+          filter_params[:team_id].blank? && filter_params[:sport_id].blank? && filter_params[:league_id].blank?
       quest_teams = current_ace.active_goals.flat_map { |g| g.quest.associated_teams }.uniq
       unless quest_teams.empty?
         cross_sport = params[:cross_sport] == 'true'
@@ -111,7 +112,11 @@ class StrengthController < ApplicationController
     end
 
     @current_player = players.sample
-    pool            = teams_pool || @current_player.team.league.teams
+    pool            = if teams_pool&.map(&:id)&.include?(@current_player.team_id)
+                        teams_pool
+                      else
+                        @current_player.team.league.teams
+                      end
     round           = TeamMatchRound.new(player: @current_player, pool: pool)
 
     @team_choices   = round.choices
