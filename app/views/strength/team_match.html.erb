@@ -1,7 +1,7 @@
 <% content_for :title, @division.present? ? "#{@division.name} Division Quiz - Team Match" : "Team Match - Strength Training" %>
 
 <%= turbo_frame_tag "team_match_game" do %>
-  <div class="team-match-container" data-controller="team-match">
+  <div class="team-match-container" data-controller="team-match" data-team-match-player-id-value="<%= @current_player.id %>" data-team-match-correct-team-id-value="<%= @correct_team.id %>">
     <div class="filter-indicators mb-4">
       <%= teams_filter_label @parent %>
     </div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_07_213500) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_13_042900) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -90,6 +90,26 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_07_213500) do
     t.string "logo_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "game_attempts", force: :cascade do |t|
+    t.bigint "ace_id", null: false
+    t.string "game_type", null: false
+    t.string "subject_entity_type", null: false
+    t.bigint "subject_entity_id", null: false
+    t.string "target_entity_type", null: false
+    t.bigint "target_entity_id", null: false
+    t.jsonb "options_presented", default: [], null: false
+    t.string "chosen_entity_type"
+    t.bigint "chosen_entity_id"
+    t.boolean "is_correct", null: false
+    t.integer "time_elapsed_ms", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ace_id"], name: "index_game_attempts_on_ace_id"
+    t.index ["chosen_entity_type", "chosen_entity_id"], name: "index_game_attempts_on_chosen_entity"
+    t.index ["subject_entity_type", "subject_entity_id"], name: "index_game_attempts_on_subject_entity"
+    t.index ["target_entity_type", "target_entity_id"], name: "index_game_attempts_on_target_entity"
   end
 
   create_table "goals", force: :cascade do |t|
@@ -271,6 +291,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_07_213500) do
   add_foreign_key "cities", "states"
   add_foreign_key "conferences", "leagues"
   add_foreign_key "divisions", "conferences"
+  add_foreign_key "game_attempts", "aces"
   add_foreign_key "goals", "aces"
   add_foreign_key "goals", "quests"
   add_foreign_key "highlights", "achievements"

@@ -14,10 +14,18 @@ export default class extends Controller {
     "pauseButtonText"
   ]
   
+  static values = {
+    playerId: Number, 
+    correctTeamId: Number 
+  }
+
   connect() {
     this.correctAnswers = 0
     this.isPaused = false
+    this.isAnimating = false 
     this.nextQuestionTimer = null
+    this.startTime = Date.now() 
+    console.log("Team Match Controller connected. Player ID:", this.playerIdValue, "Correct Team ID:", this.correctTeamIdValue);
   }
   
   disconnect() {
@@ -27,52 +35,65 @@ export default class extends Controller {
   }
   
   checkAnswer(event) {
-    // Prevent multiple clicks during animation
     if (this.isAnimating) return
     this.isAnimating = true
     
+    const endTime = Date.now();
+    const timeElapsedMs = endTime - this.startTime;
     const button = event.currentTarget
     const isCorrect = button.dataset.correct === "true"
-    const teamId = button.dataset.teamId
+    const chosenTeamId = parseInt(button.dataset.teamId)
     const teamName = button.querySelector(".team-name").textContent
-    
-    // Update progress counter if correct
+
+    const optionsPresented = this.teamChoiceTargets.map(choice => ({
+      id: parseInt(choice.dataset.teamId),
+      type: "Team",
+      name: choice.querySelector(".team-name").textContent
+    }));
+
+    const attemptData = {
+      ace_id: null, 
+      game_type: "player_team_match",
+      subject_entity_id: this.playerIdValue,
+      subject_entity_type: "Player",
+      target_entity_id: this.correctTeamIdValue,
+      target_entity_type: "Team",
+      chosen_entity_id: chosenTeamId,
+      chosen_entity_type: "Team",
+      options_presented: optionsPresented,
+      is_correct: isCorrect,
+      time_elapsed_ms: timeElapsedMs
+    };
+
+    this.sendAttemptData(attemptData);
+
     if (isCorrect) {
       this.correctAnswers++
       this.progressCounterTarget.textContent = this.correctAnswers
     }
     
-    // Show result
     if (isCorrect) {
-      // Correct answer - show green and pulse
       button.classList.add("correct", "pulsing")
       
-      // Show team name overlay
       this.teamNameTextTarget.textContent = teamName
       this.teamNameOverlayTarget.classList.add("opacity-100")
       
-      // Hide overlay after 750ms
       setTimeout(() => {
         this.teamNameOverlayTarget.classList.remove("opacity-100")
       }, 750)
       
     } else {
-      // Incorrect answer - show red
       button.classList.add("incorrect")
       
-      // After 500ms, show correct answer
       setTimeout(() => {
-        // Find and highlight correct answer
         this.teamChoiceTargets.forEach(choice => {
           if (choice.dataset.correct === "true") {
             choice.classList.add("correct-answer")
             
-            // Show team name overlay
             const correctTeamName = choice.querySelector(".team-name").textContent
             this.teamNameTextTarget.textContent = correctTeamName
             this.teamNameOverlayTarget.classList.add("opacity-100")
             
-            // Hide overlay after 750ms
             setTimeout(() => {
               this.teamNameOverlayTarget.classList.remove("opacity-100")
             }, 750)
@@ -81,7 +102,8 @@ export default class extends Controller {
       }, 500)
     }
     
-    // Schedule next question after 3 seconds (if not paused)
+    if (this.nextQuestionTimer) clearTimeout(this.nextQuestionTimer);
+
     this.nextQuestionTimer = setTimeout(() => {
       this.isAnimating = false
       if (!this.isPaused) {
@@ -89,12 +111,39 @@ export default class extends Controller {
       }
     }, 3000)
   }
+
+  async sendAttemptData(payload) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (!csrfToken) {
+      console.error("CSRF token not found!");
+      return;
+    }
+
+    try {
+      const response = await fetch('/game_attempts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-Token': csrfToken
+        },
+        body: JSON.stringify({ game_attempt: payload }) 
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Failed to save game attempt:', response.status, errorData.errors);
+      } else {
+        console.log('Game attempt saved successfully.');
+      }
+    } catch (error) {
+      console.error('Error sending game attempt data:', error);
+    }
+  }
   
   loadNextQuestion() {
-    // Get current URL with params
     const url = new URL(window.location.href)
     
-    // Reload the page to get a new question
     Turbo.visit(url.toString())
   }
   
@@ -104,15 +153,16 @@ export default class extends Controller {
     const icon = this.pauseButtonTarget.querySelector('i')
 
     if (this.isPaused) {
+      if (this.nextQuestionTimer) clearTimeout(this.nextQuestionTimer);
       icon.className = 'fa-solid fa-play mr-2'
       this.pauseButtonTextTarget.textContent = 'Resume'
     } else {
       icon.className = 'fa-solid fa-pause mr-2'
       this.pauseButtonTextTarget.textContent = 'Pause'   
       
-      // If we're not currently animating, load the next question
-      if (!this.isAnimating) {
-        this.loadNextQuestion()
+      if (!this.isAnimating && this.nextQuestionTimer) {
+      } else if (!this.isAnimating) {
+         this.loadNextQuestion();
       }
     }
   }
