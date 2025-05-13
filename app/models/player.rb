@@ -9,6 +9,9 @@ class Player < ApplicationRecord
   has_many :positions, through: :roles
   has_many :ratings, as: :target, dependent: :destroy
   
+  # DB-level sampling scope – avoids pulling full result sets into memory
+  scope :sampled, ->(n = 50) { order(Arel.sql('RANDOM()')).limit(n) }
+  
   def name
     "#{first_name} #{last_name}"
   end
