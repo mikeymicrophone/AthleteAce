@@ -1,30 +1,52 @@
 <% content_for :title, @division.present? ? "#{@division.name} Division Quiz - Team Match" : "Team Match - Strength Training" %>
 
-<%= turbo_frame_tag "team_match_game" do %>
-  <div class="team-match-container" data-controller="team-match" data-team-match-player-id-value="<%= @current_player.id %>" data-team-match-correct-team-id-value="<%= @correct_team.id %>">
-    <div class="filter-indicators mb-4">
-      <%= teams_filter_label @parent %>
-    </div>
-
-    <div class="team-match-game" data-team-match-target="gameContainer">
+<div class="flex flex-col lg:flex-row lg:gap-x-8"> 
+  <div class="lg:w-1/3 mb-4 lg:mb-0"> 
+    <!-- Static Player Card Area -->
+    <div class="mb-4"> 
       <%= player_card @current_player %>
-      <%= team_choice_group @team_choices, @correct_team.id %>
-
-      <!-- Floating team name overlay (hidden by default) -->
-      <div class="team-name-overlay fixed inset-0 flex items-center justify-center pointer-events-none opacity-0 z-50" data-team-match-target="teamNameOverlay">
-        <div class="team-name-content text-8xl font-extrabold text-center text-white text-shadow-lg">
-          <span data-team-match-target="teamNameText"></span>
-        </div>
-      </div>
-
-      <!-- Controls -->
-      <div class="controls flex justify-between items-center mt-8">
-        <div class="progress">
-          <span class="text-gray-600">Progress: <span data-team-match-target="progressCounter">0</span> correct</span>
-        </div>
-        
-        <%= pause_button "team-match" %>
-      </div>
     </div>
+  </div> 
+
+  <div class="lg:w-2/3"> 
+    <%= turbo_frame_tag "team_match_game" do %>
+      <div class="team-match-container" 
+           data-controller="team-match" 
+           data-team-match-player-id-value="<%= @current_player.id %>" 
+           data-team-match-correct-team-id-value="<%= @correct_team.id %>">
+        
+        <div class="filter-indicators mb-4">
+          <%= teams_filter_label @parent %>
+        </div>
+
+        <div class="team-match-game" data-team-match-target="gameContainer">
+          <%= team_choice_group @team_choices, @correct_team.id %>
+
+          <!-- Floating team name overlay (hidden by default) -->
+          <div class="team-name-overlay fixed inset-0 flex items-center justify-center pointer-events-none opacity-0 z-50" data-team-match-target="teamNameOverlay">
+            <div class="team-name-content text-8xl font-extrabold text-center text-white text-shadow-lg">
+              <span data-team-match-target="teamNameText"></span>
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <div class="controls flex justify-between items-center mt-8">
+            <div class="progress">
+              <span class="text-gray-600">Progress: <span data-team-match-target="progressCounter">0</span> correct</span>
+            </div>
+            <%= pause_button "team-match" %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div> 
+
+<!-- Static Last Correct Answer Area -->
+<div class="mt-8 p-4 border-t border-gray-200 text-center">
+  <h3 class="text-lg font-semibold mb-2">Last Correct Match:</h3>
+  <div id="lastCorrectTeamLogoContainer">
+    <img id="lastCorrectTeamLogo" src="" alt="Team Logo" class="mx-auto h-16 w-16 hidden">
+    <p id="lastCorrectTeamLogoPlaceholder" class="text-gray-500">Play a round to see the last correct match!</p>
   </div>
-<% end %>
+  <p id="lastCorrectTeamName" class="text-xl font-bold mt-2"></p>
+</div>

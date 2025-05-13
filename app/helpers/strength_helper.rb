@@ -37,6 +37,7 @@ module StrengthHelper
         team_match_target: "teamChoice",
         team_id: team.id,
         correct: correct,
+        team_logo_url: team.logo_url,
         action: "click->team-match#checkAnswer"
       } do
       tag.div(class: "team-logo-container h-20 w-20 mb-3 flex items-center justify-center") do

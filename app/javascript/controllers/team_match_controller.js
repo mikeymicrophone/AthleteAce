@@ -81,6 +81,22 @@ export default class extends Controller {
       setTimeout(() => {
         this.teamNameOverlayTarget.classList.remove("opacity-100")
       }, 750)
+
+      const correctTeamLogoUrl = button.dataset.teamLogoUrl; 
+      const staticLogoEl = document.getElementById('lastCorrectTeamLogo');
+      const staticNameEl = document.getElementById('lastCorrectTeamName');
+      const staticPlaceholderEl = document.getElementById('lastCorrectTeamLogoPlaceholder');
+
+      if (staticLogoEl && staticNameEl && staticPlaceholderEl && correctTeamLogoUrl) {
+        staticLogoEl.src = correctTeamLogoUrl;
+        staticLogoEl.alt = `${teamName} Logo`;
+        staticLogoEl.classList.remove('hidden');
+        staticNameEl.textContent = teamName;
+        staticPlaceholderEl.classList.add('hidden');
+      } else {
+        if (!correctTeamLogoUrl) console.warn('Team logo URL not found on button dataset for static display.');
+        if (!staticLogoEl || !staticNameEl || !staticPlaceholderEl) console.warn('Static display elements for last correct answer not found.');
+      }
       
     } else {
       button.classList.add("incorrect")
