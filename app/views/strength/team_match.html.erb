@@ -1,28 +1,30 @@
 <% content_for :title, @division.present? ? "#{@division.name} Division Quiz - Team Match" : "Team Match - Strength Training" %>
 
-<div class="team-match-container" data-controller="team-match">
-  <div class="filter-indicators mb-4">
-    <%= teams_filter_label @parent %>
-  </div>
-
-  <div class="team-match-game" data-team-match-target="gameContainer">
-    <%= player_card @current_player %>
-    <%= team_choice_group @team_choices, @correct_team.id %>
-
-    <!-- Floating team name overlay (hidden by default) -->
-    <div class="team-name-overlay fixed inset-0 flex items-center justify-center pointer-events-none opacity-0 z-50" data-team-match-target="teamNameOverlay">
-      <div class="team-name-content text-8xl font-extrabold text-center text-white text-shadow-lg">
-        <span data-team-match-target="teamNameText"></span>
-      </div>
+<%= turbo_frame_tag "team_match_game" do %>
+  <div class="team-match-container" data-controller="team-match">
+    <div class="filter-indicators mb-4">
+      <%= teams_filter_label @parent %>
     </div>
 
-    <!-- Controls -->
-    <div class="controls flex justify-between items-center mt-8">
-      <div class="progress">
-        <span class="text-gray-600">Progress: <span data-team-match-target="progressCounter">0</span> correct</span>
+    <div class="team-match-game" data-team-match-target="gameContainer">
+      <%= player_card @current_player %>
+      <%= team_choice_group @team_choices, @correct_team.id %>
+
+      <!-- Floating team name overlay (hidden by default) -->
+      <div class="team-name-overlay fixed inset-0 flex items-center justify-center pointer-events-none opacity-0 z-50" data-team-match-target="teamNameOverlay">
+        <div class="team-name-content text-8xl font-extrabold text-center text-white text-shadow-lg">
+          <span data-team-match-target="teamNameText"></span>
+        </div>
       </div>
-      
-      <%= pause_button "team-match" %>
+
+      <!-- Controls -->
+      <div class="controls flex justify-between items-center mt-8">
+        <div class="progress">
+          <span class="text-gray-600">Progress: <span data-team-match-target="progressCounter">0</span> correct</span>
+        </div>
+        
+        <%= pause_button "team-match" %>
+      </div>
     </div>
   </div>
-</div>
+<% end %>

@@ -1,5 +1,6 @@
 // app/javascript/controllers/team_match_controller.js
 import { Controller } from "@hotwired/stimulus"
+import { Turbo } from "@hotwired/turbo-rails"
 
 export default class extends Controller {
   static targets = [
@@ -94,7 +95,7 @@ export default class extends Controller {
     const url = new URL(window.location.href)
     
     // Reload the page to get a new question
-    window.location.href = url.toString()
+    Turbo.visit(url.toString())
   }
   
   togglePause() {
