@@ -9,6 +9,7 @@ class Ace < ApplicationRecord
   has_many :active_goals, -> { Goal.active }, class_name: 'Goal'
   has_many :quests, through: :goals
   has_many :ratings, dependent: :destroy
+  has_many :game_attempts, dependent: :destroy
   
   def adopt_quest(quest)
     goals.find_or_create_by(quest: quest)
