@@ -13,11 +13,6 @@ export default class extends Controller {
   }
 
   connect() {
-    console.log("[RatingSlider] Controller connected!", this.element);
-    // console.log("Player ID:", this.playerIdValue);
-    // console.log("Team ID:", this.teamIdValue);
-    // Initial setup for each slider can be done here if necessary,
-    // though most is handled by ERB and data-actions now.
     this.initializeAllSliders();
   }
 
