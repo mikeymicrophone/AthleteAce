@@ -31,7 +31,10 @@ Rails.application.routes.draw do
   resources :federations
   
   # Rating system
-  resources :spectrums
+  resources :spectrums do
+    resources :ratings
+  end
+
   resources :ratings
   
   resources :players do
