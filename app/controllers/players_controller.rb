@@ -3,17 +3,37 @@ class PlayersController < ApplicationController
 
   # GET /players or /players.json
   def index
-    if params[:sport_id]
-      @players = Sport.find(params[:sport_id]).players
+    # Start building the base query
+    base_query = if params[:sport_id]
+      Sport.find(params[:sport_id]).players
     elsif params[:league_id]
-      @players = League.find(params[:league_id]).players
+      League.find(params[:league_id]).players
     elsif params[:stadium_id]
-      @players = Stadium.find(params[:stadium_id]).players
+      Stadium.find(params[:stadium_id]).players
     elsif params[:team_id]
       @team = Team.find(params[:team_id])
-      @players = @team.players
+      @team.players
     else
-      @players = Player.all
+      Player.all
+    end
+    
+    # Determine sort field and add necessary joins
+    sort_field = params[:sort] || "first_name"
+    
+    # Add joins conditionally based on sort field
+    @players = case sort_field
+    when "league_id", "league.name"
+      # Join with teams and leagues when sorting by league
+      base_query.joins(:team => :league).order("leagues.name")
+    when "sport_id", "sport.name"
+      # Join with teams and sports when sorting by sport
+      base_query.joins(:team => {:league => :sport}).order("sports.name")
+    when "team_id", "team.name"
+      # Join with teams when sorting by team
+      base_query.joins(:team).order("teams.mascot")
+    else
+      # No joins needed for player attributes
+      base_query.order(sort_field)
     end
     
     # Load available spectrums for the rating selector

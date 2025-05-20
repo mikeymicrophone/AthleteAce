@@ -18,7 +18,6 @@ class Rating < ApplicationRecord
   # Scopes
   scope :by_ace, ->(ace) { where(ace: ace) }
   scope :by_spectrum, ->(spectrum) { where(spectrum: spectrum) }
-  scope :on_spectrum, ->(spectrum) { where(spectrum: spectrum) } # Alias for by_spectrum for more readable code
   scope :for_target, ->(target) { where(target: target) }
   scope :positive, -> { where('value > 0') }
   scope :negative, -> { where('value < 0') }

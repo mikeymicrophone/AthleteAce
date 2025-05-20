@@ -21,7 +21,7 @@
           </div>
           
           <div class="flex justify-between items-center mt-4">
-            <%= link_to "You have " + pluralize(current_ace.ratings.on_spectrum(spectrum).count, "rating"), spectrum, class: "text-blue-600 hover:text-blue-800" %>
+            <%= link_to "You have " + pluralize(current_ace.ratings.by_spectrum(spectrum).count, "rating"), spectrum, class: "text-blue-600 hover:text-blue-800" %>
             <%= link_to "Total is " + pluralize(spectrum.ratings.count, "rating"), [spectrum, :ratings], class: "text-blue-600 hover:text-blue-800" %>
           </div>
         </div>
