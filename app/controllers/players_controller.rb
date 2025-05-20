@@ -17,26 +17,66 @@ class PlayersController < ApplicationController
       Player.all
     end
     
-    # Determine sort field and add necessary joins
-    sort_field = params[:sort] || "first_name"
-    
-    # Add joins conditionally based on sort field
-    @players = case sort_field
-    when "league_id", "league.name"
-      # Join with teams and leagues when sorting by league
-      base_query.joins(:team => :league).order("leagues.name")
-    when "sport_id", "sport.name"
-      # Join with teams and sports when sorting by sport
-      base_query.joins(:team => {:league => :sport}).order("sports.name")
-    when "team_id", "team.name"
-      # Join with teams when sorting by team
-      base_query.joins(:team).order("teams.mascot")
-    when "random"
-      # Random sorting
-      base_query.order(Arel.sql("RANDOM()"))
+    # Parse sort parameters - can be a single string or an array of sort fields
+    sort_params = if params[:sort].present?
+      params[:sort].is_a?(Array) ? params[:sort] : [params[:sort]]
     else
-      # No joins needed for player attributes
-      base_query.order(sort_field)
+      ["first_name"] # Default sort
+    end
+    
+    # Start with the base query
+    query = base_query
+    
+    # Track if we need to add specific joins
+    needs_league_join = false
+    needs_sport_join = false
+    needs_team_join = false
+    needs_position_join = false
+    
+    # Determine required joins based on all sort fields
+    sort_params.each do |sort_field|
+      case sort_field
+      when "league_id", "league.name"
+        needs_league_join = true
+        needs_team_join = true
+      when "sport_id", "sport.name"
+        needs_sport_join = true
+        needs_league_join = true
+        needs_team_join = true
+      when "team_id", "team.name", "teams.mascot", "teams.territory"
+        needs_team_join = true
+      when "position_id", "position.name", "positions.name"
+        needs_position_join = true
+      end
+    end
+    
+    # Apply necessary joins
+    query = query.joins(:team) if needs_team_join
+    query = query.joins(:team => :league) if needs_league_join
+    query = query.joins(:team => {:league => :sport}) if needs_sport_join
+    query = query.joins(:primary_position) if needs_position_join
+    
+    # Handle special case for random sorting
+    if sort_params.include?("random")
+      @players = query.order(Arel.sql("RANDOM()"))
+    else
+      # Build the order clause for multiple fields
+      order_clauses = sort_params.map do |sort_field|
+        case sort_field
+        when "league_id", "league.name"
+          "leagues.name"
+        when "sport_id", "sport.name"
+          "sports.name"
+        when "team_id", "team.name"
+          "teams.mascot"
+        when "position_id", "position.name", "positions.name"
+          "positions.name"
+        else
+          sort_field
+        end
+      end
+      
+      @players = query.order(order_clauses.join(", "))
     end
     
     # Load available spectrums for the rating selector
