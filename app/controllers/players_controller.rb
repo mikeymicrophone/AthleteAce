@@ -31,6 +31,9 @@ class PlayersController < ApplicationController
     when "team_id", "team.name"
       # Join with teams when sorting by team
       base_query.joins(:team).order("teams.mascot")
+    when "random"
+      # Random sorting
+      base_query.order(Arel.sql("RANDOM()"))
     else
       # No joins needed for player attributes
       base_query.order(sort_field)
