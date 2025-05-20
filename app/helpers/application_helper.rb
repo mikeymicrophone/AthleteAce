@@ -3,8 +3,9 @@ module ApplicationHelper
   
   # Renders a Tailwind CSS styled pagination component
   # @param pagy [Pagy] The Pagy object
+  # @param nearby_pages [Integer] Number of pages to show on either side of the current page (default: 2)
   # @return [String] HTML for the pagination component
-  def tailwind_pagination(pagy)
+  def tailwind_pagination(pagy, nearby_pages = 2)
     return unless pagy.pages > 1
     
     tag.nav(class: "flex justify-center my-6", "aria-label": "Pagination") do
@@ -26,9 +27,9 @@ module ApplicationHelper
           end)
         end
         
-        # Page links - simplified approach
-        from = [1, pagy.page - 2].max
-        to = [pagy.pages, pagy.page + 2].min
+        # Page links - simplified approach with configurable range
+        from = [1, pagy.page - nearby_pages].max
+        to = [pagy.pages, pagy.page + nearby_pages].min
         
         # First page if needed
         if from > 1

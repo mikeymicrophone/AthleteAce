@@ -14,7 +14,7 @@
 
 <%= render_floating_spectrum_picker %>
 
-<%= tailwind_pagination(@pagy) %>
+<%= pagy_nav(@pagy).html_safe %>
 
 <div id="players" class="space-y-4">
   <% @players.each do |player| %>
@@ -58,4 +58,4 @@
   <% end %>
 </div>
 
-<%= tailwind_pagination(@pagy) %>
+<%= pagy_nav(@pagy).html_safe %>
