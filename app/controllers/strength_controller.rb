@@ -76,7 +76,6 @@ class StrengthController < ApplicationController
     @players = fetch_players_with_params(filter_params).select { |p| p.photo_urls.present? }
     
     if @players.empty?
-      flash.now[:alert] = "No players with photos found with the selected filters. Showing all players with photos instead."
       @players = Player.where.not(photo_urls: [nil, '']).limit(50).to_a
     end
     
@@ -107,7 +106,6 @@ class StrengthController < ApplicationController
 
     players = PlayerSearch.new(filter_params).call
     if players.empty?
-      flash.now[:alert] = "No players found with the selected filters. Showing random players instead."
       players = Player.sampled(50)
     end
 
