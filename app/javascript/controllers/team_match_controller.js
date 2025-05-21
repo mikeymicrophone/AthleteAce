@@ -194,9 +194,17 @@ export default class extends Controller {
   
   loadNextQuestion() {
     console.log("[TM Controller] loadNextQuestion() called");
-    const url = new URL(window.location.href)
-    
-    Turbo.visit(url.toString())
+    const frame = document.getElementById('team_match_game');
+    if (frame && typeof frame.reload === 'function') {
+      console.log("[TM Controller] Reloading turbo frame #team_match_game");
+      frame.reload();
+    } else if (frame) {
+      console.log("[TM Controller] Forcing src reload on turbo frame #team_match_game");
+      frame.src = frame.src; // fallback
+    } else {
+      console.log("[TM Controller] Turbo frame not found, falling back to full visit");
+      Turbo.visit(window.location.href);
+    }
   }
   
   togglePause() {
