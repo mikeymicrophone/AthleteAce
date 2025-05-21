@@ -17,66 +17,24 @@ class PlayersController < ApplicationController
       Player.all
     end
     
-    # Parse sort parameters - can be a single string or an array of sort fields
-    sort_params = if params[:sort].present?
-      params[:sort].is_a?(Array) ? params[:sort] : [params[:sort]]
+    # Build the query with proper joins for sorting and searching
+    base_query = base_query.joins(:team, team: [:league, league: :sport])
+                          .left_joins(:positions)
+                          .select("players.*, teams.mascot as team_name, teams.territory as team_territory, " +
+                                 "leagues.name as league_name, sports.name as sport_name, positions.name as position_name")
+    
+    # Initialize Ransack search object
+    @q = base_query.ransack(params[:q])
+    
+    # Set default sort if none specified
+    @q.sorts = 'first_name asc' if @q.sorts.empty?
+    
+    # Handle random sorting as a special case
+    if params[:random].present? && params[:random] == 'true'
+      @players = base_query.order(Arel.sql('RANDOM()'))
     else
-      ["first_name"] # Default sort
-    end
-    
-    # Start with the base query
-    query = base_query
-    
-    # Track if we need to add specific joins
-    needs_league_join = false
-    needs_sport_join = false
-    needs_team_join = false
-    needs_position_join = false
-    
-    # Determine required joins based on all sort fields
-    sort_params.each do |sort_field|
-      case sort_field
-      when "league_id", "league.name"
-        needs_league_join = true
-        needs_team_join = true
-      when "sport_id", "sport.name"
-        needs_sport_join = true
-        needs_league_join = true
-        needs_team_join = true
-      when "team_id", "team.name", "teams.mascot", "teams.territory"
-        needs_team_join = true
-      when "position_id", "position.name", "positions.name"
-        needs_position_join = true
-      end
-    end
-    
-    # Apply necessary joins
-    query = query.joins(:team) if needs_team_join
-    query = query.joins(:team => :league) if needs_league_join
-    query = query.joins(:team => {:league => :sport}) if needs_sport_join
-    query = query.joins(:primary_position) if needs_position_join
-    
-    # Handle special case for random sorting
-    if sort_params.include?("random")
-      @players = query.order(Arel.sql("RANDOM()"))
-    else
-      # Build the order clause for multiple fields
-      order_clauses = sort_params.map do |sort_field|
-        case sort_field
-        when "league_id", "league.name"
-          "leagues.name"
-        when "sport_id", "sport.name"
-          "sports.name"
-        when "team_id", "team.name"
-          "teams.mascot"
-        when "position_id", "position.name", "positions.name"
-          "positions.name"
-        else
-          sort_field
-        end
-      end
-      
-      @players = query.order(order_clauses.join(", "))
+      # Get the result with distinct to avoid duplicates from joins
+      @players = @q.result(distinct: true)
     end
     
     # Load available spectrums for the rating selector
@@ -85,7 +43,8 @@ class PlayersController < ApplicationController
     # Set current spectrum ID if provided in params
     set_current_spectrum_id(params[:spectrum_id]) if params[:spectrum_id].present?
     
-    @pagy, @players = pagy(@players)
+    # Paginate the results
+    @pagy, @players = pagy(@players, items: params[:per_page] || 20)
   end
 
   # GET /players/1 or /players/1.json

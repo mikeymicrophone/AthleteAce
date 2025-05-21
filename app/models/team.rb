@@ -49,4 +49,14 @@ class Team < ApplicationRecord
     
     (avg + 10_000) / 20_000
   end
+  
+  # Define which attributes can be searched via Ransack
+  def self.ransackable_attributes(auth_object = nil)
+    ["created_at", "id", "league_id", "mascot", "stadium_id", "territory", "updated_at"]
+  end
+  
+  # Define which associations can be searched via Ransack
+  def self.ransackable_associations(auth_object = nil)
+    ["active_membership", "conference", "division", "league", "memberships", "players", "ratings", "stadium"]
+  end
 end

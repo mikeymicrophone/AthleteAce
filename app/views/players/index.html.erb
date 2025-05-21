@@ -1,15 +1,26 @@
 <% content_for :title, "Players" %>
 
-<div class="flex justify-between items-center mb-4">
-  <h1 class="text-2xl font-bold">Players</h1>
+<h1 class="text-2xl font-bold mb-4">Players</h1>
 
-  <%= sorting_scopes_for(@players) %>
-  
-  <% if params[:team_id].present? %>
-    <div class="text-lg font-medium">
-      Team: <%= link_to @team.name, @team, class: "text-blue-600 hover:underline" %>
-    </div>
-  <% end %>
+<% if params[:team_id].present? %>
+  <div class="mb-4 text-lg font-medium">
+    Team: <%= link_to @team.name, @team, class: "text-blue-600 hover:underline" %>
+  </div>
+<% end %>
+
+<%= player_search_form(@q) %>
+
+<div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+  <div class="flex flex-wrap gap-2 items-center">
+    <span class="text-sm text-gray-600 mr-1">Sort by:</span>
+    <%= tailwind_sort_link(@q, :first_name) %>
+    <%= tailwind_sort_link(@q, :last_name) %>
+    <%= tailwind_sort_link(@q, :team_name, "Team") %>
+    <%= tailwind_sort_link(@q, :league_name, "League") %>
+    <%= tailwind_sort_link(@q, :sport_name, "Sport") %>
+    <%= tailwind_sort_link(@q, :position_name, "Position") %>
+    <%= random_sort_link %>
+  </div>
 </div>
 
 <%= render_floating_spectrum_picker %>
