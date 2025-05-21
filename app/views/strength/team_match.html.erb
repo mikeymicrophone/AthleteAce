@@ -17,9 +17,9 @@
     <%= turbo_frame_tag "team_match_game" do %>
       <div class="team-match-container">
         
-        <div class="filter-indicators mb-4">
+        <%= tag.div class: "filter-indicators mb-4" do %>
           <%= teams_filter_label @parent %>
-        </div>
+        <% end %>
 
         <%= tag.div class: "team-match-game", data: { team_match_target: "gameContainer" } do %>
           <%= team_choice_group @team_choices, @correct_team.id %>
@@ -35,38 +35,36 @@
         <!-- Controls -->
         <%= tag.div class: "controls flex justify-between items-center mt-8", data: { team_match_target: "controls" } do %>
           <%= tag.div class: "progress" do %>
-            <span class="text-gray-600">Progress: <span data-team-match-target="progressCounter">0</span> correct</span>
+            <%= tag.span "Progress: #{tag.span("0", data: { team_match_target: "progressCounter" })} correct".html_safe, class: "text-gray-600" %>
           <% end %>
           <%= pause_button "team-match" %>
         <% end %>
-
-        <!-- Last Attempt Details Area -->
-        <%= tag.div data: { team_match_target: "lastAttemptContainer" }, class: "mt-8 p-4 border border-gray-200 rounded-lg shadow-sm hidden" do %>
-          <h3 class="text-lg font-semibold mb-3 text-center text-gray-700">Most Recent Attempt:</h3>
-          <div class="flex flex-col md:flex-row items-stretch justify-center md:gap-x-6 gap-y-4">
-            
-            <!-- Player Display Area -->
-            <%= tag.div data: { team_match_target: "lastAttemptPlayerCard" }, class: "p-3 border rounded-md w-full md:w-auto flex-shrink-0" do %>
-              <!-- Player card/info will be injected here by JS -->
-              <p class="text-sm text-gray-400 italic text-center">Player details will appear here.</p>
-            <% end %>
-            
-            <%= tag.div class: "flex items-center justify-center text-2xl font-semibold text-gray-500" do %>
-              <span class="hidden md:inline">→</span>
-              <span class="md:hidden">Selected:</span>
-            <% end %>
-            
-            <!-- Chosen Team Display Area -->
-            <%= tag.div data: { team_match_target: "lastAttemptChosenTeamDisplay" }, class: "p-3 border rounded-md text-center w-full md:w-auto flex-shrink-0" do %>
-              <%= tag.img data: { team_match_target: "lastAttemptChosenTeamLogo" }, src: "", alt: "Chosen Team Logo", class: "mx-auto h-16 w-16 object-contain mb-2 hidden" %>
-              <%= tag.p "Chosen team", data: { team_match_target: "lastAttemptChosenTeamLogoPlaceholder" }, class: "text-gray-500 text-sm my-2" %>
-              <%= tag.p "", data: { team_match_target: "lastAttemptChosenTeamName" }, class: "text-lg font-bold" %>
-            <% end %>
-          </div>
-        <% end %>
-
       </div> 
     <% end %>
-  <% end %>
 
+    <!-- Last Attempt Details Area -->
+    <%= tag.div data: { team_match_target: "lastAttemptContainer" }, class: "mt-8 p-4 border border-gray-200 rounded-lg shadow-sm hidden" do %>
+      <%= tag.h3 "Most Recent Attempt", class: "text-lg font-semibold mb-3 text-center text-gray-700" %>
+      <%= tag.div class: "flex flex-col md:flex-row items-stretch justify-center md:gap-x-6 gap-y-4" do %>
+        
+        <!-- Player Display Area -->
+        <%= tag.div data: { team_match_target: "lastAttemptPlayerCard" }, class: "p-3 border rounded-md w-full md:w-auto flex-shrink-0" do %>
+          <!-- Player card/info will be injected here by JS -->
+          <%= tag.p "Player details will appear here.", class: "text-sm text-gray-400 italic text-center" %>
+        <% end %>
+            
+        <%= tag.div class: "flex items-center justify-center text-2xl font-semibold text-gray-500" do %>
+          <%= tag.span "→", class: "hidden md:inline" %>
+          <%= tag.span "Selected:", class: "md:hidden" %>
+        <% end %>
+            
+        <!-- Chosen Team Display Area -->
+        <%= tag.div data: { team_match_target: "lastAttemptChosenTeamDisplay" }, class: "p-3 border rounded-md text-center w-full md:w-auto flex-shrink-0" do %>
+          <%= tag.img data: { team_match_target: "lastAttemptChosenTeamLogo" }, src: "", alt: "Chosen Team Logo", class: "mx-auto h-16 w-16 object-contain mb-2 hidden" %>
+          <%= tag.p "Chosen team", data: { team_match_target: "lastAttemptChosenTeamLogoPlaceholder" }, class: "text-gray-500 text-sm my-2" %>
+          <%= tag.p "", data: { team_match_target: "lastAttemptChosenTeamName" }, class: "text-lg font-bold" %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
 <% end %>
