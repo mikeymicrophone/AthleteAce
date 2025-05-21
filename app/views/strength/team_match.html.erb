@@ -15,34 +15,22 @@
 
   <%= tag.div class: "lg:w-2/3" do %>
     <%= turbo_frame_tag "team_match_game" do %>
-      <div class="team-match-container">
-        
-        <%= tag.div class: "filter-indicators mb-4" do %>
-          <%= teams_filter_label @parent %>
-        <% end %>
-
-        <%= tag.div class: "team-match-game", data: { team_match_target: "gameContainer" } do %>
-          <%= team_choice_group @team_choices, @correct_team.id %>
-        <% end %>
-
-        <!-- Floating team name overlay (hidden by default) -->
-        <%= tag.div class: "team-name-overlay fixed inset-0 flex items-center justify-center pointer-events-none opacity-0 z-50", data: { team_match_target: "teamNameOverlay" } do %>
-          <%= tag.div class: "team-name-content text-8xl font-extrabold text-center text-white text-shadow-lg", data: { team_match_target: "teamNameText" } do %>
-            <%= tag.span data: { team_match_target: "teamNameText" } %>
+      <%= tag.div id: "team_match_container", class: "team-match-container" do %>
+        <%= tag.div teams_filter_label(@parent), class: "filter-indicators mb-4" %>
+        <%= tag.div team_choice_group(@team_choices, @correct_team.id), class: "team-match-game", data: { team_match_target: "gameContainer" } %>
+        <%= tag.div id: "team_name_overlay", class: "team-name-overlay fixed inset-0 flex items-center justify-center pointer-events-none opacity-0 z-50", data: { team_match_target: "teamNameOverlay" } do %>
+          <%= tag.div id: "team_name_content", class: "team-name-content text-8xl font-extrabold text-center text-white text-shadow-lg", data: { team_match_target: "teamNameText" } do %>
+            <%= tag.span id: "team_name_text", data: { team_match_target: "teamNameText" } %>
           <% end %>
         <% end %>
-
-        <!-- Controls -->
-        <%= tag.div class: "controls flex justify-between items-center mt-8", data: { team_match_target: "controls" } do %>
-          <%= tag.div class: "progress" do %>
-            <%= tag.span "Progress: #{tag.span("0", data: { team_match_target: "progressCounter" })} correct".html_safe, class: "text-gray-600" %>
-          <% end %>
-          <%= pause_button "team-match" %>
-        <% end %>
-      </div> 
+        <%= tag.div pause_button("team-match"), id: "controls", class: "controls flex justify-between items-center mt-8", data: { team_match_target: "controls" } %>
+      <% end %>
     <% end %>
 
     <!-- Last Attempt Details Area -->
+    <%= tag.div id: "progress", class: "progress" do %>
+      <%= tag.span "Progress: #{tag.span("0", data: { team_match_target: "progressCounter" })} correct".html_safe, class: "text-gray-600" %>
+    <% end %>
     <%= tag.div data: { team_match_target: "lastAttemptContainer" }, class: "mt-8 p-4 border border-gray-200 rounded-lg shadow-sm hidden" do %>
       <%= tag.h3 "Most Recent Attempt", class: "text-lg font-semibold mb-3 text-center text-gray-700" %>
       <%= tag.div class: "flex flex-col md:flex-row items-stretch justify-center md:gap-x-6 gap-y-4" do %>
