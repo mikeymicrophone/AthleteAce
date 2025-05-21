@@ -1,4 +1,22 @@
 module PlayersHelper
+
+  def player_sort_links
+    tag.div class: "flex flex-col md:flex-row justify-between items-center gap-4 mb-4" do
+      tag.div class: "flex flex-wrap gap-2 items-center" do
+        tag.span class: "text-sm text-gray-600 mr-1" do
+          "Sort by:"
+        end
+        tailwind_sort_link(@q, :first_name) +
+        tailwind_sort_link(@q, :last_name) +
+        tailwind_sort_link(@q, :team_name, "Team") +
+        tailwind_sort_link(@q, :league_name, "League") +
+        tailwind_sort_link(@q, :sport_name, "Sport") +
+        tailwind_sort_link(@q, :position_name, "Position") +
+    random_sort_link
+      end
+    end
+  end
+  
   # Custom sort link helper that enhances Ransack's sort_link with Tailwind styling
   # @param search [Ransack::Search] The Ransack search object
   # @param attribute [Symbol] The attribute to sort by
