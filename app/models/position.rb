@@ -9,4 +9,14 @@ class Position < ApplicationRecord
   def to_s
     name
   end
+  
+  # Define which attributes can be searched via Ransack
+  def self.ransackable_attributes(auth_object = nil)
+    ["abbreviation", "created_at", "description", "id", "name", "sport_id", "updated_at"]
+  end
+  
+  # Define which associations can be searched via Ransack
+  def self.ransackable_associations(auth_object = nil)
+    ["players", "roles", "sport"]
+  end
 end

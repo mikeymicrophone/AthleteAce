@@ -1,10 +1,6 @@
 <% content_for :title, "Spectrums" %>
 
 <div class="w-full">
-  <% if notice.present? %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
-  <% end %>
-
   <div class="flex justify-between items-center mb-6">
     <h1 class="font-bold text-4xl">Rating Spectrums</h1>
     <% if ace_signed_in? %>
@@ -25,14 +21,8 @@
           </div>
           
           <div class="flex justify-between items-center mt-4">
-            <%= link_to "View Details", spectrum, class: "text-blue-600 hover:text-blue-800" %>
-            
-            <% if ace_signed_in? %>
-              <div class="flex space-x-2">
-                <%= link_to "Edit", edit_spectrum_path(spectrum), class: "text-gray-600 hover:text-gray-800" %>
-                <%= button_to "Delete", spectrum, method: :delete, class: "text-red-600 hover:text-red-800", data: { turbo_confirm: "Are you sure? This will delete all ratings on this spectrum." } %>
-              </div>
-            <% end %>
+            <%= link_to "You have " + pluralize(current_ace.ratings.by_spectrum(spectrum).count, "rating"), spectrum, class: "text-blue-600 hover:text-blue-800" %>
+            <%= link_to "Total is " + pluralize(spectrum.ratings.count, "rating"), [spectrum, :ratings], class: "text-blue-600 hover:text-blue-800" %>
           </div>
         </div>
       </div>

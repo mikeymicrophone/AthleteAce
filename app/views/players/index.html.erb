@@ -1,19 +1,20 @@
-<p style="color: green"><%= notice %></p>
-
 <% content_for :title, "Players" %>
 
-<div class="flex justify-between items-center mb-4">
-  <h1 class="text-2xl font-bold">Players</h1>
-  
-  <% if params[:team_id].present? %>
-    <div class="text-lg font-medium">
-      Team: <%= link_to @team.name, @team, class: "text-blue-600 hover:underline" %>
-    </div>
-  <% end %>
-</div>
+<h1 class="text-2xl font-bold mb-4">Players</h1>
 
-<!-- New Floating Spectrum Picker -->
+<% if params[:team_id].present? %>
+  <div class="mb-4 text-lg font-medium">
+    Team: <%= link_to @team.name, @team, class: "text-blue-600 hover:underline" %>
+  </div>
+<% end %>
+
+<%= player_search_form(@q) %>
+
+<%= player_sort_links %>
+
 <%= render_floating_spectrum_picker %>
+
+<%= pagy_nav(@pagy).html_safe %>
 
 <div id="players" class="space-y-4">
   <% @players.each do |player| %>
@@ -41,7 +42,7 @@
       <div class="player-stats text-right">
         <% if player.ratings.any? %>
           <div class="text-sm">
-            <span class="font-medium"><%= player.ratings.count %></span> ratings
+            <span class="font-medium"><%= pluralize player.ratings.count, "rating" %></span>
           </div>
           <% player.ratings.group(:spectrum_id).count.first(3).each do |spectrum_id, count| %>
             <% spectrum = Spectrum.find(spectrum_id) %>
@@ -57,10 +58,4 @@
   <% end %>
 </div>
 
-<div class="mt-6">
-  <%= pagy_nav(@pagy).html_safe %>
-</div>
-
-<div class="mt-4">
-  <%= link_to "New player", new_player_path, class: "px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" %>
-</div>
+<%= pagy_nav(@pagy).html_safe %>

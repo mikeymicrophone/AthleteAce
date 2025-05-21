@@ -86,111 +86,41 @@ class StrengthController < ApplicationController
   # Team matching game
   def team_match
     id_collect
-    
-    @parent = Division.find_by(id: params[:division_id]) || Conference.find_by(id: params[:conference_id]) || League.find_by(id: params[:league_id]) || City.find_by(id: params[:city_id]) || State.find_by(id: params[:state_id])
 
-    filter_params = strength_filter_params
-    teams_for_choices = nil
-    
-    if params[:division_id].present?
-      @division = Division.find(params[:division_id])
-      teams_for_choices = @division.teams.to_a
-      
-      if teams_for_choices.empty?
-        flash.now[:alert] = "No teams found in this division. Redirecting to all divisions."
-        redirect_to divisions_path and return
-      end
-      
-      filter_params.delete(:team_id)
-      filter_params[:team_ids] = teams_for_choices.map(&:id)
-    elsif params[:conference_id].present?
-      @conference = Conference.find(params[:conference_id])
-      teams_for_choices = @conference.teams.to_a
-      
-      if teams_for_choices.empty?
-        flash.now[:alert] = "No teams found in this conference. Redirecting to all conferences."
-        redirect_to conferences_path and return
-      end
-      
-      filter_params.delete(:team_id)
-      filter_params[:team_ids] = teams_for_choices.map(&:id)
-    elsif params[:league_id].present? && params[:controller] == "leagues"
-      @league = League.find(params[:league_id])
-      teams_for_choices = @league.teams.to_a
-      
-      if teams_for_choices.empty?
-        flash.now[:alert] = "No teams found in this league. Redirecting to all leagues."
-        redirect_to leagues_path and return
-      end
-      
-      filter_params.delete(:team_id)
-      filter_params[:team_ids] = teams_for_choices.map(&:id)
-    elsif params[:city_id].present?
-      @city = City.find(params[:city_id])
-      teams_for_choices = @city.teams.to_a
-      
-      if teams_for_choices.empty?
-        flash.now[:alert] = "No teams found in this city. Redirecting to all cities."
-        redirect_to cities_path and return
-      end
-      
-      filter_params.delete(:team_id)
-      filter_params[:team_ids] = teams_for_choices.map(&:id)
-    elsif params[:state_id].present?
-      @state = State.find(params[:state_id])
-      teams_for_choices = @state.teams.to_a
-      
-      if teams_for_choices.empty?
-        flash.now[:alert] = "No teams found in this state. Redirecting to all states."
-        redirect_to states_path and return
-      end
-      
-      filter_params.delete(:team_id)
-      filter_params[:team_ids] = teams_for_choices.map(&:id)
-    elsif ace_signed_in? && no_scope_specified?
-      quest_teams = current_ace.active_goals.map { |goal| goal.quest.associated_teams }.flatten.uniq
-      if quest_teams.any?
-        teams_for_choices = quest_teams
+    filter_params = strength_filter_params.to_h.symbolize_keys
+    @parent = parent_scope
+    teams_pool = nil
+
+    if @parent.present?
+      teams_pool = @parent.teams
+      return redirect_back(fallback_location: root_path, alert: "No teams found in this scope.") if teams_pool.empty?
+      filter_params[:team_ids] = teams_pool.map(&:id)
+    elsif ace_signed_in? && no_scope_specified? &&
+          filter_params[:team_id].blank? && filter_params[:sport_id].blank? && filter_params[:league_id].blank?
+      quest_teams = current_ace.active_goals.flat_map { |g| g.quest.associated_teams }.uniq
+      unless quest_teams.empty?
         cross_sport = params[:cross_sport] == 'true'
-        unless cross_sport
-          if teams_for_choices.first
-            sport_id = teams_for_choices.first.sport.id
-            teams_for_choices = teams_for_choices.select { |team| team.sport.id == sport_id }
-          end
-        end
-        if teams_for_choices.empty?
-          flash.now[:alert] = "No teams found for your quest. Showing all teams instead."
-          teams_for_choices = nil
-        else
-          filter_params.delete(:team_id)
-          filter_params[:team_ids] = teams_for_choices.map(&:id)
-        end
+        teams_pool  = cross_sport ? quest_teams : quest_teams.select { |t| t.sport.id == quest_teams.first.sport.id }
+        filter_params[:team_ids] = teams_pool.map(&:id) if teams_pool.present?
       end
     end
-    
-    @players = if filter_params[:team_ids].present?
-                   Player.includes(:team).where(team_id: filter_params[:team_ids]).to_a
-                 else
-                   fetch_players_with_params(filter_params)
-                 end
-    
-    if @players.empty?
-      flash.now[:alert] = "No players found with the selected filters. Showing all players instead."
-      @players = Player.includes(:team).limit(50).to_a
-      teams_for_choices = nil  # Reset to avoid confusion
+
+    players = PlayerSearch.new(filter_params).call
+    if players.empty?
+      flash.now[:alert] = "No players found with the selected filters. Showing random players instead."
+      players = Player.sampled(50)
     end
-    
-    @current_player = @players.sample
-    @correct_team = @current_player.team
-    
-    if teams_for_choices.present?
-      other_teams = (teams_for_choices - [@current_player.team]).sample(3)
-      @team_choices = ([@current_player.team] + other_teams).shuffle
-    else
-      all_teams = @correct_team.league.teams.to_a
-      other_teams = (all_teams - [@current_player.team]).sample(3)
-      @team_choices = ([@current_player.team] + other_teams).shuffle
-    end
+
+    @current_player = players.sample
+    pool            = if teams_pool&.map(&:id)&.include?(@current_player.team_id)
+                        teams_pool
+                      else
+                        @current_player.team.league.teams
+                      end
+    round           = TeamMatchRound.new(player: @current_player, pool: pool)
+
+    @team_choices   = round.choices
+    @correct_team   = @current_player.team
   end
 
   # Cipher-based learning (scrambled names)
@@ -227,10 +157,32 @@ class StrengthController < ApplicationController
     params[:division_id].blank? && params[:conference_id].blank? && params[:league_id].blank? && params[:city_id].blank? && params[:state_id].blank?
   end
 
+  # Strong parameter helper
   def strength_filter_params
-    params.permit(:team_id, :sport_id, :league_id, :include_inactive, :cross_sport)
+    params.permit(:team_id, :sport_id, :league_id, :include_inactive, :cross_sport, team_ids: [])
   end
-  
+
+  FILTER_PARENTS = {
+    division_id:   Division,
+    conference_id: Conference,
+    city_id:       City,
+    state_id:      State
+  }.freeze
+
+  # Determine the parent scope (division, conference, etc.) from params
+  def parent_scope
+    FILTER_PARENTS.each do |param, model|
+      return model.find(params[param]) if params[param].present?
+    end
+    nil
+  end
+
+  # Coerce param value to int, returning nil for blank/invalid
+  def int_param(key)
+    value = params[key].presence
+    value.to_i.positive? ? value.to_i : nil
+  end
+
   # Fetch players based on filters
   def fetch_players
     # Start with all players but eager load associations for better performance

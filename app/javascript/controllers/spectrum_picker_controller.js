@@ -8,13 +8,12 @@ export default class extends Controller {
     "toggleIcon",
     "expandableContent",
     "multiSelectToggle",
-    "checkboxContainer", // For the div holding all checkboxes
-    "spectrumCheckbox"   // For individual spectrum checkboxes
+    "buttonContainer",
+    "spectrumButton"
   ]
 
   static values = {
-    // We might pass initial selected IDs or all spectrums as JSON if needed later
-    // For now, ERB handles initial state of checkboxes
+    highlightColor: String
   }
 
   connect() {
@@ -31,25 +30,20 @@ export default class extends Controller {
   }
 
   updateSummaryDisplay() {
-    const checkedCheckboxes = this.spectrumCheckboxTargets.filter(cb => cb.checked);
-    const selectedNames = checkedCheckboxes.map(cb => {
-      const label = cb.closest('label').querySelector('span');
-      return label ? label.textContent.trim() : 'Unknown';
-    });
-
+    const selectedButtons = this.spectrumButtonTargets.filter(btn => !btn.classList.contains('bg-gray-200'));
+    const selectedNames = selectedButtons.map(btn => btn.textContent.trim());
     if (selectedNames.length > 0) {
-      this.summaryDisplayTarget.textContent = `Spectrums: ${selectedNames.join(', ')}`;
+      this.summaryDisplayTarget.textContent = selectedNames.join(', ');
     } else {
-      this.summaryDisplayTarget.textContent = "Spectrums: None";
+      this.summaryDisplayTarget.textContent = 'None';
     }
-    // Truncate if too long (optional, can be done with CSS too)
-    if (selectedNames.join(', ').length > 25) { // Adjust character limit as needed
-        this.summaryDisplayTarget.textContent = `Spectrums: ${selectedNames.length} selected`;
+    if (selectedNames.join(', ').length > 25) {
+      this.summaryDisplayTarget.textContent = `${selectedNames.length} selected`;
     }
   }
   
   updateMultiSelectToggleState() {
-    const checkedCount = this.spectrumCheckboxTargets.filter(cb => cb.checked).length;
+    const selectedButtons = this.spectrumButtonTargets.filter(btn => !btn.classList.contains('bg-gray-200'));
     // If more than one is checked, or if none are checked but multi-select was intended (e.g. from previous state), keep it checked.
     // The ERB handles the initial 'checked' state of the multi-select toggle based on selected_spectrum_ids.count.
     // This JS primarily ensures consistency if we manipulate checkboxes client-side before form submission.
@@ -60,46 +54,48 @@ export default class extends Controller {
   }
 
   handleMultiSelectToggle(event) {
-    const isMultiSelectEnabled = event.target.checked;
-    if (!isMultiSelectEnabled) {
-      // If multi-select is disabled, ensure only one (or zero) checkbox is selected.
-      // Keep the last interacted one or the first checked one.
-      const checkedCheckboxes = this.spectrumCheckboxTargets.filter(cb => cb.checked);
-      if (checkedCheckboxes.length > 1) {
-        // Uncheck all but the first one found (or based on a specific logic, e.g. last clicked prior to disabling)
-        // For simplicity, let's keep the first one in the DOM order that's checked.
-        const firstChecked = checkedCheckboxes[0];
-        checkedCheckboxes.forEach(cb => {
-          if (cb !== firstChecked) {
-            cb.checked = false;
-          }
-        });
-      }
+    const isMulti = event.target.checked;
+    if (!isMulti) {
+      const selected = this.spectrumButtonTargets.filter(btn => !btn.classList.contains('bg-gray-200'));
+      if (selected.length > 1) selected.slice(1).forEach(btn => this.toggleButtonSelection(btn, false));
     }
     this.updateSummaryDisplay();
   }
 
-  handleCheckboxChange(event) {
-    if (this.hasMultiSelectToggleTarget && !this.multiSelectToggleTarget.checked) {
-      // Single-select mode: uncheck others if this one is checked
-      if (event.target.checked) {
-        this.spectrumCheckboxTargets.forEach(cb => {
-          if (cb !== event.target) {
-            cb.checked = false;
-          }
-        });
-      }
+  toggleSpectrum(event) {
+    const btn = event.currentTarget;
+    const id = btn.dataset.spectrumId;
+    const form = this.formTarget;
+    const isSelected = !btn.classList.contains('bg-gray-200');
+    // Toggle UI
+    this.toggleButtonSelection(btn, !isSelected);
+    // Manage hidden inputs
+    if (!isSelected) {
+      const input = document.createElement('input');
+      input.type = 'hidden'; input.name = 'spectrum_ids[]'; input.value = id;
+      input.dataset.spectrum = id;
+      form.appendChild(input);
+    } else {
+      const input = form.querySelector(`input[type=hidden][name='spectrum_ids[]'][value='${id}']`);
+      if (input) input.remove();
     }
     this.updateSummaryDisplay();
+  }
+
+  // Apply or remove highlight classes
+  toggleButtonSelection(btn, select) {
+    const highlightClasses = this.highlightColorValue.split(' ');
+    if (select) {
+      btn.classList.remove('bg-gray-200','text-gray-700');
+      btn.classList.add(...highlightClasses);
+    } else {
+      btn.classList.remove(...highlightClasses);
+      btn.classList.add('bg-gray-200','text-gray-700');
+    }
   }
 
   submitForm(event) {
     event.preventDefault(); // Prevent default if called from an explicit button click within the form
     this.formTarget.requestSubmit();
-  }
-  
-  // Helper to get all spectrum IDs that are currently checked
-  getCheckedSpectrumIds() {
-    return this.spectrumCheckboxTargets.filter(cb => cb.checked).map(cb => cb.value);
   }
 }

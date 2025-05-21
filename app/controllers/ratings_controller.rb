@@ -6,7 +6,11 @@ class RatingsController < ApplicationController
 
   # GET /ratings
   def index
-    @ratings = current_ace.ratings.includes(:spectrum, :target).order(created_at: :desc)
+    @ratings = if params[:spectrum_id].present?
+      Spectrum.find(params[:spectrum_id]).ratings.includes(:target).order(created_at: :desc)
+    else
+      current_ace.ratings.includes(:spectrum, :target).order(created_at: :desc)
+    end
   end
 
   # GET /ratings/1

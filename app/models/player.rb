@@ -1,6 +1,6 @@
 class Player < ApplicationRecord
   belongs_to :birth_city, optional: true
-  belongs_to :birth_country, optional: true
+  belongs_to :birth_country, class_name: 'Country', optional: true
   belongs_to :team
   delegate :sport, to: :team
   delegate :league, to: :team
@@ -8,6 +8,50 @@ class Player < ApplicationRecord
   has_many :roles, dependent: :destroy
   has_many :positions, through: :roles
   has_many :ratings, as: :target, dependent: :destroy
+  
+  # Ransack configuration
+  # Define searchable attributes and associations
+  ransacker :full_name do
+    Arel.sql("CONCAT(players.first_name, ' ', players.last_name)")
+  end
+  
+  # Allow searching and sorting by team name
+  ransacker :team_name do
+    Arel.sql("teams.mascot")
+  end
+  
+  # Allow searching and sorting by team territory
+  ransacker :team_territory do
+    Arel.sql("teams.territory")
+  end
+  
+  # Allow searching and sorting by league name
+  ransacker :league_name do
+    Arel.sql("leagues.name")
+  end
+  
+  # Allow searching and sorting by sport name
+  ransacker :sport_name do
+    Arel.sql("sports.name")
+  end
+  
+  # Allow searching and sorting by position name
+  ransacker :position_name do
+    Arel.sql("positions.name")
+  end
+  
+  # Define which attributes can be searched via Ransack
+  def self.ransackable_attributes(auth_object = nil)
+    ["active", "bio", "birth_city_id", "birth_country_id", "birthdate", "created_at", "current_position", "debut_year", "draft_year", "first_name", "full_name", "id", "last_name", "league_name", "nicknames", "photo_urls", "position_name", "sport_name", "team_id", "team_name", "team_territory", "updated_at"]
+  end
+  
+  # Define which associations can be searched via Ransack
+  def self.ransackable_associations(auth_object = nil)
+    ["birth_city", "birth_country", "positions", "ratings", "roles", "team"]
+  end
+  
+  # DB-level sampling scope – avoids pulling full result sets into memory
+  scope :sampled, ->(n = 50) { order(Arel.sql('RANDOM()')).limit(n) }
   
   def name
     "#{first_name} #{last_name}"

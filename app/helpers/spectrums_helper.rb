@@ -54,13 +54,13 @@ module SpectrumsHelper
   end
 
   # Renders the floating spectrum picker component
-  def render_floating_spectrum_picker
-    content_tag(:div, class: "fixed top-4 right-4 z-50 bg-white p-3 rounded-lg shadow-xl border border-gray-200 w-64 sm:w-72 md:w-80", data: { controller: "spectrum-picker" }) do
+  def render_floating_spectrum_picker(highlight_color: 'bg-blue-600')
+    content_tag(:div, id: "spectrum-picker", class: "sticky top-4 right-4 z-50 bg-white p-3 rounded-lg shadow-xl border border-gray-200 w-64 sm:w-72 md:w-80", data: { controller: "spectrum-picker", spectrum_picker_highlight_color_value: highlight_color }) do
       form_with url: url_for, method: :get, local: true, data: { spectrum_picker_target: "form" } do |form|
         # Collapsed View / Toggle Button
         collapsed_view = content_tag(:div, class: "flex justify-between items-center cursor-pointer", data: { action: "click->spectrum-picker#toggleExpand" }) do
           summary_text = selected_spectrums.any? ? selected_spectrums.map { |s| s.name.sub(/\s*\(.*\)\s*$/, '').strip }.join(', ') : "None"
-          summary_span = content_tag(:span, "Spectrums: #{summary_text}", class: "text-sm font-medium text-gray-700 truncate pr-2", data: { spectrum_picker_target: "summaryDisplay" })
+          summary_span = content_tag(:span, summary_text, class: "text-sm font-medium text-gray-700 truncate pr-2", data: { spectrum_picker_target: "summaryDisplay" })
           toggle_icon_svg = tag.svg(class: "w-5 h-5 text-gray-500 transform transition-transform duration-150", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", xmlns: "http://www.w3.org/2000/svg", data: { spectrum_picker_target: "toggleIcon" }) do
             tag.path(stroke_linecap: "round", stroke_linejoin: "round", stroke_width: "2", d: "M19 9l-7 7-7-7")
           end
@@ -76,26 +76,25 @@ module SpectrumsHelper
                             selected_spectrum_ids.count > 1 || (selected_spectrum_ids.empty? && default_spectrums.count > 1 && default_spectrums.any?),
                             class: "form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500", 
                             data: { spectrum_picker_target: "multiSelectToggle", action: "change->spectrum-picker#handleMultiSelectToggle" }) +
-              content_tag(:span, "Enable Multi-select", class: "ml-2")
+              content_tag(:span, "Multiple", class: "ml-2")
             end
           end
 
-          # Spectrum Checkboxes
-          checkboxes_div = content_tag(:div, class: "space-y-2 max-h-48 overflow-y-auto mb-3", data: { spectrum_picker_target: "checkboxContainer" }) do
-            # Hidden input to ensure spectrum_ids[] is submitted as an empty array if no checkboxes are checked
+          # Spectrum Buttons
+          buttons_div = content_tag(:div, class: "flex flex-wrap gap-2 mb-3", data: { spectrum_picker_target: "buttonContainer" }) do
+            # Hidden input to ensure spectrum_ids[] is submitted even if none selected
             hidden_input = form.hidden_field :spectrum_ids, value: '', name: 'spectrum_ids[]', id: nil
-            
-            checkboxes = default_spectrums.map do |spectrum|
-              label_tag(nil, class: "flex items-center text-sm text-gray-700 cursor-pointer") do
-                check_box_tag('spectrum_ids[]', spectrum.id, 
-                              selected_spectrum_ids.include?(spectrum.id),
-                              class: "form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 spectrum-checkbox", 
-                              data: { spectrum_picker_target: "spectrumCheckbox", action: "change->spectrum-picker#handleCheckboxChange", spectrum_id: spectrum.id },
-                              id: "spectrum_ids_#{spectrum.id}") +
-                content_tag(:span, spectrum.name.sub(/\s*\(.*\)\s*$/, '').strip, class: "ml-2")
-              end
+            # Initial inputs for selected spectrums
+            initial_inputs = selected_spectrum_ids.map { |id| form.hidden_field(:spectrum_ids, value: id, name: 'spectrum_ids[]') }.join.html_safe
+            buttons = default_spectrums.map do |spectrum|
+              selected = selected_spectrum_ids.include?(spectrum.id)
+              btn_classes = ["px-2 py-1 rounded cursor-pointer", (selected ? highlight_color : "bg-gray-200 text-gray-700")].join(' ')
+              button_tag spectrum.name.sub(/\s*\(.*\)\s*$/, '').strip,
+                type: 'button',
+                class: btn_classes,
+                data: { action: "click->spectrum-picker#toggleSpectrum", spectrum_picker_target: "spectrumButton", spectrum_id: spectrum.id }
             end.join.html_safe
-            hidden_input + checkboxes
+            hidden_input + initial_inputs + buttons
           end
           
           # Apply Button
@@ -103,7 +102,7 @@ module SpectrumsHelper
             form.submit "Apply Filters", class: "w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2", data: { action: "click->spectrum-picker#submitForm" }
           end
 
-          multi_select_div + checkboxes_div + apply_button_div
+          multi_select_div + buttons_div + apply_button_div
         end
         
         collapsed_view + expandable_content

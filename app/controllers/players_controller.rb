@@ -3,17 +3,38 @@ class PlayersController < ApplicationController
 
   # GET /players or /players.json
   def index
-    if params[:sport_id]
-      @players = Sport.find(params[:sport_id]).players
+    # Start building the base query
+    base_query = if params[:sport_id]
+      Sport.find(params[:sport_id]).players
     elsif params[:league_id]
-      @players = League.find(params[:league_id]).players
+      League.find(params[:league_id]).players
     elsif params[:stadium_id]
-      @players = Stadium.find(params[:stadium_id]).players
+      Stadium.find(params[:stadium_id]).players
     elsif params[:team_id]
       @team = Team.find(params[:team_id])
-      @players = @team.players
+      @team.players
     else
-      @players = Player.all
+      Player.all
+    end
+    
+    # Build the query with proper joins for sorting and searching
+    base_query = base_query.joins(:team, team: [:league, league: :sport])
+                          .left_joins(:positions)
+                          .select("players.*, teams.mascot as team_name, teams.territory as team_territory, " +
+                                 "leagues.name as league_name, sports.name as sport_name, positions.name as position_name")
+    
+    # Initialize Ransack search object
+    @q = base_query.ransack(params[:q])
+    
+    # Set default sort if none specified
+    @q.sorts = 'first_name asc' if @q.sorts.empty?
+    
+    # Handle random sorting as a special case
+    if params[:random].present? && params[:random] == 'true'
+      @players = base_query.order(Arel.sql('RANDOM()'))
+    else
+      # Get the result with distinct to avoid duplicates from joins
+      @players = @q.result(distinct: true)
     end
     
     # Load available spectrums for the rating selector
@@ -22,7 +43,8 @@ class PlayersController < ApplicationController
     # Set current spectrum ID if provided in params
     set_current_spectrum_id(params[:spectrum_id]) if params[:spectrum_id].present?
     
-    @pagy, @players = pagy(@players)
+    # Paginate the results
+    @pagy, @players = pagy(@players, items: params[:per_page] || 20)
   end
 
   # GET /players/1 or /players/1.json
