@@ -14,7 +14,7 @@ module StrengthHelper
           end
         end +
         tag.div(class: "player-text-container mt-4 text-center w-full") do
-          tag.h3(player.full_name, class: "text-xl font-bold") + 
+          tag.h3(player.full_name, id: "player_name", data: { player_name: true }, class: "text-xl font-bold") + 
           (player.primary_position ? tag.p(player.primary_position.name, class: "text-gray-600") : '')
         end
       end
