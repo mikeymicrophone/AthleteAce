@@ -30,30 +30,36 @@
     <% end %>
   <% end %>
 
-  <!-- Last Attempt Details Area -->
+  <!-- Progress Indicator -->
   <%= tag.div id: "progress", class: "progress" do %>
     <%= tag.span "Progress: #{tag.span("0", data: { team_match_target: "progressCounter" })} correct".html_safe, class: "text-gray-600" %>
   <% end %>
-  <%= tag.div data: { team_match_target: "lastAttemptContainer" }, class: "mt-8 p-4 border border-gray-200 rounded-lg shadow-sm hidden" do %>
-    <%= tag.h3 "Most Recent Attempt", class: "text-lg font-semibold mb-3 text-center text-gray-700" %>
-    <%= tag.div class: "flex flex-col md:flex-row items-stretch justify-center md:gap-x-6 gap-y-4" do %>
-      
-      <!-- Player Display Area -->
-      <%= tag.div data: { team_match_target: "lastAttemptPlayerCard" }, class: "p-3 border rounded-md w-full md:w-auto flex-shrink-0" do %>
-        <!-- Player card/info will be injected here by JS -->
-        <%= tag.p "Player details will appear here.", class: "text-sm text-gray-400 italic text-center" %>
-      <% end %>
-          
-      <%= tag.div class: "flex items-center justify-center text-2xl font-semibold text-gray-500" do %>
-        <%= tag.span "→", class: "hidden md:inline" %>
-        <%= tag.span "Selected:", class: "md:hidden" %>
-      <% end %>
-          
-      <!-- Chosen Team Display Area -->
-      <%= tag.div data: { team_match_target: "lastAttemptChosenTeamDisplay" }, class: "p-3 border rounded-md text-center w-full md:w-auto flex-shrink-0" do %>
-        <%= tag.img data: { team_match_target: "lastAttemptChosenTeamLogo" }, src: "", alt: "Chosen Team Logo", class: "mx-auto h-16 w-16 object-contain mb-2 hidden" %>
-        <%= tag.p "Chosen team", data: { team_match_target: "lastAttemptChosenTeamLogoPlaceholder" }, class: "text-gray-500 text-sm my-2" %>
-        <%= tag.p "", data: { team_match_target: "lastAttemptChosenTeamName" }, class: "text-lg font-bold" %>
+  
+  <!-- Attempts History Area -->
+  <%= tag.div id: "attempts", data: { team_match_target: "attemptsContainer" }, class: "mt-8 p-4 border border-gray-200 rounded-lg shadow-sm hidden" do %>
+    <%= tag.h3 "Recent Attempts", class: "text-lg font-semibold mb-3 text-center text-gray-700" %>
+    
+    <!-- Grid for displaying attempt history -->
+    <%= tag.div data: { team_match_target: "attemptsGrid" }, class: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" %>
+    
+    <!-- Template for new attempts (hidden) -->
+    <%= tag.div id: "attempt-template", class: "hidden" do %>
+      <%= tag.div class: "attempt-card flex flex-col items-center border rounded-md overflow-hidden" do %>
+        <!-- Team part -->
+        <%= tag.div class: "team-part w-full p-2 text-center" do %>
+          <%= tag.div class: "team-logo-container flex justify-center items-center h-16" do %>
+            <%= tag.img class: "team-logo max-h-16 max-w-full object-contain", src: "", alt: "Team Logo" %>
+          <% end %>
+          <%= tag.p class: "team-name text-sm font-semibold mt-1 truncate w-full" %>
+        <% end %>
+        
+        <!-- Player part -->
+        <%= tag.div class: "player-part w-full p-2 text-center border-t" do %>
+          <%= tag.div class: "player-photo-container flex justify-center items-center h-12" do %>
+            <%= tag.img class: "player-photo max-h-12 max-w-full object-contain", src: "", alt: "Player Photo" %>
+          <% end %>
+          <%= tag.p class: "player-name text-xs font-medium mt-1 truncate w-full" %>
+        <% end %>
       <% end %>
     <% end %>
   <% end %>

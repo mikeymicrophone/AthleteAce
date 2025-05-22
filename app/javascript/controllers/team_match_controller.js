@@ -13,12 +13,8 @@ export default class extends Controller {
     "pauseButton",
     "pauseButtonText",
     "currentPlayerCardDisplay", 
-    "lastAttemptContainer",     
-    "lastAttemptPlayerCard",    
-    "lastAttemptChosenTeamDisplay", 
-    "lastAttemptChosenTeamLogo",  
-    "lastAttemptChosenTeamLogoPlaceholder", 
-    "lastAttemptChosenTeamName"   
+    "attemptsContainer",
+    "attemptsGrid"
   ]
   
   static values = {
@@ -61,6 +57,17 @@ export default class extends Controller {
     const chosenTeamId = parseInt(button.dataset.teamId)
     const teamName = button.querySelector(".team-name").textContent
     const chosenTeamLogoUrl = button.dataset.teamLogoUrl;
+    
+    // Get the correct team info
+    let correctTeamName = "";
+    let correctTeamLogoUrl = "";
+    
+    this.teamChoiceTargets.forEach(choice => {
+      if (choice.dataset.correct === "true") {
+        correctTeamName = choice.querySelector(".team-name").textContent;
+        correctTeamLogoUrl = choice.dataset.teamLogoUrl || "";
+      }
+    });
 
     const optionsPresented = this.teamChoiceTargets.map(choice => ({
       id: parseInt(choice.dataset.teamId),
@@ -83,26 +90,27 @@ export default class extends Controller {
     };
 
     this.sendAttemptData(attemptData);
+    
+    // Get player name from the player card
+    const playerName = this.currentPlayerCardDisplayTarget.querySelector('.player-name')?.textContent || 'Player';
+    const playerPhotoUrl = this.currentPlayerCardDisplayTarget.querySelector('.player-photo')?.src || '';
 
-    // --- Update Last Attempt Display --- 
-    console.log("[TM Controller] checkAnswer() - updating last attempt display");
-    this.lastAttemptPlayerCardTarget.innerHTML = this.currentPlayerCardDisplayTarget.innerHTML;
-    this.lastAttemptChosenTeamNameTarget.textContent = teamName;
-
-    if (chosenTeamLogoUrl) {
-      this.lastAttemptChosenTeamLogoTarget.src = chosenTeamLogoUrl;
-      this.lastAttemptChosenTeamLogoTarget.alt = `${teamName} Logo`;
-      this.lastAttemptChosenTeamLogoTarget.classList.remove('hidden');
-      this.lastAttemptChosenTeamLogoPlaceholderTarget.classList.add('hidden');
-    } else {
-      this.lastAttemptChosenTeamLogoTarget.classList.add('hidden');
-      this.lastAttemptChosenTeamLogoPlaceholderTarget.classList.remove('hidden');
-      this.lastAttemptChosenTeamLogoPlaceholderTarget.textContent = "Logo N/A";
-    }
-
-    // Clear previous color coding
-    this.lastAttemptPlayerCardTarget.classList.remove('bg-green-100', 'border-green-500', 'bg-red-100', 'border-red-500');
-    this.lastAttemptChosenTeamDisplayTarget.classList.remove('bg-green-100', 'border-green-500', 'bg-red-100', 'border-red-500');
+    // Add attempt to the grid with correct team data and chosen team data
+    this.addAttemptToGrid({
+      player: {
+        name: playerName,
+        photoUrl: playerPhotoUrl
+      },
+      correctTeam: {
+        name: correctTeamName,
+        logoUrl: correctTeamLogoUrl
+      },
+      chosenTeam: {
+        name: teamName,
+        logoUrl: chosenTeamLogoUrl || ''
+      },
+      isCorrect: isCorrect
+    });
 
     if (isCorrect) {
       console.log("[TM Controller] checkAnswer() - answer IS correct");
@@ -116,10 +124,6 @@ export default class extends Controller {
       setTimeout(() => {
         this.teamNameOverlayTarget.classList.remove("opacity-100")
       }, 750)
-      
-      // Apply correct styling to last attempt display
-      this.lastAttemptPlayerCardTarget.classList.add('bg-green-100', 'border-green-500');
-      this.lastAttemptChosenTeamDisplayTarget.classList.add('bg-green-100', 'border-green-500');
 
     } else {
       console.log("[TM Controller] checkAnswer() - answer IS NOT correct");
@@ -140,14 +144,11 @@ export default class extends Controller {
           }
         })
       }, 500)
-
-      // Apply incorrect styling to last attempt display
-      this.lastAttemptPlayerCardTarget.classList.add('bg-red-100', 'border-red-500');
-      this.lastAttemptChosenTeamDisplayTarget.classList.add('bg-red-100', 'border-red-500');
     }
 
-    this.lastAttemptContainerTarget.classList.remove('hidden'); // Show the container
-    console.log("[TM Controller] checkAnswer() - lastAttemptContainer shown");
+    // Show the attempts container if it's not already visible
+    this.attemptsContainerTarget.classList.remove('hidden');
+    console.log("[TM Controller] checkAnswer() - attemptsContainer shown");
     
     if (this.nextQuestionTimer) clearTimeout(this.nextQuestionTimer);
     console.log("[TM Controller] checkAnswer() - scheduling nextQuestionTimer");
@@ -161,6 +162,77 @@ export default class extends Controller {
         console.log("[TM Controller] setTimeout callback - game is paused, not loading next question");
       }
     }, 3000)
+  }
+
+  addAttemptToGrid(attemptData) {
+    // Get the template
+    const templateElement = document.getElementById('attempt-template');
+    if (!templateElement) {
+      console.error("Attempt template not found");
+      return;
+    }
+
+    // Clone the template
+    const template = templateElement.querySelector('.attempt-card').cloneNode(true);
+    
+    // Set up team part - always show the CORRECT team
+    const teamPart = template.querySelector('.team-part');
+    const teamLogo = teamPart.querySelector('.team-logo');
+    const teamName = teamPart.querySelector('.team-name');
+    
+    teamName.textContent = attemptData.correctTeam.name;
+    if (attemptData.correctTeam.logoUrl) {
+      teamLogo.src = attemptData.correctTeam.logoUrl;
+      teamLogo.alt = `${attemptData.correctTeam.name} Logo`;
+    } else {
+      teamLogo.classList.add('hidden');
+    }
+    
+    // Set up player part
+    const playerPart = template.querySelector('.player-part');
+    const playerPhoto = playerPart.querySelector('.player-photo');
+    const playerName = playerPart.querySelector('.player-name');
+    
+    playerName.textContent = attemptData.player.name;
+    if (attemptData.player.photoUrl) {
+      playerPhoto.src = attemptData.player.photoUrl;
+      playerPhoto.alt = `${attemptData.player.name} Photo`;
+    } else {
+      playerPhoto.classList.add('hidden');
+    }
+    
+    // Add a small indicator for the chosen team if incorrect
+    if (!attemptData.isCorrect) {
+      const chosenTeamIndicator = document.createElement('div');
+      chosenTeamIndicator.className = 'chosen-team-indicator text-xs text-red-600 mt-1';
+      chosenTeamIndicator.textContent = `Selected: ${attemptData.chosenTeam.name}`;
+      playerPart.appendChild(chosenTeamIndicator);
+    }
+    
+    // Apply correct/incorrect styling
+    if (attemptData.isCorrect) {
+      teamPart.classList.add('bg-green-100');
+      playerPart.classList.add('bg-green-50');
+      template.classList.add('border-green-500');
+    } else {
+      teamPart.classList.add('bg-red-100');
+      playerPart.classList.add('bg-red-50');
+      template.classList.add('border-red-500');
+    }
+    
+    // Add a timestamp data attribute for sorting/reference
+    template.dataset.timestamp = Date.now();
+    
+    // Prepend to grid (newest first)
+    this.attemptsGridTarget.prepend(template);
+    
+    // Limit to 20 most recent attempts
+    const attemptCards = this.attemptsGridTarget.querySelectorAll('.attempt-card');
+    if (attemptCards.length > 20) {
+      for (let i = 20; i < attemptCards.length; i++) {
+        attemptCards[i].remove();
+      }
+    }
   }
 
   async sendAttemptData(payload) {
