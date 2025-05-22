@@ -119,6 +119,11 @@ class StrengthController < ApplicationController
 
     @team_choices   = round.choices
     @correct_team   = @current_player.team
+    
+    respond_to do |format|
+      format.html
+      format.turbo_stream
+    end
   end
 
   # Cipher-based learning (scrambled names)

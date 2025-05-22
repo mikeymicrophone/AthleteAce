@@ -1,6 +1,10 @@
 <% content_for :title, @division.present? ? "#{@division.name} Division Quiz - Team Match" : "Team Match - Strength Training" %>
 
-<%= tag.div data: { controller: "team-match" } do %>
+<%= tag.div data: { 
+  controller: "team-match",
+  team_match_player_id_value: @current_player.id,
+  team_match_correct_team_id_value: @correct_team.id
+} do %>
   <%= tag.div teams_filter_label(@parent), class: "filter-indicators mb-4" %>
 
   <%= turbo_frame_tag "team_match_game" do %>
@@ -13,7 +17,7 @@
       <% end %>
 
       <%= tag.div class: "lg:w-2/3" do %>
-        <%= tag.div id: "team_match_container", class: "team-match-container", data: { player_id: @current_player.id, correct_team_id: @correct_team.id } do %>
+        <%= tag.div id: "team_match_container", class: "team-match-container" do %>
           <%= tag.div team_choice_group(@team_choices, @correct_team.id), class: "team-match-game", data: { team_match_target: "gameContainer" } %>
           <%= tag.div id: "team_name_overlay", class: "team-name-overlay fixed inset-0 flex items-center justify-center pointer-events-none opacity-0 z-50", data: { team_match_target: "teamNameOverlay" } do %>
             <%= tag.div id: "team_name_content", class: "team-name-content text-8xl font-extrabold text-center text-white text-shadow-lg", data: { team_match_target: "teamNameText" } do %>

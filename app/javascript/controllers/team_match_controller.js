@@ -194,17 +194,14 @@ export default class extends Controller {
   
   loadNextQuestion() {
     console.log("[TM Controller] loadNextQuestion() called");
-    const frame = document.getElementById('team_match_game');
-    if (frame && typeof frame.reload === 'function') {
-      console.log("[TM Controller] Reloading turbo frame #team_match_game");
-      frame.reload();
-    } else if (frame) {
-      console.log("[TM Controller] Forcing src reload on turbo frame #team_match_game");
-      frame.src = frame.src; // fallback
-    } else {
-      console.log("[TM Controller] Turbo frame not found, falling back to full visit");
-      Turbo.visit(window.location.href);
-    }
+    const currentUrl = new URL(window.location.href);
+    
+    // Add a timestamp parameter to force a fresh request
+    currentUrl.searchParams.set('t', Date.now());
+    
+    // Visit the URL but target only the team_match_game frame
+    console.log("[TM Controller] Visiting with frame target");
+    Turbo.visit(currentUrl.toString(), { frame: "team_match_game" });
   }
   
   togglePause() {
