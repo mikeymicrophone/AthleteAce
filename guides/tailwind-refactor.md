@@ -23,6 +23,12 @@ app/assets/stylesheets/
 └── utilities/
     ├── debug.css                 # @layer utilities – helper classes
     └── themes.css                # CSS vars, dark‑mode tweaks
+└── players.css                   # @layer styles for entities
+└── teams.css
+└── strength.css                  # @layer styles for pages and interfaces
+└── stats.css
+└── pagination.css
+└── 
 ```
 
 * **application.tailwind.css** should contain **nothing** but imports:
@@ -136,3 +142,5 @@ config.action_view.preload_links_header = false        # fixes Safari module cac
 5. Migrate page‑by‑page – no big bang.
 
 Take this file as **the single source of truth** while refactoring Athlete Ace’s front‑end.
+
+Note that at this point, none of the existing styles are considered mission-critical. We will plan to preserve them, but we will not be held to them.
