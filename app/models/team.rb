@@ -27,7 +27,7 @@ class Team < ApplicationRecord
   # @param spectrum [Spectrum] The spectrum to get ratings for
   # @return [ActiveRecord::Relation] Ratings for this team on the spectrum
   def ratings_on(spectrum)
-    ratings.where(spectrum: spectrum)
+    ratings.active.where(spectrum: spectrum)
   end
   
   # Get the average rating value for this team on a spectrum
