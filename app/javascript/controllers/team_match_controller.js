@@ -91,9 +91,41 @@ export default class extends Controller {
 
     this.sendAttemptData(attemptData);
     
-    // Get player name from the player card
-    const playerName = this.currentPlayerCardDisplayTarget.querySelector('.player-name')?.textContent || 'Player';
-    const playerPhotoUrl = this.currentPlayerCardDisplayTarget.querySelector('.player-photo')?.src || '';
+    // Get player name from the player card based on its known structure
+    let playerName = 'Player';
+    
+    // First try to find the element with data-player-name attribute
+    let nameElement = this.currentPlayerCardDisplayTarget.querySelector('[data-player-name]');
+    
+    // Fallback to ID selector in case it's not transformed
+    if (!nameElement) {
+      nameElement = this.currentPlayerCardDisplayTarget.querySelector('#player_name');
+    }
+    
+    // Final fallback to transformed class selector (if the preprocessor changed it)
+    if (!nameElement) {
+      nameElement = this.currentPlayerCardDisplayTarget.querySelector('.player-name');
+    }
+    
+    if (nameElement) {
+      playerName = nameElement.textContent.trim();
+    }
+    
+    // Get player photo from the player card
+    let playerPhotoUrl = '';
+    const imageContainer = this.currentPlayerCardDisplayTarget.querySelector('.player-image-container');
+    if (imageContainer) {
+      const imgElement = imageContainer.querySelector('img');
+      if (imgElement && imgElement.src) {
+        playerPhotoUrl = imgElement.src;
+      }
+    } else {
+      // Fallback to any image in the card
+      const imgElement = this.currentPlayerCardDisplayTarget.querySelector('img');
+      if (imgElement && imgElement.src) {
+        playerPhotoUrl = imgElement.src;
+      }
+    }
 
     // Add attempt to the grid with correct team data and chosen team data
     this.addAttemptToGrid({
