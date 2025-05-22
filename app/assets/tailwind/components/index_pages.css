@@ -1,0 +1,116 @@
+/* Index pages styling using @apply */
+
+/* Index Page Layout */
+.index-header {
+  @apply mb-6;
+}
+
+.index-title {
+  @apply text-2xl font-bold mb-4;
+}
+
+.index-parent-link {
+  @apply mb-4 text-lg font-medium;
+}
+
+.index-parent-link a {
+  @apply text-blue-600 hover:underline;
+}
+
+.index-collection {
+  @apply flex flex-col space-y-4;
+}
+
+/* Index Record Layout */
+.index-record {
+  @apply grid grid-cols-1 gap-4 items-center p-4 rounded-lg shadow-sm bg-white;
+}
+
+.index-record {
+  @apply md:grid-cols-3;
+}
+
+.record-info {
+  @apply col-span-1;
+}
+
+.record-name {
+  @apply font-medium text-lg;
+}
+
+.record-metadata {
+  @apply text-sm text-gray-600;
+}
+
+.record-tag {
+  @apply text-xs mt-1 inline-block bg-gray-100 px-2 py-0.5 rounded;
+}
+
+.record-rating-container {
+  @apply col-span-3 sm:col-span-1;
+}
+
+.record-stats {
+  @apply text-right;
+}
+
+.record-stats-count {
+  @apply text-sm;
+}
+
+.record-stats-count-value {
+  @apply font-medium;
+}
+
+.record-stats-detail {
+  @apply text-xs text-gray-600;
+}
+
+.record-stats-empty {
+  @apply text-sm text-gray-500 italic;
+}
+
+/* Resource-specific styling */
+.player-record {
+  @apply border-l-4 border-blue-400 hover:border-indigo-500;
+}
+
+.team-record {
+  @apply border-l-4 border-orange-400 hover:border-indigo-500;
+}
+
+.league-record {
+  @apply border-l-4 border-green-400 hover:border-indigo-500;
+}
+
+.country-record {
+  @apply border-l-4 border-yellow-400 hover:border-indigo-500;
+}
+
+.state-record {
+  @apply border-l-4 border-purple-400 hover:border-indigo-500;
+}
+
+.city-record {
+  @apply border-l-4 border-pink-400 hover:border-indigo-500;
+}
+
+.stadium-record {
+  @apply border-l-4 border-gray-400 hover:border-indigo-500;
+}
+
+.sport-record {
+  @apply border-l-4 border-teal-400 hover:border-indigo-500;
+}
+
+.conference-record {
+  @apply border-l-4 border-red-400 hover:border-indigo-500;
+}
+
+.division-record {
+  @apply border-l-4 border-indigo-400 hover:border-indigo-500;
+}
+
+.membership-record {
+  @apply border-l-4 border-amber-400 hover:border-indigo-500;
+}

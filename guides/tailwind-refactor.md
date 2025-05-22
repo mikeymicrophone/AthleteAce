@@ -14,10 +14,10 @@ roles: [developer, designer]
 ## 1 · File layout
 
 ```text
-app/assets/stylesheets/
+app/assets/tailwind/
 ├── application.tailwind.css      # Loads Tailwind base + all partials
 ├── components/
-│   ├── buttons.css               # @layer components – .btn, .btn--*
+│   ├── buttons.css               # @layer components – .btn, .btn--*
 │   ├── cards.css                 # …other UI blocks
 │   └── forms.css
 └── utilities/
@@ -116,6 +116,19 @@ config.action_view.preload_links_header = false        # fixes Safari module cac
 | 3      | Convert layout partials (nav, footer, modals).                                                              | Unified look.               |
 | 4      | Audit templates: any line >120 chars? extract class.                                                        | Stable codebase.            |
 | 5      | Delete old utility‑only CSS files; document pattern in README.                                              | 💅 Done.                    |
+
+### Progress Update
+
+✅ **Completed: Index Pages Refactoring**
+
+We've successfully refactored the `index_pages.css` to use Tailwind's `@apply` directive with semantic classes:
+
+1. Created `app/assets/tailwind/components/index_pages.css` with semantic classes
+2. Used `@apply` to connect them to Tailwind utility classes
+3. Imported the component file in `app/assets/tailwind/components.css`
+4. Removed the direct import from `app/assets/stylesheets/application.css`
+
+This approach maintains the same visual appearance while making the CSS more maintainable and consistent with our Tailwind architecture.
 
 ---
 

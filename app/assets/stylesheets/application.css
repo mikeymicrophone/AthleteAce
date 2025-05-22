@@ -13,7 +13,7 @@
 
 /* Import component-specific stylesheets */
 @import "strength.css";
-@import "index_pages.css";
+/* index_pages.css has been moved to tailwind/components/index_pages.css */
 
 body {
   font-family: 'Lora', serif;
