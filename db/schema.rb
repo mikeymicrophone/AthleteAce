@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_13_042900) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_22_163732) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -212,8 +212,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_13_042900) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "archived", default: false, null: false
     t.index ["ace_id", "spectrum_id", "target_type", "target_id"], name: "index_ratings_on_ace_spectrum_and_target", unique: true
     t.index ["ace_id"], name: "index_ratings_on_ace_id"
+    t.index ["archived"], name: "index_ratings_on_archived"
     t.index ["spectrum_id"], name: "index_ratings_on_spectrum_id"
     t.index ["target_type", "target_id"], name: "index_ratings_on_target"
   end

@@ -42,37 +42,47 @@ class RatingsController < ApplicationController
   # POST /players/1/ratings
   # POST /teams/1/ratings
   def create
-    @rating = current_ace.ratings.find_or_initialize_by(
-      target: @target,
-      spectrum_id: rating_params[:spectrum_id]
+    @rating = RatingService.update_or_replace(
+      rating_params.merge(
+        target_type: @target.class.name,
+        target_id: @target.id
+      ),
+      current_ace
     )
-    
-    @rating.assign_attributes(rating_params)
 
     respond_to do |format|
-      if @rating.save
-        format.html { redirect_to after_rating_path, notice: 'Rating was successfully saved.' }
-        format.json { render json: { success: true, rating: @rating }, status: :created }
-        format.js { head :ok }
-      else
-        format.html do
-          @spectrum = Spectrum.find(rating_params[:spectrum_id])
-          render :new, status: :unprocessable_entity
-        end
-        format.json { render json: { success: false, errors: @rating.errors.full_messages }, status: :unprocessable_entity }
-        format.js { head :unprocessable_entity }
+      format.html { redirect_to after_rating_path, notice: 'Rating was successfully saved.' }
+      format.json { render json: { success: true, rating: @rating }, status: :created }
+      format.js { head :ok }
+    end
+  rescue StandardError => e
+    respond_to do |format|
+      format.html do
+        @spectrum = Spectrum.find(rating_params[:spectrum_id]) if rating_params[:spectrum_id]
+        @rating ||= Rating.new(rating_params)
+        @rating.errors.add(:base, e.message)
+        render :new, status: :unprocessable_entity
       end
+      format.json { render json: { success: false, errors: [e.message] }, status: :unprocessable_entity }
+      format.js { head :unprocessable_entity }
     end
   end
 
   # PATCH/PUT /ratings/1
   def update
-    if @rating.update(rating_params)
-      redirect_to after_rating_path, notice: 'Rating was successfully updated.'
-    else
-      @spectrum = @rating.spectrum
-      render :edit, status: :unprocessable_entity
-    end
+    @rating = RatingService.update_or_replace(
+      rating_params.merge(
+        target_type: @target.class.name,
+        target_id: @target.id
+      ),
+      current_ace
+    )
+    redirect_to after_rating_path, notice: 'Rating was successfully saved.'
+  rescue StandardError => e
+    @spectrum = Spectrum.find(rating_params[:spectrum_id]) if rating_params[:spectrum_id]
+    @rating ||= Rating.new(rating_params)
+    @rating.errors.add(:base, e.message)
+    render :edit, status: :unprocessable_entity
   end
 
   # DELETE /ratings/1

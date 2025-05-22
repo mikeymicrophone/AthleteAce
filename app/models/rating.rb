@@ -23,6 +23,9 @@ class Rating < ApplicationRecord
   scope :negative, -> { where('value < 0') }
   scope :neutral, -> { where(value: 0) }
   scope :recent, -> { order(created_at: :desc) }
+  scope :active, -> { where(archived: false) }
+  scope :archived, -> { where(archived: true) }
+  default_scope { active }
   
   # Methods
   def positive?
