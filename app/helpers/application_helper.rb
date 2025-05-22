@@ -100,7 +100,7 @@ module ApplicationHelper
 
   # Shared Tailwind classes for all index records
   def index_record_base_classes
-    'flex items-center justify-between p-4 mb-2 bg-white rounded shadow hover:bg-orange-50 transition-colors duration-150'
+    'index-record'
   end
   
   # Generic index page header with title and optional parent link
@@ -146,47 +146,47 @@ module ApplicationHelper
 
   # Resource-specific example: Teams
   def team_index_record_classes
-    'border-l-4 border-orange-400 hover:border-indigo-500'
+    'team-record'
   end
 
   def player_index_record_classes
-    'border-l-4 border-blue-400 hover:border-indigo-500'
+    'player-record'
   end
 
   def league_index_record_classes
-    'border-l-4 border-green-400 hover:border-indigo-500'
+    'league-record'
   end
 
   def country_index_record_classes
-    'border-l-4 border-yellow-400 hover:border-indigo-500'
+    'country-record'
   end
 
   def state_index_record_classes
-    'border-l-4 border-purple-400 hover:border-indigo-500'
+    'state-record'
   end
 
   def city_index_record_classes
-    'border-l-4 border-pink-400 hover:border-indigo-500'
+    'city-record'
   end
 
   def stadium_index_record_classes
-    'border-l-4 border-gray-400 hover:border-indigo-500'
+    'stadium-record'
   end
 
   def sport_index_record_classes
-    'border-l-4 border-teal-400 hover:border-indigo-500'
+    'sport-record'
   end
 
   def conference_index_record_classes
-    'border-l-4 border-red-400 hover:border-indigo-500'
+    'conference-record'
   end
 
   def division_index_record_classes
-    'border-l-4 border-indigo-400 hover:border-indigo-500'
+    'division-record'
   end
 
   def membership_index_record_classes
-    'border-l-4 border-cyan-400 hover:border-indigo-500'
+    'membership-record'
   end
 
   # Renders a collection of records with their names and logos

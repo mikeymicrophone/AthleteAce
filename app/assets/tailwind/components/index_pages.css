@@ -23,7 +23,8 @@
 
 /* Index Record Layout */
 .index-record {
-  @apply grid grid-cols-1 gap-4 items-center p-4 rounded-lg shadow-sm bg-white;
+  @apply flex items-center justify-between p-4 mb-2 bg-white rounded shadow hover:bg-orange-50 transition-colors duration-150;
+  @apply grid grid-cols-1 gap-4 items-center rounded-lg shadow-sm;
 }
 
 .index-record {
@@ -113,4 +114,13 @@
 
 .membership-record {
   @apply border-l-4 border-amber-400 hover:border-indigo-500;
+}
+
+/* Quiz Button */
+.quiz-button {
+  @apply bg-purple-500 text-white px-4 py-2 rounded-md font-medium inline-flex items-center gap-2 transition-all duration-200;
+}
+
+.quiz-button:hover {
+  @apply bg-purple-600 -translate-y-0.5;
 }
