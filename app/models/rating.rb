@@ -10,10 +10,6 @@ class Rating < ApplicationRecord
                      greater_than_or_equal_to: -10_000, 
                      less_than_or_equal_to: 10_000 
                    }
-  validates :ace_id, uniqueness: { 
-    scope: [:spectrum_id, :target_type, :target_id],
-    message: "has already rated this target on this spectrum" 
-  }
   
   # Scopes
   scope :by_ace, ->(ace) { where(ace: ace) }
@@ -23,6 +19,8 @@ class Rating < ApplicationRecord
   scope :negative, -> { where('value < 0') }
   scope :neutral, -> { where(value: 0) }
   scope :recent, -> { order(created_at: :desc) }
+  scope :active, -> { where(archived: false) }
+  scope :archived, -> { where(archived: true) }
   
   # Methods
   def positive?

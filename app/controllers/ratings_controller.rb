@@ -7,9 +7,9 @@ class RatingsController < ApplicationController
   # GET /ratings
   def index
     @ratings = if params[:spectrum_id].present?
-      Spectrum.find(params[:spectrum_id]).ratings.includes(:target).order(created_at: :desc)
+      Spectrum.find(params[:spectrum_id]).ratings.active.includes(:target).order(created_at: :desc)
     else
-      current_ace.ratings.includes(:spectrum, :target).order(created_at: :desc)
+      current_ace.ratings.active.includes(:spectrum, :target).order(created_at: :desc)
     end
   end
 
@@ -26,7 +26,7 @@ class RatingsController < ApplicationController
     
     if @spectrum_id.present?
       @spectrum = Spectrum.find(@spectrum_id)
-      @rating = current_ace.ratings.find_or_initialize_by(target: @target, spectrum: @spectrum)
+      @rating = current_ace.ratings.active.find_or_initialize_by(target: @target, spectrum: @spectrum)
     else
       @rating = Rating.new(target: @target)
       @spectrums = Spectrum.all
@@ -42,37 +42,62 @@ class RatingsController < ApplicationController
   # POST /players/1/ratings
   # POST /teams/1/ratings
   def create
-    @rating = current_ace.ratings.find_or_initialize_by(
-      target: @target,
-      spectrum_id: rating_params[:spectrum_id]
-    )
-    
-    @rating.assign_attributes(rating_params)
+    Rating.transaction do
+      # Archive existing active rating if present
+      existing = current_ace.ratings.find_by(
+        spectrum_id: rating_params[:spectrum_id],
+        target_type: rating_params[:target_type],
+        target_id: rating_params[:target_id],
+        archived: false
+      )
+      existing&.update!(archived: true) if existing
+
+      # Create new rating
+      @rating = current_ace.ratings.create!(rating_params)
+    end
 
     respond_to do |format|
-      if @rating.save
-        format.html { redirect_to after_rating_path, notice: 'Rating was successfully saved.' }
-        format.json { render json: { success: true, rating: @rating }, status: :created }
-        format.js { head :ok }
-      else
-        format.html do
-          @spectrum = Spectrum.find(rating_params[:spectrum_id])
-          render :new, status: :unprocessable_entity
-        end
-        format.json { render json: { success: false, errors: @rating.errors.full_messages }, status: :unprocessable_entity }
-        format.js { head :unprocessable_entity }
+      format.html { redirect_to after_rating_path }
+      format.json { render json: { success: true, rating: @rating }, status: :created }
+      format.js { head :ok }
+    end
+  rescue StandardError => e
+    Rails.logger.error "Rating creation failed: #{e.message}"
+    respond_to do |format|
+      format.html do
+        @spectrum = Spectrum.find(rating_params[:spectrum_id]) if rating_params[:spectrum_id]
+        @rating ||= Rating.new(rating_params)
+        @rating.errors.add(:base, e.message)
+        render :new, status: :unprocessable_entity
       end
+      format.json { render json: { success: false, errors: [e.message] }, status: :unprocessable_entity }
+      format.js { head :unprocessable_entity }
     end
   end
 
   # PATCH/PUT /ratings/1
   def update
-    if @rating.update(rating_params)
-      redirect_to after_rating_path, notice: 'Rating was successfully updated.'
-    else
-      @spectrum = @rating.spectrum
-      render :edit, status: :unprocessable_entity
+    Rating.transaction do
+      # Archive existing active rating if present
+      existing = current_ace.ratings.find_by(
+        spectrum_id: rating_params[:spectrum_id],
+        target_type: rating_params[:target_type],
+        target_id: rating_params[:target_id],
+        archived: false
+      )
+      existing&.update!(archived: true) if existing
+
+      # Create new rating
+      @rating = current_ace.ratings.create!(rating_params)
     end
+
+    redirect_to after_rating_path
+  rescue StandardError => e
+    Rails.logger.error "Rating update failed: #{e.message}"
+    @spectrum = Spectrum.find(rating_params[:spectrum_id]) if rating_params[:spectrum_id]
+    @rating ||= Rating.new(rating_params)
+    @rating.errors.add(:base, e.message)
+    render :edit, status: :unprocessable_entity
   end
 
   # DELETE /ratings/1
@@ -103,7 +128,7 @@ class RatingsController < ApplicationController
     
     # Only allow a list of trusted parameters through.
     def rating_params
-      params.require(:rating).permit(:spectrum_id, :value, :notes)
+      params.require(:rating).permit(:spectrum_id, :value, :notes, :target_id, :target_type)
     end
     
     # Ensure the current ace can only modify their own ratings

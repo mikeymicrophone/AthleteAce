@@ -39,7 +39,7 @@ class Ace < ApplicationRecord
   # @param target [Object] The target to get ratings for
   # @return [ActiveRecord::Relation] The ratings for the target
   def ratings_for(target)
-    ratings.where(target: target)
+    ratings.where(target: target, archived: false)
   end
   
   # Get the rating for a specific target on a specific spectrum
@@ -47,7 +47,7 @@ class Ace < ApplicationRecord
   # @param spectrum [Spectrum] The spectrum to get the rating on
   # @return [Rating, nil] The rating or nil if not rated
   def rating_for(target, spectrum)
-    ratings.find_by(target: target, spectrum: spectrum)
+    ratings.find_by(target: target, spectrum: spectrum, archived: false)
   end
   
   # Check if the ace has rated a target on a spectrum

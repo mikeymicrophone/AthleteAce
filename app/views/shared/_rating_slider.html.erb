@@ -19,7 +19,7 @@
       <div class="flex justify-between items-center mb-1">
         <span class="text-sm font-medium text-gray-700"><%= spectrum.name.sub(/\s*\(.*\)\s*$/, '').strip %></span>
         <span data-rating-slider-target="value_<%= spectrum.id %>" class="text-sm font-semibold">
-          <%= target.ratings.find_by(spectrum_id: spectrum.id)&.value || 0 %>
+          <%= target.ratings.active.find_by(spectrum_id: spectrum.id)&.value || 0 %>
         </span>
       </div>
       
@@ -29,7 +29,7 @@
         <input type="range" 
                min="-10000" 
                max="10000" 
-               value="<%= target.ratings.find_by(spectrum_id: spectrum.id)&.value || 0 %>" 
+               value="<%= target.ratings.active.find_by(spectrum_id: spectrum.id)&.value || 0 %>" 
                step="100" 
                class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer rating-slider-input"
                data-rating-slider-target="slider_<%= spectrum.id %>" <%# Target needs to be unique %>

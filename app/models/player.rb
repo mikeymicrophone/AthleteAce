@@ -88,7 +88,7 @@ class Player < ApplicationRecord
   # @param spectrum [Spectrum] The spectrum to get ratings for
   # @return [ActiveRecord::Relation] Ratings for this player on the spectrum
   def ratings_on(spectrum)
-    ratings.where(spectrum: spectrum)
+    ratings.active.where(spectrum: spectrum)
   end
   
   # Get the average rating value for this player on a spectrum

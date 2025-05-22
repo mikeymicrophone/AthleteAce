@@ -79,8 +79,6 @@ export default class extends Controller {
     }
     console.log('[RatingSlider] Submission details - URL:', url, 'Target ID:', targetId, 'Target Type:', targetType);
 
-    if (statusDisplay) statusDisplay.textContent = "Saving...";
-
     try {
       const csrfToken = document.querySelector("meta[name='csrf-token']").content;
       const response = await fetch(url, {
@@ -105,27 +103,16 @@ export default class extends Controller {
       const data = await response.json();
 
       if (response.ok) {
-        if (statusDisplay) statusDisplay.textContent = "Saved!";
-        // console.log("Rating saved:", data);
-        // Update the slider's value to the saved value, in case the controller adjusted it.
+        // Update the slider's value to the saved value, in case the controller adjusted it
         slider.value = data.rating.value;
         const valueDisplay = this.element.querySelector(`[data-rating-slider-target="value_${spectrumId}"]`);
         if (valueDisplay) this.updateValueDisplay(data.rating.value, valueDisplay);
-
       } else {
         console.error("Error saving rating:", data);
-        if (statusDisplay) statusDisplay.textContent = data.error || "Error saving.";
+        console.error("Error saving rating:", data);
       }
     } catch (error) {
       console.error("Network or other error:", error);
-      if (statusDisplay) statusDisplay.textContent = "Network error.";
-    }
-
-    // Clear status message after a delay
-    if (statusDisplay) {
-      setTimeout(() => {
-        statusDisplay.textContent = "";
-      }, 3000);
     }
   }
 }
