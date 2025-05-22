@@ -11,6 +11,10 @@
 
 /* Font Awesome is loaded via CDN in the application layout */
 
+/* Import component-specific stylesheets */
+@import "strength.css";
+@import "index_pages.css";
+
 body {
   font-family: 'Lora', serif;
   line-height: 1.6;

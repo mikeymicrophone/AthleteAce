@@ -1,12 +1,6 @@
 <% content_for :title, "Players" %>
 
-<h1 class="text-2xl font-bold mb-4">Players</h1>
-
-<% if params[:team_id].present? %>
-  <div class="mb-4 text-lg font-medium">
-    Team: <%= link_to @team.name, @team, class: "text-blue-600 hover:underline" %>
-  </div>
-<% end %>
+<%= index_header("Players", @team) if params[:team_id].present? %>
 
 <%= player_search_form(@q) %>
 
@@ -16,46 +10,20 @@
 
 <%= pagy_nav(@pagy).html_safe %>
 
-<div id="players" class="space-y-4">
+<%= index_collection("players") do %>
   <% @players.each do |player| %>
-    <%= tag.div(id: dom_id(player), class: [index_record_base_classes, player_index_record_classes, "grid grid-cols-3 gap-4 items-center p-4 rounded-lg shadow-sm"].join(' ')) do %>
-      <div class="player-info">
-        <div class="font-medium text-lg">
-          <%= display_name_with_lazy_logo(player, logo_attribute: :image_url) %>
-        </div>
-        <div class="text-sm text-gray-600">
-          <%= link_to_name player.team %> | 
-          <%= display_name_with_lazy_logo(player.league) %> | 
-          <%= display_name_with_lazy_logo(player.sport, logo_attribute: :icon_url) %>
-        </div>
-        <% if player.primary_position %>
-          <div class="text-xs mt-1 inline-block bg-gray-100 px-2 py-0.5 rounded">
-            <%= player.primary_position.name %>
-          </div>
-        <% end %>
-      </div>
+    <%= index_record(player, "player-record") do %>
+      <%= record_info_section do %>
+        <%= player_info_display(player) %>
+      <% end %>
       
-      <div class="rating-container col-span-3 sm:col-span-1">
-        <%= render partial: "shared/rating_slider", locals: { target: player, selected_spectrums: selected_spectrums } %>
-      </div>
+      <%= rating_slider_container(player, selected_spectrums) %>
       
-      <div class="player-stats text-right">
-        <% if player.ratings.any? %>
-          <div class="text-sm">
-            <span class="font-medium"><%= pluralize player.ratings.count, "rating" %></span>
-          </div>
-          <% player.ratings.group(:spectrum_id).count.first(3).each do |spectrum_id, count| %>
-            <% spectrum = Spectrum.find(spectrum_id) %>
-            <div class="text-xs text-gray-600">
-              <%= spectrum.name %>: <%= player.normalized_average_rating_on(spectrum)&.*(100)&.round || 'N/A' %>%
-            </div>
-          <% end %>
-        <% else %>
-          <div class="text-sm text-gray-500 italic">No ratings yet</div>
-        <% end %>
-      </div>
+      <%= record_stats_section do %>
+        <%= ratings_stats_display(player) %>
+      <% end %>
     <% end %>
   <% end %>
-</div>
+<% end %>
 
 <%= pagy_nav(@pagy).html_safe %>

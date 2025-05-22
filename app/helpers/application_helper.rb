@@ -102,6 +102,47 @@ module ApplicationHelper
   def index_record_base_classes
     'flex items-center justify-between p-4 mb-2 bg-white rounded shadow hover:bg-orange-50 transition-colors duration-150'
   end
+  
+  # Generic index page header with title and optional parent link
+  def index_header(title, parent_record = nil, parent_link_text = nil)
+    content = tag.h1(title, class: "index-title")
+    
+    if parent_record.present?
+      content += tag.div(class: "index-parent-link") do
+        "#{parent_link_text || parent_record.class.name}: " + 
+        link_to(parent_record.name, parent_record, class: "text-blue-600 hover:underline")
+      end
+    end
+    
+    tag.div(content, class: "index-header")
+  end
+  
+  # Generic index collection container
+  def index_collection(collection_id, &block)
+    tag.div(id: collection_id, class: "index-collection", &block)
+  end
+  
+  # Generic index record wrapper
+  def index_record(record, record_classes = nil, &block)
+    tag.div(
+      id: dom_id(record), 
+      class: [
+        "index-record",
+        record_classes
+      ].compact.join(' '),
+      &block
+    )
+  end
+  
+  # Generic record info section
+  def record_info_section(&block)
+    tag.div(class: "record-info", &block)
+  end
+  
+  # Generic record stats section
+  def record_stats_section(&block)
+    tag.div(class: "record-stats", &block)
+  end
 
   # Resource-specific example: Teams
   def team_index_record_classes

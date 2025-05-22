@@ -1,4 +1,35 @@
 module PlayersHelper
+  # Display player name with logo
+  def player_name_display(player)
+    tag.div class: "record-name" do
+      display_name_with_lazy_logo(player, logo_attribute: :image_url)
+    end
+  end
+  
+  # Display player metadata (team, league, sport)
+  def player_metadata_display(player)
+    tag.div class: "record-metadata" do
+      link_to_name(player.team) + 
+      " | " + 
+      display_name_with_lazy_logo(player.league) + 
+      " | " + 
+      display_name_with_lazy_logo(player.sport, logo_attribute: :icon_url)
+    end
+  end
+  
+  # Display player position tag if available
+  def player_position_display(player)
+    if player.primary_position
+      tag.div player.primary_position.name, class: "record-tag"
+    end
+  end
+  
+  # Combine all player info elements
+  def player_info_display(player)
+    player_name_display(player) +
+    player_metadata_display(player) +
+    player_position_display(player).to_s
+  end
 
   def player_sort_links
     tag.div class: "flex flex-col md:flex-row justify-between items-center gap-4 mb-4" do
