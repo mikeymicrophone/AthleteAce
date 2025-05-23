@@ -1,0 +1,201 @@
+/* Strength game components */
+
+/* Player card components */
+.player-info {
+  @apply mb-6 text-center;
+}
+
+.player-question {
+  @apply text-2xl font-bold mb-2;
+}
+
+.player-card {
+  @apply bg-white rounded-lg shadow-lg p-4 max-w-md mx-auto flex flex-col;
+}
+
+.player-image-container {
+  @apply h-64 mb-4 w-full;
+}
+
+.player-photo {
+  @apply h-full mx-auto object-contain;
+}
+
+.player-image-placeholder {
+  @apply h-64 mb-4 bg-gray-200 flex items-center justify-center w-full;
+}
+
+.player-text-container {
+  @apply mt-4 text-center w-full;
+}
+
+.player-name {
+  @apply text-xl font-bold;
+}
+
+.player-position {
+  @apply text-gray-600;
+}
+
+/* Team choice components */
+.team-choices-container {
+  @apply max-w-2xl mx-auto;
+}
+
+.team-choices-grid {
+  @apply grid grid-cols-2 gap-6;
+}
+
+.team-choice {
+  @apply bg-white rounded-lg shadow-md p-4 flex flex-col items-center justify-center transition-all duration-300 hover:shadow-lg w-full h-48;
+}
+
+.team-choice.correct {
+  @apply bg-green-100 border-2 border-green-500;
+}
+
+.team-choice.incorrect {
+  @apply bg-red-100 border-2 border-red-500;
+}
+
+.team-choice.correct-answer {
+  @apply bg-green-100 border-2 border-green-500;
+}
+
+.team-choice.pulsing {
+  @apply animate-pulse;
+}
+
+.team-logo-container {
+  @apply h-20 w-20 mb-3 flex items-center justify-center;
+}
+
+.team-logo {
+  @apply max-h-full max-w-full object-contain;
+}
+
+.team-logo-placeholder {
+  @apply h-full w-full bg-gray-200 flex items-center justify-center rounded-full;
+}
+
+.team-name {
+  @apply text-lg font-medium text-center;
+}
+
+/* Game layout components */
+.game-layout {
+  @apply flex flex-col lg:flex-row lg:gap-x-8;
+}
+
+.player-card-area {
+  @apply lg:w-1/3 mb-4 lg:mb-0;
+}
+
+.current-player-card {
+  @apply mb-4;
+}
+
+.team-choices-section {
+  @apply lg:w-2/3;
+}
+
+.team-match-game-container {
+  /* Container for the game */
+}
+
+.team-match-game {
+  /* Game content */
+}
+
+/* Controls */
+.controls {
+  @apply flex justify-between items-center mt-8;
+}
+
+.pause-button-container {
+  /* Container for pause button */
+}
+
+.pause-button {
+  @apply flex items-center bg-gray-200 hover:bg-gray-300 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+/* Team name overlay */
+.team-name-overlay {
+  @apply fixed inset-0 flex items-center justify-center pointer-events-none opacity-0 z-50;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.team-name-content {
+  @apply text-8xl font-extrabold text-center text-white text-shadow-lg;
+}
+
+.team-name-text {
+  /* Text styling */
+}
+
+/* Progress indicator */
+.progress-indicator {
+  @apply mt-4 text-center;
+}
+
+.progress-text {
+  @apply text-gray-600;
+}
+
+.progress-counter {
+  @apply font-bold;
+}
+
+/* Attempts history */
+.attempts-container {
+  @apply mt-8 p-4 border border-gray-200 rounded-lg shadow-sm;
+}
+
+.attempts-heading {
+  @apply text-lg font-semibold mb-3 text-center text-gray-700;
+}
+
+.attempts-grid {
+  @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4;
+}
+
+.attempt-template {
+  @apply hidden;
+}
+
+.attempt-card {
+  @apply flex flex-col items-center border rounded-md overflow-hidden;
+}
+
+.attempt-team-part {
+  @apply w-full p-2 text-center;
+}
+
+.attempt-team-logo-container {
+  @apply flex justify-center items-center h-16;
+}
+
+.attempt-team-logo {
+  @apply max-h-16 max-w-full object-contain;
+}
+
+.attempt-team-name {
+  @apply text-sm font-semibold mt-1 truncate w-full;
+}
+
+.attempt-player-part {
+  @apply w-full p-2 text-center border-t;
+}
+
+.attempt-player-photo-container {
+  @apply flex justify-center items-center h-12;
+}
+
+.attempt-player-photo {
+  @apply max-h-12 max-w-full object-contain;
+}
+
+.attempt-player-name {
+  @apply text-xs font-medium mt-1 truncate w-full;
+}
