@@ -9,6 +9,7 @@ export default class extends Controller {
     "teamChoice", 
     "teamNameOverlay", 
     "teamNameText",
+    "playerNameText",
     "progressCounter",
     "pauseButton",
     "pauseButtonText",
@@ -143,7 +144,16 @@ export default class extends Controller {
       },
       isCorrect: isCorrect
     });
-
+    
+    // Set player name in the overlay if the target exists
+    try {
+      if (this.hasPlayerNameTextTarget) {
+        this.playerNameTextTarget.textContent = playerName;
+      }
+    } catch (e) {
+      console.warn("Player name text target not available yet", e);
+    }
+    
     if (isCorrect) {
       console.log("[TM Controller] checkAnswer() - answer IS correct");
       this.correctAnswers++
@@ -155,7 +165,7 @@ export default class extends Controller {
       
       setTimeout(() => {
         this.teamNameOverlayTarget.classList.remove("visible")
-      }, 750)
+      }, 1250) // Increased from 750ms to 1250ms
 
     } else {
       console.log("[TM Controller] checkAnswer() - answer IS NOT correct");
@@ -172,7 +182,7 @@ export default class extends Controller {
             
             setTimeout(() => {
               this.teamNameOverlayTarget.classList.remove("visible")
-            }, 750)
+            }, 1250) // Increased from 750ms to 1250ms
           }
         })
       }, 500)

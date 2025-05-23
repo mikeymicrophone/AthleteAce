@@ -123,11 +123,14 @@ module StrengthHelper
 
   def team_name_overlay
     tag.div id: "team_name_overlay", 
-            class: "team-name-overlay fixed inset-0 flex items-center justify-center pointer-events-none opacity-0 z-50", 
+            class: "team-name-overlay fixed inset-0 flex flex-col items-center justify-center pointer-events-none opacity-0 z-50", 
             data: { team_match_target: "teamNameOverlay" } do
+      tag.div id: "player_name_content", 
+              class: "player-name-content text-5xl font-bold text-center text-white text-shadow-md mb-4" do
+        tag.span id: "player_name_text", class: "player-name-text", data: { team_match_target: "playerNameText" }
+      end
       tag.div id: "team_name_content", 
-              class: "team-name-content text-8xl font-extrabold text-center text-white text-shadow-lg", 
-              data: { team_match_target: "teamNameText" } do
+              class: "team-name-content text-8xl font-extrabold text-center text-white text-shadow-lg" do
         tag.span id: "team_name_text", class: "team-name-text", data: { team_match_target: "teamNameText" }
       end
     end
