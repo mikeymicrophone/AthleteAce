@@ -12,26 +12,6 @@
   @apply inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700;
 }
 
-.nav-link {
-  @apply text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium;
-}
-
-.nav-group-title {
-  @apply flex items-center text-white cursor-pointer px-3 py-2 rounded-md hover:bg-gray-700;
-}
-
-.nav-dropdown {
-  @apply absolute left-0 mt-2 w-52 rounded-md bg-white shadow-lg z-50 hidden;
-}
-
-.nav-dropdown-item {
-  @apply flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-orange-500 text-sm;
-}
-
-.nav-dropdown.active {
-  @apply block;
-}
-
 .card {
   @apply bg-white shadow rounded p-4;
 }
