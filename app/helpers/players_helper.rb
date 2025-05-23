@@ -99,7 +99,7 @@ module PlayersHelper
     css_classes = is_random ? "random-sort-link random-sort-link-active" : "random-sort-link random-sort-link-inactive"
     
     link_to players_path(random: true), class: css_classes do
-      tag.i(class: "random-sort-icon") + "Random"
+      tag.i(class: "random-sort-icon #{icon_for_resource(:shuffle)}") + "Random"
     end
   end
   
@@ -147,7 +147,7 @@ module PlayersHelper
             concat(
               tag.div(class: "advanced-filters-toggle", data: { action: "click->collapse#toggle" }) do
                 tag.span("Advanced Filters", class: "advanced-filters-text") +
-                tag.i(class: "advanced-filters-icon")
+                tag.i(class: "advanced-filters-icon #{icon_for_resource(:chevron_down)}")
               end
             )
             
@@ -193,7 +193,7 @@ module PlayersHelper
             # Submit button
             concat(
               f.button(type: "submit", class: "submit-button") do
-                tag.i(class: "search-icon") + "Search"
+                tag.i(class: "search-icon #{icon_for_resource(:search)}") + "Search"
               end
             )
           end

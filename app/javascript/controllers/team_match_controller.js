@@ -167,7 +167,7 @@ export default class extends Controller {
       
       setTimeout(() => {
         this.teamNameOverlayTarget.classList.remove("visible")
-      }, 1250) // Increased from 750ms to 1250ms
+      }, 1250)
 
     } else {
       console.log("[TM Controller] checkAnswer() - answer IS NOT correct");
@@ -184,7 +184,7 @@ export default class extends Controller {
             
             setTimeout(() => {
               this.teamNameOverlayTarget.classList.remove("visible")
-            }, 1250) // Increased from 750ms to 1250ms
+            }, 1250)
           }
         })
       }, 500)
