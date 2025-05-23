@@ -14,15 +14,21 @@ roles: [developer, designer]
 ## 1 · File layout
 
 ```text
-app/assets/stylesheets/
+app/assets/tailwind/
 ├── application.tailwind.css      # Loads Tailwind base + all partials
 ├── components/
-│   ├── buttons.css               # @layer components – .btn, .btn--*
+│   ├── buttons.css               # @layer components – .btn, .btn--*
 │   ├── cards.css                 # …other UI blocks
 │   └── forms.css
 └── utilities/
     ├── debug.css                 # @layer utilities – helper classes
     └── themes.css                # CSS vars, dark‑mode tweaks
+└── players.css                   # @layer styles for entities
+└── teams.css
+└── strength.css                  # @layer styles for pages and interfaces
+└── stats.css
+└── pagination.css
+└── 
 ```
 
 * **application.tailwind.css** should contain **nothing** but imports:
@@ -111,6 +117,19 @@ config.action_view.preload_links_header = false        # fixes Safari module cac
 | 4      | Audit templates: any line >120 chars? extract class.                                                        | Stable codebase.            |
 | 5      | Delete old utility‑only CSS files; document pattern in README.                                              | 💅 Done.                    |
 
+### Progress Update
+
+✅ **Completed: Index Pages Refactoring**
+
+We've successfully refactored the `index_pages.css` to use Tailwind's `@apply` directive with semantic classes:
+
+1. Created `app/assets/tailwind/components/index_pages.css` with semantic classes
+2. Used `@apply` to connect them to Tailwind utility classes
+3. Imported the component file in `app/assets/tailwind/components.css`
+4. Removed the direct import from `app/assets/stylesheets/application.css`
+
+This approach maintains the same visual appearance while making the CSS more maintainable and consistent with our Tailwind architecture.
+
 ---
 
 ## 8 · Advanced patterns
@@ -136,3 +155,5 @@ config.action_view.preload_links_header = false        # fixes Safari module cac
 5. Migrate page‑by‑page – no big bang.
 
 Take this file as **the single source of truth** while refactoring Athlete Ace’s front‑end.
+
+Note that at this point, none of the existing styles are considered mission-critical. We will plan to preserve them, but we will not be held to them.

@@ -99,7 +99,7 @@ export default class extends Controller {
     
     // Fallback to ID selector in case it's not transformed
     if (!nameElement) {
-      nameElement = this.currentPlayerCardDisplayTarget.querySelector('#player_name');
+      nameElement = this.currentPlayerCardDisplayTarget.querySelector('[id$="_name"]');
     }
     
     // Final fallback to transformed class selector (if the preprocessor changed it)
@@ -115,7 +115,7 @@ export default class extends Controller {
     let playerPhotoUrl = '';
     const imageContainer = this.currentPlayerCardDisplayTarget.querySelector('.player-image-container');
     if (imageContainer) {
-      const imgElement = imageContainer.querySelector('img');
+      const imgElement = imageContainer.querySelector('.player-photo');
       if (imgElement && imgElement.src) {
         playerPhotoUrl = imgElement.src;
       }
@@ -127,7 +127,7 @@ export default class extends Controller {
       }
     }
 
-    // Add attempt to the grid with correct team data and chosen team data
+    // Add attempts to the grid with correct team data and chosen team data
     this.addAttemptToGrid({
       player: {
         name: playerName,
@@ -143,7 +143,19 @@ export default class extends Controller {
       },
       isCorrect: isCorrect
     });
-
+    
+    // Highlight the player name in the player card
+    const playerNameElement = this.currentPlayerCardDisplayTarget.querySelector('.player-name');
+    if (playerNameElement) {
+      // Add highlight class to trigger animation
+      playerNameElement.classList.add('highlight');
+      
+      // Remove highlight class after animation completes
+      setTimeout(() => {
+        playerNameElement.classList.remove('highlight');
+      }, 1250);
+    }
+    
     if (isCorrect) {
       console.log("[TM Controller] checkAnswer() - answer IS correct");
       this.correctAnswers++
@@ -151,11 +163,11 @@ export default class extends Controller {
       button.classList.add("correct", "pulsing")
       
       this.teamNameTextTarget.textContent = teamName
-      this.teamNameOverlayTarget.classList.add("opacity-100")
+      this.teamNameOverlayTarget.classList.add("visible")
       
       setTimeout(() => {
-        this.teamNameOverlayTarget.classList.remove("opacity-100")
-      }, 750)
+        this.teamNameOverlayTarget.classList.remove("visible")
+      }, 1250)
 
     } else {
       console.log("[TM Controller] checkAnswer() - answer IS NOT correct");
@@ -168,18 +180,18 @@ export default class extends Controller {
             
             const correctTeamName = choice.querySelector(".team-name").textContent
             this.teamNameTextTarget.textContent = correctTeamName
-            this.teamNameOverlayTarget.classList.add("opacity-100")
+            this.teamNameOverlayTarget.classList.add("visible")
             
             setTimeout(() => {
-              this.teamNameOverlayTarget.classList.remove("opacity-100")
-            }, 750)
+              this.teamNameOverlayTarget.classList.remove("visible")
+            }, 1250)
           }
         })
       }, 500)
     }
 
     // Show the attempts container if it's not already visible
-    this.attemptsContainerTarget.classList.remove('hidden');
+    this.attemptsContainerTarget.classList.remove("hidden");
     console.log("[TM Controller] checkAnswer() - attemptsContainer shown");
     
     if (this.nextQuestionTimer) clearTimeout(this.nextQuestionTimer);
@@ -203,27 +215,40 @@ export default class extends Controller {
       console.error("Attempt template not found");
       return;
     }
-
+    
     // Clone the template
     const template = templateElement.querySelector('.attempt-card').cloneNode(true);
     
-    // Set up team part - always show the CORRECT team
-    const teamPart = template.querySelector('.team-part');
-    const teamLogo = teamPart.querySelector('.team-logo');
-    const teamName = teamPart.querySelector('.team-name');
+    // Set up team part
+    const teamPart = template.querySelector('.attempt-team-part');
+    const teamLogo = teamPart.querySelector('.attempt-team-logo');
+    const teamName = teamPart.querySelector('.attempt-team-name');
     
-    teamName.textContent = attemptData.correctTeam.name;
-    if (attemptData.correctTeam.logoUrl) {
-      teamLogo.src = attemptData.correctTeam.logoUrl;
-      teamLogo.alt = `${attemptData.correctTeam.name} Logo`;
+    // Set the team info - always show the correct team in the card
+    if (attemptData.isCorrect) {
+      // If correct, show the chosen team (which is the correct team)
+      teamName.textContent = attemptData.chosenTeam.name;
+      if (attemptData.chosenTeam.logoUrl) {
+        teamLogo.src = attemptData.chosenTeam.logoUrl;
+        teamLogo.alt = `${attemptData.chosenTeam.name} Logo`;
+      } else {
+        teamLogo.classList.add('hidden');
+      }
     } else {
-      teamLogo.classList.add('hidden');
+      // If incorrect, show the correct team in the card
+      teamName.textContent = attemptData.correctTeam.name;
+      if (attemptData.correctTeam.logoUrl) {
+        teamLogo.src = attemptData.correctTeam.logoUrl;
+        teamLogo.alt = `${attemptData.correctTeam.name} Logo`;
+      } else {
+        teamLogo.classList.add('hidden');
+      }
     }
     
     // Set up player part
-    const playerPart = template.querySelector('.player-part');
-    const playerPhoto = playerPart.querySelector('.player-photo');
-    const playerName = playerPart.querySelector('.player-name');
+    const playerPart = template.querySelector('.attempt-player-part');
+    const playerPhoto = playerPart.querySelector('.attempt-player-photo');
+    const playerName = playerPart.querySelector('.attempt-player-name');
     
     playerName.textContent = attemptData.player.name;
     if (attemptData.player.photoUrl) {
@@ -236,20 +261,20 @@ export default class extends Controller {
     // Add a small indicator for the chosen team if incorrect
     if (!attemptData.isCorrect) {
       const chosenTeamIndicator = document.createElement('div');
-      chosenTeamIndicator.className = 'chosen-team-indicator text-xs text-red-600 mt-1';
-      chosenTeamIndicator.textContent = `Selected: ${attemptData.chosenTeam.name}`;
+      chosenTeamIndicator.className = 'chosen-team-indicator';
+      chosenTeamIndicator.textContent = `Your Guess: ${attemptData.chosenTeam.name}`;
       playerPart.appendChild(chosenTeamIndicator);
     }
     
-    // Apply correct/incorrect styling
+    // Apply styling based on correctness
     if (attemptData.isCorrect) {
-      teamPart.classList.add('bg-green-100');
-      playerPart.classList.add('bg-green-50');
-      template.classList.add('border-green-500');
+      template.classList.add('correct-attempt');
+      teamPart.classList.add('correct-team-part');
+      playerPart.classList.add('correct-player-part');
     } else {
-      teamPart.classList.add('bg-red-100');
-      playerPart.classList.add('bg-red-50');
-      template.classList.add('border-red-500');
+      template.classList.add('incorrect-attempt');
+      teamPart.classList.add('incorrect-team-part');
+      playerPart.classList.add('incorrect-player-part');
     }
     
     // Add a timestamp data attribute for sorting/reference
@@ -315,11 +340,13 @@ export default class extends Controller {
 
     if (this.isPaused) {
       if (this.nextQuestionTimer) clearTimeout(this.nextQuestionTimer);
-      icon.className = 'fa-solid fa-play mr-2'
+      icon.className = 'fa-solid fa-play pause-icon'
       this.pauseButtonTextTarget.textContent = 'Resume'
+      this.pauseButtonTarget.classList.add('paused')
     } else {
-      icon.className = 'fa-solid fa-pause mr-2'
-      this.pauseButtonTextTarget.textContent = 'Pause'   
+      icon.className = 'fa-solid fa-pause pause-icon'
+      this.pauseButtonTextTarget.textContent = 'Pause'
+      this.pauseButtonTarget.classList.remove('paused')
       
       if (!this.isAnimating && this.nextQuestionTimer) {
       } else if (!this.isAnimating) {

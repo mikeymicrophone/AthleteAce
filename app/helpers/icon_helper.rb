@@ -24,7 +24,12 @@ module IconHelper
       strength: "fa-solid fa-dumbbell",
       ratings: "fa-solid fa-ranking-star",
       spectrums: "fa-solid fa-gauge-high",
-      memberships: "fa-solid fa-id-card"
+      memberships: "fa-solid fa-id-card",
+      
+      # Generic UI Icons
+      chevron_down: "fa-solid fa-chevron-down",
+      search: "fa-solid fa-search",
+      shuffle: "fa-solid fa-shuffle"
     }
     
     icon_mappings[resource_name.to_sym] || "fa-solid fa-circle-info"

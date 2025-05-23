@@ -1,0 +1,209 @@
+/* Index pages styling */
+@layer components {
+  /* Index Page Layout */
+  .index-header {
+    margin-bottom: 1.5rem; /* mb-6 */
+  }
+  
+  .index-title {
+    font-size: 1.5rem; /* text-2xl */
+    font-weight: 700; /* font-bold */
+    margin-bottom: 1rem; /* mb-4 */
+  }
+  
+  .index-parent-link {
+    margin-bottom: 1rem; /* mb-4 */
+    font-size: 1.125rem; /* text-lg */
+    font-weight: 500; /* font-medium */
+  }
+  
+  .index-parent-link a {
+    color: #2563eb; /* text-blue-600 */
+  }
+  
+  .index-parent-link a:hover {
+    text-decoration: underline;
+  }
+  
+  .index-collection {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; /* space-y-4 */
+  }
+  
+  /* Index Record Layout */
+  .index-record {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem; /* gap-4 */
+    align-items: center;
+    padding: 1rem; /* p-4 */
+    border-radius: 0.5rem; /* rounded-lg */
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+    background-color: white; /* bg-white */
+  }
+  
+  @media (min-width: 768px) {
+    .index-record {
+      grid-template-columns: repeat(3, 1fr); /* md:grid-cols-3 */
+    }
+  }
+  
+  .record-info {
+    grid-column: span 1;
+  }
+  
+  .record-name {
+    font-weight: 500; /* font-medium */
+    font-size: 1.125rem; /* text-lg */
+  }
+  
+  .record-metadata {
+    font-size: 0.875rem; /* text-sm */
+    color: #4b5563; /* text-gray-600 */
+  }
+  
+  .record-tag {
+    font-size: 0.75rem; /* text-xs */
+    margin-top: 0.25rem; /* mt-1 */
+    display: inline-block;
+    background-color: #f3f4f6; /* bg-gray-100 */
+    padding: 0 0.5rem; /* px-2 */
+    padding-top: 0.125rem; /* py-0.5 */
+    padding-bottom: 0.125rem;
+    border-radius: 0.25rem; /* rounded */
+  }
+  
+  .record-rating-container {
+    grid-column: span 3;
+  }
+  
+  @media (min-width: 640px) {
+    .record-rating-container {
+      grid-column: span 1; /* sm:col-span-1 */
+    }
+  }
+  
+  .record-stats {
+    text-align: right;
+  }
+  
+  .record-stats-count {
+    font-size: 0.875rem; /* text-sm */
+  }
+  
+  .record-stats-count-value {
+    font-weight: 500; /* font-medium */
+  }
+  
+  .record-stats-detail {
+    font-size: 0.75rem; /* text-xs */
+    color: #4b5563; /* text-gray-600 */
+  }
+  
+  .record-stats-empty {
+    font-size: 0.875rem; /* text-sm */
+    color: #6b7280; /* text-gray-500 */
+    font-style: italic;
+  }
+  
+  /* Resource-specific styling */
+  .player-record {
+    border-left-width: 4px;
+    border-left-color: #60a5fa; /* border-blue-400 */
+  }
+  
+  .player-record:hover {
+    border-left-color: #6366f1; /* hover:border-indigo-500 */
+  }
+  
+  .team-record {
+    border-left-width: 4px;
+    border-left-color: #fb923c; /* border-orange-400 */
+  }
+  
+  .team-record:hover {
+    border-left-color: #6366f1; /* hover:border-indigo-500 */
+  }
+  
+  .league-record {
+    border-left-width: 4px;
+    border-left-color: #4ade80; /* border-green-400 */
+  }
+  
+  .league-record:hover {
+    border-left-color: #6366f1; /* hover:border-indigo-500 */
+  }
+  
+  .country-record {
+    border-left-width: 4px;
+    border-left-color: #facc15; /* border-yellow-400 */
+  }
+  
+  .country-record:hover {
+    border-left-color: #6366f1; /* hover:border-indigo-500 */
+  }
+  
+  .state-record {
+    border-left-width: 4px;
+    border-left-color: #c084fc; /* border-purple-400 */
+  }
+  
+  .state-record:hover {
+    border-left-color: #6366f1; /* hover:border-indigo-500 */
+  }
+  
+  .city-record {
+    border-left-width: 4px;
+    border-left-color: #f472b6; /* border-pink-400 */
+  }
+  
+  .city-record:hover {
+    border-left-color: #6366f1; /* hover:border-indigo-500 */
+  }
+  
+  .stadium-record {
+    border-left-width: 4px;
+    border-left-color: #9ca3af; /* border-gray-400 */
+  }
+  
+  .stadium-record:hover {
+    border-left-color: #6366f1; /* hover:border-indigo-500 */
+  }
+  
+  .sport-record {
+    border-left-width: 4px;
+    border-left-color: #2dd4bf; /* border-teal-400 */
+  }
+  
+  .sport-record:hover {
+    border-left-color: #6366f1; /* hover:border-indigo-500 */
+  }
+  
+  .conference-record {
+    border-left-width: 4px;
+    border-left-color: #f87171; /* border-red-400 */
+  }
+  
+  .conference-record:hover {
+    border-left-color: #6366f1; /* hover:border-indigo-500 */
+  }
+  
+  .division-record {
+    border-left-width: 4px;
+    border-left-color: #818cf8; /* border-indigo-400 */
+  }
+  
+  .division-record:hover {
+    border-left-color: #6366f1; /* hover:border-indigo-500 */
+  }
+  
+  .membership-record {
+    border-left-width: 4px;
+    border-left-color: #22d3ee; /* border-cyan-400 */
+  }
+  
+  .membership-record:hover {
+    border-left-color: #6366f1; /* hover:border-indigo-500 */
+  }
+}

@@ -13,6 +13,12 @@ class PlayersController < ApplicationController
     elsif params[:team_id]
       @team = Team.find(params[:team_id])
       @team.players
+    elsif params[:state_id]
+      @state = State.find(params[:state_id])
+      @state.players
+    elsif params[:city_id]
+      @city = City.find(params[:city_id])
+      @city.players
     else
       Player.all
     end

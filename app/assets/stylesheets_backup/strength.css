@@ -1,0 +1,134 @@
+/* Strength-related components and layouts */
+@layer components {
+  /* Team Match Game Layout */
+  .team-match-layout {
+    @apply flex flex-col lg:flex-row lg:gap-x-8;
+  }
+  
+  .player-card-area {
+    @apply lg:w-1/3 mb-4 lg:mb-0;
+  }
+  
+  .team-choices-area {
+    @apply lg:w-2/3;
+  }
+  
+  .team-match-container {
+    @apply relative;
+  }
+  
+  .team-match-game {
+    @apply bg-white rounded-lg shadow-md p-4;
+  }
+  
+  /* Team Choice Components */
+  .team-choices-container {
+    @apply max-w-2xl mx-auto;
+  }
+  
+  .team-choices-grid {
+    @apply grid grid-cols-2 gap-6;
+  }
+  
+  .team-choice {
+    @apply bg-white rounded-lg shadow-md p-4 flex flex-col items-center justify-center transition-all duration-300 hover:shadow-lg w-full h-48;
+  }
+  
+  .team-logo-container {
+    @apply h-20 w-20 mb-3 flex items-center justify-center;
+  }
+  
+  .team-logo-placeholder {
+    @apply h-full w-full bg-gray-200 flex items-center justify-center rounded-full;
+  }
+  
+  .team-name {
+    @apply text-lg font-medium text-center;
+  }
+  
+  /* Team Name Overlay */
+  .team-name-overlay {
+    @apply fixed inset-0 flex items-center justify-center pointer-events-none opacity-0 z-50;
+  }
+  
+  .team-name-content {
+    @apply text-8xl font-extrabold text-center text-white text-shadow-lg;
+  }
+  
+  /* Controls */
+  .controls {
+    @apply flex justify-between items-center mt-8;
+  }
+  
+  .pause-button {
+    @apply flex items-center bg-gray-200 hover:bg-gray-300 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  /* Progress Indicator */
+  .progress {
+    @apply mt-4 text-center;
+  }
+  
+  /* Attempts History */
+  .attempts-container {
+    @apply mt-8 p-4 border border-gray-200 rounded-lg shadow-sm;
+  }
+  
+  .attempts-heading {
+    @apply text-lg font-semibold mb-3 text-center text-gray-700;
+  }
+  
+  .attempts-grid {
+    @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4;
+  }
+  
+  .attempt-card {
+    @apply flex flex-col items-center border rounded-md overflow-hidden;
+  }
+  
+  .team-part {
+    @apply w-full p-2 text-center;
+  }
+  
+  .player-part {
+    @apply w-full p-2 text-center border-t;
+  }
+  
+  /* Filter Indicators */
+  .filter-indicators {
+    @apply mb-4;
+  }
+  
+  .filter-indicator {
+    @apply inline-flex items-center;
+  }
+  
+  .filter-badge {
+    @apply bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium;
+  }
+  
+  .filter-label {
+    @apply font-semibold mr-1;
+  }
+  
+  .filter-value {
+    @apply font-normal;
+  }
+  
+  /* State Classes */
+  .correct {
+    @apply bg-green-100 border-green-500 text-green-800;
+  }
+  
+  .incorrect {
+    @apply bg-red-100 border-red-500 text-red-800;
+  }
+  
+  .correct-answer {
+    @apply bg-blue-100 border-blue-500 text-blue-800;
+  }
+  
+  .pulsing {
+    @apply animate-pulse;
+  }
+}

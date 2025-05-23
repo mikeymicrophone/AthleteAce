@@ -9,11 +9,7 @@
     <%= tag.div class: "lg:w-2/3" do %>
       <%= tag.div id: "team_match_container", class: "team-match-container" do %>
         <%= tag.div team_choice_group(@team_choices, @correct_team.id), class: "team-match-game", data: { team_match_target: "gameContainer" } %>
-        <%= tag.div id: "team_name_overlay", class: "team-name-overlay fixed inset-0 flex items-center justify-center pointer-events-none opacity-0 z-50", data: { team_match_target: "teamNameOverlay" } do %>
-          <%= tag.div id: "team_name_content", class: "team-name-content text-8xl font-extrabold text-center text-white text-shadow-lg", data: { team_match_target: "teamNameText" } do %>
-            <%= tag.span id: "team_name_text", data: { team_match_target: "teamNameText" } %>
-          <% end %>
-        <% end %>
+        <%= team_name_overlay %>
         <%= tag.div pause_button("team-match"), id: "controls", class: "controls flex justify-between items-center mt-8", data: { team_match_target: "controls" } %>
       <% end %>
     <% end %>

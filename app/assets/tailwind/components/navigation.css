@@ -1,0 +1,66 @@
+/* Navigation Styles */
+.navigation-container {
+  @apply fixed top-0 left-0 right-0 w-full z-50 shadow-md font-serif bg-gray-800;
+  /* Ensure the background is visible with a fallback */
+  background: #1f2937;
+  background: linear-gradient(to bottom, #3a3a3a, #1a1a1a);
+}
+
+.nav-menu {
+  @apply relative;
+}
+
+.nav-group {
+  @apply relative;
+}
+
+.nav-group-title {
+  @apply font-semibold text-lg cursor-pointer transition-all duration-300 ease-in-out py-2 px-4 rounded;
+}
+
+.nav-group-title:hover {
+  @apply transform -translate-y-px;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-dropdown {
+  @apply absolute top-full left-0 bg-white border border-gray-200 rounded-lg shadow-lg p-3 min-w-[220px] z-50 mt-2 transition-all duration-300 ease-in-out;
+  transform: translateY(-10px);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.nav-group:hover .nav-dropdown,
+.nav-dropdown.active {
+  @apply opacity-100;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.nav-dropdown-item {
+  @apply flex items-center py-2.5 px-3.5 rounded transition-all duration-200 ease-in-out text-gray-600 no-underline mb-0.5 text-base tracking-wide;
+}
+
+.nav-dropdown-item:hover {
+  @apply bg-gray-100 text-orange-500 transform translate-x-0.5;
+}
+
+.nav-dropdown-item i {
+  @apply mr-3 w-5 text-center text-gray-500 transition-colors duration-200 ease-in-out;
+}
+
+.nav-dropdown-item:hover i {
+  @apply text-orange-500;
+}
+
+.nav-dropdown-item.active {
+  @apply bg-orange-500 text-white shadow;
+}
+
+.nav-dropdown-item.active i {
+  @apply text-white;
+}
+
+.nav-dropdown-item.active:hover {
+  @apply bg-orange-600 text-white transform translate-x-0.5;
+}
