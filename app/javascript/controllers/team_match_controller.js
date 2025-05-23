@@ -151,10 +151,10 @@ export default class extends Controller {
       button.classList.add("correct", "pulsing")
       
       this.teamNameTextTarget.textContent = teamName
-      this.teamNameOverlayTarget.classList.add("opacity-100")
+      this.teamNameOverlayTarget.classList.add("visible")
       
       setTimeout(() => {
-        this.teamNameOverlayTarget.classList.remove("opacity-100")
+        this.teamNameOverlayTarget.classList.remove("visible")
       }, 750)
 
     } else {
@@ -168,10 +168,10 @@ export default class extends Controller {
             
             const correctTeamName = choice.querySelector(".team-name").textContent
             this.teamNameTextTarget.textContent = correctTeamName
-            this.teamNameOverlayTarget.classList.add("opacity-100")
+            this.teamNameOverlayTarget.classList.add("visible")
             
             setTimeout(() => {
-              this.teamNameOverlayTarget.classList.remove("opacity-100")
+              this.teamNameOverlayTarget.classList.remove("visible")
             }, 750)
           }
         })
@@ -179,7 +179,7 @@ export default class extends Controller {
     }
 
     // Show the attempts container if it's not already visible
-    this.attemptsContainerTarget.classList.remove('hidden');
+    this.attemptsContainerTarget.classList.remove("hidden");
     console.log("[TM Controller] checkAnswer() - attemptsContainer shown");
     
     if (this.nextQuestionTimer) clearTimeout(this.nextQuestionTimer);
@@ -249,20 +249,20 @@ export default class extends Controller {
     // Add a small indicator for the chosen team if incorrect
     if (!attemptData.isCorrect) {
       const chosenTeamIndicator = document.createElement('div');
-      chosenTeamIndicator.className = 'chosen-team-indicator text-xs text-red-600 mt-1';
+      chosenTeamIndicator.className = 'chosen-team-indicator';
       chosenTeamIndicator.textContent = `Your Guess: ${attemptData.chosenTeam.name}`;
       playerPart.appendChild(chosenTeamIndicator);
     }
     
     // Apply styling based on correctness
     if (attemptData.isCorrect) {
-      teamPart.classList.add('bg-green-100');
-      playerPart.classList.add('bg-green-50');
-      template.classList.add('border-green-500');
+      template.classList.add('correct-attempt');
+      teamPart.classList.add('correct-team-part');
+      playerPart.classList.add('correct-player-part');
     } else {
-      teamPart.classList.add('bg-red-100');
-      playerPart.classList.add('bg-red-50');
-      template.classList.add('border-red-500');
+      template.classList.add('incorrect-attempt');
+      teamPart.classList.add('incorrect-team-part');
+      playerPart.classList.add('incorrect-player-part');
     }
     
     // Add a timestamp data attribute for sorting/reference
@@ -328,11 +328,13 @@ export default class extends Controller {
 
     if (this.isPaused) {
       if (this.nextQuestionTimer) clearTimeout(this.nextQuestionTimer);
-      icon.className = 'fa-solid fa-play mr-2'
+      icon.className = 'fa-solid fa-play pause-icon'
       this.pauseButtonTextTarget.textContent = 'Resume'
+      this.pauseButtonTarget.classList.add('paused')
     } else {
-      icon.className = 'fa-solid fa-pause mr-2'
-      this.pauseButtonTextTarget.textContent = 'Pause'   
+      icon.className = 'fa-solid fa-pause pause-icon'
+      this.pauseButtonTextTarget.textContent = 'Pause'
+      this.pauseButtonTarget.classList.remove('paused')
       
       if (!this.isAnimating && this.nextQuestionTimer) {
       } else if (!this.isAnimating) {

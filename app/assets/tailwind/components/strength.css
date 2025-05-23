@@ -120,10 +120,22 @@
   @apply flex items-center bg-gray-200 hover:bg-gray-300 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
 }
 
+.pause-button.paused {
+  @apply bg-blue-200 hover:bg-blue-300;
+}
+
+.pause-icon {
+  @apply mr-2;
+}
+
 /* Team name overlay */
 .team-name-overlay {
   @apply fixed inset-0 flex items-center justify-center pointer-events-none opacity-0 z-50;
   transition: opacity 0.3s ease-in-out;
+}
+
+.team-name-overlay.visible {
+  @apply opacity-100;
 }
 
 .team-name-content {
@@ -150,6 +162,34 @@
 /* Attempts history */
 .attempts-container {
   @apply mt-8 p-4 border border-gray-200 rounded-lg shadow-sm;
+}
+
+.chosen-team-indicator {
+  @apply text-xs text-red-600 mt-1;
+}
+
+.correct-attempt {
+  @apply border-green-500;
+}
+
+.incorrect-attempt {
+  @apply border-red-500;
+}
+
+.correct-team-part {
+  @apply bg-green-100;
+}
+
+.incorrect-team-part {
+  @apply bg-red-100;
+}
+
+.correct-player-part {
+  @apply bg-green-50;
+}
+
+.incorrect-player-part {
+  @apply bg-red-50;
 }
 
 .attempts-heading {
