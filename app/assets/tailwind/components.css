@@ -1,6 +1,12 @@
 /* Component shortcuts built with @apply */
 @import "./components/index_pages.css";
 @import "./components/strength.css";
+@import "./components/players.css";
+@import "./components/name_pulse.css";
+@import "./components/player_details.css";
+@import "./components/rating_slider.css";
+@import "./components/quests.css";
+@import "./components/navigation.css";
 
 .btn {
   @apply inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700;

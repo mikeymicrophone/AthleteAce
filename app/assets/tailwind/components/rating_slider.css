@@ -1,0 +1,62 @@
+/* Rating Slider Component Styles */
+
+/* Slider track customization */
+.rating-slider {
+  @apply appearance-none h-2 rounded outline-none;
+  -webkit-appearance: none;
+}
+
+/* Slider thumb customization */
+.rating-slider::-webkit-slider-thumb {
+  @apply w-[18px] h-[18px] rounded-full bg-white border-2 border-blue-500 cursor-pointer shadow transition-all duration-200 ease-in-out;
+  -webkit-appearance: none;
+}
+
+.rating-slider::-moz-range-thumb {
+  @apply w-[18px] h-[18px] rounded-full bg-white border-2 border-blue-500 cursor-pointer shadow transition-all duration-200 ease-in-out;
+}
+
+/* Hover state for thumb */
+.rating-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.rating-slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+}
+
+/* Active state for thumb */
+.rating-slider:active::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+
+.rating-slider:active::-moz-range-thumb {
+  transform: scale(1.2);
+}
+
+/* Container for the rating slider */
+.rating-slider-container {
+  @apply p-2.5 rounded-lg bg-gray-50 shadow-sm;
+}
+
+/* Spectrum item styling */
+.spectrum-item {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.spectrum-item:hover {
+  @apply bg-gray-100;
+}
+
+/* Multi-spectrum mode colors */
+.spectrum-color-0 { @apply text-blue-500; }
+.spectrum-color-1 { @apply text-green-500; }
+.spectrum-color-2 { @apply text-yellow-500; }
+.spectrum-color-3 { @apply text-red-500; }
+
+/* Zoom mode (to be implemented later) */
+.zoom-mode .rating-slider-container {
+  @apply relative z-10 transition-transform duration-300 ease-in-out;
+  transform: scale(1.5);
+  transform-origin: center;
+}

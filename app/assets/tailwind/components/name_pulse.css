@@ -1,0 +1,49 @@
+/* Name pulse animation styles */
+.player-info {
+  @apply flex flex-wrap gap-2 items-center text-2xl my-8;
+}
+
+.name-part {
+  @apply font-bold inline-block;
+  transform-origin: center;
+}
+
+.first-name {
+  @apply text-blue-500;
+}
+
+.last-name {
+  @apply text-red-500;
+}
+
+.pulse-grow {
+  animation: pulse-grow-animation var(--grow-duration, 500ms) ease-in-out forwards;
+}
+
+.pulse-shrink {
+  animation: pulse-shrink-animation var(--shrink-duration, 300ms) ease-in-out forwards;
+}
+
+@keyframes pulse-grow-animation {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-shrink-animation {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.8);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

@@ -1,0 +1,27 @@
+/* Quest-specific styles */
+
+/* Fix for the green vertical lines that appear on quest elements */
+#quest_discovery {
+  @apply relative overflow-hidden;
+}
+
+.quest-container {
+  @apply relative overflow-hidden;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.quest-container::before,
+.quest-container::after {
+  display: none !important;
+}
+
+/* Enhance quest buttons for better visibility */
+.quest-action-button {
+  @apply min-w-[120px] text-center;
+}
+
+/* Improve spacing in quest cards */
+.quest-card {
+  @apply rounded-lg border border-gray-200 overflow-hidden;
+}
