@@ -9,7 +9,6 @@ export default class extends Controller {
     "teamChoice", 
     "teamNameOverlay", 
     "teamNameText",
-    "playerNameText",
     "progressCounter",
     "pauseButton",
     "pauseButtonText",
@@ -145,13 +144,16 @@ export default class extends Controller {
       isCorrect: isCorrect
     });
     
-    // Set player name in the overlay if the target exists
-    try {
-      if (this.hasPlayerNameTextTarget) {
-        this.playerNameTextTarget.textContent = playerName;
-      }
-    } catch (e) {
-      console.warn("Player name text target not available yet", e);
+    // Highlight the player name in the player card
+    const playerNameElement = this.currentPlayerCardDisplayTarget.querySelector('.player-name');
+    if (playerNameElement) {
+      // Add highlight class to trigger animation
+      playerNameElement.classList.add('highlight');
+      
+      // Remove highlight class after animation completes
+      setTimeout(() => {
+        playerNameElement.classList.remove('highlight');
+      }, 1250);
     }
     
     if (isCorrect) {
