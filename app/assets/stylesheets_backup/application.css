@@ -11,10 +11,10 @@
 
 /* Font Awesome is loaded via CDN in the application layout */
 
-/* Import Tailwind CSS */
-@import "../tailwind/application.css";
+/* Import component-specific stylesheets */
+@import "strength.css";
+/* index_pages.css has been moved to tailwind/components/index_pages.css */
 
-/* Base styles that aren't in Tailwind components */
 body {
   font-family: 'Lora', serif;
   line-height: 1.6;

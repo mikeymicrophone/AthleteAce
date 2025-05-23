@@ -1,6 +1,8 @@
 /* Navigation Styles */
 .navigation-container {
-  @apply relative shadow-md font-serif;
+  @apply fixed top-0 left-0 right-0 w-full z-50 shadow-md font-serif bg-gray-800;
+  /* Ensure the background is visible with a fallback */
+  background: #1f2937;
   background: linear-gradient(to bottom, #3a3a3a, #1a1a1a);
 }
 
