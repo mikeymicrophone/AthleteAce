@@ -1,8 +1,28 @@
 # AthleteAce Database Seed File
 # This file loads data from the athlete_ace_data source directory
 
-puts "===== Seeding AthleteAce Database ====="
+class SeedVersion < ActiveSupport::CurrentAttributes
+  attribute :seed_version, :string
+  attribute :last_seeded_at, :datetime
 
+  attribute :seeded_models, :array, default: []
+end
+
+SeedVersion.seeded_models = [Country, State, City, Stadium, Sport, League, Conference, Division, Team, Player, Membership, Position, Role, Spectrum, Quest, Achievement, Highlight]
+
+ApplicationRecord.before_create do
+  self.seed_version ||= SeedVersion.seed_version
+  self.last_seeded_at ||= SeedVersion.last_seeded_at
+end
+
+puts "===== Seeding AthleteAce Database ====="
+previous_seed_version = SeedVersion.seeded_models.map { |model| model.seeded.last&.seed_version =~ /^(\d+)\.\d+\.\d+\.\d+$/ ; $1.to_i }.max
+puts "Previous seed version: #{previous_seed_version}"
+SeedVersion.seed_version = "%03d.#{Time.current.strftime('%Y.%m.%d')}" % (previous_seed_version + 1)
+SeedVersion.last_seeded_at = Time.current
+
+# All database operations inside this block will automatically include 
+# seed_version and last_seeded_at without manual assignment
 # Step 1: Load sports data
 puts "\n----- Seeding Sports -----"
 sports_file = File.read(Rails.root.join('db/seeds/athlete_ace_data/sports/sports.json'))
@@ -29,6 +49,18 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/locations/countries/*.json')
     country_record.save!
     puts "Created country: #{country['name']}"
   end
+end
+
+puts "Loading federations..."
+federations_file = File.read(Rails.root.join('db/seeds/athlete_ace_data/locations/federations/federations.json'))
+federations_data = JSON.parse(federations_file)
+federations_data["federations"].each do |federation|
+  federation_record = Federation.find_or_initialize_by(name: federation["name"])
+  federation_record.abbreviation = federation["abbreviation"]
+  federation_record.description = federation["description"]
+  federation_record.logo_url = federation["logo_url"]
+  federation_record.url = federation["url"]
+  federation_record.save!
 end
 
 # States
@@ -123,7 +155,11 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/**/leagues.json')).ea
   puts "Loading leagues from #{file}..."
   leagues = JSON.parse(leagues_file)
   sport = Sport.find_by(name: leagues["sport_name"])
-  jurisdiction = Country.find_by(name: leagues["country_name"])
+  if leagues["federation_name"]
+    jurisdiction = Federation.find_by(abbreviation: leagues["federation_name"])
+  else
+    jurisdiction = Country.find_by(name: leagues["country_name"])
+  end
   leagues["leagues"].each do |league|
     league_record = League.find_or_initialize_by(
       name: league["name"]
