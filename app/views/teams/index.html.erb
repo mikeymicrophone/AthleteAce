@@ -42,8 +42,9 @@
           <%= render "shared/rating_slider", target: team, selected_spectrums: selected_spectrums %>
         </div>
 
-        <div class="team-links md:col-span-1 text-right">
+        <div class="team-links md:col-span-1 text-right flex flex-wrap items-center justify-end gap-3">
           <%= link_to pluralize(team.players.count, "player"), [team, :players], class: "text-sm text-blue-600 hover:underline" %>
+          <%= team_quiz_link(team) %>
         </div>
       </div>
     <% end %>

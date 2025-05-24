@@ -91,7 +91,7 @@ class StrengthController < ApplicationController
     teams_pool = nil
 
     if @parent.present?
-      teams_pool = @parent.teams
+      teams_pool = @parent.is_a?(Team) ? @parent.league.teams : @parent.teams
       return redirect_back(fallback_location: root_path, alert: "No teams found in this scope.") if teams_pool.empty?
       filter_params[:team_ids] = teams_pool.map(&:id)
     elsif ace_signed_in? && no_scope_specified? &&
@@ -169,7 +169,11 @@ class StrengthController < ApplicationController
     division_id:   Division,
     conference_id: Conference,
     city_id:       City,
-    state_id:      State
+    state_id:      State,
+    league_id:     League,
+    sport_id:      Sport,
+    country_id:    Country,
+    team_id:       Team
   }.freeze
 
   # Determine the parent scope (division, conference, etc.) from params
