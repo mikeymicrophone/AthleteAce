@@ -51,6 +51,18 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/locations/countries/*.json')
   end
 end
 
+puts "Loading federations..."
+federations_file = File.read(Rails.root.join('db/seeds/athlete_ace_data/locations/federations/federations.json'))
+federations_data = JSON.parse(federations_file)
+federations_data["federations"].each do |federation|
+  federation_record = Federation.find_or_initialize_by(name: federation["name"])
+  federation_record.abbreviation = federation["abbreviation"]
+  federation_record.description = federation["description"]
+  federation_record.logo_url = federation["logo_url"]
+  federation_record.url = federation["url"]
+  federation_record.save!
+end
+
 # States
 puts "Loading states..."
 Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/locations/states/*.json')).each do |file|
@@ -143,7 +155,11 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/**/leagues.json')).ea
   puts "Loading leagues from #{file}..."
   leagues = JSON.parse(leagues_file)
   sport = Sport.find_by(name: leagues["sport_name"])
-  jurisdiction = Country.find_by(name: leagues["country_name"])
+  if leagues["federation_name"]
+    jurisdiction = Federation.find_by(abbreviation: leagues["federation_name"])
+  else
+    jurisdiction = Country.find_by(name: leagues["country_name"])
+  end
   leagues["leagues"].each do |league|
     league_record = League.find_or_initialize_by(
       name: league["name"]
