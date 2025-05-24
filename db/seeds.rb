@@ -4,7 +4,11 @@
 class SeedVersion < ActiveSupport::CurrentAttributes
   attribute :seed_version, :string
   attribute :last_seeded_at, :datetime
+
+  attribute :seeded_models, :array, default: []
 end
+
+SeedVersion.seeded_models = [Country, State, City, Stadium, Sport, League, Conference, Division, Team, Player, Membership, Position, Role, Spectrum, Quest, Achievement, Highlight]
 
 ApplicationRecord.before_create do
   self.seed_version ||= SeedVersion.seed_version
@@ -12,7 +16,8 @@ ApplicationRecord.before_create do
 end
 
 puts "===== Seeding AthleteAce Database ====="
-SeedVersion.seed_version = "001.2025.05.23"
+previous_seed_version = SeedVersion.seeded_models.map { |model| model.seeded.last&.seed_version =~ /^(\d+)\.\d+\.\d+$/ ; $1.to_i }.max
+SeedVersion.seed_version = "%03d.#{Time.current.strftime('%Y.%m.%d')}" % (previous_seed_version + 1)
 SeedVersion.last_seeded_at = Time.current
 
 # All database operations inside this block will automatically include 
