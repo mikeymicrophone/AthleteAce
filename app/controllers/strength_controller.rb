@@ -140,11 +140,11 @@ class StrengthController < ApplicationController
     Rails.logger.debug "TEAM MATCH: Selected player: #{@current_player.name} (Team: #{@current_player.team.mascot})"
     
     # Double-check that the player's team is in our pool
-    unless filter_params[:team_ids].include?(@current_player.team_id)
+    unless filter_params[:team_ids].present? && filter_params[:team_ids].include?(@current_player.team_id)
       Rails.logger.error "TEAM MATCH: Player's team not in teams_pool! Re-selecting a player."
       
       # Instead of modifying the teams_pool, we'll re-select a player from the filtered pool
-      filtered_players = Player.where(team_id: filter_params[:team_ids]).sampled(50)
+      filtered_players = filter_params[:team_ids].present? ? Player.where(team_id: filter_params[:team_ids]).sampled(50) : []
       
       if filtered_players.any?
         # If we have players in the filtered pool, select one of those
