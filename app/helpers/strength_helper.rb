@@ -99,7 +99,13 @@ module StrengthHelper
 
   def player_card_section(player)
     tag.div id: "player_card_area", class: "player-card-area lg:w-1/3 mb-4 lg:mb-0" do
-      tag.div id: "current_player_card_display", class: "current-player-card mb-4", data: { team_match_target: "currentPlayerCardDisplay" } do
+      tag.div id: "current_player_card_display", 
+              class: "current-player-card mb-4", 
+              data: { 
+                team_match_target: "currentPlayerCardDisplay",
+                player_id: player.id,
+                player_team_id: player.team_id
+              } do
         player_card(player)
       end
     end
