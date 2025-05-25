@@ -42,97 +42,97 @@ module RatingsHelper
   # @param selected_spectrums [Array<Spectrum>] Collection of currently selected spectrums to display sliders for
   # @return [ActiveSupport::SafeBuffer] The HTML for the rating slider
   def rating_slider_container(record, selected_spectrums)
-    # Prepare data attributes based on the record type
-    data_attrs = { controller: "rating-slider" }
-    data_attrs[:rating_slider_player_id_value] = record.id.to_s if record.is_a?(Player)
-    data_attrs[:rating_slider_team_id_value] = record.id.to_s if record.is_a?(Team)
-    
-    tag.div(
-      id: "rating-slider-group-#{record.class.name.downcase}-#{record.id}", 
-      class: "rating-slider-group-container",
-      data: data_attrs
-    ) do
-      # Generate sliders for each selected spectrum
-      content = ActiveSupport::SafeBuffer.new
-      
-      selected_spectrums.each do |spectrum|
-        content << build_rating_slider(record, spectrum)
-      end
-      
-      # Add empty state message if no spectrums are selected
+    # The outer div simply wraps everything, matches what we see in the teams page
+    tag.div class: "rating-container md:col-span-1" do
+      # If no spectrums selected, just show a message
       if selected_spectrums.empty?
-        content << tag.p("Select a spectrum to see rating sliders.",
-          id: "rating-slider-empty-state-#{record.class.name.downcase}-#{record.id}",
-          class: "empty-state-message")
+        tag.p "Select a spectrum to see rating sliders.",
+             class: "empty-state-message text-sm text-gray-500 italic"
+      else
+        # The main div with the controller that handles the sliders
+        # This matches the structure in the screenshot exactly
+        tag.div id: "rating-slider-group-#{record.class.name.downcase}-#{record.id}", 
+                class: "rating-slider-group-container",
+                data: {
+                  controller: "rating-slider",
+                  rating_slider_team_id_value: record.is_a?(Team) ? record.id : nil,
+                  rating_slider_player_id_value: record.is_a?(Player) ? record.id : nil
+                } do
+          
+          # Generate content for each spectrum
+          content = ActiveSupport::SafeBuffer.new
+          
+          # Build a slider for each selected spectrum
+          selected_spectrums.each do |spectrum|
+            content << build_spectrum_slider(record, spectrum)
+          end
+          
+          content
+        end
       end
-      
-      content
     end
   end
   
   private
   
-  # Build an individual rating slider for a specific spectrum
+  # Build a slider for a specific spectrum
   # @param record [ActiveRecord::Base] The object being rated
   # @param spectrum [Spectrum] The spectrum to display the slider for
-  # @return [ActiveSupport::SafeBuffer] The HTML for a single rating slider
-  def build_rating_slider(record, spectrum)
+  # @return [ActiveSupport::SafeBuffer] The HTML for a single spectrum slider
+  def build_spectrum_slider(record, spectrum)
     record_type = record.class.name.downcase
     record_id = record.id
     spectrum_id = spectrum.id
     current_value = record.ratings.active.find_by(spectrum_id: spectrum_id)&.value || 0
     
-    tag.div(
-      id: "rating-slider-#{record_type}-#{record_id}-spectrum-#{spectrum_id}",
-      class: "rating-slider-instance",
-      data: { spectrum_id: spectrum_id }
-    ) do
-      content = ActiveSupport::SafeBuffer.new
+    # The individual slider container
+    tag.div class: "rating-slider-instance mb-4 border-t pt-2",
+            data: { spectrum_id: spectrum_id } do
       
-      # Header with label and current value
-      content << tag.div(class: "slider-header") do
-        header_content = ActiveSupport::SafeBuffer.new
-        header_content << tag.span(spectrum.name.sub(/\s*\(.*\)\s*$/, '').strip, class: "slider-label")
-        header_content << tag.span(current_value,
-          id: "rating-value-#{record_type}-#{record_id}-spectrum-#{spectrum_id}",
-          class: "slider-value",
-          data: { rating_slider_target: "value_#{spectrum_id}" })
-        header_content
+      slider_content = ActiveSupport::SafeBuffer.new
+      
+      # Header with spectrum name and value display
+      slider_content << tag.div(class: "flex justify-between items-center mb-1") do
+        header = ActiveSupport::SafeBuffer.new
+        header << tag.span(spectrum.name.sub(/\s*\(.*\)\s*$/, '').strip, 
+                          class: "text-sm font-medium text-gray-700")
+        header << tag.span(current_value,
+                          class: "text-sm font-semibold",
+                          data: { rating_slider_target: "value_#{spectrum_id}" })
+        header
       end
       
-      # Slider control with range input
-      content << tag.div(class: "slider-control") do
-        control_content = ActiveSupport::SafeBuffer.new
-        control_content << tag.span(spectrum.low_label, class: "slider-low-label")
-        control_content << tag.input(
+      # Slider with min/max labels
+      slider_content << tag.div(class: "flex items-center space-x-2") do
+        slider_row = ActiveSupport::SafeBuffer.new
+        slider_row << tag.span(spectrum.low_label, class: "text-xs text-gray-500")
+        slider_row << tag.input(
           type: "range",
           min: -10000,
           max: 10000,
           value: current_value,
           step: 100,
-          id: "rating-input-#{record_type}-#{record_id}-spectrum-#{spectrum_id}",
-          class: "slider-input",
+          class: "w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer rating-slider-input",
           data: {
             rating_slider_target: "slider_#{spectrum_id}",
             action: "input->rating-slider#updateValue change->rating-slider#submitRating",
             rating_slider_spectrum_id_param: spectrum_id
           }
         )
-        control_content << tag.span(spectrum.high_label, class: "slider-high-label")
-        control_content
+        slider_row << tag.span(spectrum.high_label, class: "text-xs text-gray-500")
+        slider_row
       end
       
       # Status message area
-      content << tag.div(class: "slider-status") do
+      slider_content << tag.div(class: "text-right mt-1") do
         tag.span(
           "",
-          id: "rating-status-#{record_type}-#{record_id}-spectrum-#{spectrum_id}",
-          class: "status-indicator",
+          class: "text-xs text-gray-500",
           data: { rating_slider_target: "status_#{spectrum_id}" }
         )
       end
       
-      content
+      slider_content
     end
   end
 end

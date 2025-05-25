@@ -5,9 +5,7 @@
 <div id="conferences">
   <% @conferences.each do |conference| %>
     <%= tag.div(id: dom_id(conference), class: [index_record_base_classes, conference_index_record_classes].join(' ')) do %>
-      <%= link_to conference do %>
-        <%= display_name_with_lazy_logo(conference) %>
-      <% end %>
+      <%= display_name_with_lazy_logo(conference) %>
       <%= link_to conference.league.name, conference.league %>
       <%= link_to pluralize(conference.divisions.count, "division"), [conference, :divisions] %>
       <%= link_to pluralize(conference.teams.count, "team"), [conference, :teams] %>

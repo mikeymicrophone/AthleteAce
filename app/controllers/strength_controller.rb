@@ -86,39 +86,123 @@ class StrengthController < ApplicationController
   def team_match
     id_collect
 
-    filter_params = strength_filter_params.to_h.symbolize_keys
-    @parent = parent_scope
-    teams_pool = nil
+    Rails.logger.debug "TEAM_MATCH DEBUG:"
+    Rails.logger.debug "  params[:team_id] = #{params[:team_id].inspect}"
+    Rails.logger.debug "  @team_id = #{@team_id.inspect}"
 
+    filter_params = strength_filter_params.to_h.symbolize_keys
+    Rails.logger.debug "  filter_params = #{filter_params.inspect}"
+    
+    @parent = parent_scope
+
+    # If we have a specific scope (team, league, conference, etc)
     if @parent.present?
-      teams_pool = @parent.is_a?(Team) ? @parent.league.teams : @parent.teams
+      Rails.logger.debug "TEAM MATCH: Parent scope found: #{@parent.class.name} ##{@parent.id}"
+      
+      # Get teams based on the parent scope
+      # Convert to array immediately to avoid readonly association issues
+      if @parent.is_a?(Team)
+        teams_pool = @parent.league.teams.to_a
+      elsif @parent.is_a?(Conference) || @parent.is_a?(League)
+        teams_pool = @parent.teams.to_a
+      else
+        teams_pool = @parent.teams.to_a
+      end
+      
       return redirect_back(fallback_location: root_path, alert: "No teams found in this scope.") if teams_pool.empty?
+      
+      # Important: Restrict to ONLY these teams
       filter_params[:team_ids] = teams_pool.map(&:id)
+      Rails.logger.debug "TEAM MATCH: Restricting to teams: #{filter_params[:team_ids]}"
     elsif ace_signed_in? && no_scope_specified? &&
           filter_params[:team_id].blank? && filter_params[:sport_id].blank? && filter_params[:league_id].blank?
+      # No scope specified, use quest teams for logged-in users
       quest_teams = current_ace.active_goals.flat_map { |g| g.quest.associated_teams }.uniq
       unless quest_teams.empty?
         cross_sport = params[:cross_sport] == 'true'
         teams_pool  = cross_sport ? quest_teams : quest_teams.select { |t| t.sport.id == quest_teams.first.sport.id }
         filter_params[:team_ids] = teams_pool.map(&:id) if teams_pool.present?
+        Rails.logger.debug "TEAM MATCH: Using quest teams: #{filter_params[:team_ids]}"
       end
     end
 
+    # Fetch players based on the filters
     players = PlayerSearch.new(filter_params).call
+    Rails.logger.debug "TEAM MATCH: Found #{players.size} players with filter params: #{filter_params}"
+    
     if players.empty?
+      Rails.logger.debug "TEAM MATCH: No players found with filtered teams, using sample"
       players = Player.sampled(50)
     end
-
+    
+    # Select a random player for the quiz
     @current_player = players.sample
-    pool            = if teams_pool&.map(&:id)&.include?(@current_player.team_id)
-                        teams_pool
-                      else
-                        @current_player.team.league.teams
-                      end
-    round           = TeamMatchRound.new(player: @current_player, pool: pool)
-
-    @team_choices   = round.choices
-    @correct_team   = @current_player.team
+    Rails.logger.debug "TEAM MATCH: Selected player: #{@current_player.name} (Team: #{@current_player.team.mascot})"
+    
+    # Double-check that the player's team is in our pool
+    unless filter_params[:team_ids].include?(@current_player.team_id)
+      Rails.logger.error "TEAM MATCH: Player's team not in teams_pool! Re-selecting a player."
+      
+      # Instead of modifying the teams_pool, we'll re-select a player from the filtered pool
+      filtered_players = Player.where(team_id: filter_params[:team_ids]).sampled(50)
+      
+      if filtered_players.any?
+        # If we have players in the filtered pool, select one of those
+        @current_player = filtered_players.sample
+        Rails.logger.debug "TEAM MATCH: Re-selected player: #{@current_player.name} (Team: #{@current_player.team.mascot})"
+      else
+        # As a fallback, keep the current player but create a new teams_pool that includes their team
+        Rails.logger.debug "TEAM MATCH: No players in filtered pool, keeping current player and adjusting pool"
+        
+        # If we have a specific parent scope, respect it when building the pool
+        if @parent.is_a?(Conference)
+          # For conference, use only teams from that conference plus the player's team
+          pool = @parent.teams.to_a
+          pool << @current_player.team unless pool.include?(@current_player.team)
+        elsif @parent.is_a?(League)
+          # For league, use only teams from that league plus the player's team
+          pool = @parent.teams.to_a
+          pool << @current_player.team unless pool.include?(@current_player.team)
+        else
+          # Default: use teams from the player's league
+          pool = @current_player.team.league.teams.to_a
+        end
+        
+        # Update the teams_pool
+        teams_pool = pool
+      end
+    end
+    
+    # Define the pool of teams to choose from for the quiz
+    # If we have a teams_pool and the player's team is in it, use that pool
+    # Otherwise, ensure we at least restrict to teams in the same league as the player
+    if teams_pool.present? && teams_pool.map(&:id).include?(@current_player.team_id)
+      pool = teams_pool
+      Rails.logger.debug "TEAM MATCH: Using existing teams_pool for choices"
+    else
+      # If the player doesn't belong to our filter, make sure we at least stay in the same league/conference
+      if @parent.is_a?(Conference)
+        # If we're filtering by conference, ensure we only show teams from that conference
+        pool = @parent.teams
+        Rails.logger.debug "TEAM MATCH: Restricting pool to conference teams: #{pool.map(&:mascot)}"
+      elsif @parent.is_a?(League)
+        # If we're filtering by league, ensure we only show teams from that league
+        pool = @parent.teams
+        Rails.logger.debug "TEAM MATCH: Restricting pool to league teams: #{pool.map(&:mascot)}"
+      else
+        # Default fallback - use teams from the player's league
+        pool = @current_player.team.league.teams
+        Rails.logger.debug "TEAM MATCH: Using player's league teams for pool"
+      end
+    end
+    
+    round = TeamMatchRound.new(player: @current_player, pool: pool)
+    @team_choices = round.choices
+    @correct_team = @current_player.team
+    
+    # Debug the final choices
+    Rails.logger.debug "TEAM MATCH: Final team choices: #{@team_choices.map(&:mascot)}"
+    Rails.logger.debug "TEAM MATCH: Correct team: #{@correct_team.mascot}"
     
     respond_to do |format|
       format.html
@@ -157,12 +241,12 @@ class StrengthController < ApplicationController
   private
   
   def no_scope_specified?
-    params[:division_id].blank? && params[:conference_id].blank? && params[:league_id].blank? && params[:city_id].blank? && params[:state_id].blank?
+    params[:division_id].blank? && params[:conference_id].blank? && params[:league_id].blank? && params[:city_id].blank? && params[:state_id].blank? && params[:team_id].blank?
   end
 
   # Strong parameter helper
   def strength_filter_params
-    params.permit(:team_id, :sport_id, :league_id, :include_inactive, :cross_sport, team_ids: [])
+    params.permit(:team_id, :conference_id, :division_id, :sport_id, :league_id, :include_inactive, :cross_sport, team_ids: [])
   end
 
   FILTER_PARENTS = {

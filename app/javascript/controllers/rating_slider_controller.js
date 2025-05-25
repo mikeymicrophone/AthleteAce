@@ -13,16 +13,32 @@ export default class extends Controller {
   }
 
   connect() {
+    console.log('[RatingSlider] Controller connected', {
+      element: this.element,
+      hasPlayerIdValue: this.hasPlayerIdValue,
+      playerIdValue: this.hasPlayerIdValue ? this.playerIdValue : null,
+      hasTeamIdValue: this.hasTeamIdValue,
+      teamIdValue: this.hasTeamIdValue ? this.teamIdValue : null
+    });
     this.initializeAllSliders();
   }
 
   initializeAllSliders() {
-    const sliders = this.element.querySelectorAll('.rating-slider-input');
+    // Look for range inputs with the class that matches what's in the DOM
+    const sliders = this.element.querySelectorAll('input[type="range"].rating-slider-input');
+    console.log('[RatingSlider] Found sliders:', sliders.length);
+    
     sliders.forEach(slider => {
       const spectrumId = slider.dataset.ratingSliderSpectrumIdParam;
+      console.log('[RatingSlider] Initializing slider for spectrum:', spectrumId, slider);
+      
+      // Find the value display element
       const valueDisplay = this.element.querySelector(`[data-rating-slider-target="value_${spectrumId}"]`);
       if (valueDisplay) {
         this.updateValueDisplay(slider.value, valueDisplay);
+        console.log('[RatingSlider] Updated value display for spectrum:', spectrumId);
+      } else {
+        console.error('[RatingSlider] Could not find value display for spectrum ID:', spectrumId);
       }
     });
   }
@@ -55,6 +71,13 @@ export default class extends Controller {
     const ratingValue = slider.value;
     const spectrumId = slider.dataset.ratingSliderSpectrumIdParam;
     
+    console.log("[RatingSlider] Submitting rating:", {
+      slider,
+      ratingValue,
+      spectrumId,
+      dataset: slider.dataset
+    });
+    
     const statusDisplay = this.element.querySelector(`[data-rating-slider-target="status_${spectrumId}"]`);
 
     if (!spectrumId) {
@@ -62,18 +85,29 @@ export default class extends Controller {
       if (statusDisplay) statusDisplay.textContent = "Error: Spectrum ID missing";
       return;
     }
+    
+    // Get the record type from the data attribute
+    const recordType = this.element.dataset.ratingSliderRecordType;
+    console.log("[RatingSlider] Record type:", recordType);
 
     let targetId, targetType, url;
-    if (this.hasPlayerIdValue && this.playerIdValue) {
-      targetId = this.playerIdValue;
+    if (recordType === 'player' || (this.hasPlayerIdValue && this.playerIdValue)) {
+      targetId = this.hasPlayerIdValue ? this.playerIdValue : this.element.dataset.ratingSliderPlayerIdValue;
       targetType = 'Player';
       url = `/players/${targetId}/ratings`;
-    } else if (this.hasTeamIdValue && this.teamIdValue) {
-      targetId = this.teamIdValue;
+    } else if (recordType === 'team' || (this.hasTeamIdValue && this.teamIdValue)) {
+      targetId = this.hasTeamIdValue ? this.teamIdValue : this.element.dataset.ratingSliderTeamIdValue;
       targetType = 'Team';
       url = `/teams/${targetId}/ratings`;
     } else {
-      console.error("[RatingSlider] Target ID or Type not found in submitRating.");
+      console.error("[RatingSlider] Target ID or Type not found in submitRating.", {
+        recordType,
+        hasPlayerIdValue: this.hasPlayerIdValue,
+        playerIdValue: this.playerIdValue,
+        hasTeamIdValue: this.hasTeamIdValue,
+        teamIdValue: this.teamIdValue,
+        elementDataset: this.element.dataset
+      });
       if (statusDisplay) statusDisplay.textContent = "Error: Target missing";
       return;
     }

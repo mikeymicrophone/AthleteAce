@@ -38,9 +38,7 @@
           </div>
         </div>
         
-        <div class="rating-container md:col-span-1">
-          <%= rating_slider_container(team, selected_spectrums) %>
-        </div>
+        <%= rating_slider_container(team, selected_spectrums) %>
 
         <div class="team-links md:col-span-1 text-right flex flex-wrap items-center justify-end gap-3">
           <%= link_to pluralize(team.players.count, "player"), [team, :players], class: "text-sm text-blue-600 hover:underline" %>
