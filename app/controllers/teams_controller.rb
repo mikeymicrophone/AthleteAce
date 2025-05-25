@@ -35,6 +35,9 @@ class TeamsController < ApplicationController
       @teams = @teams.includes(:stadium).order('stadiums.city_id')
     end
 
+    # Paginate the teams collection
+    @pagy, @teams = pagy @teams, items: params[:per_page] || Pagy::DEFAULT[:items]
+
     @spectrums = Spectrum.all
     
     # Set current spectrum ID if provided in params

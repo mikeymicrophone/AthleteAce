@@ -48,3 +48,24 @@
     <% end %>
   <% end %>
 </div>
+
+<%# Standard Pagy pagination navigation %>
+<% if @pagy.pages > 1 %>
+  <div class="my-6 flex justify-center">
+    <%== pagy_nav(@pagy) %>
+  </div>
+  
+  <%# Simple per-page selector %>
+  <div class="flex justify-center mt-2 mb-8">
+    <div class="text-sm text-gray-600">
+      Items per page: 
+      <% [5, 10, 20, 50].each do |per_page| %>
+        <% if params[:per_page].to_i == per_page || (params[:per_page].blank? && per_page == Pagy::DEFAULT[:items]) %>
+          <span class="font-bold px-2"><%= per_page %></span>
+        <% else %>
+          <%= link_to per_page, teams_path(per_page: per_page), class: "text-blue-600 hover:underline px-2" %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
