@@ -129,7 +129,7 @@ class StrengthController < ApplicationController
     # Fetch players based on the filters
     players = PlayerSearch.new(filter_params).call
     Rails.logger.debug "TEAM MATCH: Found #{players.size} players with filter params: #{filter_params}"
-    
+
     if players.empty?
       Rails.logger.debug "TEAM MATCH: No players found with filtered teams, using sample"
       players = Player.sampled(50)
