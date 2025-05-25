@@ -8,44 +8,68 @@
   The spectrum picker itself is now expected to be at the page level, not within this partial.
 %>
 
-<div class="rating-slider-group-container" 
-     data-controller="rating-slider" <%# Controller might need renaming or significant updates %>
-     <%= "data-rating-slider-player-id-value=#{target.id}" if target.is_a?(Player) %>
-     <%= "data-rating-slider-team-id-value=#{target.id}" if target.is_a?(Team) %>>
+<%
+  # Prepare data attributes with proper conditional logic
+  data_attrs = { controller: "rating-slider" }
+  data_attrs[:rating_slider_player_id_value] = target.id.to_s if target.is_a?(Player)
+  data_attrs[:rating_slider_team_id_value] = target.id.to_s if target.is_a?(Team)
+%>
+
+<%= tag.div(
+  id: "rating-slider-group-#{target.class.name.downcase}-#{target.id}", 
+  class: "rating-slider-group-container",
+  data: data_attrs
+) do %>
 
   <%# Loop through each selected spectrum and render a slider for it %>
   <% selected_spectrums.each_with_index do |spectrum, index| %>
-    <div class="rating-slider-instance mb-4 border-t pt-2" data-spectrum-id="<%= spectrum.id %>">
-      <div class="flex justify-between items-center mb-1">
-        <span class="text-sm font-medium text-gray-700"><%= spectrum.name.sub(/\s*\(.*\)\s*$/, '').strip %></span>
-        <span data-rating-slider-target="value_<%= spectrum.id %>" class="text-sm font-semibold">
-          <%= target.ratings.active.find_by(spectrum_id: spectrum.id)&.value || 0 %>
-        </span>
-      </div>
+    <%= tag.div(
+      id: "rating-slider-#{target.class.name.downcase}-#{target.id}-spectrum-#{spectrum.id}",
+      class: "rating-slider-instance mb-4 border-t pt-2",
+      data: { spectrum_id: spectrum.id }
+    ) do %>
+      <%= tag.div(class: "slider-header flex justify-between items-center mb-1") do %>
+        <%= tag.span(spectrum.name.sub(/\s*\(.*\)\s*$/, '').strip, 
+                     class: "slider-label text-sm font-medium text-gray-700") %>
+        <%= tag.span(target.ratings.active.find_by(spectrum_id: spectrum.id)&.value || 0,
+                     id: "rating-value-#{target.class.name.downcase}-#{target.id}-spectrum-#{spectrum.id}",
+                     class: "slider-value text-sm font-semibold",
+                     data: { rating_slider_target: "value_#{spectrum.id}" }) %>
+      <% end %>
       
-      <%# Rating Slider %>
-      <div class="flex items-center space-x-2">
-        <span class="text-xs text-gray-500"><%= spectrum.low_label %></span>
-        <input type="range" 
-               min="-10000" 
-               max="10000" 
-               value="<%= target.ratings.active.find_by(spectrum_id: spectrum.id)&.value || 0 %>" 
-               step="100" 
-               class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer rating-slider-input"
-               data-rating-slider-target="slider_<%= spectrum.id %>" <%# Target needs to be unique %>
-               data-action="input->rating-slider#updateValue change->rating-slider#submitRating"
-               data-rating-slider-spectrum-id-param="<%= spectrum.id %>"> <%# Pass spectrum_id for JS actions. CORRECTED %>
-        <span class="text-xs text-gray-500"><%= spectrum.high_label %></span>
-      </div>
+      <%= tag.div(class: "slider-control flex items-center space-x-2") do %>
+        <%= tag.span(spectrum.low_label, class: "slider-low-label text-xs text-gray-500") %>
+        <%= tag.input(
+          type: "range",
+          min: -10000,
+          max: 10000,
+          value: target.ratings.active.find_by(spectrum_id: spectrum.id)&.value || 0,
+          step: 100,
+          id: "rating-input-#{target.class.name.downcase}-#{target.id}-spectrum-#{spectrum.id}",
+          class: "slider-input w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer rating-slider-input",
+          data: {
+            rating_slider_target: "slider_#{spectrum.id}",
+            action: "input->rating-slider#updateValue change->rating-slider#submitRating",
+            rating_slider_spectrum_id_param: spectrum.id
+          }
+        ) %>
+        <%= tag.span(spectrum.high_label, class: "slider-high-label text-xs text-gray-500") %>
+      <% end %>
       
-      <%# Status Indicator (per slider) %>
-      <div class="text-right mt-1">
-        <span data-rating-slider-target="status_<%= spectrum.id %>" class="text-xs text-gray-500"></span>
-      </div>
-    </div>
+      <%= tag.div(class: "slider-status text-right mt-1") do %>
+        <%= tag.span(
+          "",
+          id: "rating-status-#{target.class.name.downcase}-#{target.id}-spectrum-#{spectrum.id}",
+          class: "status-indicator text-xs text-gray-500",
+          data: { rating_slider_target: "status_#{spectrum.id}" }
+        ) %>
+      <% end %>
+    <% end %>
   <% end %>
 
   <% if selected_spectrums.empty? %>
-    <p class="text-sm text-gray-500 italic">Select a spectrum to see rating sliders.</p>
+    <%= tag.p("Select a spectrum to see rating sliders.",
+             id: "rating-slider-empty-state-#{target.class.name.downcase}-#{target.id}",
+             class: "empty-state-message text-sm text-gray-500 italic") %>
   <% end %>
-</div>
+<% end %>
