@@ -102,10 +102,9 @@ module RatingsHelper
         header
       end
       
-      # Slider with min/max labels
-      slider_content << tag.div(class: "flex items-center space-x-2") do
+      # Slider (without min/max labels)
+      slider_content << tag.div(class: "w-full") do
         slider_row = ActiveSupport::SafeBuffer.new
-        slider_row << tag.span(spectrum.low_label, class: "text-xs text-gray-500")
         slider_row << tag.input(
           type: "range",
           min: -10000,
@@ -119,7 +118,6 @@ module RatingsHelper
             rating_slider_spectrum_id_param: spectrum_id
           }
         )
-        slider_row << tag.span(spectrum.high_label, class: "text-xs text-gray-500")
         slider_row
       end
       

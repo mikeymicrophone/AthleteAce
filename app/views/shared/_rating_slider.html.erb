@@ -36,8 +36,7 @@
                      data: { rating_slider_target: "value_#{spectrum.id}" }) %>
       <% end %>
       
-      <%= tag.div(class: "slider-control") do %>
-        <%= tag.span(spectrum.low_label, class: "slider-low-label") %>
+      <%= tag.div(class: "slider-control w-full") do %>
         <%= tag.input(
           type: "range",
           min: -10000,
@@ -45,14 +44,13 @@
           value: target.ratings.active.find_by(spectrum_id: spectrum.id)&.value || 0,
           step: 100,
           id: "rating-input-#{target.class.name.downcase}-#{target.id}-spectrum-#{spectrum.id}",
-          class: "slider-input",
+          class: "slider-input w-full",
           data: {
             rating_slider_target: "slider_#{spectrum.id}",
             action: "input->rating-slider#updateValue change->rating-slider#submitRating",
             rating_slider_spectrum_id_param: spectrum.id
           }
         ) %>
-        <%= tag.span(spectrum.high_label, class: "slider-high-label") %>
       <% end %>
       
       <%= tag.div(class: "slider-status") do %>
