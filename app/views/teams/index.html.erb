@@ -39,7 +39,7 @@
         </div>
         
         <div class="rating-container md:col-span-1">
-          <%= render "shared/rating_slider", target: team, selected_spectrums: selected_spectrums %>
+          <%= rating_slider_container(team, selected_spectrums) %>
         </div>
 
         <div class="team-links md:col-span-1 text-right flex flex-wrap items-center justify-end gap-3">

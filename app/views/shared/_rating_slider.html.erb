@@ -25,20 +25,19 @@
   <% selected_spectrums.each_with_index do |spectrum, index| %>
     <%= tag.div(
       id: "rating-slider-#{target.class.name.downcase}-#{target.id}-spectrum-#{spectrum.id}",
-      class: "rating-slider-instance mb-4 border-t pt-2",
+      class: "rating-slider-instance",
       data: { spectrum_id: spectrum.id }
     ) do %>
-      <%= tag.div(class: "slider-header flex justify-between items-center mb-1") do %>
-        <%= tag.span(spectrum.name.sub(/\s*\(.*\)\s*$/, '').strip, 
-                     class: "slider-label text-sm font-medium text-gray-700") %>
+      <%= tag.div(class: "slider-header") do %>
+        <%= tag.span(spectrum.name.sub(/\s*\(.*\)\s*$/, '').strip, class: "slider-label") %>
         <%= tag.span(target.ratings.active.find_by(spectrum_id: spectrum.id)&.value || 0,
                      id: "rating-value-#{target.class.name.downcase}-#{target.id}-spectrum-#{spectrum.id}",
-                     class: "slider-value text-sm font-semibold",
+                     class: "slider-value",
                      data: { rating_slider_target: "value_#{spectrum.id}" }) %>
       <% end %>
       
-      <%= tag.div(class: "slider-control flex items-center space-x-2") do %>
-        <%= tag.span(spectrum.low_label, class: "slider-low-label text-xs text-gray-500") %>
+      <%= tag.div(class: "slider-control") do %>
+        <%= tag.span(spectrum.low_label, class: "slider-low-label") %>
         <%= tag.input(
           type: "range",
           min: -10000,
@@ -46,21 +45,21 @@
           value: target.ratings.active.find_by(spectrum_id: spectrum.id)&.value || 0,
           step: 100,
           id: "rating-input-#{target.class.name.downcase}-#{target.id}-spectrum-#{spectrum.id}",
-          class: "slider-input w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer rating-slider-input",
+          class: "slider-input",
           data: {
             rating_slider_target: "slider_#{spectrum.id}",
             action: "input->rating-slider#updateValue change->rating-slider#submitRating",
             rating_slider_spectrum_id_param: spectrum.id
           }
         ) %>
-        <%= tag.span(spectrum.high_label, class: "slider-high-label text-xs text-gray-500") %>
+        <%= tag.span(spectrum.high_label, class: "slider-high-label") %>
       <% end %>
       
-      <%= tag.div(class: "slider-status text-right mt-1") do %>
+      <%= tag.div(class: "slider-status") do %>
         <%= tag.span(
           "",
           id: "rating-status-#{target.class.name.downcase}-#{target.id}-spectrum-#{spectrum.id}",
-          class: "status-indicator text-xs text-gray-500",
+          class: "status-indicator",
           data: { rating_slider_target: "status_#{spectrum.id}" }
         ) %>
       <% end %>
@@ -70,6 +69,6 @@
   <% if selected_spectrums.empty? %>
     <%= tag.p("Select a spectrum to see rating sliders.",
              id: "rating-slider-empty-state-#{target.class.name.downcase}-#{target.id}",
-             class: "empty-state-message text-sm text-gray-500 italic") %>
+             class: "empty-state-message") %>
   <% end %>
 <% end %>
