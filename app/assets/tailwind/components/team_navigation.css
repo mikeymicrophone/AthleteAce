@@ -1,0 +1,55 @@
+.teams-navigation {
+  @apply mb-6 p-4 bg-white rounded-lg shadow-md;
+}
+
+.teams-navigation-title {
+  @apply text-xl font-semibold mb-4 text-gray-800;
+}
+
+.teams-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4;
+}
+
+.team-stats-card {
+  @apply bg-gray-50 rounded-lg overflow-hidden transition-all duration-200 hover:shadow-lg border border-gray-200;
+}
+
+.team-stats-link {
+  @apply block p-3 text-gray-800 no-underline;
+}
+
+.team-stats-header {
+  @apply flex items-center mb-3;
+}
+
+.team-logo-container {
+  @apply w-10 h-10 mr-3 flex items-center justify-center bg-gray-100 rounded-full overflow-hidden;
+}
+
+.team-logo {
+  @apply w-full h-full object-cover;
+}
+
+.team-logo-placeholder {
+  @apply w-full h-full flex items-center justify-center text-gray-500;
+}
+
+.team-name {
+  @apply text-base font-medium truncate;
+}
+
+.team-stats-details {
+  @apply flex justify-between;
+}
+
+.team-stats-item {
+  @apply flex flex-col items-center;
+}
+
+.team-stats-value {
+  @apply text-lg font-semibold text-indigo-600;
+}
+
+.team-stats-label {
+  @apply text-xs text-gray-500;
+}

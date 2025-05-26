@@ -240,6 +240,30 @@ class StrengthController < ApplicationController
   
   def game_attempts
     @game_attempts = current_ace.game_attempts.order(created_at: :desc)
+    
+    # Calculate team statistics for teams with attempts
+    @team_stats = {}
+    
+    # Get all teams that have attempts
+    team_attempts = @game_attempts.where(target_entity_type: 'Team')
+    teams_with_attempts = Team.where(id: team_attempts.pluck(:target_entity_id).uniq)
+    
+    # For each team, calculate stats
+    teams_with_attempts.each do |team|
+      team_attempts_array = team_attempts.where(target_entity_id: team.id)
+      
+      total_attempts = team_attempts_array.size
+      correct_attempts = team_attempts_array.count(&:correct?)
+      
+      @team_stats[team] = {
+        total_attempts: total_attempts,
+        correct_attempts: correct_attempts,
+        accuracy: total_attempts > 0 ? (correct_attempts.to_f / total_attempts * 100).round : 0
+      }
+    end
+    
+    # Sort teams by name
+    @teams = @team_stats.keys.sort_by(&:name)
   end
 
   # Team-specific game attempts grouped by player

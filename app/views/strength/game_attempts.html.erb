@@ -5,6 +5,42 @@
     <%= tag.h1 "My Game Attempts", class: "game-attempts-title" %>
     <%= tag.p "View your past game attempts and track your progress", class: "game-attempts-subtitle" %>
   <% end %>
+  
+  <% if @teams.any? %>
+    <%= tag.div class: "teams-navigation" do %>
+      <%= tag.h2 "Teams", class: "teams-navigation-title" %>
+      <%= tag.div class: "teams-grid" do %>
+        <% @teams.each do |team| %>
+          <%= tag.div class: "team-stats-card" do %>
+            <%= link_to team_strength_game_attempts_path(team), class: "team-stats-link" do %>
+              <%= tag.div class: "team-stats-header" do %>
+                <%= tag.div class: "team-logo-container" do %>
+                  <% if team.logo_url.present? %>
+                    <%= tag.img src: team.logo_url, alt: "#{team.name} logo", class: "team-logo" %>
+                  <% else %>
+                    <%= tag.div class: "team-logo-placeholder" do %>
+                      <%= tag.i class: "fa-solid fa-shield-alt" %>
+                    <% end %>
+                  <% end %>
+                <% end %>
+                <%= tag.h3 team.name, class: "team-name" %>
+              <% end %>
+              <%= tag.div class: "team-stats-details" do %>
+                <%= tag.div class: "team-stats-item" do %>
+                  <%= tag.span "#{@team_stats[team][:correct_attempts]}/#{@team_stats[team][:total_attempts]}", class: "team-stats-value" %>
+                  <%= tag.span "correct", class: "team-stats-label" %>
+                <% end %>
+                <%= tag.div class: "team-stats-item" do %>
+                  <%= tag.span "#{@team_stats[team][:accuracy]}%", class: "team-stats-value" %>
+                  <%= tag.span "accuracy", class: "team-stats-label" %>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
 
   <%= tag.div class: "game-attempts-panel" do %>
     <%= tag.div class: "game-attempts-content" do %>
