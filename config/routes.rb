@@ -53,6 +53,7 @@ Rails.application.routes.draw do
     resources :players, shallow: true
     resources :ratings, only: [:new, :create]
     resources :memberships, only: [:new, :create]
+    get 'strength/game_attempts', to: 'strength#team_game_attempts'
   end
   resources :countries do
     resources :leagues, shallow: true

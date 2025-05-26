@@ -1,0 +1,140 @@
+/* Team Game Attempts Component Styles */
+
+.team-game-attempts-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+}
+
+.team-game-attempts-header {
+  @apply mb-8;
+}
+
+.team-game-attempts-title {
+  @apply text-3xl font-bold text-gray-900;
+}
+
+.team-game-attempts-subtitle {
+  @apply mt-2 text-sm text-gray-600;
+}
+
+.player-sections {
+  @apply space-y-8;
+}
+
+.player-section {
+  @apply bg-white rounded-lg shadow-md overflow-hidden;
+}
+
+.player-section-header {
+  @apply p-6 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-200;
+}
+
+.player-info {
+  @apply flex items-center mb-4 md:mb-0;
+}
+
+.player-photo-container {
+  @apply h-16 w-16 mr-4 flex-shrink-0 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center;
+}
+
+.player-photo {
+  @apply h-full w-full object-cover;
+}
+
+.player-photo-placeholder {
+  @apply h-full w-full flex items-center justify-center text-gray-400;
+}
+
+.player-details {
+  @apply flex flex-col;
+}
+
+.player-name {
+  @apply text-xl font-semibold text-gray-900;
+}
+
+.player-position {
+  @apply text-sm text-gray-600;
+}
+
+.player-stats {
+  @apply mt-4 md:mt-0;
+}
+
+.stats-group {
+  @apply flex flex-col sm:flex-row gap-4;
+}
+
+.stat-item {
+  @apply flex flex-col items-center sm:items-start;
+}
+
+.stat-label {
+  @apply text-sm font-medium text-gray-500;
+}
+
+.stat-value {
+  @apply flex items-center gap-2;
+}
+
+.stat-fraction {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.stat-percentage {
+  @apply text-sm text-gray-600;
+}
+
+.player-ratings {
+  @apply p-6 border-b border-gray-200;
+}
+
+.ratings-header {
+  @apply flex flex-col md:flex-row justify-between items-start md:items-center mb-4;
+}
+
+.ratings-heading {
+  @apply text-lg font-medium text-gray-900;
+}
+
+.spectrum-selector {
+  @apply mt-2 md:mt-0;
+}
+
+.spectrum-picker {
+  @apply flex items-center gap-2;
+}
+
+.spectrum-label {
+  @apply text-sm text-gray-600;
+}
+
+.spectrum-select {
+  @apply block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md;
+}
+
+.player-attempts {
+  @apply p-6;
+}
+
+.attempts-heading {
+  @apply text-lg font-medium text-gray-900 mb-4;
+}
+
+.attempts-list {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+/* Reuse the attempt card styles from game_attempts.css */
+/* The attempt-card, correct-attempt, incorrect-attempt classes are already defined */
+
+.empty-attempts-message {
+  @apply text-center py-12;
+}
+
+.empty-attempts-text {
+  @apply text-gray-500;
+}
+
+.start-playing-button {
+  @apply mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
+}

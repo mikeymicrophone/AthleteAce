@@ -273,11 +273,56 @@ export default class extends Controller {
   }
 
   updateValueDisplay(value, valueDisplayElement) {
-    valueDisplayElement.textContent = value;
-    // Optional: Color update logic if desired per slider
-    // const normalizedValue = (parseInt(value) + 10000) / 20000;
-    // const hue = normalizedValue * 120; // 0 = red, 120 = green
-    // valueDisplayElement.style.color = `hsl(${hue}, 80%, 40%)`;
+    // Update the value display with the current value
+    if (valueDisplayElement) {
+      valueDisplayElement.textContent = value;
+    }
+  }
+  
+  // Handle spectrum selection changes
+  updateSelectedSpectrum(event) {
+    const selectElement = event.target;
+    const spectrumId = selectElement.value;
+    const playerId = selectElement.dataset.playerId;
+    
+    console.log('[RatingSlider] Spectrum selection changed:', {
+      spectrumId,
+      playerId,
+      selectElement
+    });
+    
+    // Find the player's rating container
+    const playerContainer = selectElement.closest('.player-section');
+    if (!playerContainer) {
+      console.error('[RatingSlider] Could not find player container');
+      return;
+    }
+    
+    // Find the rating slider container
+    const ratingContainer = playerContainer.querySelector('.rating-slider-group-container');
+    if (!ratingContainer) {
+      console.error('[RatingSlider] Could not find rating container');
+      return;
+    }
+    
+    // Make an AJAX request to get the slider for the selected spectrum
+    fetch(`/players/${playerId}/ratings/new?spectrum_id=${spectrumId}`, {
+      headers: {
+        'Accept': 'text/html',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.text())
+    .then(html => {
+      // Replace the current slider with the new one
+      ratingContainer.innerHTML = html;
+      
+      // Re-initialize the sliders
+      this.initializeAllSliders();
+    })
+    .catch(error => {
+      console.error('[RatingSlider] Error fetching spectrum slider:', error);
+    });
   }
 
   // Submit the rating for a specific slider

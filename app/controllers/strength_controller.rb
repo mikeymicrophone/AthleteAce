@@ -241,6 +241,51 @@ class StrengthController < ApplicationController
   def game_attempts
     @game_attempts = current_ace.game_attempts.order(created_at: :desc)
   end
+
+  # Team-specific game attempts grouped by player
+  def team_game_attempts
+    @team = Team.find(params[:team_id])
+    
+    # Find all game attempts where this team was the target
+    @attempts_by_player = {}
+    @player_stats = {}
+    
+    # Get all attempts for this team
+    attempts = current_ace.game_attempts.where(target_entity_type: 'Team', target_entity_id: @team.id)
+    
+    # Group attempts by subject (player)
+    player_attempts = attempts.group_by(&:subject_entity_id)
+    
+    # For each player, calculate stats and group their attempts
+    player_attempts.each do |player_id, player_attempts_array|
+      player = Player.find(player_id)
+      
+      # Store the player's attempts
+      @attempts_by_player[player] = player_attempts_array
+      
+      # Calculate stats
+      total_attempts = player_attempts_array.size
+      correct_attempts = player_attempts_array.count(&:correct?)
+      
+      # Calculate recent stats (last week)
+      one_week_ago = 1.week.ago
+      recent_attempts = player_attempts_array.select { |a| a.created_at >= one_week_ago }
+      recent_total = recent_attempts.size
+      recent_correct = recent_attempts.count(&:correct?)
+      
+      @player_stats[player] = {
+        total_attempts: total_attempts,
+        correct_attempts: correct_attempts,
+        accuracy: total_attempts > 0 ? (correct_attempts.to_f / total_attempts * 100).round : 0,
+        recent_total: recent_total,
+        recent_correct: recent_correct,
+        recent_accuracy: recent_total > 0 ? (recent_correct.to_f / recent_total * 100).round : 0
+      }
+    end
+    
+    # Sort players by name
+    @players = @attempts_by_player.keys.sort_by(&:full_name)
+  end
   
   private
   
