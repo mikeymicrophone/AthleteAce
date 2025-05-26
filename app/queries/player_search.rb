@@ -15,11 +15,12 @@ class PlayerSearch
   # Uses DB-level `ORDER BY RANDOM()` to avoid loading full sets into memory.
   def call
     query = @scope
+    query = query.where(team_id: @params[:team_ids])     if @params[:team_ids].present? && @params[:team_id].blank?
     query = query.where(team_id: @params[:team_id])      if @params[:team_id].present?
-    query = query.where(team_id: @params[:team_ids])     if @params[:team_ids].present?
+    
     query = query.joins(:team).where(teams: { league_id: @params[:league_id] }) if @params[:league_id].present?
-    query = query.joins(:team).where(teams: { sport_id:  @params[:sport_id]  }) if @params[:sport_id].present?
-    query = query.where(active: true) unless @params[:include_inactive] == 'true'
+    query = query.joins(:team, :league).where(leagues: { sport_id:  @params[:sport_id]  }) if @params[:sport_id].present?
+    # query = query.where(active: true) unless @params[:include_inactive] == 'true'
 
     query.sampled(DEFAULT_SAMPLE_SIZE)
   end

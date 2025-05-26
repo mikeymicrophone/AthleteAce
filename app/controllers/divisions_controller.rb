@@ -8,6 +8,11 @@ class DivisionsController < ApplicationController
     else
       Division.all
     end
+    
+    @spectrums = Spectrum.all
+    
+    # Set current spectrum ID if provided in params
+    set_current_spectrum_id params[:spectrum_id] if params[:spectrum_id].present?
   end
 
   # GET /divisions/1 or /divisions/1.json

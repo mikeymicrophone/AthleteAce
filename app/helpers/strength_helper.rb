@@ -22,8 +22,8 @@ module StrengthHelper
   end
 
   def team_choice_group(teams, correct_team_id)
-    tag.div id: "team_choices_container", class: "team-choices-container max-w-2xl mx-auto" do
-      tag.div id: "team_choices_grid", class: "team-choices-grid grid grid-cols-2 gap-6", data: {team_match_target: "choicesGrid"} do
+    tag.div id: "team_choices_container", class: "team-choices-container w-full" do
+      tag.div id: "team_choices_grid", class: "team-choices-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", data: {team_match_target: "choicesGrid"} do
         teams.map do |team|
           team_choice_button team, team.id == correct_team_id
         end.join.html_safe
@@ -99,7 +99,13 @@ module StrengthHelper
 
   def player_card_section(player)
     tag.div id: "player_card_area", class: "player-card-area lg:w-1/3 mb-4 lg:mb-0" do
-      tag.div id: "current_player_card_display", class: "current-player-card mb-4", data: { team_match_target: "currentPlayerCardDisplay" } do
+      tag.div id: "current_player_card_display", 
+              class: "current-player-card mb-4", 
+              data: { 
+                team_match_target: "currentPlayerCardDisplay",
+                player_id: player.id,
+                player_team_id: player.team_id
+              } do
         player_card(player)
       end
     end

@@ -2,22 +2,33 @@
 
 <% content_for :title, "Divisions" %>
 
-<h1>Divisions</h1>
+<%= render_floating_spectrum_picker %>
 
-<div id="divisions">
+<div id="divisions" class="space-y-4">
   <% @divisions.each do |division| %>
-    <%= tag.div(id: dom_id(division), class: [index_record_base_classes, division_index_record_classes].join(' ')) do %>
-      <%= link_to division do %>
-        <%= display_name_with_lazy_logo(division) %>
-      <% end %>
-      <%= link_to division.conference.name, division.conference %>
-      <%= link_to division.conference.league.name, division.conference.league %>
-      <%= link_to pluralize(division.teams.count, "team"), [division, :teams] %>
-      <%= link_to "Quiz Me", division_strength_team_match_path(division), class: "button quiz-button", title: "Test your knowledge of teams in this division" %>
+    <%= tag.div(id: dom_id(division), class: [index_record_base_classes, division_index_record_classes, "p-4 rounded-lg shadow-sm"].join(' ')) do %>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+        <div class="division-info md:col-span-1">
+          <div>
+            <div class="text-xl font-semibold text-gray-900">
+              <%= display_name_with_lazy_logo(division) %>
+            </div>
+            <div class="text-sm text-gray-500 mt-1">
+              <span><%= link_to division.conference.name, division.conference %></span>
+              <span class="mx-1">&bull;</span>
+              <span><%= link_to division.conference.league.name, division.conference.league %></span>
+            </div>
+          </div>
+        </div>
+        
+        <%= rating_slider_container(division, selected_spectrums) %>
+
+        <div class="division-links md:col-span-1 text-right flex flex-wrap items-center justify-end gap-3">
+          <%= link_to pluralize(division.teams.count, "team"), [division, :teams], class: "text-sm text-blue-600 hover:underline" %>
+          <%= link_to "Quiz Me", division_strength_team_match_path(division), class: "inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md", title: "Test your knowledge of teams in this division" %>
+        </div>
+      </div>
     <% end %>
   <% end %>
 </div>
 
-<div class="actions">
-  <%= link_to "New division", new_division_path, class: "button" %>
-</div>

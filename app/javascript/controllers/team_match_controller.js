@@ -1,6 +1,6 @@
 // app/javascript/controllers/team_match_controller.js
-import { Controller } from "@hotwired/stimulus"
-import { Turbo } from "@hotwired/turbo-rails"
+import { Controller } from "@hotwired/stimulus";
+import { Turbo } from "@hotwired/turbo-rails";
 
 export default class extends Controller {
   static targets = [
@@ -15,47 +15,53 @@ export default class extends Controller {
     "currentPlayerCardDisplay", 
     "attemptsContainer",
     "attemptsGrid"
-  ]
+  ];
   
   static values = {
     playerId: Number, 
     correctTeamId: Number 
-  }
+  };
 
   connect() {
     console.log("[TM Controller] connect() called");
-    this.correctAnswers = 0
-    this.isPaused = false
-    this.isAnimating = false 
+    this.correctAnswers = 0;
+    this.isPaused = false;
+    this.isAnimating = false;
     console.log("[TM Controller] connect() - isAnimating set to:", this.isAnimating);
-    this.nextQuestionTimer = null
-    this.startTime = Date.now() 
-    // console.log("Team Match Controller connected. Player ID:", this.playerIdValue, "Correct Team ID:", this.correctTeamIdValue);
+    this.nextQuestionTimer = null;
+    this.startTime = Date.now();
+    console.log("Team Match Controller connected. Player ID:", this.playerIdValue, "Correct Team ID:", this.correctTeamIdValue);
+    
+    // Listen for Turbo frame responses to update player values after a frame refresh
+    document.addEventListener("turbo:frame-render", this.handleFrameRender.bind(this));
   }
   
   disconnect() {
     console.log("[TM Controller] disconnect() called");
     if (this.nextQuestionTimer) {
-      clearTimeout(this.nextQuestionTimer)
+      clearTimeout(this.nextQuestionTimer);
     }
+    
+    // Clean up event listener
+    document.removeEventListener("turbo:frame-render", this.handleFrameRender.bind(this));
   }
   
   checkAnswer(event) {
     console.log("[TM Controller] checkAnswer() called");
     if (this.isAnimating) {
       console.log("[TM Controller] checkAnswer() - bailing: isAnimating is true");
-      return
+      return;
     }
     console.log("[TM Controller] checkAnswer() - proceeding: isAnimating is false");
-    this.isAnimating = true
+    this.isAnimating = true;
     console.log("[TM Controller] checkAnswer() - isAnimating set to true");
     
     const endTime = Date.now();
     const timeElapsedMs = endTime - this.startTime;
-    const button = event.currentTarget
-    const isCorrect = button.dataset.correct === "true"
-    const chosenTeamId = parseInt(button.dataset.teamId)
-    const teamName = button.querySelector(".team-name").textContent
+    const button = event.currentTarget;
+    const isCorrect = button.dataset.correct === "true";
+    const chosenTeamId = parseInt(button.dataset.teamId);
+    const teamName = button.querySelector(".team-name").textContent;
     const chosenTeamLogoUrl = button.dataset.teamLogoUrl;
     
     // Get the correct team info
@@ -158,36 +164,36 @@ export default class extends Controller {
     
     if (isCorrect) {
       console.log("[TM Controller] checkAnswer() - answer IS correct");
-      this.correctAnswers++
-      this.progressCounterTarget.textContent = this.correctAnswers
-      button.classList.add("correct", "pulsing")
+      this.correctAnswers++;
+      this.progressCounterTarget.textContent = this.correctAnswers;
+      button.classList.add("correct", "pulsing");
       
-      this.teamNameTextTarget.textContent = teamName
-      this.teamNameOverlayTarget.classList.add("visible")
+      this.teamNameTextTarget.textContent = teamName;
+      this.teamNameOverlayTarget.classList.add("visible");
       
       setTimeout(() => {
-        this.teamNameOverlayTarget.classList.remove("visible")
-      }, 1250)
+        this.teamNameOverlayTarget.classList.remove("visible");
+      }, 1250);
 
     } else {
       console.log("[TM Controller] checkAnswer() - answer IS NOT correct");
-      button.classList.add("incorrect")
+      button.classList.add("incorrect");
       
       setTimeout(() => {
         this.teamChoiceTargets.forEach(choice => {
           if (choice.dataset.correct === "true") {
-            choice.classList.add("correct-answer")
+            choice.classList.add("correct-answer");
             
-            const correctTeamName = choice.querySelector(".team-name").textContent
-            this.teamNameTextTarget.textContent = correctTeamName
-            this.teamNameOverlayTarget.classList.add("visible")
+            const correctTeamName = choice.querySelector(".team-name").textContent;
+            this.teamNameTextTarget.textContent = correctTeamName;
+            this.teamNameOverlayTarget.classList.add("visible");
             
             setTimeout(() => {
-              this.teamNameOverlayTarget.classList.remove("visible")
-            }, 1250)
+              this.teamNameOverlayTarget.classList.remove("visible");
+            }, 1250);
           }
-        })
-      }, 500)
+        });
+      }, 500);
     }
 
     // Show the attempts container if it's not already visible
@@ -198,14 +204,14 @@ export default class extends Controller {
     console.log("[TM Controller] checkAnswer() - scheduling nextQuestionTimer");
     this.nextQuestionTimer = setTimeout(() => {
       console.log("[TM Controller] setTimeout callback - setting isAnimating to false");
-      this.isAnimating = false
+      this.isAnimating = false;
       if (!this.isPaused) {
         console.log("[TM Controller] setTimeout callback - calling loadNextQuestion()");
-        this.loadNextQuestion()
+        this.loadNextQuestion();
       } else {
         console.log("[TM Controller] setTimeout callback - game is paused, not loading next question");
       }
-    }, 3000)
+    }, 3000);
   }
 
   addAttemptToGrid(attemptData) {
@@ -331,26 +337,59 @@ export default class extends Controller {
     // Visit the URL but target only the team_match_game frame
     console.log("[TM Controller] Visiting with frame target");
     Turbo.visit(currentUrl.toString(), { frame: "team_match_game" });
+    
+    // Reset the timer and animation state for the next question
+    this.isAnimating = false;
+    this.startTime = Date.now();
   }
   
   togglePause() {
-    console.log('Pause Text Target:', this.pauseButtonTextTarget);
-    this.isPaused = !this.isPaused
-    const icon = this.pauseButtonTarget.querySelector('i')
-
+    console.log("[TM Controller] togglePause() called");
+    this.isPaused = !this.isPaused;
+    
     if (this.isPaused) {
-      if (this.nextQuestionTimer) clearTimeout(this.nextQuestionTimer);
-      icon.className = 'fa-solid fa-play pause-icon'
-      this.pauseButtonTextTarget.textContent = 'Resume'
-      this.pauseButtonTarget.classList.add('paused')
-    } else {
-      icon.className = 'fa-solid fa-pause pause-icon'
-      this.pauseButtonTextTarget.textContent = 'Pause'
-      this.pauseButtonTarget.classList.remove('paused')
+      this.pauseButtonTextTarget.textContent = "Resume Game";
+      this.gameContainerTarget.classList.add("paused");
       
-      if (!this.isAnimating && this.nextQuestionTimer) {
-      } else if (!this.isAnimating) {
-         this.loadNextQuestion();
+      // If we have a pending timer, clear it
+      if (this.nextQuestionTimer) {
+        clearTimeout(this.nextQuestionTimer);
+        this.nextQuestionTimer = null;
+      }
+    } else {
+      this.pauseButtonTextTarget.textContent = "Pause Game";
+      this.gameContainerTarget.classList.remove("paused");
+      
+      // Restart the timer if we're in the middle of an answer delay
+      if (this.isAnimating) {
+        this.nextQuestionTimer = setTimeout(() => this.loadNextQuestion(), 800);
+      }
+    }
+  }
+  
+  handleFrameRender(event) {
+    // Only process events for our game frame
+    if (event.target.id === "team_match_game") {
+      console.log("[TM Controller] Frame rendered - updating player values");
+      
+      // Get new values from data attributes on the current player card
+      const playerCard = this.currentPlayerCardDisplayTarget;
+      if (playerCard) {
+        const newPlayerId = playerCard.dataset.playerId;
+        const newTeamId = playerCard.dataset.playerTeamId;
+        
+        if (newPlayerId && newPlayerId !== String(this.playerIdValue)) {
+          console.log(`[TM Controller] Updating player ID from ${this.playerIdValue} to ${newPlayerId}`);
+          this.playerIdValue = parseInt(newPlayerId);
+        }
+        
+        if (newTeamId && newTeamId !== String(this.correctTeamIdValue)) {
+          console.log(`[TM Controller] Updating correct team ID from ${this.correctTeamIdValue} to ${newTeamId}`);
+          this.correctTeamIdValue = parseInt(newTeamId);
+        }
+        
+        // Reset the timer for the new question
+        this.startTime = Date.now();
       }
     }
   }

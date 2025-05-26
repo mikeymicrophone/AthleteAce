@@ -10,13 +10,25 @@ RSpec.describe StrengthController, type: :controller do
     end
 
     context 'when authenticated' do
+      # Create a confirmed ace (user) for authentication
       let(:ace) { create(:ace) }
+      
+      # Create a quest with a team for testing
+      let(:sport) { create(:sport) }
+      let(:league) { create(:league, sport: sport) }
+      let(:team) { create(:team, league: league) }
       let(:quest) { create(:quest) }
+      
       before do
+        # Set up achievement for the quest that references the team
+        achievement = create(:achievement, target: team)
+        quest.add_achievement(achievement)
+        
+        # Sign in the user and have them adopt the quest
         sign_in ace
-        ace.adopt_quest(quest)  # Assuming adopt_quest method exists from memory
+        ace.adopt_quest(quest)
       end
-
+      
       it 'assigns players and teams when no scope is specified' do
         get :team_match
         expect(assigns(:players)).not_to be_empty
@@ -64,6 +76,76 @@ RSpec.describe StrengthController, type: :controller do
         ace.adopt_quest(quest)
         get :team_match, params: { cross_sport: 'false' }
         expect(assigns(:team_choices).map(&:sport).map(&:id).uniq).to eq([sport.id])
+      end
+      
+      describe 'filtering by conference' do
+        let(:sport) { create(:sport) }
+        let(:league) { create(:league, sport: sport) }
+        let(:conference) { create(:conference, league: league) }
+        let(:other_conference) { create(:conference, league: league) }
+        
+        let!(:conference_team1) { create(:team, conference: conference) }
+        let!(:conference_team2) { create(:team, conference: conference) }
+        let!(:other_conference_team) { create(:team, conference: other_conference) }
+        
+        let!(:player1) { create(:player, team: conference_team1) }
+        let!(:player2) { create(:player, team: conference_team2) }
+        let!(:other_player) { create(:player, team: other_conference_team) }
+        
+        it 'restricts players to the specified conference' do
+          get :team_match, params: { conference_id: conference.id }
+          
+          # The current player should be from one of the conference teams
+          expect(assigns(:current_player).team.conference_id).to eq(conference.id)
+          
+          # All team choices should be from the conference
+          expect(assigns(:team_choices).map(&:conference_id).uniq).to eq([conference.id])
+          
+          # The correct team should be from the conference
+          expect(assigns(:correct_team).conference_id).to eq(conference.id)
+        end
+      end
+      
+      describe 'filtering by league' do
+        let(:sport) { create(:sport) }
+        let(:league1) { create(:league, sport: sport) }
+        let(:league2) { create(:league, sport: sport) }
+        
+        let!(:league1_team1) { create(:team, league: league1) }
+        let!(:league1_team2) { create(:team, league: league1) }
+        let!(:league2_team) { create(:team, league: league2) }
+        
+        let!(:player1) { create(:player, team: league1_team1) }
+        let!(:player2) { create(:player, team: league1_team2) }
+        let!(:other_player) { create(:player, team: league2_team) }
+        
+        it 'restricts players to the specified league' do
+          get :team_match, params: { league_id: league1.id }
+          
+          # The current player should be from one of the league teams
+          expect(assigns(:current_player).team.league_id).to eq(league1.id)
+          
+          # All team choices should be from the league
+          expect(assigns(:team_choices).map(&:league_id).uniq).to eq([league1.id])
+          
+          # The correct team should be from the league
+          expect(assigns(:correct_team).league_id).to eq(league1.id)
+        end
+      end
+      
+      describe 'filtering by team' do
+        let(:team) { create(:team) }
+        let!(:player) { create(:player, team: team) }
+        
+        it 'restricts players to the specified team' do
+          get :team_match, params: { team_id: team.id }
+          
+          # The current player should be from the specified team
+          expect(assigns(:current_player).team_id).to eq(team.id)
+          
+          # The correct team should be the specified team
+          expect(assigns(:correct_team).id).to eq(team.id)
+        end
       end
     end
   end

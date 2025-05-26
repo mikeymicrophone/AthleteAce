@@ -30,16 +30,8 @@ Rails.application.routes.draw do
   resources :goals, except: [:create, :new]
   resources :federations
   
-  # Rating system
-  resources :spectrums do
-    resources :ratings
-  end
-
-  resources :ratings
-  
-  resources :players do
-    resources :ratings, only: [:new, :create]
-  end
+  # Load ratings routes from dedicated file
+  draw :ratings
   
   # League organization
   resources :conferences do
@@ -50,6 +42,7 @@ Rails.application.routes.draw do
   
   resources :divisions do
     resources :teams, shallow: true
+    resources :ratings, only: [:new, :create]
     get 'strength/team_match', to: 'strength#team_match'
   end
   
