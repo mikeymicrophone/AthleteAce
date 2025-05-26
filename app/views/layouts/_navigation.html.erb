@@ -81,6 +81,9 @@
               <%= link_to strength_path, class: "nav-dropdown-item #{current_page?(strength_path) ? 'active' : ''}" do %>
                 <i class="<%= icon_for_resource(:strength) %>"></i> Strength
               <% end %>
+              <%= link_to "/strength/game_attempts", class: "nav-dropdown-item #{current_page?('/strength/game_attempts') ? 'active' : ''}" do %>
+                <i class="fa-solid fa-history"></i> Game History
+              <% end %>
               <%= link_to ratings_path, class: "nav-dropdown-item #{controller_name == 'ratings' ? 'active' : ''}" do %>
                 <i class="<%= icon_for_resource(:ratings) %>"></i> Ratings
               <% end %>

@@ -1,0 +1,51 @@
+<% content_for :title, "My Game Attempts" %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">My Game Attempts</h1>
+    <p class="mt-2 text-sm text-gray-600">View your past game attempts and track your progress</p>
+  </div>
+
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="p-6">
+      <% if @game_attempts.any? %>
+        <div class="attempts-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <% @game_attempts.each do |attempt| %>
+            <div class="attempt-card flex flex-col items-center border rounded-md overflow-hidden <%= attempt.correct? ? 'correct-attempt' : 'incorrect-attempt' %>">
+              <div class="attempt-team-part w-full p-2 text-center <%= attempt.correct? ? 'correct-team-part' : 'incorrect-team-part' %>">
+                <div class="attempt-team-logo-container flex justify-center items-center h-16">
+                  <%= display_name_with_lazy_logo(attempt.target_entity) %>
+                </div>
+                <p class="attempt-team-name text-sm font-semibold mt-1 truncate w-full">
+                  <%= attempt.target_entity.name %>
+                </p>
+              </div>
+              
+              <div class="attempt-player-part w-full p-2 text-center border-t <%= attempt.correct? ? 'correct-player-part' : 'incorrect-player-part' %>">
+                <div class="attempt-player-photo-container flex justify-center items-center h-16">
+                  <%= display_name_with_lazy_logo(attempt.subject_entity) %>
+                </div>
+                <p class="attempt-player-name text-xs font-medium mt-1 truncate w-full">
+                  <%= attempt.subject_entity.full_name %>
+                </p>
+                <% unless attempt.correct? %>
+                  <div class="chosen-team-indicator text-xs text-red-600 mt-1">
+                    Your Guess: <%= attempt.chosen_entity.name %>
+                  </div>
+                <% end %>
+                <div class="text-xs text-gray-500 mt-1">
+                  <%= time_ago_in_words(attempt.created_at) %> ago
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="text-center py-12">
+          <p class="text-gray-500">You haven't made any game attempts yet.</p>
+          <%= link_to "Start Playing", strength_team_match_path, class: "mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div> 

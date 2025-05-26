@@ -238,6 +238,10 @@ class StrengthController < ApplicationController
     end
   end
   
+  def game_attempts
+    @game_attempts = current_ace.game_attempts.order(created_at: :desc)
+  end
+  
   private
   
   def no_scope_specified?

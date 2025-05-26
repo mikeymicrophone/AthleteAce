@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   get "strength/images" => "strength#images"
   get "strength/ciphers" => "strength#ciphers"
   get "strength/team_match" => "strength#team_match"
+  get "strength/game_attempts" => "strength#game_attempts"
   post "strength/check_answer" => "strength#check_answer", as: :check_answer
   resources :achievements do
     collection do
@@ -104,5 +105,10 @@ Rails.application.routes.draw do
     resources :leagues, shallow: true
     resources :teams, shallow: true
     resources :players, shallow: true
+  end
+
+  namespace :strength do
+    get 'team_match', to: 'team_match#show'
+    get 'game_attempts', to: 'strength#game_attempts'
   end
 end
