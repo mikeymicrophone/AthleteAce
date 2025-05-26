@@ -1,0 +1,101 @@
+/* Game Attempts Component Styles */
+
+.game-attempts-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+}
+
+.game-attempts-header {
+  @apply mb-8;
+}
+
+.game-attempts-title {
+  @apply text-3xl font-bold text-gray-900;
+}
+
+.game-attempts-subtitle {
+  @apply mt-2 text-sm text-gray-600;
+}
+
+.game-attempts-panel {
+  @apply bg-white rounded-lg shadow overflow-hidden;
+}
+
+.game-attempts-content {
+  @apply p-6;
+}
+
+.attempts-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4;
+}
+
+.attempt-card {
+  @apply flex flex-col items-center border rounded-md overflow-hidden;
+}
+
+.correct-attempt {
+  @apply border-green-200;
+}
+
+.incorrect-attempt {
+  @apply border-red-200;
+}
+
+.attempt-team-part {
+  @apply w-full p-2 text-center;
+}
+
+.correct-team-part {
+  @apply bg-green-50;
+}
+
+.incorrect-team-part {
+  @apply bg-red-50;
+}
+
+.attempt-team-logo-container {
+  @apply flex justify-center items-center h-16;
+}
+
+.attempt-team-name {
+  @apply text-sm font-semibold mt-1 truncate w-full;
+}
+
+.attempt-player-part {
+  @apply w-full p-2 text-center border-t;
+}
+
+.correct-player-part {
+  @apply bg-green-50;
+}
+
+.incorrect-player-part {
+  @apply bg-red-50;
+}
+
+.attempt-player-photo-container {
+  @apply flex justify-center items-center h-16;
+}
+
+.attempt-player-name {
+  @apply text-xs font-medium mt-1 truncate w-full;
+}
+
+.chosen-team-indicator {
+  @apply text-xs text-red-600 mt-1;
+}
+
+.attempt-timestamp {
+  @apply text-xs text-gray-500 mt-1;
+}
+
+.empty-attempts-message {
+  @apply text-center py-12;
+}
+
+.empty-attempts-text {
+  @apply text-gray-500;
+}
+
+.start-playing-button {
+  @apply mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
+}
