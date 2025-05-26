@@ -100,12 +100,11 @@ export default class extends Controller {
       inPrecisionMode = true;
       
       // Determine step size based on vertical distance
-      // Since our default step is now 1, we'll adjust the precision control to be:
-      // Default (step=1), Medium (step=10), Coarse (step=100)
-      let newStep = 1; // Default step is now 1
+      // Default is now step=100, then 10, then 1 for finest control
+      let newStep = 100; // Default is coarse control
       
       if (verticalDistance > 40) {
-        newStep = 100; // Coarse control (100s) - for quick large adjustments
+        newStep = 1;   // Fine control (1 by 1)
       } else if (verticalDistance > 20) {
         newStep = 10;  // Medium control (10s)
       }
@@ -121,11 +120,11 @@ export default class extends Controller {
       // Apply different styles based on precision level
       precisionIndicator.className = 'precision-indicator text-xs absolute bg-white px-2 py-1 rounded-md shadow-sm';
       if (newStep === 1) {
-        precisionIndicator.classList.add('text-green-600', 'font-bold'); // Fine precision (default)
+        precisionIndicator.classList.add('text-green-600', 'font-bold'); // Fine precision (1s)
       } else if (newStep === 10) {
-        precisionIndicator.classList.add('text-blue-600'); // Medium precision
+        precisionIndicator.classList.add('text-blue-600'); // Medium precision (10s)
       } else {
-        precisionIndicator.classList.add('text-orange-500'); // Coarse precision (100s)
+        precisionIndicator.classList.add('text-gray-500'); // Coarse precision (100s, default)
       }
     });
     

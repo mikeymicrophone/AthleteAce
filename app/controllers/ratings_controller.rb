@@ -112,7 +112,7 @@ class RatingsController < ApplicationController
       @rating = Rating.find(params[:id])
     end
     
-    # Set the target (player, team, etc.) for the rating
+    # Set the target (player, team, division, etc.) for the rating
     def set_target
       if params[:player_id]
         @target = Player.find(params[:player_id])
@@ -120,8 +120,11 @@ class RatingsController < ApplicationController
       elsif params[:team_id]
         @target = Team.find(params[:team_id])
         @target_type = 'team'
+      elsif params[:division_id]
+        @target = Division.find(params[:division_id])
+        @target_type = 'division'
       else
-        # Handle other target types as needed
+        # No valid target type found
         redirect_to root_path, alert: 'Invalid target for rating.'
       end
     end
@@ -144,6 +147,8 @@ class RatingsController < ApplicationController
         player_path(@target)
       elsif @target_type == 'team'
         team_path(@target)
+      elsif @target_type == 'division'
+        division_path(@target)
       else
         ratings_path
       end

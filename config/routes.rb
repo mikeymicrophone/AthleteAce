@@ -50,6 +50,7 @@ Rails.application.routes.draw do
   
   resources :divisions do
     resources :teams, shallow: true
+    resources :ratings, only: [:new, :create]
     get 'strength/team_match', to: 'strength#team_match'
   end
   
