@@ -51,11 +51,11 @@ module RatingsHelper
     end
 
     # The outer div simply wraps everything, matches what we see in the teams page
-    tag.div class: "rating-container md:col-span-1" do
+    tag.div class: "rating-container" do
       # If no spectrums selected, just show a message
       if selected_spectrums.empty?
         tag.p "Select a spectrum to see rating sliders.",
-             class: "empty-state-message text-sm text-gray-500 italic"
+             class: "empty-state-message"
       else
         # The main div with the controller that handles the sliders
         # This matches the structure in the screenshot exactly
@@ -97,24 +97,24 @@ module RatingsHelper
     current_value = record.ratings.active.find_by(spectrum_id: spectrum_id)&.value || 0
     
     # The individual slider container
-    tag.div class: "rating-slider-instance mb-4 border-t pt-2",
+    tag.div class: "rating-slider-instance",
             data: { spectrum_id: spectrum_id } do
       
       slider_content = ActiveSupport::SafeBuffer.new
       
       # Header with spectrum name and value display
-      slider_content << tag.div(class: "flex justify-between items-center mb-1") do
+      slider_content << tag.div(class: "slider-header") do
         header = ActiveSupport::SafeBuffer.new
         header << tag.span(spectrum.name.sub(/\s*\(.*\)\s*$/, '').strip, 
-                          class: "text-sm font-medium text-gray-700")
+                          class: "slider-label")
         header << tag.span(current_value,
-                          class: "text-sm font-semibold",
+                          class: "slider-value",
                           data: { rating_slider_target: "value_#{spectrum_id}" })
         header
       end
       
       # Slider (without min/max labels)
-      slider_content << tag.div(class: "w-full") do
+      slider_content << tag.div(class: "slider-control") do
         slider_row = ActiveSupport::SafeBuffer.new
         slider_row << tag.input(
           type: "range",
@@ -122,7 +122,7 @@ module RatingsHelper
           max: 10000,
           value: current_value,
           step: 1,
-          class: "w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer rating-slider-input",
+          class: "slider-input",
           data: {
             rating_slider_target: "slider_#{spectrum_id}",
             action: "input->rating-slider#updateValue change->rating-slider#submitRating",
@@ -133,10 +133,10 @@ module RatingsHelper
       end
       
       # Status message area
-      slider_content << tag.div(class: "text-right mt-1") do
+      slider_content << tag.div(class: "slider-status") do
         tag.span(
           "",
-          class: "text-xs text-gray-500",
+          class: "status-indicator",
           data: { rating_slider_target: "status_#{spectrum_id}" }
         )
       end

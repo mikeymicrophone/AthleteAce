@@ -115,13 +115,13 @@ export default class extends Controller {
       precisionIndicator.textContent = `Step: ${newStep}`;
       
       // Apply different styles based on precision level
-      precisionIndicator.className = 'precision-indicator text-xs absolute bg-white px-2 py-1 rounded-md shadow-sm';
+      precisionIndicator.className = 'precision-indicator';
       if (newStep === 1) {
-        precisionIndicator.classList.add('text-green-600', 'font-bold'); // Fine precision (1s)
+        precisionIndicator.classList.add('precision-fine'); // Fine precision (1s)
       } else if (newStep === 10) {
-        precisionIndicator.classList.add('text-blue-600'); // Medium precision (10s)
+        precisionIndicator.classList.add('precision-medium'); // Medium precision (10s)
       } else {
-        precisionIndicator.classList.add('text-gray-500'); // Coarse precision (100s, default)
+        precisionIndicator.classList.add('precision-coarse'); // Coarse precision (100s, default)
       }
     });
     

@@ -22,8 +22,8 @@ module StrengthHelper
   end
 
   def team_choice_group(teams, correct_team_id)
-    tag.div id: "team_choices_container", class: "team-choices-container max-w-2xl mx-auto" do
-      tag.div id: "team_choices_grid", class: "team-choices-grid grid grid-cols-2 gap-6", data: {team_match_target: "choicesGrid"} do
+    tag.div id: "team_choices_container", class: "team-choices-container w-full" do
+      tag.div id: "team_choices_grid", class: "team-choices-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", data: {team_match_target: "choicesGrid"} do
         teams.map do |team|
           team_choice_button team, team.id == correct_team_id
         end.join.html_safe

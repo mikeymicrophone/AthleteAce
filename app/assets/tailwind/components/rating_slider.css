@@ -39,6 +39,7 @@
 .slider-input {
   @apply w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer outline-none;
   -webkit-appearance: none;
+  appearance: none;
 }
 
 /* Slider thumb customization */
@@ -89,6 +90,33 @@
 .spectrum-color-1 { @apply text-green-500; }
 .spectrum-color-2 { @apply text-yellow-500; }
 .spectrum-color-3 { @apply text-red-500; }
+
+/* Precision indicator styles */
+.precision-indicator {
+  @apply text-xs absolute bg-white px-2 py-1 rounded-md shadow-sm;
+}
+
+.precision-fine {
+  @apply text-green-600 font-bold;
+}
+
+.precision-medium {
+  @apply text-blue-600;
+}
+
+.precision-coarse {
+  @apply text-gray-500;
+}
+
+/* Rating container */
+.rating-container {
+  @apply md:col-span-1;
+}
+
+/* Quiz button */
+.quiz-button {
+  @apply inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md;
+}
 
 /* Zoom mode (to be implemented later) */
 .zoom-mode .rating-slider-group-container {
