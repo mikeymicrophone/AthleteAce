@@ -42,7 +42,7 @@
           min: -10000,
           max: 10000,
           value: target.ratings.active.find_by(spectrum_id: spectrum.id)&.value || 0,
-          step: 100,
+          step: 1,
           id: "rating-input-#{target.class.name.downcase}-#{target.id}-spectrum-#{spectrum.id}",
           class: "slider-input w-full",
           data: {

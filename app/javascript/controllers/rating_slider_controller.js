@@ -8,7 +8,8 @@ export default class extends Controller {
   static targets = [/* "slider", "value", "status" // These will be qualified by spectrum_id */]
   static values = { 
     playerId: Number,
-    teamId: Number
+    teamId: Number,
+    divisionId: Number
     // currentSpectrum, selectedSpectrums, multiMode are no longer needed here
   }
 
@@ -18,7 +19,9 @@ export default class extends Controller {
       hasPlayerIdValue: this.hasPlayerIdValue,
       playerIdValue: this.hasPlayerIdValue ? this.playerIdValue : null,
       hasTeamIdValue: this.hasTeamIdValue,
-      teamIdValue: this.hasTeamIdValue ? this.teamIdValue : null
+      teamIdValue: this.hasTeamIdValue ? this.teamIdValue : null,
+      hasDivisionIdValue: this.hasDivisionIdValue,
+      divisionIdValue: this.hasDivisionIdValue ? this.divisionIdValue : null
     });
     this.initializeAllSliders();
   }
@@ -97,10 +100,12 @@ export default class extends Controller {
       inPrecisionMode = true;
       
       // Determine step size based on vertical distance
-      let newStep = 100; // Default step
+      // Since our default step is now 1, we'll adjust the precision control to be:
+      // Default (step=1), Medium (step=10), Coarse (step=100)
+      let newStep = 1; // Default step is now 1
       
       if (verticalDistance > 40) {
-        newStep = 1;   // Fine control (1 by 1)
+        newStep = 100; // Coarse control (100s) - for quick large adjustments
       } else if (verticalDistance > 20) {
         newStep = 10;  // Medium control (10s)
       }
@@ -116,11 +121,11 @@ export default class extends Controller {
       // Apply different styles based on precision level
       precisionIndicator.className = 'precision-indicator text-xs absolute bg-white px-2 py-1 rounded-md shadow-sm';
       if (newStep === 1) {
-        precisionIndicator.classList.add('text-green-600', 'font-bold');
+        precisionIndicator.classList.add('text-green-600', 'font-bold'); // Fine precision (default)
       } else if (newStep === 10) {
-        precisionIndicator.classList.add('text-blue-600');
+        precisionIndicator.classList.add('text-blue-600'); // Medium precision
       } else {
-        precisionIndicator.classList.add('text-gray-500');
+        precisionIndicator.classList.add('text-orange-500'); // Coarse precision (100s)
       }
     });
     
@@ -193,6 +198,10 @@ export default class extends Controller {
       targetId = this.hasTeamIdValue ? this.teamIdValue : this.element.dataset.ratingSliderTeamIdValue;
       targetType = 'Team';
       url = `/teams/${targetId}/ratings`;
+    } else if (recordType === 'division' || (this.hasDivisionIdValue && this.divisionIdValue)) {
+      targetId = this.hasDivisionIdValue ? this.divisionIdValue : this.element.dataset.ratingSliderDivisionIdValue;
+      targetType = 'Division';
+      url = `/divisions/${targetId}/ratings`;
     } else {
       console.error("[RatingSlider] Target ID or Type not found in submitRating.", {
         recordType,
@@ -200,6 +209,8 @@ export default class extends Controller {
         playerIdValue: this.playerIdValue,
         hasTeamIdValue: this.hasTeamIdValue,
         teamIdValue: this.teamIdValue,
+        hasDivisionIdValue: this.hasDivisionIdValue,
+        divisionIdValue: this.divisionIdValue,
         elementDataset: this.element.dataset
       });
       if (statusDisplay) statusDisplay.textContent = "Error: Target missing";

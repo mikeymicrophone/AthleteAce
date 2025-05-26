@@ -56,7 +56,8 @@ module RatingsHelper
                 data: {
                   controller: "rating-slider",
                   rating_slider_team_id_value: record.is_a?(Team) ? record.id : nil,
-                  rating_slider_player_id_value: record.is_a?(Player) ? record.id : nil
+                  rating_slider_player_id_value: record.is_a?(Player) ? record.id : nil,
+                  rating_slider_division_id_value: record.is_a?(Division) ? record.id : nil
                 } do
           
           # Generate content for each spectrum
@@ -110,7 +111,7 @@ module RatingsHelper
           min: -10000,
           max: 10000,
           value: current_value,
-          step: 100,
+          step: 1,
           class: "w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer rating-slider-input",
           data: {
             rating_slider_target: "slider_#{spectrum_id}",
