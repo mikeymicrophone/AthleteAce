@@ -42,6 +42,14 @@ module RatingsHelper
   # @param selected_spectrums [Array<Spectrum>] Collection of currently selected spectrums to display sliders for
   # @return [ActiveSupport::SafeBuffer] The HTML for the rating slider
   def rating_slider_container(record, selected_spectrums)
+    # Determine the record type from the record class
+    record_type = record.class.name.underscore
+    
+    # Validate this is a ratable model
+    unless Rails.application.config.ratable_models_hash[record.class.name]
+      raise ArgumentError, "#{record.class.name} is not in the list of ratable models"
+    end
+
     # The outer div simply wraps everything, matches what we see in the teams page
     tag.div class: "rating-container md:col-span-1" do
       # If no spectrums selected, just show a message
@@ -51,13 +59,15 @@ module RatingsHelper
       else
         # The main div with the controller that handles the sliders
         # This matches the structure in the screenshot exactly
-        tag.div id: "rating-slider-group-#{record.class.name.downcase}-#{record.id}", 
+        tag.div id: "rating-slider-group-#{record_type}-#{record.id}", 
                 class: "rating-slider-group-container",
                 data: {
                   controller: "rating-slider",
-                  rating_slider_team_id_value: record.is_a?(Team) ? record.id : nil,
-                  rating_slider_player_id_value: record.is_a?(Player) ? record.id : nil,
-                  rating_slider_division_id_value: record.is_a?(Division) ? record.id : nil
+                  'rating-slider-target-type-value': record_type,
+                  'rating-slider-target-id-value': record.id,
+                  # Also provide data attributes for backward compatibility
+                  'rating-slider-target-type': record_type,
+                  'rating-slider-target-id': record.id
                 } do
           
           # Generate content for each spectrum

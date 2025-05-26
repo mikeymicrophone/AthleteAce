@@ -112,21 +112,29 @@ class RatingsController < ApplicationController
       @rating = Rating.find(params[:id])
     end
     
-    # Set the target (player, team, division, etc.) for the rating
+    # Set the target for the rating based on the ratable_models configuration
     def set_target
-      if params[:player_id]
-        @target = Player.find(params[:player_id])
-        @target_type = 'player'
-      elsif params[:team_id]
-        @target = Team.find(params[:team_id])
-        @target_type = 'team'
-      elsif params[:division_id]
-        @target = Division.find(params[:division_id])
-        @target_type = 'division'
+      # Look for any valid target ID parameter
+      target_param = find_target_param
+      
+      if target_param
+        model_name, id = target_param
+        model_class = model_name.classify.constantize
+        @target = model_class.find(id)
+        @target_type = model_name.singularize
       else
         # No valid target type found
         redirect_to root_path, alert: 'Invalid target for rating.'
       end
+    end
+    
+    # Find the first valid target parameter in the request
+    def find_target_param
+      Rails.application.config.ratable_models.each do |model_name|
+        param_name = "#{model_name.underscore}_id"
+        return [model_name.underscore, params[param_name]] if params[param_name].present?
+      end
+      nil
     end
     
     # Only allow a list of trusted parameters through.
@@ -141,14 +149,11 @@ class RatingsController < ApplicationController
       end
     end
     
-    # Determine where to redirect after rating
+    # Determine where to redirect after rating based on target type
     def after_rating_path
-      if @target_type == 'player'
-        player_path(@target)
-      elsif @target_type == 'team'
-        team_path(@target)
-      elsif @target_type == 'division'
-        division_path(@target)
+      if @target && @target_type && Rails.application.config.ratable_models_hash[@target_type.classify]
+        # Dynamically generate the path helper name and call it
+        send("#{@target_type}_path", @target)
       else
         ratings_path
       end

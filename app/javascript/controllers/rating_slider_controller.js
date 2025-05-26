@@ -7,21 +7,18 @@ export default class extends Controller {
   // We still need a general target for the sliders if we iterate them.
   static targets = [/* "slider", "value", "status" // These will be qualified by spectrum_id */]
   static values = { 
-    playerId: Number,
-    teamId: Number,
-    divisionId: Number
-    // currentSpectrum, selectedSpectrums, multiMode are no longer needed here
+    targetId: Number,
+    targetType: String
+    // Using a more generic approach instead of specific model types
   }
 
   connect() {
     console.log('[RatingSlider] Controller connected', {
       element: this.element,
-      hasPlayerIdValue: this.hasPlayerIdValue,
-      playerIdValue: this.hasPlayerIdValue ? this.playerIdValue : null,
-      hasTeamIdValue: this.hasTeamIdValue,
-      teamIdValue: this.hasTeamIdValue ? this.teamIdValue : null,
-      hasDivisionIdValue: this.hasDivisionIdValue,
-      divisionIdValue: this.hasDivisionIdValue ? this.divisionIdValue : null
+      hasTargetIdValue: this.hasTargetIdValue,
+      targetIdValue: this.hasTargetIdValue ? this.targetIdValue : null,
+      hasTargetTypeValue: this.hasTargetTypeValue,
+      targetTypeValue: this.hasTargetTypeValue ? this.targetTypeValue : null
     });
     this.initializeAllSliders();
   }
@@ -184,37 +181,39 @@ export default class extends Controller {
       return;
     }
     
-    // Get the record type from the data attribute
-    const recordType = this.element.dataset.ratingSliderRecordType;
-    console.log("[RatingSlider] Record type:", recordType);
-
-    let targetId, targetType, url;
-    if (recordType === 'player' || (this.hasPlayerIdValue && this.playerIdValue)) {
-      targetId = this.hasPlayerIdValue ? this.playerIdValue : this.element.dataset.ratingSliderPlayerIdValue;
-      targetType = 'Player';
-      url = `/players/${targetId}/ratings`;
-    } else if (recordType === 'team' || (this.hasTeamIdValue && this.teamIdValue)) {
-      targetId = this.hasTeamIdValue ? this.teamIdValue : this.element.dataset.ratingSliderTeamIdValue;
-      targetType = 'Team';
-      url = `/teams/${targetId}/ratings`;
-    } else if (recordType === 'division' || (this.hasDivisionIdValue && this.divisionIdValue)) {
-      targetId = this.hasDivisionIdValue ? this.divisionIdValue : this.element.dataset.ratingSliderDivisionIdValue;
-      targetType = 'Division';
-      url = `/divisions/${targetId}/ratings`;
-    } else {
+    // Get the target type and id either from values or data attributes
+    let targetType, targetId, url;
+    
+    // First, try to get values from controller values
+    if (this.hasTargetTypeValue && this.hasTargetIdValue) {
+      targetType = this.targetTypeValue;
+      targetId = this.targetIdValue;
+    } 
+    // Fallback to data attributes if not set as values
+    else {
+      targetType = this.element.dataset.ratingSliderTargetType;
+      targetId = this.element.dataset.ratingSliderTargetId;
+    }
+    
+    // Validate that we have a target
+    if (!targetType || !targetId) {
       console.error("[RatingSlider] Target ID or Type not found in submitRating.", {
-        recordType,
-        hasPlayerIdValue: this.hasPlayerIdValue,
-        playerIdValue: this.playerIdValue,
-        hasTeamIdValue: this.hasTeamIdValue,
-        teamIdValue: this.teamIdValue,
-        hasDivisionIdValue: this.hasDivisionIdValue,
-        divisionIdValue: this.divisionIdValue,
+        hasTargetTypeValue: this.hasTargetTypeValue,
+        targetTypeValue: this.targetTypeValue,
+        hasTargetIdValue: this.hasTargetIdValue,
+        targetIdValue: this.targetIdValue,
         elementDataset: this.element.dataset
       });
       if (statusDisplay) statusDisplay.textContent = "Error: Target missing";
       return;
     }
+    
+    // Ensure targetType is capitalized for the API
+    targetType = targetType.charAt(0).toUpperCase() + targetType.slice(1);
+    
+    // Build the URL based on the target type and id
+    const path = targetType.toLowerCase() + 's'; // pluralize
+    url = `/${path}/${targetId}/ratings`;
     console.log('[RatingSlider] Submission details - URL:', url, 'Target ID:', targetId, 'Target Type:', targetType);
 
     try {
