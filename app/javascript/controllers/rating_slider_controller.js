@@ -46,97 +46,217 @@ export default class extends Controller {
     });
   }
   
-  setupEnhancedSlider(slider, spectrumId) {
-    // Store the original step value
-    const originalStep = slider.getAttribute('step');
-    slider.dataset.originalStep = originalStep;
+  initializeSlider(slider, spectrumId) {
+    if (!slider) return;
     
-    // Track whether we're in precision mode
+    const valueDisplay = this.element.querySelector(`[data-rating-slider-target="value_${spectrumId}"]`);
+    const statusDisplay = this.element.querySelector(`[data-rating-slider-target="status_${spectrumId}"]`);
+    
+    // Store original step value for later restoration
+    const originalStep = slider.dataset.ratingSliderOriginalStep || slider.getAttribute('step');
+    
+    // Variables for precision mode
     let inPrecisionMode = false;
     let startY = 0;
-    let currentStep = parseInt(originalStep);
-    let valueDisplay = this.element.querySelector(`[data-rating-slider-target="value_${spectrumId}"]`);
+    let currentStep = originalStep;
+    let currentPrecisionMode = this.element.dataset.ratingSliderPrecisionMode || 'coarse';
+    let sliderContainer = slider.parentNode;
     
-    // Create a precision indicator
+    // Create precision indicator element
     const precisionIndicator = document.createElement('div');
-    precisionIndicator.className = 'precision-indicator hidden text-xs text-gray-500 absolute bg-white px-2 py-1 rounded-md shadow-sm';
-    precisionIndicator.style.pointerEvents = 'none';
-    slider.parentNode.style.position = 'relative';
-    slider.parentNode.appendChild(precisionIndicator);
+    precisionIndicator.className = 'precision-indicator hidden';
+    sliderContainer.appendChild(precisionIndicator);
     
-    // We'll use pointerdown/move/up for better mobile support
-    slider.addEventListener('pointerdown', (e) => {
-      // Don't interfere with the initial slider drag, just record the starting position
-      startY = e.clientY;
-      
-      // Prepare the precision indicator but don't show it yet
-      precisionIndicator.style.left = `${slider.offsetWidth / 2}px`;
-      precisionIndicator.style.top = '25px';
+    // Ensure the slider container has position relative for absolute positioning of the indicator
+    sliderContainer.style.position = 'relative';
+    
+    // Set initial slider sensitivity based on precision mode
+    this.updateSliderSensitivity(slider, currentPrecisionMode);
+    
+    // Create a draggable handle for precision control
+    const precisionHandle = document.createElement('div');
+    precisionHandle.className = 'precision-handle hidden';
+    precisionHandle.style.position = 'absolute';
+    precisionHandle.style.width = '100%';
+    precisionHandle.style.height = '30px';
+    precisionHandle.style.bottom = '-35px';
+    precisionHandle.style.left = '0';
+    precisionHandle.style.cursor = 'ns-resize';
+    precisionHandle.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+    precisionHandle.style.borderRadius = '4px';
+    precisionHandle.style.zIndex = '10';
+    precisionHandle.style.display = 'flex';
+    precisionHandle.style.alignItems = 'center';
+    precisionHandle.style.justifyContent = 'center';
+    precisionHandle.innerHTML = '<span style="font-size: 10px; color: #666;">Pull down for precision</span>';
+    sliderContainer.appendChild(precisionHandle);
+    
+    // Show the precision handle when hovering over the slider
+    slider.addEventListener('mouseover', () => {
+      precisionHandle.classList.remove('hidden');
     });
     
-    // Listen for pointer moves on the document, not just the slider
-    document.addEventListener('pointermove', (e) => {
-      // Only activate precision mode if the slider is being interacted with
-      if (e.buttons !== 1) return; // Left mouse button not pressed
-      
-      // Calculate vertical distance from start
-      const verticalDistance = e.clientY - startY;
-      
-      // Only enter precision mode if there's significant vertical movement
-      if (verticalDistance <= 5) {
-        if (inPrecisionMode) {
-          // Exit precision mode if user moves back up
-          inPrecisionMode = false;
-          slider.setAttribute('step', originalStep);
-          precisionIndicator.classList.add('hidden');
+    slider.addEventListener('mouseout', (e) => {
+      // Only hide if we're not moving to the precision handle
+      if (!e.relatedTarget || !e.relatedTarget.classList.contains('precision-handle')) {
+        if (!inPrecisionMode) {
+          precisionHandle.classList.add('hidden');
         }
-        return;
       }
-      
-      // We're now in precision mode
+    });
+    
+    // Precision handle events
+    precisionHandle.addEventListener('mouseover', () => {
+      precisionHandle.classList.remove('hidden');
+    });
+    
+    precisionHandle.addEventListener('mouseout', (e) => {
+      if (!inPrecisionMode) {
+        precisionHandle.classList.add('hidden');
+      }
+    });
+    
+    // Main precision control logic
+    const startPrecisionMode = (e) => {
       inPrecisionMode = true;
+      startY = e.clientY;
       
-      // Determine step size based on vertical distance
-      // Default is now step=100, then 10, then 1 for finest control
+      // Position the precision indicator
+      precisionIndicator.style.left = '50%';
+      precisionIndicator.style.transform = 'translateX(-50%)';
+      precisionIndicator.style.top = '-25px';
+      precisionIndicator.classList.remove('hidden');
+      precisionIndicator.textContent = `Step: ${currentStep}`;
+      
+      // Prevent default to avoid text selection
+      e.preventDefault();
+      
+      // Add global event listeners for drag tracking
+      document.addEventListener('mousemove', updatePrecision);
+      document.addEventListener('mouseup', endPrecisionMode);
+      document.addEventListener('touchmove', updatePrecision, { passive: false });
+      document.addEventListener('touchend', endPrecisionMode);
+    };
+    
+    const updatePrecision = (e) => {
+      if (!inPrecisionMode) return;
+      
+      // Get the current Y position
+      const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : startY);
+      
+      // Calculate vertical distance from start point
+      const verticalDistance = Math.max(0, clientY - startY);
+      
+      // Determine precision mode and step size based on vertical distance
+      let newPrecisionMode = 'coarse';
       let newStep = 100; // Default is coarse control
       
       if (verticalDistance > 40) {
+        newPrecisionMode = 'fine';
         newStep = 1;   // Fine control (1 by 1)
       } else if (verticalDistance > 20) {
+        newPrecisionMode = 'medium';
         newStep = 10;  // Medium control (10s)
       }
       
-      // Update the step
-      currentStep = newStep;
-      slider.setAttribute('step', newStep.toString());
-      
-      // Show the precision indicator
-      precisionIndicator.classList.remove('hidden');
-      precisionIndicator.textContent = `Step: ${newStep}`;
-      
-      // Apply different styles based on precision level
-      precisionIndicator.className = 'precision-indicator';
-      if (newStep === 1) {
-        precisionIndicator.classList.add('precision-fine'); // Fine precision (1s)
-      } else if (newStep === 10) {
-        precisionIndicator.classList.add('precision-medium'); // Medium precision (10s)
-      } else {
-        precisionIndicator.classList.add('precision-coarse'); // Coarse precision (100s, default)
+      // Update precision mode if changed
+      if (currentPrecisionMode !== newPrecisionMode) {
+        currentPrecisionMode = newPrecisionMode;
+        this.element.dataset.ratingSliderPrecisionMode = currentPrecisionMode;
+        
+        // Update slider sensitivity based on new precision mode
+        this.updateSliderSensitivity(slider, currentPrecisionMode);
+        
+        // Update the indicator
+        precisionIndicator.className = 'precision-indicator';
+        precisionIndicator.classList.add(`precision-${currentPrecisionMode}`);
+        precisionIndicator.textContent = `Step: ${newStep}`;
+        
+        // Update the slider step
+        currentStep = newStep;
+        slider.setAttribute('step', newStep.toString());
+        
+        // Log for debugging
+        console.log(`Precision mode: ${currentPrecisionMode}, Step: ${newStep}, Distance: ${verticalDistance}`);
       }
-    });
+      
+      // Prevent default to avoid scrolling
+      e.preventDefault();
+    };
     
     const endPrecisionMode = () => {
       if (!inPrecisionMode) return;
       
       inPrecisionMode = false;
-      slider.setAttribute('step', originalStep); // Reset to original step
+      
+      // Remove global event listeners
+      document.removeEventListener('mousemove', updatePrecision);
+      document.removeEventListener('mouseup', endPrecisionMode);
+      document.removeEventListener('touchmove', updatePrecision);
+      document.removeEventListener('touchend', endPrecisionMode);
+      
+      // Hide the precision indicator
       precisionIndicator.classList.add('hidden');
+      
+      // Hide the precision handle if not hovering
+      if (!slider.matches(':hover') && !precisionHandle.matches(':hover')) {
+        precisionHandle.classList.add('hidden');
+      }
     };
     
-    document.addEventListener('pointerup', endPrecisionMode);
-    document.addEventListener('pointercancel', endPrecisionMode);
+    // Attach the precision mode events to the handle
+    precisionHandle.addEventListener('mousedown', startPrecisionMode);
+    precisionHandle.addEventListener('touchstart', startPrecisionMode, { passive: false });
+    
+    // Also allow starting precision mode from the slider itself with a vertical drag
+    let dragStartY = 0;
+    let isDraggingVertically = false;
+    
+    slider.addEventListener('mousedown', (e) => {
+      dragStartY = e.clientY;
+    });
+    
+    slider.addEventListener('mousemove', (e) => {
+      if (e.buttons !== 1) return; // Not dragging
+      
+      const verticalDelta = Math.abs(e.clientY - dragStartY);
+      
+      // If we're dragging more vertically than horizontally, enter precision mode
+      if (verticalDelta > 10 && !isDraggingVertically) {
+        isDraggingVertically = true;
+        startPrecisionMode(e);
+      }
+    });
+    
+    slider.addEventListener('mouseup', () => {
+      isDraggingVertically = false;
+    });
   }
-
+  
+  // Update slider sensitivity based on precision mode
+  updateSliderSensitivity(slider, precisionMode) {
+    // Remove existing sensitivity classes
+    slider.classList.remove('sensitivity-coarse', 'sensitivity-medium', 'sensitivity-fine');
+    
+    // Add appropriate sensitivity class
+    slider.classList.add(`sensitivity-${precisionMode}`);
+    
+    // Set step based on precision mode
+    let step;
+    switch (precisionMode) {
+      case 'fine':
+        step = 1;
+        break;
+      case 'medium':
+        step = 10;
+        break;
+      default: // coarse
+        step = 100;
+        break;
+    }
+    
+    slider.setAttribute('step', step.toString());
+  }
 
   // Update the value display for a specific slider
   updateValue(event) {

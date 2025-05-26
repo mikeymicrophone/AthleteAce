@@ -65,6 +65,7 @@ module RatingsHelper
                   controller: "rating-slider",
                   'rating-slider-target-type-value': record_type,
                   'rating-slider-target-id-value': record.id,
+                  'rating-slider-precision-mode': 'coarse',
                   # Also provide data attributes for backward compatibility
                   'rating-slider-target-type': record_type,
                   'rating-slider-target-id': record.id
@@ -121,12 +122,13 @@ module RatingsHelper
           min: -10000,
           max: 10000,
           value: current_value,
-          step: 1,
+          step: 100,
           class: "slider-input",
           data: {
             rating_slider_target: "slider_#{spectrum_id}",
             action: "input->rating-slider#updateValue change->rating-slider#submitRating",
-            rating_slider_spectrum_id_param: spectrum_id
+            rating_slider_spectrum_id_param: spectrum_id,
+            rating_slider_original_step: 100
           }
         )
         slider_row

@@ -108,6 +108,33 @@
   @apply text-gray-500;
 }
 
+/* Slider sensitivity classes */
+.sensitivity-coarse {
+  /* Default sensitivity - wide range movement */
+  @apply w-full;
+  /* No additional styles needed as this is the default */
+}
+
+.sensitivity-medium {
+  /* Medium sensitivity - more controlled movement */
+  @apply w-full;
+  /* CSS variable to control the input range sensitivity */
+  --slider-sensitivity: 2;
+  /* Scale the effective width to make horizontal movement more precise */
+  transform: scaleX(var(--slider-sensitivity));
+  transform-origin: center;
+}
+
+.sensitivity-fine {
+  /* Fine sensitivity - very precise movement */
+  @apply w-full;
+  /* CSS variable to control the input range sensitivity */
+  --slider-sensitivity: 4;
+  /* Scale the effective width to make horizontal movement extremely precise */
+  transform: scaleX(var(--slider-sensitivity));
+  transform-origin: center;
+}
+
 /* Rating container */
 .rating-container {
   @apply md:col-span-1;
