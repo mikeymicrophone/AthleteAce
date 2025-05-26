@@ -12,14 +12,14 @@
         <%= tag.div class: "attempts-grid" do %>
           <% @game_attempts.each do |attempt| %>
             <%= tag.div class: "attempt-card #{attempt.correct? ? 'correct-attempt' : 'incorrect-attempt'}" do %>
-              <%= tag.div class: "attempt-team-part #{attempt.correct? ? 'correct-team-part' : 'incorrect-team-part'}" do %>
+              <%= tag.div class: "attempt-team-part" do %>
                 <%= tag.div class: "attempt-team-logo-container" do %>
                   <%= display_name_with_lazy_logo(attempt.target_entity) %>
                 <% end %>
                 <%= tag.p attempt.target_entity.name, class: "attempt-team-name" %>
               <% end %>
               
-              <%= tag.div class: "attempt-player-part #{attempt.correct? ? 'correct-player-part' : 'incorrect-player-part'}" do %>
+              <%= tag.div class: "attempt-player-part" do %>
                 <%= tag.div class: "attempt-player-photo-container" do %>
                   <%= display_name_with_lazy_logo(attempt.subject_entity) %>
                 <% end %>

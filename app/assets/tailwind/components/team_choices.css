@@ -1,0 +1,47 @@
+/* Team Choices Component Styles */
+
+.team-choices-container {
+  @apply w-full;
+}
+
+.team-choices-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+
+.team-choice {
+  @apply bg-white rounded-lg shadow-md p-4 transition-all duration-300 hover:shadow-lg;
+}
+
+/* Use parent container classes for correctness states */
+.correct-choice {
+  @apply border-green-200;
+}
+
+.incorrect-choice {
+  @apply border-red-200;
+}
+
+/* Apply styles to elements inside the team choice */
+.correct-choice.team-choice-revealed {
+  @apply bg-green-50;
+}
+
+.incorrect-choice.team-choice-revealed {
+  @apply bg-red-50;
+}
+
+.team-logo-container {
+  @apply h-20 w-20 mb-3 flex items-center justify-center;
+}
+
+.team-logo {
+  @apply max-h-full max-w-full object-contain;
+}
+
+.team-logo-placeholder {
+  @apply h-full w-full bg-gray-200 flex items-center justify-center rounded-full;
+}
+
+.team-name {
+  @apply text-lg font-semibold text-center mt-2;
+}

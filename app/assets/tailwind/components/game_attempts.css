@@ -44,11 +44,12 @@
   @apply w-full p-2 text-center;
 }
 
-.correct-team-part {
+/* Use nested selectors for team part */
+.correct-attempt .attempt-team-part {
   @apply bg-green-50;
 }
 
-.incorrect-team-part {
+.incorrect-attempt .attempt-team-part {
   @apply bg-red-50;
 }
 
@@ -64,11 +65,12 @@
   @apply w-full p-2 text-center border-t;
 }
 
-.correct-player-part {
+/* Use nested selectors for player part */
+.correct-attempt .attempt-player-part {
   @apply bg-green-50;
 }
 
-.incorrect-player-part {
+.incorrect-attempt .attempt-player-part {
   @apply bg-red-50;
 }
 
