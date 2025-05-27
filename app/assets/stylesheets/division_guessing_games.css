@@ -1,0 +1,150 @@
+/* Division Guessing Game Styles */
+
+.division-guess-container {
+  @apply max-w-4xl mx-auto;
+}
+
+.division-guess-header {
+  @apply text-center mb-8;
+}
+
+.division-guess-title {
+  @apply text-3xl font-bold text-gray-800 mb-2;
+}
+
+.division-guess-subtitle {
+  @apply text-lg text-gray-600;
+}
+
+.team-card {
+  @apply transition-all duration-300;
+}
+
+.team-card .team-name {
+  @apply transition-all duration-300;
+}
+
+.team-card .highlight {
+  @apply text-blue-600;
+}
+
+.division-choice {
+  @apply bg-white hover:bg-gray-50 border border-gray-200;
+}
+
+.division-choice.correct-choice {
+  @apply border-green-500;
+}
+
+.division-choice.incorrect-choice {
+  @apply border-red-500;
+}
+
+.division-choice.correct-answer {
+  @apply bg-green-100 border-green-500 text-green-700;
+}
+
+.division-choice.pulsing {
+  animation: pulse 0.5s ease-in-out;
+}
+
+.division-name-overlay {
+  @apply bg-black bg-opacity-50 transition-opacity duration-300;
+}
+
+.division-name-overlay.visible {
+  @apply opacity-100;
+}
+
+.division-name-content {
+  @apply text-shadow-lg;
+}
+
+.text-shadow-lg {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.attempts-container {
+  @apply bg-white rounded-lg shadow-md;
+}
+
+.attempt-card {
+  @apply transition-all duration-300;
+}
+
+.attempt-card.correct-attempt {
+  @apply border-green-500 bg-green-50;
+}
+
+.attempt-card.incorrect-attempt {
+  @apply border-red-500 bg-red-50;
+}
+
+.attempt-team-part {
+  @apply border-b border-gray-200;
+}
+
+.attempt-division-part {
+  @apply bg-gray-50;
+}
+
+.chosen-division-indicator {
+  @apply text-xs text-gray-600 mt-1;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Pause button styles */
+.pause-button {
+  @apply transition-all duration-200;
+}
+
+.pause-button.paused {
+  @apply bg-yellow-200 hover:bg-yellow-300;
+}
+
+/* Progress indicator styles */
+.progress-indicator {
+  @apply text-gray-600;
+}
+
+.progress-counter {
+  @apply font-bold text-blue-600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .division-guess-container {
+    @apply px-2;
+  }
+  
+  .team-card {
+    @apply mb-6;
+  }
+}
+
+@media (max-width: 640px) {
+  .division-guess-title {
+    @apply text-2xl;
+  }
+  
+  .division-guess-subtitle {
+    @apply text-base;
+  }
+  
+  .division-guess-container {
+    @apply px-4;
+  }
+  
+  .team-card {
+    @apply mb-6;
+  }
+  
+  .division-choice {
+    @apply h-24;
+  }
+} 

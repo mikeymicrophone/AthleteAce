@@ -33,12 +33,13 @@ class DivisionGuessingGamesController < ApplicationController
     end
 
     @team = game_data.team
+    @correct_division = game_data.correct_division
     @choices = game_data.choices # Array of Division objects
     @sport = game_data.sport # Pass the sport to the view
 
     # Store necessary info in session for the create action
     session[:division_game_team_id] = @team.id
-    session[:division_game_correct_division_id] = game_data.correct_division.id
+    session[:division_game_correct_division_id] = @correct_division.id
     session[:division_game_difficulty] = difficulty.to_s
     session[:division_game_choice_ids] = @choices.map(&:id)
     session[:division_game_start_time] = Time.current.to_f
