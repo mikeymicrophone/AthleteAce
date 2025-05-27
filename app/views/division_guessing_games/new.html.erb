@@ -1,91 +1,97 @@
 <% content_for :title, "Guess the Division" %>
 
-<%= division_game_container(@team, @correct_division, @choices) do %>
-  <%= tag.div class: "flex flex-col lg:flex-row gap-8" do %>
-    <%= tag.div class: "lg:w-1/3" do %>
-      <%= tag.div class: "team-card bg-white rounded-lg shadow-md p-6" do %>
-        <%= tag.div class: "team-logo-container flex justify-center items-center h-32 mb-4" do %>
-          <% if @team.logo_url.present? %>
-            <%= tag.img src: @team.logo_url, alt: "#{@team.name} logo", class: "max-h-32 max-w-full object-contain" %>
-          <% else %>
-            <%= tag.div class: "h-32 w-32 flex items-center justify-center bg-gray-200 rounded-full" do %>
-              <%= tag.i class: "fas fa-shield-alt text-6xl text-gray-400" %>
-            <% end %>
-          <% end %>
-        <% end %>
-        
-        <%= tag.div class: "team-info text-center" do %>
-          <%= tag.h2 @team.name, class: "team-name text-2xl font-bold mb-2" %>
-          <% if @team.league.present? %>
-            <%= tag.p @team.league.name, class: "team-league text-gray-600" %>
-          <% end %>
-        <% end %>
-      <% end %>
-    <% end %>
-
-    <%= tag.div class: "lg:w-2/3" do %>
-      <%= tag.div id: "division_guess_container", class: "division-guess-container", data: { 
-        controller: "division-guess",
-        division_guess_team_id_value: @team.id,
-        division_guess_correct_division_id_value: @correct_division.id
-      } do %>
-        <%= tag.div id: "division_guess_game", class: "division-guess-game", data: { division_guess_target: "gameContainer" } do %>
-          <%= tag.div class: "grid grid-cols-2 gap-4" do %>
-            <% @choices.each do |division| %>
-              <%= tag.button class: "division-choice #{division == @correct_division ? 'correct-choice' : 'incorrect-choice'} flex flex-col items-center justify-center w-full h-32 p-4 rounded-lg shadow-md transition-colors duration-200",
-                  data: {
-                    division_guess_target: "divisionChoice",
-                    division_id: division.id,
-                    correct: (division == @correct_division).to_s,
-                    action: "click->division-guess#checkAnswer"
-                  } do %>
-                <%= tag.span division.name, class: "division-name text-lg font-medium text-center" %>
+<% if @team && @correct_division && @choices.present? && @choices.size >= 2 %>
+  <%= division_game_container(@team, @correct_division, @choices) do %>
+    <%= tag.div class: "flex flex-col lg:flex-row gap-8" do %>
+      <%= tag.div class: "lg:w-1/3" do %>
+        <%= tag.div class: "team-card bg-white rounded-lg shadow-md p-6" do %>
+          <%= tag.div class: "team-logo-container flex justify-center items-center h-32 mb-4" do %>
+            <% if @team.logo_url.present? %>
+              <%= tag.img src: @team.logo_url, alt: "#{@team.name} logo", class: "max-h-32 max-w-full object-contain" %>
+            <% else %>
+              <%= tag.div class: "h-32 w-32 flex items-center justify-center bg-gray-200 rounded-full" do %>
+                <%= tag.i class: "fas fa-shield-alt text-6xl text-gray-400" %>
               <% end %>
             <% end %>
           <% end %>
-        <% end %>
-
-        <%= tag.div id: "division_name_overlay", class: "division-name-overlay fixed inset-0 flex items-center justify-center pointer-events-none opacity-0 z-50", data: { division_guess_target: "teamNameOverlay" } do %>
-          <%= tag.div class: "division-name-content text-8xl font-extrabold text-center text-white text-shadow-lg" do %>
-            <%= tag.span data: { division_guess_target: "teamNameText" } %>
+          
+          <%= tag.div class: "team-info text-center" do %>
+            <%= tag.h2 @team.name, class: "team-name text-2xl font-bold mb-2" %>
+            <% if @team.league.present? %>
+              <%= tag.p @team.league.name, class: "team-league text-gray-600" %>
+            <% end %>
           <% end %>
         <% end %>
+      <% end %>
 
-        <%= tag.div class: "controls flex justify-between items-center mt-6" do %>
-          <%= tag.div class: "progress-indicator" do %>
-            <%= tag.span "Progress: #{tag.span("0", id: "progress_counter", class: "progress-counter", data: { division_guess_target: "progressCounter" })} correct".html_safe, class: "progress-text text-gray-600" %>
+      <%= tag.div class: "lg:w-2/3" do %>
+        <%= tag.div id: "division_guess_container", class: "division-guess-container", data: { 
+          controller: "division-guess",
+          division_guess_team_id_value: @team.id,
+          division_guess_correct_division_id_value: @correct_division.id
+        } do %>
+          <%= tag.div id: "division_guess_game", class: "division-guess-game", data: { division_guess_target: "gameContainer" } do %>
+            <%= tag.div class: "grid grid-cols-2 gap-4" do %>
+              <% @choices.each do |division| %>
+                <%= tag.button class: "division-choice #{division == @correct_division ? 'correct-choice' : 'incorrect-choice'} flex flex-col items-center justify-center w-full h-32 p-4 rounded-lg shadow-md transition-colors duration-200",
+                    data: {
+                      division_guess_target: "divisionChoice",
+                      division_id: division.id,
+                      correct: (division == @correct_division).to_s,
+                      action: "click->division-guess#checkAnswer"
+                    } do %>
+                  <%= tag.span division.name, class: "division-name text-lg font-medium text-center" %>
+                <% end %>
+              <% end %>
+            <% end %>
           <% end %>
 
-          <%= tag.button class: "pause-button flex items-center bg-gray-200 hover:bg-gray-300 font-medium py-2 px-4 rounded-lg transition-colors duration-200",
-              data: {
-                division_guess_target: "pauseButton",
-                action: "click->division-guess#togglePause"
-              } do %>
-            <%= tag.i class: "fa-solid fa-pause mr-2" %>
-            <%= tag.span "Pause", data: { division_guess_target: "pauseButtonText" } %>
+          <%= tag.div id: "division_name_overlay", class: "division-name-overlay fixed inset-0 flex items-center justify-center pointer-events-none opacity-0 z-50", data: { division_guess_target: "teamNameOverlay" } do %>
+            <%= tag.div class: "division-name-content text-8xl font-extrabold text-center text-white text-shadow-lg" do %>
+              <%= tag.span data: { division_guess_target: "teamNameText" } %>
+            <% end %>
+          <% end %>
+
+          <%= tag.div class: "controls flex justify-between items-center mt-6" do %>
+            <%= tag.div class: "progress-indicator" do %>
+              <%= tag.span "Progress: #{tag.span("0", id: "progress_counter", class: "progress-counter", data: { division_guess_target: "progressCounter" })} correct".html_safe, class: "progress-text text-gray-600" %>
+            <% end %>
+
+            <%= tag.button class: "pause-button flex items-center bg-gray-200 hover:bg-gray-300 font-medium py-2 px-4 rounded-lg transition-colors duration-200",
+                data: {
+                  division_guess_target: "pauseButton",
+                  action: "click->division-guess#togglePause"
+                } do %>
+              <%= tag.i class: "fa-solid fa-pause mr-2" %>
+              <%= tag.span "Pause", data: { division_guess_target: "pauseButtonText" } %>
+            <% end %>
           <% end %>
         <% end %>
       <% end %>
     <% end %>
-  <% end %>
 
-  <%= tag.div class: "attempts-container hidden mt-8", data: { division_guess_target: "attemptsContainer" } do %>
-    <%= tag.h2 "Recent Attempts", class: "attempts-heading text-xl font-bold mb-4" %>
-    <%= tag.div class: "attempts-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4", data: { division_guess_target: "attemptsGrid" } %>
-  <% end %>
+    <%= tag.div class: "attempts-container mt-8", data: { division_guess_target: "attemptsContainer" } do %>
+      <%= tag.h2 "Recent Attempts", class: "attempts-heading text-xl font-bold mb-4 text-center" %>
+      <%= tag.div class: "attempts-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4", data: { division_guess_target: "attemptsGrid" } %>
+    <% end %>
 
-  <%= tag.template id: "attempt-template" do %>
-    <%= tag.div class: "attempt-card border rounded-lg overflow-hidden" do %>
-      <%= tag.div class: "attempt-team-part p-3" do %>
-        <%= tag.div class: "flex items-center mb-2" do %>
-          <%= tag.img class: "attempt-team-logo h-8 w-8 mr-2 object-contain" %>
-          <%= tag.span class: "attempt-team-name font-medium text-sm" %>
+    <%= tag.template id: "attempt-template" do %>
+      <%= tag.div class: "attempt-card border rounded-lg overflow-hidden" do %>
+        <%= tag.div class: "attempt-team-part p-3" do %>
+          <%= tag.div class: "flex items-center mb-2" do %>
+            <%= tag.img class: "attempt-team-logo h-8 w-8 mr-2 object-contain" %>
+            <%= tag.span class: "attempt-team-name font-medium text-sm" %>
+          <% end %>
         <% end %>
+        <%= tag.div class: "attempt-division-part p-3" do %>
+          <%= tag.span class: "attempt-division-name text-sm" %>
+        <% end %>
+        <%= tag.div class: "text-xs p-2 bg-gray-50 text-gray-500 text-right" %>
       <% end %>
-      <%= tag.div class: "attempt-division-part p-3" do %>
-        <%= tag.span class: "attempt-division-name text-sm" %>
-      <% end %>
-      <%= tag.div class: "text-xs p-2 bg-gray-50 text-gray-500 text-right" %>
     <% end %>
   <% end %>
+<% else %>
+  <div class="text-center text-gray-500 mt-12">
+    <p>Unable to start a new game. Please try a different difficulty or check your data.</p>
+  </div>
 <% end %>
