@@ -110,4 +110,27 @@ class Player < ApplicationRecord
     
     (avg + 10_000) / 20_000
   end
+
+  # Calculate statistics for a given set of attempts
+  # @param attempts [ActiveRecord::Relation<Attempt>] An ActiveRecord relation of attempts for this player
+  # @return [Hash] A hash containing total_attempts, correct_attempts, accuracy,
+  #                recent_total, recent_correct, and recent_accuracy
+  def calculate_attempt_stats(attempts)
+    total_attempts = attempts.size
+    correct_attempts = attempts.count(&:correct?)
+
+    one_week_ago = 1.week.ago
+    recent_attempts = attempts.where("created_at >= ?", one_week_ago)
+    recent_total = recent_attempts.size
+    recent_correct = recent_attempts.count(&:correct?)
+
+    {
+      total_attempts: total_attempts,
+      correct_attempts: correct_attempts,
+      accuracy: total_attempts > 0 ? (correct_attempts.to_f / total_attempts * 100).round : 0,
+      recent_total: recent_total,
+      recent_correct: recent_correct,
+      recent_accuracy: recent_total > 0 ? (recent_correct.to_f / recent_total * 100).round : 0
+    }
+  end
 end

@@ -12,18 +12,18 @@
       
       <% @sports.each do |sport| %>
         <%= tag.div class: "sport-section" do %>
-          <%= tag.h3 sport, class: "sport-title" %>
-          <%= tag.div class: "teams-buttons" do %>
+          <%= tag.h3 sport.name, class: "sport-title" %>
+          <%= tag.div class: "teams-buttons flex flex-wrap gap-2 mb-4" do %>
             <% @teams_by_sport[sport].each do |team| %>
-              <%= link_to team_strength_game_attempts_path(team), class: "team-button" do %>
+              <%= link_to team_strength_game_attempts_path(team), class: "team-button bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-3 rounded-lg shadow-md inline-flex items-center text-sm transition-colors duration-150" do %>
                 <%= tag.div class: "team-button-content" do %>
                   <% if team.logo_url.present? %>
-                    <%= tag.img src: team.logo_url, alt: "#{team.name} logo", class: "team-button-logo" %>
+                    <%= tag.img src: team.logo_url, alt: "#{team.name} logo", class: "team-button-logo w-5 h-5 mr-2 object-contain" %>
                   <% else %>
-                    <%= tag.i class: "fa-solid fa-shield-alt team-button-icon" %>
+                    <%= tag.i class: "fa-solid fa-shield-alt team-button-icon mr-2" %>
                   <% end %>
-                  <%= tag.span team.name, class: "team-button-name" %>
-                  <%= tag.span "#{@team_stats[team][:correct_attempts]}/#{@team_stats[team][:total_attempts]}", class: "team-button-stats" %>
+                  <%= tag.span team.name, class: "team-button-name mr-2" %>
+                  <%= tag.span "#{@team_stats[team][:correct_attempts]}/#{@team_stats[team][:total_attempts]}", class: "team-button-stats text-xs bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded-full" %>
                 <% end %>
               <% end %>
             <% end %>
