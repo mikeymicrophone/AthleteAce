@@ -47,46 +47,52 @@
       <% end %>
       
       <%= tag.p "Having trouble? Make sure your database has teams with active divisions in the same league.", class: "text-sm text-gray-500 mt-4" %>
+      
+      <%# Show recent attempts even on the difficulty selection screen %>
+      <%= recent_division_attempts(current_ace) if current_ace %>
     <% end %>
   <% else %>
-    <%= tag.div class: "bg-white shadow-md rounded-lg p-6 max-w-lg mx-auto" do %>
-      <%= tag.div class: "flex justify-between items-center mb-4" do %>
-        <%= tag.div do %>
-          <%= tag.span session[:division_game_difficulty]&.titleize, class: "inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2" %>
-          <% if @team.league %>
-            <%= tag.span @team.league.name, class: "inline-block bg-gray-100 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded-full" %>
+    <%# Use the division game container to wrap the game content %>
+    <%= division_game_container(@team, @team.division, @choices) do %>
+      <%= tag.div class: "bg-white shadow-md rounded-lg p-6 max-w-lg mx-auto" do %>
+        <%= tag.div class: "flex justify-between items-center mb-4" do %>
+          <%= tag.div do %>
+            <%= tag.span session[:division_game_difficulty]&.titleize, class: "inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2" %>
+            <% if @team.league %>
+              <%= tag.span @team.league.name, class: "inline-block bg-gray-100 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded-full" %>
+            <% end %>
+          <% end %>
+          <%= link_to "Change Difficulty", new_division_game_path, class: "text-sm text-blue-600 hover:text-blue-800" %>
+        <% end %>
+        
+        <%= tag.p class: "text-xl mb-4 text-gray-800" do %>
+          Which division does
+          <%= tag.strong @team.name, class: "font-semibold text-blue-600" %>
+          play in?
+        <% end %>
+        
+        <% if @sport %>
+          <%= tag.p class: "text-sm text-gray-500 mb-4" do %>
+            <%= tag.span "Sport: ", class: "font-medium" %>
+            <%= tag.span @sport.name, class: "" %>
           <% end %>
         <% end %>
-        <%= link_to "Change Difficulty", new_division_game_path, class: "text-sm text-blue-600 hover:text-blue-800" %>
-      <% end %>
-      
-      <%= tag.p class: "text-xl mb-4 text-gray-800" do %>
-        Which division does
-        <%= tag.strong @team.name, class: "font-semibold text-blue-600" %>
-        play in?
-      <% end %>
-      
-      <% if @sport %>
-        <%= tag.p class: "text-sm text-gray-500 mb-4" do %>
-          <%= tag.span "Sport: ", class: "font-medium" %>
-          <%= tag.span @sport.name, class: "" %>
-        <% end %>
-      <% end %>
 
-      <%= tag.div class: "division-choices-grid grid gap-3" do %>
-        <% @choices.each do |division| %>
-          <%= link_to create_division_game_attempt_path(guessed_division_id: division.id), 
-                      method: :post,
-                      class: "division-choice flex items-center p-4 border border-gray-300 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors cursor-pointer" do %>
-            <%= tag.div class: "division-choice-content w-full" do %>
-              <%= tag.div class: "flex items-center" do %>
-                <%= tag.div class: "division-icon mr-3 text-blue-600" do %>
-                  <i class="fas fa-shield-alt"></i>
-                <% end %>
-                <%= tag.div class: "division-info" do %>
-                  <%= tag.div division.name, class: "division-name text-lg font-medium" %>
-                  <% if division.conference %>
-                    <%= tag.div division.conference.name, class: "division-conference text-sm text-gray-500" %>
+        <%= tag.div class: "division-choices-grid grid gap-3" do %>
+          <% @choices.each do |division| %>
+            <%= link_to create_division_game_attempt_path(guessed_division_id: division.id), 
+                        method: :post,
+                        class: "division-choice flex items-center p-4 border border-gray-300 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors cursor-pointer" do %>
+              <%= tag.div class: "division-choice-content w-full" do %>
+                <%= tag.div class: "flex items-center" do %>
+                  <%= tag.div class: "division-icon mr-3 text-blue-600" do %>
+                    <i class="fas fa-shield-alt"></i>
+                  <% end %>
+                  <%= tag.div class: "division-info" do %>
+                    <%= tag.div division.name, class: "division-name text-lg font-medium" %>
+                    <% if division.conference %>
+                      <%= tag.div division.conference.name, class: "division-conference text-sm text-gray-500" %>
+                    <% end %>
                   <% end %>
                 <% end %>
               <% end %>
@@ -94,6 +100,9 @@
           <% end %>
         <% end %>
       <% end %>
+      
+      <%# Add the attempts history container %>
+      <%= division_attempts_history_container %>
     <% end %>
   <% end %>
 
