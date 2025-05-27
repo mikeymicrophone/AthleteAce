@@ -9,6 +9,10 @@ Rails.application.routes.draw do
   get "strength/team_match" => "strength#team_match"
   get "strength/game_attempts" => "strength#game_attempts"
   post "strength/check_answer" => "strength#check_answer", as: :check_answer
+
+  # Division Guessing Game
+  get "play/guess-the-division" => "division_guessing_games#new", as: :new_division_game
+  post "play/guess-the-division" => "division_guessing_games#create", as: :create_division_game_attempt
   resources :achievements do
     collection do
       get :target_options

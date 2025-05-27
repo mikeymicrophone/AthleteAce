@@ -2,6 +2,10 @@
 
 <% content_for :title, "Leagues" %>
 
+<div class="mb-4 text-center">
+  <%= link_to "Play: Guess the Division", new_division_game_path, class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+</div>
+
 <div id="leagues">
   <% @leagues.each do |league| %>
     <%= tag.div(id: dom_id(league), class: [index_record_base_classes, league_index_record_classes].join(' ')) do %>
