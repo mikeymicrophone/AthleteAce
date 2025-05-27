@@ -262,8 +262,19 @@ class StrengthController < ApplicationController
       }
     end
     
-    # Sort teams by name
-    @teams = @team_stats.keys.sort_by(&:name)
+    # Group teams by sport
+    @teams_by_sport = {}
+    @team_stats.keys.each do |team|
+      sport = team.sport || 'Other'
+      @teams_by_sport[sport] ||= []
+      @teams_by_sport[sport] << team
+    end
+    
+    # Sort sports alphabetically and teams within each sport
+    @sports = @teams_by_sport.keys.sort
+    @teams_by_sport.each do |sport, teams|
+      @teams_by_sport[sport] = teams.sort_by(&:name)
+    end
   end
 
   # Team-specific game attempts grouped by player
