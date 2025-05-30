@@ -72,10 +72,8 @@ export default class extends Controller {
       this.teamNameOverlayTarget.classList.remove("opacity-100")
       this.teamNameOverlayTarget.classList.add("opacity-0")
       
-      // Load next question after overlay fades
-      setTimeout(() => {
-        window.location.reload()
-      }, 500)
+      // The next question will be loaded via Turbo Stream in the sendAttemptData method
+      // No need to reload the page
     }, 1500)
   }
 
@@ -85,6 +83,7 @@ export default class extends Controller {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept": "text/vnd.turbo-stream.html",
           "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content
         },
         body: JSON.stringify({
@@ -94,6 +93,17 @@ export default class extends Controller {
 
       if (!response.ok) {
         console.error("Failed to save attempt:", await response.text())
+      } else {
+        // Process the Turbo Stream response
+        const html = await response.text()
+        const parser = new DOMParser()
+        const doc = parser.parseFromString(html, 'text/html')
+        const streamElements = doc.querySelectorAll('turbo-stream')
+        
+        // Apply each turbo-stream action
+        streamElements.forEach(element => {
+          Turbo.renderStreamMessage(element.outerHTML)
+        })
       }
     } catch (error) {
       console.error("Error saving attempt:", error)

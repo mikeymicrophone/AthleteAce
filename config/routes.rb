@@ -27,8 +27,8 @@ Rails.application.routes.draw do
     end
   end
   
-  # Route for submitting game attempt results
-  resources :game_attempts, only: [:create]
+  # Route for submitting game attempt results and retrieving game attempts
+  resources :game_attempts, only: [:index, :create]
   
   resources :highlights, only: [:new, :create]
   

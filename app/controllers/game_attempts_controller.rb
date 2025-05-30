@@ -19,9 +19,9 @@ class GameAttemptsController < ApplicationController
       format.html # index.html.erb
       format.json do
         render json: @game_attempts.as_json(include: {
-          subject_entity: { methods: [:logo_url, :name, :full_name].compact },
-          target_entity: { methods: [:logo_url, :name].compact },
-          chosen_entity: { methods: [:logo_url, :name].compact }
+          subject_entity: { methods: [:logo_url, :name] },
+          target_entity: { methods: [:logo_url, :name] },
+          chosen_entity: { methods: [:logo_url, :name] }
         })
       end
     end
