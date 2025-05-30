@@ -1,0 +1,63 @@
+<%= tag.div class: "flex flex-col lg:flex-row gap-8" do %>
+  <%= tag.div class: "lg:w-1/3" do %>
+    <%= tag.div class: "team-card bg-white rounded-lg shadow-md p-6", data: { team_id: team.id, team_division_id: correct_division.id, division_guess_target: "currentTeamCardDisplay" } do %>
+      <%= tag.div class: "team-logo-container flex justify-center items-center h-32 mb-4" do %>
+        <% if team.logo_url.present? %>
+          <%= tag.img src: team.logo_url, alt: "#{team.name} logo", class: "max-h-32 max-w-full object-contain" %>
+        <% else %>
+          <%= tag.div class: "h-32 w-32 flex items-center justify-center bg-gray-200 rounded-full" do %>
+            <%= tag.i class: "fas fa-shield-alt text-6xl text-gray-400" %>
+          <% end %>
+        <% end %>
+      <% end %>
+      
+      <%= tag.div class: "team-info text-center" do %>
+        <%= tag.h2 team.name, class: "team-name text-2xl font-bold mb-2" %>
+        <% if team.league.present? %>
+          <%= tag.p team.league.name, class: "team-league text-gray-600" %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= tag.div class: "lg:w-2/3" do %>
+    <%= tag.div class: "division-guess-game", data: { division_guess_target: "gameContainer" } do %>
+      <%= tag.div class: "grid grid-cols-2 gap-4" do %>
+        <% choices.each do |division| %>
+          <%= tag.button class: "division-choice #{division == correct_division ? 'correct-choice' : 'incorrect-choice'} flex flex-col items-center justify-center w-full h-32 p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border-2 border-transparent hover:border-blue-300",
+              data: {
+                division_guess_target: "divisionChoice",
+                division_id: division.id,
+                correct: (division == correct_division).to_s,
+                action: "click->division-guess#checkAnswer"
+              } do %>
+            <%= tag.div class: "flex flex-col items-center" do %>
+              <%= tag.div class: "division-icon text-blue-600 mb-2" do %>
+                <i class="fas fa-shield-alt text-xl"></i>
+              <% end %>
+              <%= tag.span division.name, class: "division-name text-lg font-medium text-center" %>
+              <% if division.conference %>
+                <%= tag.span division.conference.name, class: "division-conference text-sm text-gray-500 mt-1" %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <%= tag.div class: "controls flex justify-between items-center mt-6" do %>
+      <%= tag.div class: "progress-indicator" do %>
+        <%= tag.span "Progress: #{tag.span("0", id: "progress_counter", class: "progress-counter", data: { division_guess_target: "progressCounter" })} correct".html_safe, class: "progress-text text-gray-600" %>
+      <% end %>
+
+      <%= tag.button class: "pause-button flex items-center bg-gray-200 hover:bg-gray-300 font-medium py-2 px-4 rounded-lg transition-colors duration-200",
+          data: {
+            division_guess_target: "pauseButton",
+            action: "click->division-guess#togglePause"
+          } do %>
+        <%= tag.i class: "fa-solid fa-pause mr-2" %>
+        <%= tag.span "Pause", data: { division_guess_target: "pauseButtonText" } %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
