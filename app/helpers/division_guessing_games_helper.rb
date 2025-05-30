@@ -47,8 +47,8 @@ module DivisionGuessingGamesHelper
   end
   
   # Render team card with logo and information
-  def team_card(team)
-    tag.div class: "team-card bg-white rounded-lg shadow-md p-6" do
+  def team_card(team, data_attributes = {})
+    tag.div class: "team-card bg-white rounded-lg shadow-md p-6", data: data_attributes do
       team_logo_container(team) + team_info(team)
     end
   end
@@ -78,14 +78,18 @@ module DivisionGuessingGamesHelper
   def division_choices_grid(choices, correct_division)
     tag.div class: "grid grid-cols-2 gap-4" do
       choices.map do |division|
-        tag.button class: "division-choice #{division == correct_division ? 'correct-choice' : 'incorrect-choice'} flex flex-col items-center justify-center w-full h-32 p-4 rounded-lg shadow-md transition-colors duration-200",
+        tag.button class: "division-choice #{division == correct_division ? 'correct-choice' : 'incorrect-choice'} flex flex-col items-center justify-center w-full h-32 p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border-2 border-transparent hover:border-blue-300",
                    data: {
                      division_guess_target: "divisionChoice",
                      division_id: division.id,
                      correct: (division == correct_division).to_s,
                      action: "click->division-guess#checkAnswer"
                    } do
-          tag.span division.name, class: "division-name text-lg font-medium text-center"
+          tag.div(class: "flex flex-col items-center") do
+            tag.div class: "division-icon text-blue-600 mb-2" do
+              tag.i class: "fas fa-shield-alt text-xl"
+            end
+          end + tag.span(division.name, class: "division-name text-lg font-medium text-center")
         end
       end.join.html_safe
     end
