@@ -1,25 +1,27 @@
-<%= tag.div class: "flex flex-col lg:flex-row gap-8" do %>
-  <%= tag.div class: "lg:w-1/3" do %>
-    <%= team_card(team, { team_id: team.id, team_division_id: correct_division.id, division_guess_target: "currentTeamCardDisplay" }) %>
-  <% end %>
-
-  <%= tag.div class: "lg:w-2/3" do %>
-    <%= tag.div class: "division-guess-game", data: { division_guess_target: "gameContainer" } do %>
-      <%= division_choices_grid(choices, correct_division) %>
+<%= tag.div id: "division_game_frame", data: { turbo_frame: "division_game" } do %>
+  <%= tag.div class: "flex flex-col lg:flex-row gap-8" do %>
+    <%= tag.div class: "lg:w-1/3" do %>
+      <%= team_card(team, { team_id: team.id, team_division_id: correct_division.id, division_guess_target: "currentTeamCardDisplay" }) %>
     <% end %>
 
-    <%= tag.div class: "controls flex justify-between items-center mt-6" do %>
-      <%= tag.div class: "progress-indicator" do %>
-        <%= tag.span "Progress: #{tag.span("0", id: "progress_counter", class: "progress-counter", data: { division_guess_target: "progressCounter" })} correct".html_safe, class: "progress-text text-gray-600" %>
+    <%= tag.div class: "lg:w-2/3" do %>
+      <%= tag.div class: "division-guess-game", data: { division_guess_target: "gameContainer" } do %>
+        <%= division_choices_grid(choices, correct_division) %>
       <% end %>
 
-      <%= tag.button class: "pause-button flex items-center bg-gray-200 hover:bg-gray-300 font-medium py-2 px-4 rounded-lg transition-colors duration-200",
-          data: {
-            division_guess_target: "pauseButton",
-            action: "click->division-guess#togglePause"
-          } do %>
-        <%= tag.i class: "fa-solid fa-pause mr-2" %>
-        <%= tag.span "Pause", data: { division_guess_target: "pauseButtonText" } %>
+      <%= tag.div class: "controls flex justify-between items-center mt-6" do %>
+        <%= tag.div class: "progress-indicator" do %>
+          <%= tag.span "Progress: #{tag.span("0", id: "progress_counter", class: "progress-counter", data: { division_guess_target: "progressCounter" })} correct".html_safe, class: "progress-text text-gray-600" %>
+        <% end %>
+
+        <%= tag.button class: "pause-button flex items-center bg-gray-200 hover:bg-gray-300 font-medium py-2 px-4 rounded-lg transition-colors duration-200",
+            data: {
+              division_guess_target: "pauseButton",
+              action: "click->division-guess#togglePause"
+            } do %>
+          <%= tag.i class: "fa-solid fa-pause mr-2" %>
+          <%= tag.span "Pause", data: { division_guess_target: "pauseButtonText" } %>
+        <% end %>
       <% end %>
     <% end %>
   <% end %>
