@@ -44,9 +44,9 @@
     <% end %>
   <% end %>
 
-  <%= tag.div class: "attempts-container mt-8", data: { division_guess_target: "attemptsContainer" } do %>
+  <%= tag.div id: "division_attempts_container", class: "attempts-container mt-8", data: { division_guess_target: "attemptsContainer" } do %>
     <%= tag.h2 "Recent Attempts", class: "attempts-heading text-xl font-bold mb-4 text-center" %>
-    <%= tag.div class: "attempts-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4", data: { division_guess_target: "attemptsGrid" } %>
+    <%= tag.div id: "division_attempts_grid", class: "attempts-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4", data: { division_guess_target: "attemptsGrid" } %>
   <% end %>
 
   <%= tag.template id: "attempt-template" do %>

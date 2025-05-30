@@ -51,7 +51,7 @@ class DivisionGuessingGamesController < ApplicationController
 
     # Create GameAttempt record
     # Note: `options_presented` and `time_elapsed_ms` are required by the GameAttempt model's schema
-    game_attempt = current_ace.game_attempts.build(
+    @game_attempt = current_ace.game_attempts.build(
       subject_entity: team,
       target_entity: correct_division,
       chosen_entity: guessed_division,
@@ -62,7 +62,7 @@ class DivisionGuessingGamesController < ApplicationController
       time_elapsed_ms: time_elapsed_ms
     )
 
-    if game_attempt.save
+    if @game_attempt.save
       if is_correct
         flash[:notice] = "Correct! Well done."
       else
@@ -72,7 +72,12 @@ class DivisionGuessingGamesController < ApplicationController
       flash[:error] = "Could not save your attempt: #{game_attempt.errors.full_messages.join(', ')}"
     end
 
-    redirect_to new_division_game_path
+    setup_game
+
+    respond_to do |format|
+      format.html { redirect_to new_division_game_path }
+      format.turbo_stream
+    end
   end
 
   private

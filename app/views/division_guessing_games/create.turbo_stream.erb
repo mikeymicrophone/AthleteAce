@@ -1,0 +1,9 @@
+<%= turbo_stream.replace "division_game" do %>
+  <%= render partial: "division_guessing_games/game_content", locals: { team: @team, correct_division: @correct_division, choices: @choices } %>
+<% end %>
+
+<% if @game_attempt && current_ace %>
+  <%= turbo_stream.prepend "division_attempts_grid" do %>
+    <%= render_division_attempt_card(@game_attempt) %>
+  <% end %>
+<% end %>
