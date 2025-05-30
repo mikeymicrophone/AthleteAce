@@ -46,6 +46,51 @@ module DivisionGuessingGamesHelper
     end
   end
   
+  # Render team card with logo and information
+  def team_card(team)
+    tag.div class: "team-card bg-white rounded-lg shadow-md p-6" do
+      team_logo_container(team) + team_info(team)
+    end
+  end
+
+  # Render team logo container
+  def team_logo_container(team)
+    tag.div class: "team-logo-container flex justify-center items-center h-32 mb-4" do
+      if team.logo_url.present?
+        tag.img src: team.logo_url, alt: "#{team.name} logo", class: "max-h-32 max-w-full object-contain"
+      else
+        tag.div class: "h-32 w-32 flex items-center justify-center bg-gray-200 rounded-full" do
+          tag.i class: "fas fa-shield-alt text-6xl text-gray-400"
+        end
+      end
+    end
+  end
+
+  # Render team information
+  def team_info(team)
+    tag.div class: "team-info text-center" do
+      tag.h2(team.name, class: "team-name text-2xl font-bold mb-2") +
+        (team.league.present? ? tag.p(team.league.name, class: "team-league text-gray-600") : "")
+    end
+  end
+
+  # Render division choices grid
+  def division_choices_grid(choices, correct_division)
+    tag.div class: "grid grid-cols-2 gap-4" do
+      choices.map do |division|
+        tag.button class: "division-choice #{division == correct_division ? 'correct-choice' : 'incorrect-choice'} flex flex-col items-center justify-center w-full h-32 p-4 rounded-lg shadow-md transition-colors duration-200",
+                   data: {
+                     division_guess_target: "divisionChoice",
+                     division_id: division.id,
+                     correct: (division == correct_division).to_s,
+                     action: "click->division-guess#checkAnswer"
+                   } do
+          tag.span division.name, class: "division-name text-lg font-medium text-center"
+        end
+      end.join.html_safe
+    end
+  end
+  
   # Render a recent attempts section
   def recent_division_attempts(ace, limit = 5)
     attempts = ace.game_attempts.where(game_type: "guess_the_division").order(created_at: :desc).limit(limit)
