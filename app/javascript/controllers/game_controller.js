@@ -189,6 +189,11 @@ export default class extends Controller {
       button.classList.add("incorrect-choice", "bg-red-500", "text-white")
     }
     
+    // Add to recent attempts list
+    if (this.hasRecentAttemptsListTarget) {
+      this.addRecentAttempt(chosenName, false)
+    }
+    
     // Find and highlight the correct answer after a delay
     setTimeout(() => {
       let correctButton, correctName
@@ -378,54 +383,143 @@ export default class extends Controller {
     const gameTypeString = this.gameTypeValue === "team_match" 
       ? "player_team_match" 
       : "guess_the_division"
-      
+    
+    // Handle attempts grid if it exists
+    const loadGridAttempts = (data) => {
+      if (data && data.length > 0 && this.hasAttemptsGridTarget) {
+        this.attemptsContainerTarget.classList.remove("hidden")
+        data.forEach(attempt => this.addAttemptToGrid(attempt))
+      }
+    }
+    
+    // Handle recent attempts list if it exists
+    const loadRecentAttemptsList = (data) => {
+      if (this.hasRecentAttemptsListTarget) {
+        console.log(`[${this.gameTypeValue}] Populating recent attempts list with ${data.length} attempts`)
+        
+        // Clear existing attempts
+        const existingCards = this.recentAttemptsListTarget.querySelectorAll('.attempt-card:not(#attempt-template .attempt-card)')
+        existingCards.forEach(card => card.remove())
+        
+        // Remove the placeholder if it exists
+        const placeholder = this.recentAttemptsListTarget.querySelector('.no-attempts-message')
+        if (placeholder) {
+          placeholder.remove()
+        }
+        
+        // If no attempts, show a message
+        if (data.length === 0) {
+          const noAttemptsMsg = document.createElement('div')
+          noAttemptsMsg.className = 'text-gray-500 italic text-sm no-attempts-message'
+          noAttemptsMsg.textContent = 'No guesses yet'
+          this.recentAttemptsListTarget.appendChild(noAttemptsMsg)
+          return
+        }
+        
+        // Process up to 5 most recent attempts in reverse order (newest first)
+        const recentAttempts = data.slice(-5).reverse()
+        recentAttempts.forEach(attempt => {
+          const isCorrect = attempt.correct
+          let entityName = ''
+          
+          if (this.gameTypeValue === "team_match") {
+            entityName = attempt.player_name || 'Unknown Player'
+          } else {
+            entityName = attempt.team_name || 'Unknown Team'
+          }
+          
+          this.addRecentAttempt(entityName, isCorrect)
+        })
+      }
+    }
+    
+    // Fetch attempts from the server
     fetch(`/game_attempts.json?game_type=${gameTypeString}&limit=10`)
       .then(response => response.json())
       .then(data => {
-        if (data && data.length > 0 && this.hasAttemptsGridTarget) {
-          this.attemptsContainerTarget.classList.remove("hidden")
-          data.forEach(attempt => this.addAttemptToGrid(attempt))
+        // Update both interfaces if they exist
+        loadGridAttempts(data)
+        loadRecentAttemptsList(data)
+      })
+      .catch(error => {
+        console.error(`Error loading recent ${this.gameTypeValue} attempts:`, error)
+        
+        // Handle error in recent attempts list if it exists
+        if (this.hasRecentAttemptsListTarget) {
+          // Clear existing attempts
+          const existingCards = this.recentAttemptsListTarget.querySelectorAll('.attempt-card:not(#attempt-template .attempt-card)')
+          existingCards.forEach(card => card.remove())
+          
+          // Show error message
+          const errorMsg = document.createElement('div')
+          errorMsg.className = 'text-red-500 italic text-sm'
+          errorMsg.textContent = 'Error loading attempts'
+          this.recentAttemptsListTarget.appendChild(errorMsg)
         }
       })
-      .catch(error => console.error(`Error loading recent ${this.gameTypeValue} attempts:`, error))
   }
   
   addRecentAttempt(entityName, isCorrect) {
     console.log(`[${this.gameTypeValue}] Adding recent attempt: ${entityName}, correct: ${isCorrect}`)
     
+    // Get the template
+    const templateElement = document.getElementById('attempt-template')
+    if (!templateElement) {
+      console.error("Attempt template not found")
+      return
+    }
+    
+    // Clone the template
+    const template = templateElement.querySelector('.attempt-card').cloneNode(true)
+    
     // Clear the "No guesses yet" placeholder if it exists
-    const placeholder = this.recentAttemptsListTarget.querySelector(".text-gray-500.italic")
+    const placeholder = this.recentAttemptsListTarget.querySelector(".no-attempts-message")
     if (placeholder) {
       placeholder.remove()
     }
     
-    // Create a new attempt item using the helper method
-    const itemHTML = this.createAttemptItemHTML(entityName, isCorrect)
+    // Set up entity part
+    const entityPart = template.querySelector('.attempt-entity-part')
+    const entityNameElement = entityPart.querySelector('.attempt-entity-name')
+    const entityDetail = entityPart.querySelector('.attempt-entity-detail')
     
-    // Insert the new attempt at the top of the list
-    this.recentAttemptsListTarget.insertAdjacentHTML('afterbegin', itemHTML)
+    // Set the entity info
+    entityNameElement.textContent = entityName || 'Unknown'
+    entityDetail.textContent = this.gameTypeValue === "team_match" ? 'Player' : 'Team'
+    
+    // Set up result part
+    const resultIndicator = template.querySelector('.result-indicator')
+    const resultIcon = template.querySelector('.result-icon')
+    
+    resultIndicator.textContent = isCorrect ? 'Correct' : 'Incorrect'
+    
+    // Apply styles based on result using semantic class names
+    if (isCorrect) {
+      template.classList.add('correct-attempt')
+      resultIndicator.classList.add('correct-result')
+      resultIcon.classList.add('fa-check', 'text-green-600')
+    } else {
+      template.classList.add('incorrect-attempt')
+      resultIndicator.classList.add('incorrect-result')
+      resultIcon.classList.add('fa-xmark', 'text-red-600')
+    }
+    
+    // Add a timestamp data attribute for sorting/reference
+    template.dataset.timestamp = Date.now()
+    
+    // Remove the hidden class
+    template.classList.remove('hidden')
+    
+    // Prepend to list (newest first)
+    this.recentAttemptsListTarget.prepend(template)
     
     // Limit the list to 5 attempts
-    const attempts = this.recentAttemptsListTarget.children
+    const attempts = this.recentAttemptsListTarget.querySelectorAll('.attempt-card:not(#attempt-template .attempt-card)')
     if (attempts.length > 5) {
-      attempts[5].remove()
+      for (let i = 5; i < attempts.length; i++) {
+        attempts[i].remove()
+      }
     }
-  }
-  
-  createAttemptItemHTML(entityName, isCorrect) {
-    const resultClass = isCorrect ? "text-green-600" : "text-red-600"
-    const iconClass = isCorrect ? "fa-check text-green-600" : "fa-xmark text-red-600"
-    const resultText = isCorrect ? "Correct" : "Incorrect"
-    
-    return `
-      <div class="attempt-item flex items-center justify-between p-2 border-b border-gray-100">
-        <div class="flex items-center">
-          <i class="fas ${iconClass} mr-2"></i>
-          <span class="font-medium">${entityName || 'Unknown'}</span>
-        </div>
-        <div class="text-sm ${resultClass} font-semibold">${resultText}</div>
-      </div>
-    `
   }
   
   addAttemptToGrid(attempt) {

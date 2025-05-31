@@ -2,17 +2,21 @@
 <%= unified_game_container "division_guess" do %>
   <div class="flex flex-col lg:flex-row gap-8">
     <div class="lg:w-1/3">
-      <%= game_subject_card subject, "division_guess" %>
-      <%= game_recent_attempts_section %>
+      <%= game_subject_card(subject, "division_guess") %>
     </div>
 
     <div class="lg:w-2/3">
       <div class="division-guess-container">
-        <%= game_choices_grid choices, correct_answer, "division_guess" %>
+        <%= game_choices_grid(choices, correct_answer, "division_guess") %>
         <%= game_progress_display %>  
       </div>
     </div>
   </div>
 <% end %>
 
-<%= game_correct_answer_overlay "division_guess" %>
+<%# Recent attempts section placed outside Turbo Stream update area %>
+<div id="division-guess-attempts" class="recent-attempts-container mt-6">
+  <%= game_recent_attempts_section %>
+</div>
+
+<%= game_correct_answer_overlay("division_guess") %>

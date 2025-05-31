@@ -64,19 +64,12 @@ class DivisionGameSetupService
 
   private
 
-  # Selects a random team that has an active division, conference, and league.
   def select_team_for_game
-    # Ensures team has an active division, that division has a conference,
-    # and the team itself belongs to a league.
-    # This query will find teams that have: an active membership -> a division -> a conference,
-    # AND the team itself has a league_id.
     Team.joins(division: :conference).joins(:league).distinct.sample
   end
 
-  # Generates a list of division choices including the correct division and distractors.
   def generate_choices(team, correct_division)
     team_league = team.league
-    # select_team_for_game should ensure team_league and team.conference are present.
 
     choice_pool_scope = case difficulty
                         when :conference
@@ -105,25 +98,13 @@ class DivisionGameSetupService
 
     return nil unless choice_pool_scope
 
-    # Ensure correct_division is not included in distractors initial pool
     distractor_pool = choice_pool_scope.where.not(id: correct_division.id)
-
-    # We need num_choices - 1 distractors
     num_distractors_to_fetch = @num_choices - 1
     distractors = distractor_pool.sample(num_distractors_to_fetch)
-
-    # If we couldn't fetch enough distractors (e.g., conference only has 1-2 other divisions)
-    # this will result in fewer than num_choices options. The call method checks this.
     all_choices = ([correct_division] + distractors).uniq
     
-    # The `call` method checks if choices.length < @num_choices.
-    # We just need to ensure we have at least one choice (the correct one).
-    # If all_choices is empty (which shouldn't happen if correct_division is always added and valid),
-    # or only contains nil (also shouldn't happen), returning nil is appropriate.
-    # Ensure correct_division is part of the choices if it's valid.
     return nil unless correct_division
     final_choices = ([correct_division] + distractors).compact.uniq
-    
-    return final_choices.any? ? final_choices : nil
+    final_choices.any? ? final_choices : nil
   end
 end

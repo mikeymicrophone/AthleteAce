@@ -195,28 +195,49 @@ module GameHelper
     tag.span("Progress: #{count} correct".html_safe, class: "text-gray-600")
   end
   
-  # Renders a section showing recent guesses
+  # Renders a section showing recent guesses with template for dynamic updates
   def game_recent_attempts_section
-    tag.div(class: "recent-attempts mt-6 bg-white rounded-lg shadow-md p-4") do
+    tag.div(class: "recent-attempts mt-6 bg-white rounded-lg shadow-md p-4", id: "recent-attempts-container") do
       tag.h3("Recent Guesses", class: "text-lg font-bold mb-2") +
-      tag.div(class: "attempts-list space-y-2", data: { game_target: "recentAttemptsList" }) do
-        tag.div("No guesses yet", class: "text-gray-500 italic text-sm")
-      end
+      tag.div(class: "attempts-list space-y-2", id: "attempts-list", data: { game_target: "recentAttemptsList" }) do
+        tag.div("No guesses yet", class: "text-gray-500 italic text-sm no-attempts-message")
+      end +
+      # Include the hidden template that will be cloned by JavaScript
+      render("shared/attempt_template")
+    end
+  end
+  
+  # Creates the CSS classes for result status indicators
+  def attempt_result_classes(is_correct)
+    if is_correct
+      {
+        card: "border-green-500 bg-green-50",
+        indicator: "text-green-600",
+        icon: "fa-check text-green-600",
+        text: "Correct"
+      }
+    else
+      {
+        card: "border-red-500 bg-red-50",
+        indicator: "text-red-600",
+        icon: "fa-xmark text-red-600",
+        text: "Incorrect"
+      }
     end
   end
   
   # Renders an individual recent attempt item
-  def game_attempt_item(entity_name, result, game_type)
-    result_class = result ? "text-green-600" : "text-red-600"
-    icon_class = result ? "fa-check text-green-600" : "fa-xmark text-red-600"
+  def game_attempt_item(entity_name, result, game_type, additional_data = {})
+    classes = attempt_result_classes(result)
+    entity_type = game_type == "team_match" ? "Player" : "Team"
     
-    tag.div(class: "attempt-item flex items-center justify-between p-2 border-b border-gray-100") do
+    tag.div(class: "attempt-item flex items-center justify-between p-2 border-b border-gray-100 #{classes[:card]}") do
       tag.div(class: "flex items-center") do
-        tag.i(class: "fas #{icon_class} mr-2") +
+        tag.i(class: "fas #{classes[:icon]} mr-2") +
         tag.span(entity_name, class: "font-medium")
       end +
-      tag.div(class: "text-sm #{result_class} font-semibold") do
-        result ? "Correct" : "Incorrect"
+      tag.div(class: "text-sm #{classes[:indicator]} font-semibold") do
+        classes[:text]
       end
     end
   end
