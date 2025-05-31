@@ -27,60 +27,69 @@ module GameHelper
     end
   end
   
-  # Renders a shared choices grid for both game types
+  # Renders a grid of choices with appropriate data attributes
   def game_choices_grid(choices, correct_answer, game_type, options = {})
-    columns = options[:columns] || (choices.size <= 3 ? choices.size : 2)
-    choice_sizes = choices.size
-    
-    grid_classes = "choices-grid grid gap-4 mt-4"
-    grid_classes += " grid-cols-#{columns} md:grid-cols-#{columns}"
+    columns = options[:columns] || (choices.size <= 3 ? choices.size : (choices.size >= 6 ? 3 : 2))
+    grid_classes = "choices-grid grid grid-cols-1 sm:grid-cols-#{columns} gap-4 mb-6"
     
     tag.div class: grid_classes do
-      choices.map do |choice|
-        game_choice_item(choice, correct_answer, game_type)
-      end.join.html_safe
+      raw(choices.map { |choice| 
+        game_choice_item(choice, correct_answer, game_type) 
+      }.join)
     end
   end
   
-  # Renders an individual game choice (team or division)
+  # Renders a single choice item button with appropriate data attributes
   def game_choice_item(choice, correct_answer, game_type)
-    is_correct = choice.id == correct_answer.id
+    is_correct = (choice.id == correct_answer.id)
+    choice_classes = "choice-item p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col items-center"
     
-    data_attributes = {
-      game_target: "choiceItem",
+    data_attrs = {
       action: "click->game#checkAnswer",
-      answer_id: choice.id,
-      correct: is_correct.to_s
+      game_target: "choiceItem"
     }
     
-    # Using CSS classes to create consistent styling with meaningful names
-    choice_type = game_type == "team_match" ? "team" : "division"
+    # Add game-specific data attributes
+    if game_type == "team_match"
+      data_attrs[:team_id] = choice.id
+      data_attrs[:correct] = is_correct.to_s
+    else
+      data_attrs[:division_id] = choice.id
+      data_attrs[:correct] = is_correct.to_s
+    end
     
-    # Base classes shared between both game types
-    base_classes = "p-3 border rounded-lg flex items-center justify-between hover:bg-gray-100 transition-colors"
-    item_classes = "#{choice_type}-choice #{base_classes} w-full"
-    
-    tag.button class: item_classes, type: "button", data: data_attributes do
-      render_choice_content choice, game_type
+    button_tag type: "button", class: choice_classes, data: data_attrs do
+      render_choice_content(choice, game_type)
     end
   end
   
-  # Renders the content of a choice (team or division)
+  # Renders the content inside a choice button
   def render_choice_content(choice, game_type)
-    entity_type = game_type == "team_match" ? "team" : "division"
-    icon = game_type == "team_match" ? "shield-alt" : "sitemap"
-    
-    # Left side with logo and name
-    left_content = if choice.logo_url.present?
-      tag.img(src: choice.logo_url, alt: "#{choice.name} Logo", class: "w-8 h-8 mr-2 object-contain")
+    if game_type == "team_match"
+      entity_name_class = "team-name"
+      entity_image_class = "team-logo"
     else
-      tag.div class: "w-8 h-8 mr-2 flex items-center justify-center bg-gray-200 rounded-full" do
-        tag.i class: "fas fa-#{icon} text-gray-500"
+      entity_name_class = "division-name"
+      entity_image_class = "division-logo"
+    end
+    
+    content = ""
+    
+    # Image part
+    content += tag.div(class: "mb-2") do
+      if choice.logo_url.present?
+        tag.img src: choice.logo_url, alt: "#{choice.name} Logo", class: "w-16 h-16 object-contain #{entity_image_class}"
+      else
+        tag.div(class: "w-16 h-16 flex items-center justify-center bg-gray-200 rounded-full") do
+          tag.i(class: "fas fa-shield-alt text-3xl text-gray-400")
+        end
       end
     end
     
-    # Full content with name
-    left_content + tag.span(choice.name, class: "#{entity_type}-name font-medium")
+    # Name part
+    content += tag.div(choice.name, class: "text-center font-medium #{entity_name_class}")
+    
+    content.html_safe
   end
   
   # Renders the correct answer overlay that appears after selecting an answer

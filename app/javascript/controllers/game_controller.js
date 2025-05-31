@@ -77,14 +77,15 @@ export default class extends Controller {
     const button = event.currentTarget
     let chosenId, isCorrect, chosenName
     
+    // Get correct status consistently from data-correct attribute
+    isCorrect = button.dataset.correct === "true"
+    
     // Extract data based on game type
     if (this.gameTypeValue === "team_match") {
       chosenId = parseInt(button.dataset.teamId)
-      isCorrect = button.dataset.correct === "true"
       chosenName = button.querySelector(".team-name")?.textContent
     } else if (this.gameTypeValue === "division_guess") {
       chosenId = parseInt(button.dataset.divisionId)
-      isCorrect = chosenId === this.correctAnswerIdValue
       chosenName = button.querySelector(".division-name")?.textContent
     }
     
@@ -159,16 +160,22 @@ export default class extends Controller {
     setTimeout(() => {
       let correctButton, correctName
       
+      // Find the correct button using the correct="true" data attribute for both game types
+      correctButton = this.choiceItemTargets.find(choice => choice.dataset.correct === "true")
+      
+      if (!correctButton) {
+        console.error(`[${this.gameTypeValue}] Could not find the correct button`)
+        return // Early return to prevent errors
+      }
+      
+      // Apply styling based on game type
       if (this.gameTypeValue === "team_match") {
-        correctButton = this.choiceItemTargets.find(choice => choice.dataset.correct === "true")
         correctButton.classList.add("correct-answer")
       } else {
-        correctButton = this.choiceItemTargets.find(choice => 
-          parseInt(choice.dataset.divisionId) === this.correctAnswerIdValue
-        )
         correctButton.classList.add("bg-green-500", "text-white")
       }
       
+      // Get the name from the correct element
       correctName = this.gameTypeValue === "team_match" 
         ? correctButton.querySelector(".team-name")?.textContent
         : correctButton.querySelector(".division-name")?.textContent
