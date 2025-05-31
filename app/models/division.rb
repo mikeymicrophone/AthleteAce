@@ -5,10 +5,13 @@ class Division < ApplicationRecord
   has_many :ratings, as: :target, dependent: :destroy
   
   validates :name, presence: true
-  validates :abbreviation, presence: true
   
   def display_name
-    "#{name} (#{abbreviation})"
+    if abbreviation.present?
+      "#{name} (#{abbreviation})"
+    else
+      name
+    end
   end
   
   # Rating methods
