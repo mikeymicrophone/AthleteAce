@@ -3,25 +3,25 @@ module GameHelper
   def unified_game_container(game_type, options = {}, &block)
     title = options[:title] || (game_type == "team_match" ? "Who does this player play for?" : "Which division does this team belong to?")
     
-    tag.div(class: "game-container p-4 bg-white rounded-lg shadow-md") do
-      tag.div(class: "game-header mb-4") do
-        tag.h2 title, class: "text-xl font-bold text-center text-gray-800"
+    tag.div(class: "game-container") do
+      tag.div(class: "game-header") do
+        tag.h2 title, class: "game-title"
       end + capture(&block)
     end
   end
   
   # Renders a standardized progress display
   def game_progress_display(correct_count = 0)
-    tag.div class: "flex items-center justify-between my-3" do
-      tag.div(class: "text-sm font-medium") do
+    tag.div class: "game-progress" do
+      tag.div(class: "progress-text") do
         "Correct: " + 
-        tag.span(correct_count.to_s, class: "font-bold", data: { game_target: "progressCounter" })
+        tag.span(correct_count.to_s, class: "progress-count", data: { game_target: "progressCounter" })
       end +
-      tag.div(class: "flex items-center") do
-        tag.button(type: "button", class: "pause-button px-3 py-1 text-sm rounded-md flex items-center", 
+      tag.div(class: "progress-controls") do
+        tag.button(type: "button", class: "pause-button", 
                   data: { game_target: "pauseButton", action: "click->game#togglePause" }) do
-          tag.i("", class: "fas fa-pause mr-1") +
-          tag.span("Pause", data: { game_target: "pauseButtonText" })
+          tag.i("", class: "fas fa-pause pause-icon") +
+          tag.span("Pause", class: "pause-text", data: { game_target: "pauseButtonText" })
         end
       end
     end
@@ -30,7 +30,7 @@ module GameHelper
   # Renders a grid of choices with appropriate data attributes
   def game_choices_grid(choices, correct_answer, game_type, options = {})
     columns = options[:columns] || (choices.size <= 3 ? choices.size : (choices.size >= 6 ? 3 : 2))
-    grid_classes = "choices-grid grid grid-cols-1 sm:grid-cols-#{columns} gap-4 mb-6"
+    grid_classes = "choices-grid choices-grid-#{columns}"
     
     tag.div class: grid_classes do
       raw(choices.map { |choice| 
@@ -42,7 +42,7 @@ module GameHelper
   # Renders a single choice item button with appropriate data attributes
   def game_choice_item(choice, correct_answer, game_type)
     is_correct = (choice.id == correct_answer.id)
-    choice_classes = "choice-item p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col items-center"
+    choice_classes = "choice-item"
     
     data_attrs = {
       action: "click->game#checkAnswer",
@@ -76,40 +76,32 @@ module GameHelper
     content = ""
     
     # Image part
-    content += tag.div(class: "mb-2") do
+    content += tag.div(class: "choice-image-container") do
       if choice.logo_url.present?
-        tag.img src: choice.logo_url, alt: "#{choice.name} Logo", class: "w-16 h-16 object-contain #{entity_image_class}"
+        tag.img src: choice.logo_url, alt: "#{choice.name} Logo", class: "choice-image #{entity_image_class}"
       else
-        tag.div(class: "w-16 h-16 flex items-center justify-center bg-gray-200 rounded-full") do
-          tag.i(class: "fas fa-shield-alt text-3xl text-gray-400")
+        tag.div(class: "choice-image-placeholder") do
+          tag.i(class: "fas fa-shield-alt choice-placeholder-icon")
         end
       end
     end
     
     # Name part
-    content += tag.div(choice.name, class: "text-center font-medium #{entity_name_class}")
+    content += tag.div(choice.name, class: "choice-name #{entity_name_class}")
     
     content.html_safe
   end
   
   # Renders the answer overlay that appears after selecting an answer
   def game_correct_answer_overlay(game_type)
-    # Common overlay classes with transition properties
-    base_classes = "correct-answer-overlay fixed inset-0 flex items-center justify-center z-50 pointer-events-none opacity-0 transition-opacity duration-300 ease-in-out backdrop-blur-sm"
+    # Base overlay with game-specific class
+    overlay_classes = "correct-answer-overlay #{game_type == 'team_match' ? 'team-match-overlay' : 'division-overlay'}"
     
-    # Add game-specific styling
-    overlay_container_classes = "overlay-content p-6 bg-white rounded-lg shadow-xl text-center max-w-md transform transition-all duration-300 ease-in-out border-4"
-    
-    # For team match game, add specific styling
-    if game_type == "team_match"
-      overlay_container_classes += " border-blue-500 scale-100 hover:scale-105"
-    end
-    
-    tag.div(class: base_classes, data: { game_target: "overlayDisplay" }) do
-      tag.div(class: overlay_container_classes) do
+    tag.div(class: overlay_classes, data: { game_target: "overlayDisplay" }) do
+      tag.div(class: "overlay-content") do
         # Title will be updated by JavaScript based on whether answer is correct or incorrect
-        tag.h3("", class: "mb-3 text-2xl font-bold result-title") +
-        tag.div(data: { game_target: "overlayText" }, class: "text-xl font-bold text-gray-800 px-4")
+        tag.h3("", class: "result-title") +
+        tag.div(data: { game_target: "overlayText" }, class: "overlay-text")
       end
     end
   end
@@ -118,15 +110,15 @@ module GameHelper
   def game_subject_card(subject, game_type, additional_data = {})
     data_attrs = { game_target: "subjectCardDisplay" }.merge(additional_data)
     
-    tag.div(class: "subject-card p-4 bg-white rounded-lg shadow-md", data: data_attrs) do
+    tag.div(class: "subject-card", data: data_attrs) do
       # Question text based on game type
       question = if game_type == "team_match"
         "Who does #{subject.full_name || subject.name} play for?"
       else
-        "Which division does #{subject.name} belong to?"
+        "Which division do the #{subject.name} belong to?"
       end
       
-      tag.h3(question, class: "text-lg font-bold mb-4 text-center") +
+      tag.h3(question, class: "subject-question") +
       
       # Card content based on subject type
       if game_type == "team_match"
@@ -143,30 +135,30 @@ module GameHelper
     name = entity_type == :player ? (entity.full_name || entity.name) : entity.name
     subtitle = entity_type == :player ? entity.primary_position&.name : ""
     icon = entity_type == :player ? "user" : "shield-alt"
-    image_class = entity_type == :player ? "object-cover rounded-full" : "object-contain"
+    image_class = entity_type == :player ? "entity-image-player" : "entity-image-team"
     
     # Image container
-    tag.div(class: "flex items-center justify-center mb-4") do
+    tag.div(class: "entity-image-container") do
       if image_url.present?
-        tag.img(src: image_url, alt: name, class: "w-32 h-32 #{image_class}")
+        tag.img(src: image_url, alt: name, class: "entity-image #{image_class}")
       else
-        tag.div(class: "w-32 h-32 flex items-center justify-center bg-gray-200 rounded-full") do
-          tag.i(class: "fas fa-#{icon} text-5xl text-gray-400")
+        tag.div(class: "entity-image-placeholder") do
+          tag.i(class: "fas fa-#{icon} entity-placeholder-icon #{entity_type == :player ? 'player-icon' : 'team-icon'}")
         end
       end
     end +
     
     # Entity name and subtitle
-    tag.h3(name, class: "text-center text-xl font-bold mb-2") +
-    (subtitle.present? ? tag.div(subtitle, class: "text-center text-gray-600") : "")
+    tag.h3(name, class: "entity-name") +
+    (subtitle.present? ? tag.div(subtitle, class: "entity-subtitle") : "")
   end
   
   # Renders a container for recent attempts
   def game_attempts_container(game_type)
-    tag.div(class: "attempts-container mt-8 p-4 bg-white rounded-lg shadow-md hidden", 
+    tag.div(class: "attempts-container hidden", 
             data: { game_target: "attemptsContainer" }) do
-      tag.h3("Recent Attempts", class: "text-lg font-bold mb-4 text-center") +
-      tag.div(class: "attempts-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4", 
+      tag.h3("Recent Attempts", class: "attempts-heading") +
+      tag.div(class: "attempts-grid", 
               data: { game_target: "attemptsGrid" }) do
         # Content will be dynamically populated by the controller
         ""
@@ -176,31 +168,31 @@ module GameHelper
   
   # Renders a standardized progress indicator with correct count and pause button
   def game_progress_display(correct_count = 0)
-    tag.div(class: "controls flex justify-between items-center mt-6", data: { game_target: "controls" }) do
+    tag.div(class: "controls", data: { game_target: "controls" }) do
       # Progress counter
       tag.div(progress_counter(correct_count), class: "progress-indicator") +
       
       # Pause button
-      tag.button(class: "pause-button flex items-center bg-gray-200 hover:bg-gray-300 font-medium py-2 px-4 rounded-lg transition-colors duration-200",
+      tag.button(class: "pause-button-main",
                 data: { game_target: "pauseButton", action: "click->game#togglePause" }) do
-        tag.i(class: "fa-solid fa-pause mr-2") +
-        tag.span("Pause", data: { game_target: "pauseButtonText" })
+        tag.i(class: "fa-solid fa-pause pause-button-icon") +
+        tag.span("Pause", class: "pause-button-text", data: { game_target: "pauseButtonText" })
       end
     end
   end
 
   def progress_counter(correct_count = 0)
-    count = tag.span(correct_count.to_s, id: "progress_counter", class: "progress-counter font-bold", 
+    count = tag.span(correct_count.to_s, id: "progress_counter", class: "progress-counter", 
     data: { game_target: "progressCounter" })
-    tag.span("Progress: #{count} correct".html_safe, class: "text-gray-600")
+    tag.span("Progress: #{count} correct".html_safe, class: "progress-label")
   end
   
   # Renders a section showing recent guesses with template for dynamic updates
   def game_recent_attempts_section
-    tag.div(class: "recent-attempts mt-6 bg-white rounded-lg shadow-md p-4", id: "recent-attempts-container") do
-      tag.h3("Recent Guesses", class: "text-lg font-bold mb-2") +
-      tag.div(class: "attempts-list space-y-2", id: "attempts-list", data: { game_target: "recentAttemptsList" }) do
-        tag.div("No guesses yet", class: "text-gray-500 italic text-sm no-attempts-message")
+    tag.div(class: "recent-attempts", id: "recent-attempts-container") do
+      tag.h3("Recent Guesses", class: "recent-attempts-heading") +
+      tag.div(class: "attempts-list", id: "attempts-list", data: { game_target: "recentAttemptsList" }) do
+        tag.div("No guesses yet", class: "no-attempts-message")
       end +
       # Include the hidden template that will be cloned by JavaScript
       render("shared/attempt_template")
@@ -211,16 +203,16 @@ module GameHelper
   def attempt_result_classes(is_correct)
     if is_correct
       {
-        card: "border-green-500 bg-green-50",
-        indicator: "text-green-600",
-        icon: "fa-check text-green-600",
+        card: "correct-attempt",
+        indicator: "correct-indicator",
+        icon: "fa-check correct-icon",
         text: "Correct"
       }
     else
       {
-        card: "border-red-500 bg-red-50",
-        indicator: "text-red-600",
-        icon: "fa-xmark text-red-600",
+        card: "incorrect-attempt",
+        indicator: "incorrect-indicator",
+        icon: "fa-xmark incorrect-icon",
         text: "Incorrect"
       }
     end
@@ -231,12 +223,12 @@ module GameHelper
     classes = attempt_result_classes(result)
     entity_type = game_type == "team_match" ? "Player" : "Team"
     
-    tag.div(class: "attempt-item flex items-center justify-between p-2 border-b border-gray-100 #{classes[:card]}") do
-      tag.div(class: "flex items-center") do
-        tag.i(class: "fas #{classes[:icon]} mr-2") +
-        tag.span(entity_name, class: "font-medium")
+    tag.div(class: "attempt-item #{classes[:card]}") do
+      tag.div(class: "attempt-content") do
+        tag.i(class: "fas #{classes[:icon]}") +
+        tag.span(entity_name, class: "attempt-entity-name")
       end +
-      tag.div(class: "text-sm #{classes[:indicator]} font-semibold") do
+      tag.div(class: "attempt-result #{classes[:indicator]}") do
         classes[:text]
       end
     end
