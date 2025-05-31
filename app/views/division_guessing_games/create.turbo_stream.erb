@@ -1,4 +1,4 @@
-<%= turbo_stream.replace "division_game" do %>
+<%= turbo_stream.replace "division_game_frame" do %>
   <%= render partial: "division_guessing_games/game_content", locals: { team: @team, correct_division: @correct_division, choices: @choices } %>
 <% end %>
 
