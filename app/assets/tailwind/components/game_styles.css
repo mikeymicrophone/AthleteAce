@@ -257,3 +257,130 @@
 .no-attempts-message {
   @apply text-gray-500 italic text-sm;
 }
+
+/* Choice states and animations */
+.choice-item {
+  &.correct-choice {
+    @apply bg-green-500 text-white;
+  }
+  
+  &.incorrect-choice {
+    @apply bg-red-500 text-white;
+  }
+  
+  &.correct-answer {
+    @apply bg-green-500 text-white;
+  }
+  
+  &.pulsing {
+    animation: pulse 1s ease-in-out infinite;
+  }
+}
+
+/* Attempt templates and cards */
+.attempt-template {
+  @apply hidden;
+}
+
+.attempt-card {
+  @apply border rounded-md overflow-hidden p-2;
+  
+  &.correct-attempt {
+    @apply border-green-500 bg-green-50;
+  }
+  
+  &.incorrect-attempt {
+    @apply border-red-500 bg-red-50;
+  }
+}
+
+/* Attempt entity parts */
+.attempt-entity-part {
+  @apply mb-2;
+}
+
+.attempt-entity-name {
+  @apply font-medium text-sm;
+}
+
+.attempt-entity-detail {
+  @apply text-xs text-gray-600;
+}
+
+/* Attempt team parts */
+.attempt-team-part {
+  @apply w-full p-2 text-center;
+}
+
+.attempt-team-logo {
+  @apply max-h-16 max-w-full object-contain;
+}
+
+.attempt-team-name {
+  @apply text-sm font-semibold mt-1 truncate w-full;
+}
+
+/* Attempt player parts */
+.attempt-player-part {
+  @apply w-full p-2 text-center border-t;
+}
+
+.attempt-player-photo {
+  @apply max-h-16 max-w-full object-cover rounded-full;
+}
+
+.attempt-player-name {
+  @apply text-sm font-semibold mt-1 truncate w-full;
+}
+
+/* Result indicators */
+.result-indicator {
+  @apply text-sm font-semibold;
+}
+
+.result-icon {
+  @apply mr-2;
+}
+
+.correct-result {
+  @apply text-green-600;
+}
+
+.incorrect-result {
+  @apply text-red-600;
+}
+
+/* Overlay animations and states */
+.overlay-content {
+  &.scale-105 {
+    transform: scale(1.05);
+  }
+  
+  &.scale-100 {
+    transform: scale(1.0);
+  }
+}
+
+/* Pulse animation for correct answers */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Hidden utility */
+.hidden {
+  @apply hidden;
+}
+
+/* Opacity utilities for overlay */
+.opacity-0 {
+  opacity: 0;
+}
+
+.opacity-100 {
+  opacity: 1;
+}
