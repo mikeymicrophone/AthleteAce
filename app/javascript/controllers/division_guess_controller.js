@@ -34,8 +34,26 @@ export default class extends Controller {
     this.loadRecentAttempts()
   }
 
+  disconnect() {
+    console.log("[DG Controller] disconnect() called")
+    if (this.nextQuestionTimer) {
+      clearTimeout(this.nextQuestionTimer)
+    }
+    
+    // Clean up event listener
+    document.removeEventListener("turbo:frame-render", this.handleFrameRender.bind(this))
+  }
+
   checkAnswer(event) {
-    if (this.isPaused || this.isAnimating) return
+    console.log("[DG Controller] checkAnswer() called")
+    if (this.isPaused || this.isAnimating) {
+      console.log("[DG Controller] checkAnswer() - bailing: isPaused or isAnimating is true")
+      return
+    }
+    
+    console.log("[DG Controller] checkAnswer() - proceeding")
+    this.isAnimating = true
+    console.log("[DG Controller] checkAnswer() - isAnimating set to true")
 
     const button = event.currentTarget
     const divisionId = parseInt(button.dataset.divisionId)
@@ -46,64 +64,85 @@ export default class extends Controller {
       choice.disabled = true
     })
 
-    // Show the result
-    if (isCorrect) {
-      button.classList.add("bg-green-500", "text-white")
-      this.correctAnswers++
-      this.progressCounterTarget.textContent = this.correctAnswers
-    } else {
-      button.classList.add("bg-red-500", "text-white")
-      // Highlight the correct answer
-      this.divisionChoiceTargets.find(choice => 
-        parseInt(choice.dataset.divisionId) === this.correctDivisionIdValue
-      ).classList.add("bg-green-500", "text-white")
-    }
-
-    // Send attempt data to server
+    // Send attempt data to server (without expecting next question in response)
     this.sendAttemptData(divisionId, isCorrect)
 
-    // Show the team name overlay
-    this.teamNameTextTarget.textContent = button.querySelector(".division-name").textContent
-    this.teamNameOverlayTarget.classList.remove("opacity-0")
-    this.teamNameOverlayTarget.classList.add("opacity-100")
-
-    // Wait for animation to complete before loading next question
-    setTimeout(() => {
-      this.teamNameOverlayTarget.classList.remove("opacity-100")
-      this.teamNameOverlayTarget.classList.add("opacity-0")
+    if (isCorrect) {
+      console.log("[DG Controller] checkAnswer() - answer IS correct")
+      button.classList.add("bg-green-500", "text-white", "pulsing")
+      this.correctAnswers++
+      this.progressCounterTarget.textContent = this.correctAnswers
       
-      // The next question will be loaded via Turbo Stream in the sendAttemptData method
-      // No need to reload the page
-    }, 1500)
+      // Show the correct division name in overlay
+      this.teamNameTextTarget.textContent = button.querySelector(".division-name").textContent
+      this.teamNameOverlayTarget.classList.remove("opacity-0")
+      this.teamNameOverlayTarget.classList.add("opacity-100")
+      
+      // Set timer to hide overlay and load next question
+      this.nextQuestionTimer = setTimeout(() => {
+        this.teamNameOverlayTarget.classList.remove("opacity-100")
+        this.teamNameOverlayTarget.classList.add("opacity-0")
+        this.loadNextQuestion()
+      }, 1500)
+    } else {
+      console.log("[DG Controller] checkAnswer() - answer IS NOT correct")
+      button.classList.add("bg-red-500", "text-white")
+      
+      // Find and highlight the correct answer
+      const correctButton = this.divisionChoiceTargets.find(choice => 
+        parseInt(choice.dataset.divisionId) === this.correctDivisionIdValue
+      )
+      correctButton.classList.add("bg-green-500", "text-white")
+      
+      // Show the correct division name in overlay after a short delay
+      setTimeout(() => {
+        // Show the correct division name in overlay
+        this.teamNameTextTarget.textContent = correctButton.querySelector(".division-name").textContent
+        this.teamNameOverlayTarget.classList.remove("opacity-0")
+        this.teamNameOverlayTarget.classList.add("opacity-100")
+        
+        // Set timer to hide overlay and load next question
+        this.nextQuestionTimer = setTimeout(() => {
+          this.teamNameOverlayTarget.classList.remove("opacity-100")
+          this.teamNameOverlayTarget.classList.add("opacity-0")
+          this.loadNextQuestion()
+        }, 1500)
+      }, 500)
+    }
   }
 
   async sendAttemptData(guessedDivisionId, isCorrect) {
+    const endTime = Date.now()
+    const timeElapsedMs = endTime - this.startTime
+    
     try {
-      const response = await fetch("/play/guess-the-division", {
+      // Just save the attempt data without expecting a turbo stream for next question
+      const response = await fetch("/game_attempts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "text/vnd.turbo-stream.html",
+          "Accept": "application/json",
           "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content
         },
         body: JSON.stringify({
-          guessed_division_id: guessedDivisionId
+          game_attempt: {
+            game_type: "guess_the_division",
+            subject_entity_id: this.teamIdValue,
+            subject_entity_type: "Team",
+            target_entity_id: this.correctDivisionIdValue,
+            target_entity_type: "Division",
+            chosen_entity_id: guessedDivisionId,
+            chosen_entity_type: "Division",
+            is_correct: isCorrect,
+            time_elapsed_ms: timeElapsedMs
+          }
         })
       })
 
       if (!response.ok) {
         console.error("Failed to save attempt:", await response.text())
       } else {
-        // Process the Turbo Stream response
-        const html = await response.text()
-        const parser = new DOMParser()
-        const doc = parser.parseFromString(html, 'text/html')
-        const streamElements = doc.querySelectorAll('turbo-stream')
-        
-        // Apply each turbo-stream action
-        streamElements.forEach(element => {
-          Turbo.renderStreamMessage(element.outerHTML)
-        })
+        console.log("Game attempt saved successfully.")
       }
     } catch (error) {
       console.error("Error saving attempt:", error)
@@ -189,7 +228,21 @@ export default class extends Controller {
   }
 
   loadNextQuestion() {
-    Turbo.visit(window.location.pathname, { action: "replace" })
+    console.log("[DG Controller] loadNextQuestion() called")
+    this.isAnimating = false
+    console.log("[DG Controller] loadNextQuestion() - isAnimating reset to false")
+    
+    const currentUrl = new URL(window.location.href)
+    
+    // Add a timestamp parameter to force a fresh request
+    currentUrl.searchParams.set('t', Date.now())
+    
+    // Visit the URL but target only the division_game_frame
+    console.log("[DG Controller] Visiting with frame target")
+    Turbo.visit(currentUrl.toString(), { frame: "division_game_frame" })
+    
+    // Reset the timer for the next question
+    this.startTime = Date.now()
   }
 
   togglePause() {

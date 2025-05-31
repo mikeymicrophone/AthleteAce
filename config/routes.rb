@@ -13,6 +13,7 @@ Rails.application.routes.draw do
   # Division Guessing Game
   get "play/guess-the-division" => "division_guessing_games#new", as: :new_division_game
   post "play/guess-the-division" => "division_guessing_games#create", as: :create_division_game_attempt
+  patch "play/guess-the-division" => "division_guessing_games#update", as: :update_division_game
   resources :achievements do
     collection do
       get :target_options
