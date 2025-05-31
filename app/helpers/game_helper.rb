@@ -193,9 +193,9 @@ module GameHelper
       tag.h3("Recent Guesses", class: "recent-attempts-heading") +
       tag.div(class: "attempts-list", id: "attempts-list", data: { game_target: "recentAttemptsList" }) do
         tag.div("No guesses yet", class: "no-attempts-message")
-      end +
+      end #+
       # Include the hidden template that will be cloned by JavaScript
-      render("shared/attempt_template")
+      # render("shared/attempt_template")
     end
   end
   

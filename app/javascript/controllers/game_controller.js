@@ -397,8 +397,8 @@ export default class extends Controller {
       if (this.hasRecentAttemptsListTarget) {
         console.log(`[${this.gameTypeValue}] Populating recent attempts list with ${data.length} attempts`)
         
-        // Clear existing attempts
-        const existingCards = this.recentAttemptsListTarget.querySelectorAll('.attempt-card:not(#attempt-template .attempt-card)')
+        // Clear existing attempts (but not the template)
+        const existingCards = this.recentAttemptsListTarget.querySelectorAll('.attempt-card')
         existingCards.forEach(card => card.remove())
         
         // Remove the placeholder if it exists
@@ -410,7 +410,7 @@ export default class extends Controller {
         // If no attempts, show a message
         if (data.length === 0) {
           const noAttemptsMsg = document.createElement('div')
-          noAttemptsMsg.className = 'text-gray-500 italic text-sm no-attempts-message'
+          noAttemptsMsg.className = 'no-attempts-message'
           noAttemptsMsg.textContent = 'No guesses yet'
           this.recentAttemptsListTarget.appendChild(noAttemptsMsg)
           return
@@ -419,13 +419,13 @@ export default class extends Controller {
         // Process up to 5 most recent attempts in reverse order (newest first)
         const recentAttempts = data.slice(-5).reverse()
         recentAttempts.forEach(attempt => {
-          const isCorrect = attempt.correct
+          const isCorrect = attempt.correct || attempt.is_correct
           let entityName = ''
           
           if (this.gameTypeValue === "team_match") {
-            entityName = attempt.player_name || 'Unknown Player'
+            entityName = attempt.subject_entity?.name || attempt.player_name || 'Unknown Player'
           } else {
-            entityName = attempt.team_name || 'Unknown Team'
+            entityName = attempt.subject_entity?.name || attempt.team_name || 'Unknown Team'
           }
           
           this.addRecentAttempt(entityName, isCorrect)
@@ -469,8 +469,9 @@ export default class extends Controller {
       return
     }
     
-    // Clone the template
-    const template = templateElement.querySelector('.attempt-card').cloneNode(true)
+    // Clone the template content (for <template> tags)
+    const template = templateElement.content.cloneNode(true)
+    const card = template.querySelector('.attempt-card')
     
     // Clear the "No guesses yet" placeholder if it exists
     const placeholder = this.recentAttemptsListTarget.querySelector(".no-attempts-message")
@@ -478,43 +479,53 @@ export default class extends Controller {
       placeholder.remove()
     }
     
-    // Set up entity part
-    const entityPart = template.querySelector('.attempt-entity-part')
-    const entityNameElement = entityPart.querySelector('.attempt-entity-name')
-    const entityDetail = entityPart.querySelector('.attempt-entity-detail')
+    // Set up subject part
+    const subjectImage = card.querySelector('.attempt-subject-image')
+    const subjectName = card.querySelector('.attempt-subject-name')
     
-    // Set the entity info
-    entityNameElement.textContent = entityName || 'Unknown'
-    entityDetail.textContent = this.gameTypeValue === "team_match" ? 'Player' : 'Team'
-    
-    // Set up result part
-    const resultIndicator = template.querySelector('.result-indicator')
-    const resultIcon = template.querySelector('.result-icon')
-    
-    resultIndicator.textContent = isCorrect ? 'Correct' : 'Incorrect'
-    
-    // Apply styles based on result using semantic class names
-    if (isCorrect) {
-      template.classList.add('correct-attempt')
-      resultIndicator.classList.add('correct-result')
-      resultIcon.classList.add('fa-check', 'text-green-600')
+    // Set the subject info based on game type
+    if (this.gameTypeValue === "team_match") {
+      // For team match, subject is the player
+      subjectName.textContent = entityName || 'Unknown Player'
+      // You might want to set the player image here if available
+      subjectImage.style.display = 'none' // Hide if no image
     } else {
-      template.classList.add('incorrect-attempt')
-      resultIndicator.classList.add('incorrect-result')
-      resultIcon.classList.add('fa-xmark', 'text-red-600')
+      // For division guess, subject is the team
+      subjectName.textContent = entityName || 'Unknown Team'
+      // You might want to set the team logo here if available
+      subjectImage.style.display = 'none' // Hide if no image
     }
     
-    // Add a timestamp data attribute for sorting/reference
-    template.dataset.timestamp = Date.now()
+    // Set up answer part - this would show what they guessed
+    const answerImage = card.querySelector('.attempt-answer-image')
+    const answerName = card.querySelector('.attempt-answer-name')
+    const resultElement = card.querySelector('.attempt-result')
     
-    // Remove the hidden class
-    template.classList.remove('hidden')
+    // Hide answer image for now
+    answerImage.style.display = 'none'
+    answerName.textContent = 'Your guess' // You could make this more specific
     
-    // Prepend to list (newest first)
-    this.recentAttemptsListTarget.prepend(template)
+    // Set result
+    resultElement.textContent = isCorrect ? 'Correct' : 'Incorrect'
+    
+    // Apply styles based on result
+    if (isCorrect) {
+      card.classList.add('correct-attempt')
+      resultElement.classList.add('correct-result')
+    } else {
+      card.classList.add('incorrect-attempt')
+      resultElement.classList.add('incorrect-result')
+    }
+    
+    // Set timestamp
+    const timeElement = card.querySelector('.attempt-time')
+    timeElement.textContent = 'Just now'
+    
+    // Add to list (newest first)
+    this.recentAttemptsListTarget.prepend(card)
     
     // Limit the list to 5 attempts
-    const attempts = this.recentAttemptsListTarget.querySelectorAll('.attempt-card:not(#attempt-template .attempt-card)')
+    const attempts = this.recentAttemptsListTarget.querySelectorAll('.attempt-card')
     if (attempts.length > 5) {
       for (let i = 5; i < attempts.length; i++) {
         attempts[i].remove()

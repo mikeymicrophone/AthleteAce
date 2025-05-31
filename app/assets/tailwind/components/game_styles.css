@@ -216,6 +216,23 @@
   @apply text-xl font-bold text-gray-800 px-4;
 }
 
+/* Team name overlay - the old clean style */
+.team-name-overlay {
+  @apply fixed inset-0 flex items-center justify-center z-50 pointer-events-none opacity-0 transition-opacity duration-300 ease-in-out;
+  backdrop-filter: blur(2px);
+  
+  &.visible {
+    @apply opacity-100;
+  }
+}
+
+.team-name-text {
+  @apply text-6xl font-bold text-white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  font-family: 'Arial Black', Arial, sans-serif;
+  letter-spacing: 2px;
+}
+
 /* Attempt items */
 .attempt-item {
   @apply justify-between p-2 border-b border-gray-100;
@@ -283,7 +300,7 @@
 }
 
 .attempt-card {
-  @apply border rounded-md overflow-hidden p-2;
+  @apply border rounded-md overflow-hidden p-2 mb-2;
   
   &.correct-attempt {
     @apply border-green-500 bg-green-50;
@@ -292,6 +309,52 @@
   &.incorrect-attempt {
     @apply border-red-500 bg-red-50;
   }
+}
+
+/* Recent attempts container */
+.recent-attempts-container {
+  @apply mt-6;
+}
+
+/* Shared template structure from game_frame */
+.attempt-subject-part {
+  @apply p-3 bg-gray-50;
+}
+
+.attempt-subject-image {
+  @apply h-8 w-8 mr-2 object-contain rounded-full;
+}
+
+.attempt-subject-name {
+  @apply font-medium text-sm;
+}
+
+.attempt-answer-part {
+  @apply p-3;
+}
+
+.attempt-answer-image {
+  @apply h-8 w-8 mr-2 object-contain;
+}
+
+.attempt-answer-name {
+  @apply text-sm;
+}
+
+.attempt-result {
+  @apply px-2 py-1 rounded-md text-xs font-medium;
+  
+  &.correct-result {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  &.incorrect-result {
+    @apply bg-red-100 text-red-800;
+  }
+}
+
+.attempt-time {
+  @apply text-xs p-2 bg-gray-50 text-gray-500 text-right;
 }
 
 /* Attempt entity parts */
