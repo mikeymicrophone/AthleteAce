@@ -12,7 +12,8 @@ export default class extends Controller {
     "pauseButtonText",   // Text inside pause button
     "subjectCardDisplay", // Player card or team card
     "attemptsContainer",  // Container for recent attempts
-    "attemptsGrid"        // Grid of attempt cards
+    "attemptsGrid",       // Grid of attempt cards
+    "recentAttemptsList"  // List of recent attempts
   ]
 
   static values = {
@@ -123,8 +124,39 @@ export default class extends Controller {
       button.classList.add("correct-choice", "pulsing", "bg-green-500", "text-white")
     }
     
-    // Show overlay with correct name
+    // Set the overlay title and class
+    const overlayTitle = this.overlayDisplayTarget.querySelector("h3")
+    if (overlayTitle) {
+      overlayTitle.textContent = "Correct!"
+      overlayTitle.classList.add("text-green-600")
+      overlayTitle.classList.remove("text-red-600")
+    }
+    
+    // Update overlay container for correct styling
+    const overlayContent = this.overlayDisplayTarget.querySelector(".overlay-content")
+    if (overlayContent) {
+      overlayContent.classList.add("border-green-500")
+      overlayContent.classList.remove("border-red-500")
+      
+      // Add animation classes
+      overlayContent.classList.add("transform", "scale-100")
+      setTimeout(() => {
+        overlayContent.classList.add("scale-105")
+        setTimeout(() => {
+          overlayContent.classList.remove("scale-105")
+        }, 200)
+      }, 100)
+    }
+    
+    // Show overlay with correct name and appropriate styling
     this.overlayTextTarget.textContent = chosenName || "Correct Answer"
+    this.overlayTextTarget.classList.add("text-green-700")
+    this.overlayTextTarget.classList.remove("text-red-700")
+    
+    // Add to recent attempts list
+    if (this.hasRecentAttemptsListTarget) {
+      this.addRecentAttempt(chosenName, true)
+    }
     
     // Apply appropriate classes for overlay visibility
     this.overlayDisplayTarget.classList.remove("opacity-0")
@@ -144,6 +176,11 @@ export default class extends Controller {
   
   handleIncorrectAnswer(button) {
     console.log(`[${this.gameTypeValue}] handleIncorrectAnswer() - answer IS NOT correct`)
+    
+    // Get the chosen name for recent attempts list
+    let chosenName = this.gameTypeValue === "team_match" 
+      ? button.querySelector(".team-name")?.textContent
+      : button.querySelector(".division-name")?.textContent
     
     // Style the button - apply appropriate classes based on game type
     if (this.gameTypeValue === "team_match") {
@@ -176,8 +213,39 @@ export default class extends Controller {
         ? correctButton.querySelector(".team-name")?.textContent
         : correctButton.querySelector(".division-name")?.textContent
       
-      // Show overlay with correct name
-      this.overlayTextTarget.textContent = correctName || "Correct Answer"
+      // Set the overlay title and class for incorrect answer
+      const overlayTitle = this.overlayDisplayTarget.querySelector("h3")
+      if (overlayTitle) {
+        overlayTitle.textContent = "Incorrect!"
+        overlayTitle.classList.add("text-red-600")
+        overlayTitle.classList.remove("text-green-600")
+      }
+      
+      // Update overlay container for incorrect styling
+      const overlayContent = this.overlayDisplayTarget.querySelector(".overlay-content")
+      if (overlayContent) {
+        overlayContent.classList.add("border-red-500")
+        overlayContent.classList.remove("border-green-500")
+        
+        // Add animation classes
+        overlayContent.classList.add("transform", "scale-100")
+        setTimeout(() => {
+          overlayContent.classList.add("scale-105")
+          setTimeout(() => {
+            overlayContent.classList.remove("scale-105")
+          }, 200)
+        }, 100)
+      }
+      
+      // Show overlay with correct name and appropriate styling
+      this.overlayTextTarget.textContent = `The correct answer is: ${correctName || "Not available"}`
+      this.overlayTextTarget.classList.add("text-red-700")
+      this.overlayTextTarget.classList.remove("text-green-700")
+      
+      // Add to recent attempts list if we have the target
+      if (this.hasRecentAttemptsListTarget) {
+        this.addRecentAttempt(chosenName, false)
+      }
       
       // Apply appropriate classes for overlay visibility
       this.overlayDisplayTarget.classList.remove("opacity-0")
@@ -320,6 +388,44 @@ export default class extends Controller {
         }
       })
       .catch(error => console.error(`Error loading recent ${this.gameTypeValue} attempts:`, error))
+  }
+  
+  addRecentAttempt(entityName, isCorrect) {
+    console.log(`[${this.gameTypeValue}] Adding recent attempt: ${entityName}, correct: ${isCorrect}`)
+    
+    // Clear the "No guesses yet" placeholder if it exists
+    const placeholder = this.recentAttemptsListTarget.querySelector(".text-gray-500.italic")
+    if (placeholder) {
+      placeholder.remove()
+    }
+    
+    // Create a new attempt item using the helper method
+    const itemHTML = this.createAttemptItemHTML(entityName, isCorrect)
+    
+    // Insert the new attempt at the top of the list
+    this.recentAttemptsListTarget.insertAdjacentHTML('afterbegin', itemHTML)
+    
+    // Limit the list to 5 attempts
+    const attempts = this.recentAttemptsListTarget.children
+    if (attempts.length > 5) {
+      attempts[5].remove()
+    }
+  }
+  
+  createAttemptItemHTML(entityName, isCorrect) {
+    const resultClass = isCorrect ? "text-green-600" : "text-red-600"
+    const iconClass = isCorrect ? "fa-check text-green-600" : "fa-xmark text-red-600"
+    const resultText = isCorrect ? "Correct" : "Incorrect"
+    
+    return `
+      <div class="attempt-item flex items-center justify-between p-2 border-b border-gray-100">
+        <div class="flex items-center">
+          <i class="fas ${iconClass} mr-2"></i>
+          <span class="font-medium">${entityName || 'Unknown'}</span>
+        </div>
+        <div class="text-sm ${resultClass} font-semibold">${resultText}</div>
+      </div>
+    `
   }
   
   addAttemptToGrid(attempt) {

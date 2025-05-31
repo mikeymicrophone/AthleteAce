@@ -92,15 +92,24 @@ module GameHelper
     content.html_safe
   end
   
-  # Renders the correct answer overlay that appears after selecting an answer
+  # Renders the answer overlay that appears after selecting an answer
   def game_correct_answer_overlay(game_type)
     # Common overlay classes with transition properties
-    base_classes = "correct-answer-overlay fixed inset-0 flex items-center justify-center z-50 pointer-events-none opacity-0 transition-opacity duration-300 ease-in-out"
+    base_classes = "correct-answer-overlay fixed inset-0 flex items-center justify-center z-50 pointer-events-none opacity-0 transition-opacity duration-300 ease-in-out backdrop-blur-sm"
+    
+    # Add game-specific styling
+    overlay_container_classes = "overlay-content p-6 bg-white rounded-lg shadow-xl text-center max-w-md transform transition-all duration-300 ease-in-out border-4"
+    
+    # For team match game, add specific styling
+    if game_type == "team_match"
+      overlay_container_classes += " border-blue-500 scale-100 hover:scale-105"
+    end
     
     tag.div(class: base_classes, data: { game_target: "overlayDisplay" }) do
-      tag.div(class: "overlay-content p-6 bg-white rounded-lg shadow-xl text-center max-w-md transform transition-transform duration-300 ease-in-out") do
-        tag.h3("Correct!", class: "mb-3 text-2xl font-bold text-green-600") +
-        tag.div(data: { game_target: "overlayText" }, class: "text-xl font-bold text-gray-800")
+      tag.div(class: overlay_container_classes) do
+        # Title will be updated by JavaScript based on whether answer is correct or incorrect
+        tag.h3("", class: "mb-3 text-2xl font-bold result-title") +
+        tag.div(data: { game_target: "overlayText" }, class: "text-xl font-bold text-gray-800 px-4")
       end
     end
   end
@@ -109,7 +118,7 @@ module GameHelper
   def game_subject_card(subject, game_type, additional_data = {})
     data_attrs = { game_target: "subjectCardDisplay" }.merge(additional_data)
     
-    tag.div class: "subject-card p-4 bg-white rounded-lg shadow-md", data: data_attrs do
+    tag.div(class: "subject-card p-4 bg-white rounded-lg shadow-md", data: data_attrs) do
       # Question text based on game type
       question = if game_type == "team_match"
         "Who does #{subject.full_name || subject.name} play for?"
@@ -139,10 +148,10 @@ module GameHelper
     # Image container
     tag.div(class: "flex items-center justify-center mb-4") do
       if image_url.present?
-        tag.img src: image_url, alt: name, class: "w-32 h-32 #{image_class}"
+        tag.img(src: image_url, alt: name, class: "w-32 h-32 #{image_class}")
       else
-        tag.div class: "w-32 h-32 flex items-center justify-center bg-gray-200 rounded-full" do
-          tag.i class: "fas fa-#{icon} text-5xl text-gray-400"
+        tag.div(class: "w-32 h-32 flex items-center justify-center bg-gray-200 rounded-full") do
+          tag.i(class: "fas fa-#{icon} text-5xl text-gray-400")
         end
       end
     end +
@@ -154,8 +163,8 @@ module GameHelper
   
   # Renders a container for recent attempts
   def game_attempts_container(game_type)
-    tag.div class: "attempts-container mt-8 p-4 bg-white rounded-lg shadow-md hidden", 
-            data: { game_target: "attemptsContainer" } do
+    tag.div(class: "attempts-container mt-8 p-4 bg-white rounded-lg shadow-md hidden", 
+            data: { game_target: "attemptsContainer" }) do
       tag.h3("Recent Attempts", class: "text-lg font-bold mb-4 text-center") +
       tag.div(class: "attempts-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4", 
               data: { game_target: "attemptsGrid" }) do
@@ -167,7 +176,7 @@ module GameHelper
   
   # Renders a standardized progress indicator with correct count and pause button
   def game_progress_display(correct_count = 0)
-    tag.div class: "controls flex justify-between items-center mt-6", data: { game_target: "controls" } do
+    tag.div(class: "controls flex justify-between items-center mt-6", data: { game_target: "controls" }) do
       # Progress counter
       tag.div(progress_counter(correct_count), class: "progress-indicator") +
       
@@ -183,6 +192,32 @@ module GameHelper
   def progress_counter(correct_count = 0)
     count = tag.span(correct_count.to_s, id: "progress_counter", class: "progress-counter font-bold", 
     data: { game_target: "progressCounter" })
-    tag.span "Progress: #{count} correct".html_safe, class: "text-gray-600"
+    tag.span("Progress: #{count} correct".html_safe, class: "text-gray-600")
+  end
+  
+  # Renders a section showing recent guesses
+  def game_recent_attempts_section
+    tag.div(class: "recent-attempts mt-6 bg-white rounded-lg shadow-md p-4") do
+      tag.h3("Recent Guesses", class: "text-lg font-bold mb-2") +
+      tag.div(class: "attempts-list space-y-2", data: { game_target: "recentAttemptsList" }) do
+        tag.div("No guesses yet", class: "text-gray-500 italic text-sm")
+      end
+    end
+  end
+  
+  # Renders an individual recent attempt item
+  def game_attempt_item(entity_name, result, game_type)
+    result_class = result ? "text-green-600" : "text-red-600"
+    icon_class = result ? "fa-check text-green-600" : "fa-xmark text-red-600"
+    
+    tag.div(class: "attempt-item flex items-center justify-between p-2 border-b border-gray-100") do
+      tag.div(class: "flex items-center") do
+        tag.i(class: "fas #{icon_class} mr-2") +
+        tag.span(entity_name, class: "font-medium")
+      end +
+      tag.div(class: "text-sm #{result_class} font-semibold") do
+        result ? "Correct" : "Incorrect"
+      end
+    end
   end
 end
