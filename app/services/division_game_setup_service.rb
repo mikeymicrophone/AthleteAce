@@ -1,6 +1,7 @@
 require 'ostruct'
 
 class DivisionGameSetupService
+  MINIMUM_VIABLE_GAME_CHOICES = 2 # Absolute minimum choices for a game to be playable
   attr_reader :difficulty, :num_choices
 
   # Initializes the service with a difficulty level and number of choices.
@@ -40,9 +41,9 @@ class DivisionGameSetupService
 
     choices = generate_choices(team, correct_division)
     
-    if choices.nil? || choices.length < @num_choices
-      Rails.logger.error "Game setup failed: Not enough choices generated for team #{team.id} (#{team.name})."
-      Rails.logger.error "  - Required: #{@num_choices}, Generated: #{choices&.length || 0}"
+    if choices.nil? || choices.length < MINIMUM_VIABLE_GAME_CHOICES
+      Rails.logger.error "Game setup failed: Not enough viable choices generated for team #{team.id} (#{team.name})."
+      Rails.logger.error "  - Minimum Required: #{MINIMUM_VIABLE_GAME_CHOICES}, Generated: #{choices&.length || 0}, Requested: #{@num_choices}"
       Rails.logger.error "  - Difficulty: #{difficulty}"
       return nil
     end

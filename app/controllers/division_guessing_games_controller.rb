@@ -1,4 +1,5 @@
 class DivisionGuessingGamesController < ApplicationController
+  MINIMUM_VIABLE_GAME_CHOICES = 2 # Absolute minimum choices for a game to be playable
   before_action :authenticate_ace! # Ensure user is logged in
 
   def new
@@ -90,26 +91,24 @@ class DivisionGuessingGamesController < ApplicationController
     
     # Allow number of choices to be configurable
     num_choices = params[:num_choices]&.to_i || 4
-    # Ensure num_choices is within a reasonable range
+    # Ensure num_choices is within a reasonable range for what the user might request
     num_choices = 4 if num_choices < 2 || num_choices > 8
 
     service = DivisionGameSetupService.new(difficulty: difficulty, num_choices: num_choices)
     game_data = service.call
 
-    if game_data.nil? || game_data.team.nil? || game_data.correct_division.nil? || game_data.choices.blank? || game_data.choices.length < num_choices
-      # Provide more specific error message based on difficulty
-      error_message = "Could not set up a new game with #{difficulty} difficulty. "
-      error_message += case difficulty
-                      when :conference
-                        "There might not be enough divisions in the same conference and league. Try the 'League' difficulty instead."
-                      when :league
-                        "There might not be enough divisions in the same league. Please ensure your database has teams with active divisions."
-                      else
-                        "There might not be enough teams or divisions with the current settings. Please try again later."
-                      end
+    if game_data.nil? || game_data.team.nil? || game_data.correct_division.nil? || game_data.choices.blank? || game_data.choices.length < MINIMUM_VIABLE_GAME_CHOICES
+      error_message = "Could not set up a new game. "
+      if game_data && game_data.choices && game_data.choices.length < MINIMUM_VIABLE_GAME_CHOICES
+        error_message += "At least #{MINIMUM_VIABLE_GAME_CHOICES} division choices are needed, but only found #{game_data.choices.length}. "
+      else
+        error_message += "There might not be enough teams or divisions with the current settings. "
+      end
+      error_message += "Please try a different difficulty or ensure your database has sufficient data."
       
       flash[:alert] = error_message
-      redirect_to new_division_game_path # Redirect to the game page without parameters to show difficulty selection
+      # Redirect to the game page without parameters to show difficulty selection, or to a specific error page
+      redirect_to new_division_game_path 
       return
     end
 
