@@ -94,15 +94,9 @@ module GameHelper
   
   # Renders the answer overlay that appears after selecting an answer
   def game_correct_answer_overlay(game_type)
-    # Base overlay with game-specific class
-    overlay_classes = "correct-answer-overlay #{game_type == 'team_match' ? 'team-match-overlay' : 'division-overlay'}"
-    
-    tag.div(class: overlay_classes, data: { game_target: "overlayDisplay" }) do
-      tag.div(class: "overlay-content") do
-        # Title will be updated by JavaScript based on whether answer is correct or incorrect
-        tag.h3("", class: "result-title") +
-        tag.div(data: { game_target: "overlayText" }, class: "overlay-text")
-      end
+    # Use the clean answer overlay for all game types - focuses on reinforcing the correct answer
+    tag.div(class: "answer-overlay", data: { game_target: "answerOverlay" }) do
+      tag.div("", class: "answer-text", data: { game_target: "answerText" })
     end
   end
   
@@ -193,9 +187,7 @@ module GameHelper
       tag.h3("Recent Guesses", class: "recent-attempts-heading") +
       tag.div(class: "attempts-list", id: "attempts-list", data: { game_target: "recentAttemptsList" }) do
         tag.div("No guesses yet", class: "no-attempts-message")
-      end #+
-      # Include the hidden template that will be cloned by JavaScript
-      # render("shared/attempt_template")
+      end
     end
   end
   

@@ -195,7 +195,25 @@
   @apply text-center text-gray-600;
 }
 
-/* Overlay components */
+/* Answer overlay - clean style for memory reinforcement */
+.answer-overlay {
+  @apply fixed inset-0 flex items-center justify-center z-50 pointer-events-none opacity-0 transition-opacity duration-300 ease-in-out;
+  backdrop-filter: blur(2px);
+  
+  &.visible {
+    @apply opacity-100;
+  }
+}
+
+.answer-text {
+  @apply text-6xl font-bold text-white text-center;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  font-family: 'Arial Black', Arial, sans-serif;
+  letter-spacing: 2px;
+  line-height: 1.2;
+}
+
+/* Legacy overlay styles (can be removed eventually) */
 .correct-answer-overlay {
   @apply fixed inset-0 flex items-center justify-center z-50 pointer-events-none opacity-0 transition-opacity duration-300 ease-in-out backdrop-blur-sm;
 }
@@ -216,7 +234,7 @@
   @apply text-xl font-bold text-gray-800 px-4;
 }
 
-/* Team name overlay - the old clean style */
+/* Team name overlay - the old clean style (for backward compatibility) */
 .team-name-overlay {
   @apply fixed inset-0 flex items-center justify-center z-50 pointer-events-none opacity-0 transition-opacity duration-300 ease-in-out;
   backdrop-filter: blur(2px);

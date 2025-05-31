@@ -5,8 +5,8 @@ export default class extends Controller {
   static targets = [
     "gameContainer",
     "choiceItem",        // Generic name for team/division choices
-    "overlayDisplay",    // Overlay container
-    "overlayText",       // Text inside overlay
+    "answerOverlay",     // Unified overlay for both game types
+    "answerText",        // Unified answer text for both game types
     "progressCounter",   // Counter for correct answers
     "pauseButton",       // Pause button
     "pauseButtonText",   // Text inside pause button
@@ -117,57 +117,17 @@ export default class extends Controller {
     this.correctAnswers++
     this.progressCounterTarget.textContent = this.correctAnswers
     
-    // Style the button - apply appropriate classes based on game type
-    if (this.gameTypeValue === "team_match") {
-      button.classList.add("correct-choice", "pulsing")
-    } else {
-      button.classList.add("correct-choice", "pulsing", "bg-green-500", "text-white")
-    }
+    // Style the button
+    button.classList.add("correct-choice")
     
-    // Set the overlay title and class
-    const overlayTitle = this.overlayDisplayTarget.querySelector("h3")
-    if (overlayTitle) {
-      overlayTitle.textContent = "Correct!"
-      overlayTitle.classList.add("text-green-600")
-      overlayTitle.classList.remove("text-red-600")
-    }
-    
-    // Update overlay container for correct styling
-    const overlayContent = this.overlayDisplayTarget.querySelector(".overlay-content")
-    if (overlayContent) {
-      overlayContent.classList.add("border-green-500")
-      overlayContent.classList.remove("border-red-500")
-      
-      // Add animation classes
-      overlayContent.classList.add("transform", "scale-100")
-      setTimeout(() => {
-        overlayContent.classList.add("scale-105")
-        setTimeout(() => {
-          overlayContent.classList.remove("scale-105")
-        }, 200)
-      }, 100)
-    }
-    
-    // Show overlay with correct name and appropriate styling
-    this.overlayTextTarget.textContent = chosenName || "Correct Answer"
-    this.overlayTextTarget.classList.add("text-green-700")
-    this.overlayTextTarget.classList.remove("text-red-700")
-    
-    // Add to recent attempts list
-    if (this.hasRecentAttemptsListTarget) {
-      this.addRecentAttempt(chosenName, true)
-    }
-    
-    // Apply appropriate classes for overlay visibility
-    this.overlayDisplayTarget.classList.remove("opacity-0")
-    this.overlayDisplayTarget.classList.add("opacity-100")
+    // Show the correct answer for memory reinforcement
+    this.answerTextTarget.textContent = chosenName || "Correct Answer"
+    this.answerOverlayTarget.classList.add("visible")
     
     // Set timer to hide overlay and load next question
     this.nextQuestionTimer = setTimeout(() => {
-      this.overlayDisplayTarget.classList.remove("opacity-100")
-      this.overlayDisplayTarget.classList.add("opacity-0")
+      this.answerOverlayTarget.classList.remove("visible")
       
-      // Wait for transition to complete before loading next question
       setTimeout(() => {
         this.loadNextQuestion()
       }, 300)
@@ -177,95 +137,33 @@ export default class extends Controller {
   handleIncorrectAnswer(button) {
     console.log(`[${this.gameTypeValue}] handleIncorrectAnswer() - answer IS NOT correct`)
     
-    // Get the chosen name for recent attempts list
-    let chosenName = this.gameTypeValue === "team_match" 
-      ? button.querySelector(".team-name")?.textContent
-      : button.querySelector(".division-name")?.textContent
+    // Style the incorrect button
+    button.classList.add("incorrect-choice")
     
-    // Style the button - apply appropriate classes based on game type
-    if (this.gameTypeValue === "team_match") {
-      button.classList.add("incorrect-choice")
-    } else {
-      button.classList.add("incorrect-choice", "bg-red-500", "text-white")
-    }
-    
-    // Add to recent attempts list
-    if (this.hasRecentAttemptsListTarget) {
-      this.addRecentAttempt(chosenName, false)
-    }
-    
-    // Find and highlight the correct answer after a delay
+    // Find and show the correct answer after a brief delay
     setTimeout(() => {
-      let correctButton, correctName
-      
-      // Find the correct button using the correct="true" data attribute for both game types
-      correctButton = this.choiceItemTargets.find(choice => choice.dataset.correct === "true")
-      
-      if (!correctButton) {
-        console.error(`[${this.gameTypeValue}] Could not find the correct button`)
-        return // Early return to prevent errors
-      }
-      
-      // Apply styling based on game type
-      if (this.gameTypeValue === "team_match") {
+      const correctButton = this.choiceItemTargets.find(choice => choice.dataset.correct === "true")
+      if (correctButton) {
         correctButton.classList.add("correct-answer")
-      } else {
-        correctButton.classList.add("correct-answer", "bg-green-500", "text-white")
-      }
-      
-      // Get the name from the correct element
-      correctName = this.gameTypeValue === "team_match" 
-        ? correctButton.querySelector(".team-name")?.textContent
-        : correctButton.querySelector(".division-name")?.textContent
-      
-      // Set the overlay title and class for incorrect answer
-      const overlayTitle = this.overlayDisplayTarget.querySelector("h3")
-      if (overlayTitle) {
-        overlayTitle.textContent = "Incorrect!"
-        overlayTitle.classList.add("text-red-600")
-        overlayTitle.classList.remove("text-green-600")
-      }
-      
-      // Update overlay container for incorrect styling
-      const overlayContent = this.overlayDisplayTarget.querySelector(".overlay-content")
-      if (overlayContent) {
-        overlayContent.classList.add("border-red-500")
-        overlayContent.classList.remove("border-green-500")
         
-        // Add animation classes
-        overlayContent.classList.add("transform", "scale-100")
-        setTimeout(() => {
-          overlayContent.classList.add("scale-105")
+        // Get the correct answer name
+        const correctName = this.gameTypeValue === "team_match" 
+          ? correctButton.querySelector(".team-name")?.textContent
+          : correctButton.querySelector(".division-name")?.textContent
+        
+        // Show the correct answer for memory reinforcement
+        this.answerTextTarget.textContent = correctName || "Correct Answer"
+        this.answerOverlayTarget.classList.add("visible")
+        
+        // Set timer to hide overlay and load next question
+        this.nextQuestionTimer = setTimeout(() => {
+          this.answerOverlayTarget.classList.remove("visible")
+          
           setTimeout(() => {
-            overlayContent.classList.remove("scale-105")
-          }, 200)
-        }, 100)
+            this.loadNextQuestion()
+          }, 300)
+        }, 1500)
       }
-      
-      // Show overlay with correct name and appropriate styling
-      this.overlayTextTarget.textContent = `The correct answer is: ${correctName || "Not available"}`
-      this.overlayTextTarget.classList.add("text-red-700")
-      this.overlayTextTarget.classList.remove("text-green-700")
-      
-      // Add to recent attempts list if we have the target
-      if (this.hasRecentAttemptsListTarget) {
-        this.addRecentAttempt(chosenName, false)
-      }
-      
-      // Apply appropriate classes for overlay visibility
-      this.overlayDisplayTarget.classList.remove("opacity-0")
-      this.overlayDisplayTarget.classList.add("opacity-100")
-      
-      // Set timer to hide overlay and load next question
-      this.nextQuestionTimer = setTimeout(() => {
-        this.overlayDisplayTarget.classList.remove("opacity-100")
-        this.overlayDisplayTarget.classList.add("opacity-0")
-        
-        // Wait for transition to complete before loading next question
-        setTimeout(() => {
-          this.loadNextQuestion()
-        }, 300)
-      }, 1500)
     }, 500)
   }
   
