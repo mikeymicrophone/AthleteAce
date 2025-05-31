@@ -163,7 +163,7 @@ export default class extends Controller {
 
   handleFrameRender(event) {
     // Only process events for our game frame
-    if (event.target.id === "division_guess_game") {
+    if (event.target.id === "division_game_frame") {
       console.log("[DG Controller] Frame rendered - updating team values")
       
       // Get new values from data attributes on the current team card
