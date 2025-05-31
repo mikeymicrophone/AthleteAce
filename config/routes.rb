@@ -7,7 +7,12 @@ Rails.application.routes.draw do
   get "strength/images" => "strength#images"
   get "strength/ciphers" => "strength#ciphers"
   get "strength/team_match" => "strength#team_match"
+  get "strength/game_attempts" => "strength#game_attempts"
   post "strength/check_answer" => "strength#check_answer", as: :check_answer
+
+  # Division Guessing Game
+  get "play/guess-the-division" => "division_guessing_games#new", as: :new_division_game
+  post "play/guess-the-division" => "division_guessing_games#create", as: :create_division_game_attempt
   resources :achievements do
     collection do
       get :target_options
@@ -22,8 +27,8 @@ Rails.application.routes.draw do
     end
   end
   
-  # Route for submitting game attempt results
-  resources :game_attempts, only: [:create]
+  # Route for submitting game attempt results and retrieving game attempts
+  resources :game_attempts, only: [:index, :create]
   
   resources :highlights, only: [:new, :create]
   
@@ -52,6 +57,7 @@ Rails.application.routes.draw do
     resources :players, shallow: true
     resources :ratings, only: [:new, :create]
     resources :memberships, only: [:new, :create]
+    get 'strength/game_attempts', to: 'strength#team_game_attempts'
   end
   resources :countries do
     resources :leagues, shallow: true
@@ -104,5 +110,10 @@ Rails.application.routes.draw do
     resources :leagues, shallow: true
     resources :teams, shallow: true
     resources :players, shallow: true
+  end
+
+  namespace :strength do
+    get 'team_match', to: 'team_match#show'
+    get 'game_attempts', to: 'strength#game_attempts'
   end
 end

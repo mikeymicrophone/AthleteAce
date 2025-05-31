@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_24_144158) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_27_021824) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -124,6 +124,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_24_144158) do
     t.integer "time_elapsed_ms", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "difficulty_level"
     t.index ["ace_id"], name: "index_game_attempts_on_ace_id"
     t.index ["chosen_entity_type", "chosen_entity_id"], name: "index_game_attempts_on_chosen_entity"
     t.index ["subject_entity_type", "subject_entity_id"], name: "index_game_attempts_on_subject_entity"

@@ -33,7 +33,7 @@ module StrengthHelper
 
   def team_choice_button(team, correct = false)
     tag.button id: dom_id(team, 'choice'), 
-      class: "team-choice bg-white rounded-lg shadow-md p-4 flex flex-col items-center justify-center transition-all duration-300 hover:shadow-lg w-full h-48",
+      class: "team-choice #{correct ? 'correct-choice' : 'incorrect-choice'} flex flex-col items-center justify-center w-full h-48",
       data: {
         team_match_target: "teamChoice",
         team_id: team.id,
@@ -159,15 +159,16 @@ module StrengthHelper
 
   def attempt_card_template
     tag.div id: "attempt-template", class: "attempt-template hidden" do
+      # The correct-attempt or incorrect-attempt class will be added dynamically by JavaScript
       tag.div id: "attempt-card", class: "attempt-card flex flex-col items-center border rounded-md overflow-hidden" do
-        # Team part
+        # Team part - no longer needs correct-team-part or incorrect-team-part class
         tag.div(id: "team-part", class: "attempt-team-part w-full p-2 text-center") do
           tag.div(id: "team-logo-container", class: "attempt-team-logo-container flex justify-center items-center h-16") do
             tag.img(id: "team-logo", class: "attempt-team-logo max-h-16 max-w-full object-contain", src: "", alt: "Team Logo")
           end +
           tag.p(id: "team-name", class: "attempt-team-name text-sm font-semibold mt-1 truncate w-full")
         end +
-        # Player part
+        # Player part - no longer needs correct-player-part or incorrect-player-part class
         tag.div(id: "player-part", class: "attempt-player-part w-full p-2 text-center border-t") do
           tag.div(id: "player-photo-container", class: "attempt-player-photo-container flex justify-center items-center h-12") do
             tag.img(id: "player-photo", class: "attempt-player-photo max-h-12 max-w-full object-contain", src: "", alt: "Player Photo")

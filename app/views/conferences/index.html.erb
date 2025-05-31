@@ -2,6 +2,10 @@
 
 <h1>Conferences</h1>
 
+<div class="mb-4 text-center">
+  <%= link_to "Play: Guess the Division", new_division_game_path, class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+</div>
+
 <div id="conferences">
   <% @conferences.each do |conference| %>
     <%= tag.div(id: dom_id(conference), class: [index_record_base_classes, conference_index_record_classes].join(' ')) do %>

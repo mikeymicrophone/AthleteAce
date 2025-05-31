@@ -293,7 +293,11 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/**/memberships.json')
   end
   
   memberships_data["memberships"].each do |membership_data|
-    team = Team.find_by(mascot: membership_data["team_name"])
+    if membership_data["territory_name"]
+      team = Team.find_by(territory: membership_data["territory_name"], mascot: membership_data["team_name"])
+    else
+      team = Team.find_by(mascot: membership_data["team_name"])
+    end
     conference = Conference.find_by(name: membership_data["conference_name"], league: league)
     division = Division.find_by(name: membership_data["division_name"], conference: conference)
     

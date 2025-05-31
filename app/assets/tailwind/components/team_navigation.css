@@ -1,0 +1,45 @@
+.teams-navigation {
+  @apply mb-8 p-6 bg-white rounded-lg shadow-md;
+}
+
+.teams-navigation-title {
+  @apply text-2xl font-semibold mb-5 text-gray-800 border-b border-gray-200 pb-2;
+}
+
+.sport-section {
+  @apply mb-6 last:mb-0;
+}
+
+.sport-title {
+  @apply text-lg font-medium mb-3 text-gray-700 pl-2 border-l-4 border-indigo-500;
+}
+
+.teams-buttons {
+  @apply flex flex-wrap gap-2;
+}
+
+.team-button {
+  @apply inline-flex items-center py-2 px-3 bg-white border border-gray-200 rounded-full
+         hover:border-indigo-300 hover:shadow-sm transition-all duration-200
+         no-underline text-gray-800;
+}
+
+.team-button-content {
+  @apply flex items-center;
+}
+
+.team-button-logo {
+  @apply w-6 h-6 mr-2 rounded-full object-cover;
+}
+
+.team-button-icon {
+  @apply text-gray-500 mr-2;
+}
+
+.team-button-name {
+  @apply font-medium;
+}
+
+.team-button-stats {
+  @apply ml-2 text-sm text-indigo-600 font-semibold;
+}

@@ -1,6 +1,31 @@
 class GameAttemptsController < ApplicationController
   # Assuming you use Devise and have a helper like `authenticate_ace!`
   before_action :authenticate_ace!
+  
+  # GET /game_attempts
+  # GET /game_attempts.json
+  def index
+    # Filter by game_type if provided
+    scope = current_ace.game_attempts
+    scope = scope.where(game_type: params[:game_type]) if params[:game_type].present?
+    
+    # Limit results
+    limit = params[:limit].present? ? params[:limit].to_i : 10
+    limit = [limit, 50].min # Cap at 50 for performance
+    
+    @game_attempts = scope.order(created_at: :desc).limit(limit)
+    
+    respond_to do |format|
+      format.html # index.html.erb
+      format.json do
+        render json: @game_attempts.as_json(include: {
+          subject_entity: { methods: [:logo_url, :name] },
+          target_entity: { methods: [:logo_url, :name] },
+          chosen_entity: { methods: [:logo_url, :name] }
+        })
+      end
+    end
+  end
 
   # POST /game_attempts
   def create
