@@ -118,31 +118,27 @@ export default class extends Controller {
     
     // Style the button - apply appropriate classes based on game type
     if (this.gameTypeValue === "team_match") {
-      button.classList.add("correct", "pulsing")
+      button.classList.add("correct-choice", "pulsing")
     } else {
-      button.classList.add("bg-green-500", "text-white", "pulsing")
+      button.classList.add("correct-choice", "pulsing", "bg-green-500", "text-white")
     }
     
     // Show overlay with correct name
-    this.overlayTextTarget.textContent = chosenName
+    this.overlayTextTarget.textContent = chosenName || "Correct Answer"
     
-    // Apply appropriate classes based on game type
-    if (this.gameTypeValue === "team_match") {
-      this.overlayDisplayTarget.classList.add("visible")
-    } else {
-      this.overlayDisplayTarget.classList.remove("opacity-0")
-      this.overlayDisplayTarget.classList.add("opacity-100")
-    }
+    // Apply appropriate classes for overlay visibility
+    this.overlayDisplayTarget.classList.remove("opacity-0")
+    this.overlayDisplayTarget.classList.add("opacity-100")
     
     // Set timer to hide overlay and load next question
     this.nextQuestionTimer = setTimeout(() => {
-      if (this.gameTypeValue === "team_match") {
-        this.overlayDisplayTarget.classList.remove("visible")
-      } else {
-        this.overlayDisplayTarget.classList.remove("opacity-100")
-        this.overlayDisplayTarget.classList.add("opacity-0")
-      }
-      this.loadNextQuestion()
+      this.overlayDisplayTarget.classList.remove("opacity-100")
+      this.overlayDisplayTarget.classList.add("opacity-0")
+      
+      // Wait for transition to complete before loading next question
+      setTimeout(() => {
+        this.loadNextQuestion()
+      }, 300)
     }, 1500)
   }
   
@@ -151,9 +147,9 @@ export default class extends Controller {
     
     // Style the button - apply appropriate classes based on game type
     if (this.gameTypeValue === "team_match") {
-      button.classList.add("incorrect")
+      button.classList.add("incorrect-choice")
     } else {
-      button.classList.add("bg-red-500", "text-white")
+      button.classList.add("incorrect-choice", "bg-red-500", "text-white")
     }
     
     // Find and highlight the correct answer after a delay
@@ -172,7 +168,7 @@ export default class extends Controller {
       if (this.gameTypeValue === "team_match") {
         correctButton.classList.add("correct-answer")
       } else {
-        correctButton.classList.add("bg-green-500", "text-white")
+        correctButton.classList.add("correct-answer", "bg-green-500", "text-white")
       }
       
       // Get the name from the correct element
@@ -181,25 +177,21 @@ export default class extends Controller {
         : correctButton.querySelector(".division-name")?.textContent
       
       // Show overlay with correct name
-      this.overlayTextTarget.textContent = correctName
+      this.overlayTextTarget.textContent = correctName || "Correct Answer"
       
-      // Apply appropriate classes based on game type
-      if (this.gameTypeValue === "team_match") {
-        this.overlayDisplayTarget.classList.add("visible")
-      } else {
-        this.overlayDisplayTarget.classList.remove("opacity-0")
-        this.overlayDisplayTarget.classList.add("opacity-100")
-      }
+      // Apply appropriate classes for overlay visibility
+      this.overlayDisplayTarget.classList.remove("opacity-0")
+      this.overlayDisplayTarget.classList.add("opacity-100")
       
       // Set timer to hide overlay and load next question
       this.nextQuestionTimer = setTimeout(() => {
-        if (this.gameTypeValue === "team_match") {
-          this.overlayDisplayTarget.classList.remove("visible")
-        } else {
-          this.overlayDisplayTarget.classList.remove("opacity-100")
-          this.overlayDisplayTarget.classList.add("opacity-0")
-        }
-        this.loadNextQuestion()
+        this.overlayDisplayTarget.classList.remove("opacity-100")
+        this.overlayDisplayTarget.classList.add("opacity-0")
+        
+        // Wait for transition to complete before loading next question
+        setTimeout(() => {
+          this.loadNextQuestion()
+        }, 300)
       }, 1500)
     }, 500)
   }
@@ -303,6 +295,12 @@ export default class extends Controller {
         
         // Reset the timer for the new question
         this.startTime = Date.now()
+        
+        // Update the progress counter target with the current correct answers count
+        if (this.hasProgressCounterTarget) {
+          console.log(`[${this.gameTypeValue}] Updating progress counter to ${this.correctAnswers}`)
+          this.progressCounterTarget.textContent = this.correctAnswers
+        }
       }
     }
   }

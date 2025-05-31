@@ -94,14 +94,13 @@ module GameHelper
   
   # Renders the correct answer overlay that appears after selecting an answer
   def game_correct_answer_overlay(game_type)
-    # More consistent classes between game types with meaningful transition classes
-    base_classes = "correct-answer-overlay fixed inset-0 flex items-center justify-center z-50 pointer-events-none"
-    visibility_classes = "opacity-0 transition-opacity duration-300"
+    # Common overlay classes with transition properties
+    base_classes = "correct-answer-overlay fixed inset-0 flex items-center justify-center z-50 pointer-events-none opacity-0 transition-opacity duration-300 ease-in-out"
     
-    tag.div class: "#{base_classes} #{visibility_classes}", data: { game_target: "overlayDisplay" } do
-      tag.div class: "overlay-content p-6 bg-white rounded-lg shadow-xl text-center max-w-md" do
+    tag.div(class: base_classes, data: { game_target: "overlayDisplay" }) do
+      tag.div(class: "overlay-content p-6 bg-white rounded-lg shadow-xl text-center max-w-md transform transition-transform duration-300 ease-in-out") do
         tag.h3("Correct!", class: "mb-3 text-2xl font-bold text-green-600") +
-        tag.div(data: { game_target: "overlayText" }, class: "text-xl font-bold")  
+        tag.div(data: { game_target: "overlayText" }, class: "text-xl font-bold text-gray-800")
       end
     end
   end
