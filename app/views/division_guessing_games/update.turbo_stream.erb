@@ -1,0 +1,6 @@
+<%= turbo_stream.update "division_guess_game_frame" do %>
+  <%= render "division_guessing_games/game_content", 
+      subject: @team, 
+      correct_answer: @correct_division, 
+      choices: @choices %>
+<% end %>

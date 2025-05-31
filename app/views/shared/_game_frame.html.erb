@@ -1,0 +1,43 @@
+<%# Shared game frame structure that can be used by both game types %>
+<%# Usage: render 'shared/game_frame', game_type: 'division_guess|team_match', subject: @team|@current_player, content_partial: 'path/to/content' %>
+
+<%= tag.div id: "#{game_type}_page_root", class: "relative", data: {
+      controller: "game",
+      game_subject_id_value: subject.id,
+      game_correct_answer_id_value: correct_answer.id,
+      game_game_type_value: game_type,
+      game_frame_id_value: "#{game_type}_game_frame",
+      game_subject_type_value: (game_type == "team_match" ? "Player" : "Team"),
+      game_answer_type_value: (game_type == "team_match" ? "Team" : "Division")
+    } do %>
+    
+  <%= turbo_frame_tag "#{game_type}_game_frame" do %>
+    <%= render content_partial, 
+        subject: subject, 
+        correct_answer: correct_answer, 
+        choices: choices %>
+  <% end %>
+  
+  <%= game_attempts_container(game_type) %>
+<% end %>
+
+<%= tag.template id: "attempt-template" do %>
+  <%= tag.div class: "attempt-card border rounded-lg overflow-hidden shadow-sm" do %>
+    <%= tag.div class: "attempt-subject-part p-3 bg-gray-50" do %>
+      <%= tag.div class: "flex items-center" do %>
+        <%= tag.img class: "attempt-subject-image h-8 w-8 mr-2 object-contain rounded-full" %>
+        <%= tag.span class: "attempt-subject-name font-medium text-sm" %>
+      <% end %>
+    <% end %>
+    <%= tag.div class: "attempt-answer-part p-3" do %>
+      <%= tag.div class: "flex items-center justify-between" do %>
+        <%= tag.div class: "flex items-center" do %>
+          <%= tag.img class: "attempt-answer-image h-8 w-8 mr-2 object-contain" %>
+          <%= tag.span class: "attempt-answer-name text-sm" %>
+        <% end %>
+        <%= tag.div class: "attempt-result px-2 py-1 rounded-md text-xs font-medium" %>
+      <% end %>
+    <% end %>
+    <%= tag.div class: "text-xs p-2 bg-gray-50 text-gray-500 text-right attempt-time" %>
+  <% end %>
+<% end %>

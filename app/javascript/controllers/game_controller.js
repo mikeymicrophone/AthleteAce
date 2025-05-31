@@ -1,0 +1,453 @@
+import { Controller } from "@hotwired/stimulus"
+import { Turbo } from "@hotwired/turbo-rails"
+
+export default class extends Controller {
+  static targets = [
+    "gameContainer",
+    "choiceItem",        // Generic name for team/division choices
+    "overlayDisplay",    // Overlay container
+    "overlayText",       // Text inside overlay
+    "progressCounter",   // Counter for correct answers
+    "pauseButton",       // Pause button
+    "pauseButtonText",   // Text inside pause button
+    "subjectCardDisplay", // Player card or team card
+    "attemptsContainer",  // Container for recent attempts
+    "attemptsGrid"        // Grid of attempt cards
+  ]
+
+  static values = {
+    subjectId: Number,       // Player ID or Team ID
+    correctAnswerId: Number, // Team ID or Division ID
+    gameType: String,        // "team_match" or "division_guess"
+    frameId: String,         // ID of the Turbo frame to target
+    subjectType: { type: String, default: "" },  // "Player" or "Team"
+    answerType: { type: String, default: "" }    // "Team" or "Division"
+  }
+
+  connect() {
+    console.log(`[Game Controller] connect() called for ${this.gameTypeValue}`)
+    this.correctAnswers = 0
+    this.isPaused = false
+    this.isAnimating = false
+    this.nextQuestionTimer = null
+    this.startTime = Date.now()
+    
+    // Set default entity types based on game type if not explicitly provided
+    if (!this.hasSubjectTypeValue || !this.subjectTypeValue) {
+      this.subjectTypeValue = this.gameTypeValue === "team_match" ? "Player" : "Team"
+    }
+    
+    if (!this.hasAnswerTypeValue || !this.answerTypeValue) {
+      this.answerTypeValue = this.gameTypeValue === "team_match" ? "Team" : "Division"
+    }
+    
+    console.log(`Game controller initialized for ${this.gameTypeValue}`)
+    console.log(`Subject: ${this.subjectTypeValue} (ID: ${this.subjectIdValue})`)
+    console.log(`Answer: ${this.answerTypeValue} (Correct ID: ${this.correctAnswerIdValue})`)
+    console.log(`Frame target: ${this.frameIdValue}`)
+    
+    // Listen for Turbo frame responses to update values after a frame refresh
+    document.addEventListener("turbo:frame-render", this.handleFrameRender.bind(this))
+    
+    // Load recent attempts if we have the targets
+    if (this.hasAttemptsGridTarget) {
+      this.loadRecentAttempts()
+    }
+  }
+
+  disconnect() {
+    if (this.nextQuestionTimer) {
+      clearTimeout(this.nextQuestionTimer)
+    }
+    
+    // Clean up event listener
+    document.removeEventListener("turbo:frame-render", this.handleFrameRender.bind(this))
+  }
+
+  checkAnswer(event) {
+    if (this.isPaused || this.isAnimating) {
+      console.log(`[${this.gameTypeValue}] checkAnswer() - bailing: isPaused or isAnimating is true`)
+      return
+    }
+    
+    console.log(`[${this.gameTypeValue}] checkAnswer() - proceeding`)
+    this.isAnimating = true
+    console.log(`[${this.gameTypeValue}] checkAnswer() - isAnimating set to true`)
+    
+    const button = event.currentTarget
+    let chosenId, isCorrect, chosenName
+    
+    // Extract data based on game type
+    if (this.gameTypeValue === "team_match") {
+      chosenId = parseInt(button.dataset.teamId)
+      isCorrect = button.dataset.correct === "true"
+      chosenName = button.querySelector(".team-name")?.textContent
+    } else if (this.gameTypeValue === "division_guess") {
+      chosenId = parseInt(button.dataset.divisionId)
+      isCorrect = chosenId === this.correctAnswerIdValue
+      chosenName = button.querySelector(".division-name")?.textContent
+    }
+    
+    // Disable all choices during animation
+    this.choiceItemTargets.forEach(choice => {
+      choice.disabled = true
+    })
+    
+    // Send attempt data to server
+    this.sendAttemptData(chosenId, isCorrect)
+    
+    // Handle UI updates for correct/incorrect
+    this.handleAnswerUI(button, isCorrect, chosenName)
+  }
+  
+  handleAnswerUI(button, isCorrect, chosenName) {
+    if (isCorrect) {
+      this.handleCorrectAnswer(button, chosenName)
+    } else {
+      this.handleIncorrectAnswer(button)
+    }
+  }
+  
+  handleCorrectAnswer(button, chosenName) {
+    console.log(`[${this.gameTypeValue}] handleCorrectAnswer() - answer IS correct`)
+    
+    // Update progress counter
+    this.correctAnswers++
+    this.progressCounterTarget.textContent = this.correctAnswers
+    
+    // Style the button - apply appropriate classes based on game type
+    if (this.gameTypeValue === "team_match") {
+      button.classList.add("correct", "pulsing")
+    } else {
+      button.classList.add("bg-green-500", "text-white", "pulsing")
+    }
+    
+    // Show overlay with correct name
+    this.overlayTextTarget.textContent = chosenName
+    
+    // Apply appropriate classes based on game type
+    if (this.gameTypeValue === "team_match") {
+      this.overlayDisplayTarget.classList.add("visible")
+    } else {
+      this.overlayDisplayTarget.classList.remove("opacity-0")
+      this.overlayDisplayTarget.classList.add("opacity-100")
+    }
+    
+    // Set timer to hide overlay and load next question
+    this.nextQuestionTimer = setTimeout(() => {
+      if (this.gameTypeValue === "team_match") {
+        this.overlayDisplayTarget.classList.remove("visible")
+      } else {
+        this.overlayDisplayTarget.classList.remove("opacity-100")
+        this.overlayDisplayTarget.classList.add("opacity-0")
+      }
+      this.loadNextQuestion()
+    }, 1500)
+  }
+  
+  handleIncorrectAnswer(button) {
+    console.log(`[${this.gameTypeValue}] handleIncorrectAnswer() - answer IS NOT correct`)
+    
+    // Style the button - apply appropriate classes based on game type
+    if (this.gameTypeValue === "team_match") {
+      button.classList.add("incorrect")
+    } else {
+      button.classList.add("bg-red-500", "text-white")
+    }
+    
+    // Find and highlight the correct answer after a delay
+    setTimeout(() => {
+      let correctButton, correctName
+      
+      if (this.gameTypeValue === "team_match") {
+        correctButton = this.choiceItemTargets.find(choice => choice.dataset.correct === "true")
+        correctButton.classList.add("correct-answer")
+      } else {
+        correctButton = this.choiceItemTargets.find(choice => 
+          parseInt(choice.dataset.divisionId) === this.correctAnswerIdValue
+        )
+        correctButton.classList.add("bg-green-500", "text-white")
+      }
+      
+      correctName = this.gameTypeValue === "team_match" 
+        ? correctButton.querySelector(".team-name")?.textContent
+        : correctButton.querySelector(".division-name")?.textContent
+      
+      // Show overlay with correct name
+      this.overlayTextTarget.textContent = correctName
+      
+      // Apply appropriate classes based on game type
+      if (this.gameTypeValue === "team_match") {
+        this.overlayDisplayTarget.classList.add("visible")
+      } else {
+        this.overlayDisplayTarget.classList.remove("opacity-0")
+        this.overlayDisplayTarget.classList.add("opacity-100")
+      }
+      
+      // Set timer to hide overlay and load next question
+      this.nextQuestionTimer = setTimeout(() => {
+        if (this.gameTypeValue === "team_match") {
+          this.overlayDisplayTarget.classList.remove("visible")
+        } else {
+          this.overlayDisplayTarget.classList.remove("opacity-100")
+          this.overlayDisplayTarget.classList.add("opacity-0")
+        }
+        this.loadNextQuestion()
+      }, 1500)
+    }, 500)
+  }
+  
+  async sendAttemptData(chosenId, isCorrect) {
+    const endTime = Date.now()
+    const timeElapsedMs = endTime - this.startTime
+    
+    try {
+      // Determine game type string for the backend
+      const gameTypeString = this.gameTypeValue === "team_match" 
+        ? "player_team_match" 
+        : "guess_the_division"
+      
+      const response = await fetch("/game_attempts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          game_attempt: {
+            game_type: gameTypeString,
+            subject_entity_id: this.subjectIdValue,
+            subject_entity_type: this.subjectTypeValue,
+            target_entity_id: this.correctAnswerIdValue,
+            target_entity_type: this.answerTypeValue,
+            chosen_entity_id: chosenId,
+            chosen_entity_type: this.answerTypeValue,
+            is_correct: isCorrect,
+            time_elapsed_ms: timeElapsedMs
+          }
+        })
+      })
+
+      if (!response.ok) {
+        console.error("Failed to save attempt:", await response.text())
+      } else {
+        console.log("Game attempt saved successfully")
+      }
+    } catch (error) {
+      console.error("Error saving attempt:", error)
+    }
+  }
+  
+  loadNextQuestion() {
+    console.log(`[${this.gameTypeValue}] loadNextQuestion() called`)
+    this.isAnimating = false
+    console.log(`[${this.gameTypeValue}] loadNextQuestion() - isAnimating reset to false`)
+    
+    const currentUrl = new URL(window.location.href)
+    
+    // Add a timestamp parameter to force a fresh request
+    currentUrl.searchParams.set('t', Date.now())
+    
+    // Visit the URL but target only the specific game frame
+    console.log(`[${this.gameTypeValue}] Visiting with frame target: ${this.frameIdValue}`)
+    Turbo.visit(currentUrl.toString(), { frame: this.frameIdValue })
+    
+    // Reset the timer for the next question
+    this.startTime = Date.now()
+  }
+  
+  handleFrameRender(event) {
+    // Only process events for our specific game frame
+    if (event.target.id === this.frameIdValue) {
+      console.log(`[${this.gameTypeValue}] Frame rendered - updating values`)
+      
+      // Get new values from data attributes on the current card
+      const cardDisplay = this.subjectCardDisplayTarget
+      if (cardDisplay) {
+        // Get data attributes based on game type
+        if (this.gameTypeValue === "team_match") {
+          const newPlayerId = cardDisplay.dataset.playerId
+          const newTeamId = cardDisplay.dataset.playerTeamId
+          
+          if (newPlayerId && newPlayerId !== String(this.subjectIdValue)) {
+            console.log(`[${this.gameTypeValue}] Updating subject ID from ${this.subjectIdValue} to ${newPlayerId}`)
+            this.subjectIdValue = parseInt(newPlayerId)
+          }
+          
+          if (newTeamId && newTeamId !== String(this.correctAnswerIdValue)) {
+            console.log(`[${this.gameTypeValue}] Updating correct answer ID from ${this.correctAnswerIdValue} to ${newTeamId}`)
+            this.correctAnswerIdValue = parseInt(newTeamId)
+          }
+        } else if (this.gameTypeValue === "division_guess") {
+          const newTeamId = cardDisplay.dataset.teamId
+          const newDivisionId = cardDisplay.dataset.teamDivisionId
+          
+          if (newTeamId && newTeamId !== String(this.subjectIdValue)) {
+            console.log(`[${this.gameTypeValue}] Updating subject ID from ${this.subjectIdValue} to ${newTeamId}`)
+            this.subjectIdValue = parseInt(newTeamId)
+          }
+          
+          if (newDivisionId && newDivisionId !== String(this.correctAnswerIdValue)) {
+            console.log(`[${this.gameTypeValue}] Updating correct answer ID from ${this.correctAnswerIdValue} to ${newDivisionId}`)
+            this.correctAnswerIdValue = parseInt(newDivisionId)
+          }
+        }
+        
+        // Reset the timer for the new question
+        this.startTime = Date.now()
+      }
+    }
+  }
+  
+  loadRecentAttempts() {
+    // Determine game type string for the backend
+    const gameTypeString = this.gameTypeValue === "team_match" 
+      ? "player_team_match" 
+      : "guess_the_division"
+      
+    fetch(`/game_attempts.json?game_type=${gameTypeString}&limit=10`)
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.length > 0 && this.hasAttemptsGridTarget) {
+          this.attemptsContainerTarget.classList.remove("hidden")
+          data.forEach(attempt => this.addAttemptToGrid(attempt))
+        }
+      })
+      .catch(error => console.error(`Error loading recent ${this.gameTypeValue} attempts:`, error))
+  }
+  
+  addAttemptToGrid(attempt) {
+    if (this.gameTypeValue === "team_match") {
+      this.addTeamMatchAttemptToGrid(attempt)
+    } else {
+      this.addDivisionGuessAttemptToGrid(attempt)
+    }
+  }
+  
+  addTeamMatchAttemptToGrid(attempt) {
+    // Implementation for team match attempts
+    const template = document.getElementById("attempt-template")
+    if (!template) return
+    
+    const attemptCard = template.content.cloneNode(true)
+    const card = attemptCard.querySelector(".attempt-card")
+    
+    // Add correct/incorrect styling
+    if (attempt.is_correct) {
+      card.classList.add("correct-attempt")
+    } else {
+      card.classList.add("incorrect-attempt")
+    }
+    
+    // Set team info
+    const teamPart = card.querySelector(".attempt-team-part")
+    const teamLogo = teamPart.querySelector(".attempt-team-logo")
+    const teamName = teamPart.querySelector(".attempt-team-name")
+    
+    // Set appropriate team data
+    if (attempt.is_correct) {
+      teamName.textContent = attempt.chosen_entity.name
+      if (attempt.chosen_entity.logo_url) {
+        teamLogo.src = attempt.chosen_entity.logo_url
+        teamLogo.alt = `${attempt.chosen_entity.name} Logo`
+      } else {
+        teamLogo.classList.add('hidden')
+      }
+    } else {
+      teamName.textContent = attempt.target_entity.name
+      if (attempt.target_entity.logo_url) {
+        teamLogo.src = attempt.target_entity.logo_url
+        teamLogo.alt = `${attempt.target_entity.name} Logo`
+      } else {
+        teamLogo.classList.add('hidden')
+      }
+    }
+    
+    // Set player info
+    const playerPart = card.querySelector(".attempt-player-part")
+    const playerPhoto = playerPart.querySelector(".attempt-player-photo")
+    const playerName = playerPart.querySelector(".attempt-player-name")
+    
+    playerName.textContent = attempt.subject_entity.name
+    if (attempt.subject_entity.photo_url) {
+      playerPhoto.src = attempt.subject_entity.photo_url
+      playerPhoto.alt = `${attempt.subject_entity.name} Photo`
+    } else {
+      playerPhoto.classList.add('hidden')
+    }
+    
+    // Add a timestamp
+    card.dataset.timestamp = new Date(attempt.created_at).getTime()
+    
+    // Prepend to grid (newest first)
+    this.attemptsGridTarget.prepend(card)
+    
+    // Limit to 20 attempts
+    const attempts = this.attemptsGridTarget.children
+    if (attempts.length > 20) {
+      attempts[20].remove()
+    }
+  }
+  
+  addDivisionGuessAttemptToGrid(attempt) {
+    // Implementation for division guess attempts
+    const template = document.getElementById("attempt-template")
+    if (!template) return
+    
+    const attemptCard = template.content.cloneNode(true)
+    const card = attemptCard.querySelector(".attempt-card")
+    
+    // Add correct/incorrect styling
+    if (attempt.is_correct) {
+      card.classList.add("border-green-500")
+    } else {
+      card.classList.add("border-red-500")
+    }
+    
+    // Set team info
+    const teamLogo = card.querySelector(".attempt-team-logo")
+    const teamName = card.querySelector(".attempt-team-name")
+    
+    if (attempt.subject_entity.logo_url) {
+      teamLogo.src = attempt.subject_entity.logo_url
+      teamLogo.alt = `${attempt.subject_entity.name} logo`
+    } else {
+      teamLogo.parentElement.innerHTML = '<i class="fas fa-shield-alt text-3xl text-gray-400"></i>'
+    }
+    
+    teamName.textContent = attempt.subject_entity.name
+    
+    // Set division info
+    const divisionName = card.querySelector(".attempt-division-name")
+    divisionName.textContent = attempt.chosen_entity.name
+    
+    // Add to grid
+    this.attemptsGridTarget.appendChild(attemptCard)
+    
+    // Limit to 20 attempts
+    const attempts = this.attemptsGridTarget.children
+    if (attempts.length > 20) {
+      attempts[0].remove()
+    }
+  }
+  
+  togglePause() {
+    this.isPaused = !this.isPaused
+    this.pauseButtonTextTarget.textContent = this.isPaused ? "Resume" : "Pause"
+    
+    // Toggle icon based on game type
+    if (this.gameTypeValue === "team_match") {
+      this.pauseButtonTarget.querySelector("i").classList.toggle("fa-pause")
+      this.pauseButtonTarget.querySelector("i").classList.toggle("fa-play")
+    } else {
+      this.pauseButtonTarget.querySelector("i").classList.toggle("fa-pause")
+    }
+    
+    if (this.isPaused) {
+      console.log(`[${this.gameTypeValue}] Game paused`)
+    } else {
+      console.log(`[${this.gameTypeValue}] Game resumed`)
+    }
+  }
+}
