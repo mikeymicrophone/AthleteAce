@@ -81,12 +81,13 @@ export default class extends Controller {
     // Get correct status consistently from data-correct attribute
     isCorrect = button.dataset.correct === "true"
     
-    // Extract data based on game type
+    // Extract data with unified approach using guessableId
+    chosenId = parseInt(button.dataset.guessableId)
+    
+    // Get name based on game type
     if (this.gameTypeValue === "team_match") {
-      chosenId = parseInt(button.dataset.teamId)
       chosenName = button.querySelector(".team-name")?.textContent
     } else if (this.gameTypeValue === "division_guess") {
-      chosenId = parseInt(button.dataset.divisionId)
       chosenName = button.querySelector(".division-name")?.textContent
     }
     
@@ -95,8 +96,11 @@ export default class extends Controller {
       choice.disabled = true
     })
     
+    // Get options presented
+    const optionsPresented = this.choiceItemTargets.map(choice => (parseInt(choice.dataset.guessableId)));
+    
     // Send attempt data to server
-    this.sendAttemptData(chosenId, isCorrect)
+    this.sendAttemptData(chosenId, isCorrect, optionsPresented)
     
     // Handle UI updates for correct/incorrect
     this.handleAnswerUI(button, isCorrect, chosenName)
@@ -167,7 +171,7 @@ export default class extends Controller {
     }, 500)
   }
   
-  async sendAttemptData(chosenId, isCorrect) {
+  async sendAttemptData(chosenId, isCorrect, optionsPresented) {
     const endTime = Date.now()
     const timeElapsedMs = endTime - this.startTime
     
@@ -193,6 +197,7 @@ export default class extends Controller {
             target_entity_type: this.answerTypeValue,
             chosen_entity_id: chosenId,
             chosen_entity_type: this.answerTypeValue,
+            options_presented: optionsPresented,
             is_correct: isCorrect,
             time_elapsed_ms: timeElapsedMs
           }
@@ -235,42 +240,44 @@ export default class extends Controller {
       // Get new values from data attributes on the current card
       const cardDisplay = this.subjectCardDisplayTarget
       if (cardDisplay) {
-        // Get data attributes based on game type
         if (this.gameTypeValue === "team_match") {
-          const newPlayerId = cardDisplay.dataset.playerId
-          const newTeamId = cardDisplay.dataset.playerTeamId
+          // For team match game, we need to update from player card
+          const newPlayerId = cardDisplay.dataset.playerId;
+          const newGuessableId = cardDisplay.dataset.guessableId;
           
           if (newPlayerId && newPlayerId !== String(this.subjectIdValue)) {
-            console.log(`[${this.gameTypeValue}] Updating subject ID from ${this.subjectIdValue} to ${newPlayerId}`)
-            this.subjectIdValue = parseInt(newPlayerId)
+            console.log(`[${this.gameTypeValue}] Updating subject ID from ${this.subjectIdValue} to ${newPlayerId}`);
+            this.subjectIdValue = parseInt(newPlayerId);
           }
           
-          if (newTeamId && newTeamId !== String(this.correctAnswerIdValue)) {
-            console.log(`[${this.gameTypeValue}] Updating correct answer ID from ${this.correctAnswerIdValue} to ${newTeamId}`)
-            this.correctAnswerIdValue = parseInt(newTeamId)
+          // If this element has guessable ID and it's different from current, update it
+          if (newGuessableId && newGuessableId !== String(this.correctAnswerIdValue)) {
+            console.log(`[${this.gameTypeValue}] Updating correct answer ID from ${this.correctAnswerIdValue} to ${newGuessableId}`);
+            this.correctAnswerIdValue = parseInt(newGuessableId);
           }
         } else if (this.gameTypeValue === "division_guess") {
-          const newTeamId = cardDisplay.dataset.teamId
-          const newDivisionId = cardDisplay.dataset.teamDivisionId
+          // For division guess game, we need to update from team card
+          const newSubjectId = cardDisplay.dataset.guessableId;
+          const newCorrectAnswerId = cardDisplay.dataset.guessableAnswerId;
           
-          if (newTeamId && newTeamId !== String(this.subjectIdValue)) {
-            console.log(`[${this.gameTypeValue}] Updating subject ID from ${this.subjectIdValue} to ${newTeamId}`)
-            this.subjectIdValue = parseInt(newTeamId)
+          if (newSubjectId && newSubjectId !== String(this.subjectIdValue)) {
+            console.log(`[${this.gameTypeValue}] Updating subject ID from ${this.subjectIdValue} to ${newSubjectId}`);
+            this.subjectIdValue = parseInt(newSubjectId);
           }
           
-          if (newDivisionId && newDivisionId !== String(this.correctAnswerIdValue)) {
-            console.log(`[${this.gameTypeValue}] Updating correct answer ID from ${this.correctAnswerIdValue} to ${newDivisionId}`)
-            this.correctAnswerIdValue = parseInt(newDivisionId)
+          if (newCorrectAnswerId && newCorrectAnswerId !== String(this.correctAnswerIdValue)) {
+            console.log(`[${this.gameTypeValue}] Updating correct answer ID from ${this.correctAnswerIdValue} to ${newCorrectAnswerId}`);
+            this.correctAnswerIdValue = parseInt(newCorrectAnswerId);
           }
         }
         
         // Reset the timer for the new question
-        this.startTime = Date.now()
+        this.startTime = Date.now();
         
         // Update the progress counter target with the current correct answers count
         if (this.hasProgressCounterTarget) {
-          console.log(`[${this.gameTypeValue}] Updating progress counter to ${this.correctAnswers}`)
-          this.progressCounterTarget.textContent = this.correctAnswers
+          console.log(`[${this.gameTypeValue}] Updating progress counter to ${this.correctAnswers}`);
+          this.progressCounterTarget.textContent = this.correctAnswers;
         }
       }
     }

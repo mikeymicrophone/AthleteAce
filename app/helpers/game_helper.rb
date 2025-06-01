@@ -51,10 +51,10 @@ module GameHelper
     
     # Add game-specific data attributes
     if game_type == "team_match"
-      data_attrs[:team_id] = choice.id
+      data_attrs[:guessable_id] = choice.id
       data_attrs[:correct] = is_correct.to_s
     else
-      data_attrs[:division_id] = choice.id
+      data_attrs[:guessable_id] = choice.id
       data_attrs[:correct] = is_correct.to_s
     end
     
@@ -102,7 +102,20 @@ module GameHelper
   
   # Renders a subject card (player or team) with standardized styling
   def game_subject_card(subject, game_type, additional_data = {})
-    data_attrs = { game_target: "subjectCardDisplay" }.merge(additional_data)
+    data_attrs = { game_target: "subjectCardDisplay" }
+    
+    # Add appropriate data attributes based on game type
+    if game_type == "team_match"
+      # For team match, subject is a player and the answer is their team
+      data_attrs[:player_id] = subject.id
+      data_attrs[:guessable_id] = subject.team_id if subject.respond_to?(:team_id)
+    else
+      # For division guess, subject is a team and answer is their division
+      data_attrs[:guessable_id] = subject.id #TODO: check this
+      data_attrs[:guessable_answer_id] = subject.division_id if subject.respond_to?(:division_id)
+    end
+    
+    data_attrs.merge!(additional_data)
     
     tag.div(class: "subject-card", data: data_attrs) do
       # Question text based on game type

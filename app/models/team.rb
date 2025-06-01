@@ -14,6 +14,7 @@ class Team < ApplicationRecord
   def name
     "#{territory} #{mascot}"
   end
+  alias :full_name :name
   
   # Rating methods
   

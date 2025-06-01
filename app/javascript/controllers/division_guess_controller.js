@@ -16,8 +16,8 @@ export default class extends Controller {
   ]
 
   static values = {
-    teamId: Number,
-    correctDivisionId: Number
+    subjectId: Number,
+    correctAnswerId: Number
   }
 
   connect() {
@@ -27,7 +27,7 @@ export default class extends Controller {
     this.isAnimating = false
     this.nextQuestionTimer = null
     this.startTime = Date.now()
-    console.log("Division Guess Controller connected. Team ID:", this.teamIdValue, "Correct Division ID:", this.correctDivisionIdValue)
+    console.log("Division Guess Controller connected. Subject ID:", this.subjectIdValue, "Correct Answer ID:", this.correctAnswerIdValue)
     
     // Listen for Turbo frame responses to update team values after a frame refresh
     document.addEventListener("turbo:frame-render", this.handleFrameRender.bind(this))
@@ -56,8 +56,8 @@ export default class extends Controller {
     console.log("[DG Controller] checkAnswer() - isAnimating set to true")
 
     const button = event.currentTarget
-    const divisionId = parseInt(button.dataset.divisionId)
-    const isCorrect = divisionId === this.correctDivisionIdValue
+    const guessableId = parseInt(button.dataset.guessableId)
+    const isCorrect = guessableId === this.correctAnswerIdValue
 
     // Disable all buttons during animation
     this.divisionChoiceTargets.forEach(choice => {
@@ -65,7 +65,7 @@ export default class extends Controller {
     })
 
     // Send attempt data to server (without expecting next question in response)
-    this.sendAttemptData(divisionId, isCorrect)
+    this.sendAttemptData(guessableId, isCorrect)
 
     if (isCorrect) {
       console.log("[DG Controller] checkAnswer() - answer IS correct")
@@ -90,7 +90,7 @@ export default class extends Controller {
       
       // Find and highlight the correct answer
       const correctButton = this.divisionChoiceTargets.find(choice => 
-        parseInt(choice.dataset.divisionId) === this.correctDivisionIdValue
+        parseInt(choice.dataset.guessableId) === this.correctAnswerIdValue
       )
       correctButton.classList.add("bg-green-500", "text-white")
       
@@ -111,7 +111,7 @@ export default class extends Controller {
     }
   }
 
-  async sendAttemptData(guessedDivisionId, isCorrect) {
+  async sendAttemptData(guessedId, isCorrect) {
     const endTime = Date.now()
     const timeElapsedMs = endTime - this.startTime
     
@@ -127,11 +127,11 @@ export default class extends Controller {
         body: JSON.stringify({
           game_attempt: {
             game_type: "guess_the_division",
-            subject_entity_id: this.teamIdValue,
+            subject_entity_id: this.subjectIdValue,
             subject_entity_type: "Team",
-            target_entity_id: this.correctDivisionIdValue,
+            target_entity_id: this.correctAnswerIdValue,
             target_entity_type: "Division",
-            chosen_entity_id: guessedDivisionId,
+            chosen_entity_id: guessedId,
             chosen_entity_type: "Division",
             is_correct: isCorrect,
             time_elapsed_ms: timeElapsedMs
@@ -208,17 +208,17 @@ export default class extends Controller {
       // Get new values from data attributes on the current team card
       const teamCard = this.currentTeamCardDisplayTarget
       if (teamCard) {
-        const newTeamId = teamCard.dataset.teamId
-        const newDivisionId = teamCard.dataset.teamDivisionId
+        const newSubjectId = teamCard.dataset.guessableId
+        const newAnswerId = teamCard.dataset.guessableAnswerId
         
-        if (newTeamId && newTeamId !== String(this.teamIdValue)) {
-          console.log(`[DG Controller] Updating team ID from ${this.teamIdValue} to ${newTeamId}`)
-          this.teamIdValue = parseInt(newTeamId)
+        if (newSubjectId && newSubjectId !== String(this.subjectIdValue)) {
+          console.log(`[DG Controller] Updating subject ID from ${this.subjectIdValue} to ${newSubjectId}`)
+          this.subjectIdValue = parseInt(newSubjectId)
         }
         
-        if (newDivisionId && newDivisionId !== String(this.correctDivisionIdValue)) {
-          console.log(`[DG Controller] Updating correct division ID from ${this.correctDivisionIdValue} to ${newDivisionId}`)
-          this.correctDivisionIdValue = parseInt(newDivisionId)
+        if (newAnswerId && newAnswerId !== String(this.correctAnswerIdValue)) {
+          console.log(`[DG Controller] Updating correct answer ID from ${this.correctAnswerIdValue} to ${newAnswerId}`)
+          this.correctAnswerIdValue = parseInt(newAnswerId)
         }
         
         // Reset the timer for the new question

@@ -54,7 +54,7 @@ class GameAttemptsController < ApplicationController
       :chosen_entity_type,
       :is_correct,
       :time_elapsed_ms,
-      options_presented: [:id, :type, :name] # Permit array of objects with these keys
+      options_presented: [] # Accept options_presented as a simple array of values
     )
   end
 end
