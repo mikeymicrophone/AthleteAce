@@ -30,81 +30,14 @@
               <% end %>
             <% end %>
             
-            <%= tag.div class: "player-stats" do %>
-              <%= tag.div class: "stats-group" do %>
-                <%= tag.div class: "stat-item" do %>
-                  <%= tag.span "All-time", class: "stat-label" %>
-                  <%= tag.div class: "stat-value" do %>
-                    <%= tag.span "#{@player_stats[player][:correct_attempts]}/#{@player_stats[player][:total_attempts]}", class: "stat-fraction" %>
-                    <%= tag.span "(#{@player_stats[player][:accuracy]}%)", class: "stat-percentage" %>
-                  <% end %>
-                <% end %>
-                
-                <%= tag.div class: "stat-item" do %>
-                  <%= tag.span "Last Week", class: "stat-label" %>
-                  <%= tag.div class: "stat-value" do %>
-                    <%= tag.span "#{@player_stats[player][:recent_correct]}/#{@player_stats[player][:recent_total]}", class: "stat-fraction" %>
-                    <%= tag.span "(#{@player_stats[player][:recent_accuracy]}%)", class: "stat-percentage" %>
-                  <% end %>
-                <% end %>
-              <% end %>
-            <% end %>
+            <%= player_guess_attempts_stats_panel @player_stats, player %>
           <% end %>
           
           <%= tag.div class: "player-ratings" do %>
-            <%= tag.div class: "ratings-header" do %>
-              <%= tag.h3 "Player Ratings", class: "ratings-heading" %>
-              <%= tag.div class: "spectrum-selector" do %>
-                <% familiarity_spectrum = Spectrum.find_by(name: 'Familiarity') %>
-                <% all_spectrums = Spectrum.all.to_a %>
-                <% selected_spectrums = [familiarity_spectrum] %>
-                
-                <%= tag.div class: "spectrum-picker" do %>
-                  <%= tag.label "Select spectrum:", for: "spectrum-select-#{player.id}", class: "spectrum-label" %>
-                  <%= tag.select id: "spectrum-select-#{player.id}", 
-                                class: "spectrum-select",
-                                data: { 
-                                  action: "change->rating-slider#updateSelectedSpectrum",
-                                  player_id: player.id 
-                                } do %>
-                    <% all_spectrums.each do |spectrum| %>
-                      <%= tag.option spectrum.name, 
-                                    value: spectrum.id, 
-                                    selected: spectrum == familiarity_spectrum %>
-                    <% end %>
-                  <% end %>
-                <% end %>
-              <% end %>
-            <% end %>
-            
-            <%= rating_slider_container(player, selected_spectrums) %>
+            <%= rating_slider_container(player, [Spectrum.find_by(name: 'Familiarity')]) %>
           <% end %>
           
-          <%= tag.div class: "player-attempts" do %>
-            <%= tag.h3 "Recent Attempts", class: "attempts-heading" %>
-            <%= tag.div class: "attempts-list" do %>
-              <% @attempts_by_player[player].sort_by(&:created_at).reverse.take(5).each do |attempt| %>
-                <%= tag.div class: "attempt-card #{attempt.correct? ? 'correct-attempt' : 'incorrect-attempt'}" do %>
-                  <%= tag.div class: "attempt-team-part" do %>
-                    <%= tag.div class: "attempt-team-logo-container" do %>
-                      <%= display_name_with_lazy_logo(attempt.target_entity) %>
-                    <% end %>
-                    <%= tag.p attempt.target_entity.name, class: "attempt-team-name" %>
-                  <% end %>
-                  
-                  <% unless attempt.correct? %>
-                    <%= tag.div class: "chosen-team-indicator" do %>
-                      Your Guess: <%= attempt.chosen_entity.name %>
-                    <% end %>
-                  <% end %>
-                  
-                  <%= tag.div class: "attempt-timestamp" do %>
-                    <%= time_ago_in_words(attempt.created_at) %> ago
-                  <% end %>
-                <% end %>
-              <% end %>
-            <% end %>
-          <% end %>
+          <%= result_of_recent_game_attempts_for_player player, @attempts_by_player %>
         <% end %>
       <% end %>
     <% end %>
