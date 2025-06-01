@@ -396,11 +396,6 @@
 .attempt-team-logo {
   @apply max-h-16 max-w-full object-contain;
 }
-
-.attempt-team-name {
-  @apply text-sm font-semibold mt-1 truncate w-full;
-}
-
 /* Attempt player parts */
 .attempt-player-part {
   @apply w-full p-2 text-center border-t;
@@ -409,11 +404,6 @@
 .attempt-player-photo {
   @apply max-h-16 max-w-full object-cover rounded-full;
 }
-
-.attempt-player-name {
-  @apply text-sm font-semibold mt-1 truncate w-full;
-}
-
 /* Result indicators */
 .result-indicator {
   @apply text-sm font-semibold;

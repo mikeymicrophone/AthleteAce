@@ -57,10 +57,6 @@
   @apply flex justify-center items-center h-16;
 }
 
-.attempt-team-name {
-  @apply text-sm font-semibold mt-1 truncate w-full;
-}
-
 .attempt-player-part {
   @apply w-full p-2 text-center border-t;
 }
@@ -76,10 +72,6 @@
 
 .attempt-player-photo-container {
   @apply flex justify-center items-center h-16;
-}
-
-.attempt-player-name {
-  @apply text-xs font-medium mt-1 truncate w-full;
 }
 
 .chosen-team-indicator {

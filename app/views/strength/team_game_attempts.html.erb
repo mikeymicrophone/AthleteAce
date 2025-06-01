@@ -12,39 +12,22 @@
         <%= tag.div class: "player-section" do %>
           <%= tag.div class: "player-section-header" do %>
             <%= tag.div class: "player-info" do %>
-              <%= tag.div class: "player-photo-container" do %>
-                <% if player.photo_urls.present? %>
-                  <%= tag.img src: player.photo_urls.first, alt: player.full_name, class: "player-photo" %>
-                <% else %>
-                  <%= tag.div class: "player-photo-placeholder" do %>
-                    <%= tag.i class: "fa-solid fa-user" %>
-                  <% end %>
-                <% end %>
-              <% end %>
-              
+              <%= player_photo_display player %>
               <%= tag.div class: "player-details" do %>
                 <%= tag.h2 player.full_name, class: "player-name" %>
-                <% if player.primary_position %>
-                  <%= tag.p player.primary_position.name, class: "player-position" %>
-                <% end %>
+                <%= player_position_display player %>
               <% end %>
             <% end %>
             
             <%= player_guess_attempts_stats_panel @player_stats, player %>
           <% end %>
           
-          <%= tag.div class: "player-ratings" do %>
-            <%= rating_slider_container(player, [Spectrum.find_by(name: 'Familiarity')]) %>
-          <% end %>
-          
+          <%= tag.div rating_slider_container(player, [Spectrum.find_by(name: 'Familiarity')]), class: "player-ratings" %>
           <%= result_of_recent_game_attempts_for_player player, @attempts_by_player %>
         <% end %>
       <% end %>
     <% end %>
   <% else %>
-    <%= tag.div class: "empty-attempts-message" do %>
-      <%= tag.p "You haven't made any game attempts with players from this team yet.", class: "empty-attempts-text" %>
-      <%= link_to "Start Playing", strength_team_match_path(team_id: @team.id), class: "start-playing-button" %>
-    <% end %>
+    <%= empty_attempts_message @team %>
   <% end %>
 <% end %>

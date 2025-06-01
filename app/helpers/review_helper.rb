@@ -34,15 +34,13 @@ module ReviewHelper
       tag.div(class: "attempt-team-part") do
         tag.div(class: "attempt-team-logo-container") do
           display_name_with_lazy_logo attempt.target_entity
-        end +
-        tag.p(attempt.target_entity.name, class: "attempt-team-name")
+        end
       end +
       
       (show_player_name ? tag.div(class: "attempt-player-part") do
         tag.div(class: "attempt-player-photo-container") do
           display_name_with_lazy_logo attempt.subject_entity
-        end +
-        tag.p(attempt.subject_entity.full_name, class: "attempt-player-name")
+        end
       end : "") +
       unless attempt.correct?
         tag.div "Your Guess: #{attempt.chosen_entity.name}", class: "chosen-team-indicator"
@@ -61,12 +59,16 @@ module ReviewHelper
             safe_join game_attempts.map { |attempt| review_attempt_card(attempt) }
           end
         else
-          tag.div class: "empty-attempts-message" do
-            tag.p("You haven't made any game attempts yet.", class: "empty-attempts-text") +
-            link_to("Start Playing", strength_team_match_path, class: "start-playing-button")
-          end
+          empty_attempts_message
         end
       end
+    end
+  end
+
+  def empty_attempts_message team = nil
+    tag.div class: "empty-attempts-message" do
+      tag.p("You haven't made any game attempts #{team ? "with players from #{team.name}" : ""} yet.", class: "empty-attempts-text") +
+      link_to("Start Playing", (team ? strength_team_match_path(team_id: team.id) : strength_team_match_path), class: "start-playing-button")
     end
   end
 
