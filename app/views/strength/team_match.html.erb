@@ -1,13 +1,8 @@
 <% content_for :title, @division.present? ? "#{@division.name} Division Quiz - Team Match" : "Team Match - Strength Training" %>
 
-<%= game_container(@current_player, @correct_team, @team_choices, @parent) do %>
-  <%= turbo_frame_tag "team_match_game" do %>
-    <%= game_layout do %>
-      <%= player_card_section(@current_player) %>
-      <%= team_choices_section(@team_choices, @correct_team.id) %>
-    <% end %>
-  <% end %>
-
-  <%= progress_indicator %>
-  <%= attempts_history_container %>
-<% end %>
+<%= render "shared/game_frame", 
+    game_type: "team_match",
+    subject: @current_player, 
+    correct_answer: @correct_team, 
+    choices: @team_choices,
+    content_partial: "strength/team_match_content" %>

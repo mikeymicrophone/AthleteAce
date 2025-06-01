@@ -1,0 +1,467 @@
+/* Game Helper Styles */
+
+/* Common flex layouts */
+.game-progress,
+.progress-controls,
+.controls,
+.entity-image-container,
+.choice-image-container,
+.choice-image-placeholder,
+.entity-image-placeholder,
+.attempt-content,
+.attempt-item {
+  @apply flex items-center;
+}
+
+.game-progress,
+.controls {
+  @apply justify-between;
+}
+
+.choice-item,
+.choice-image-container,
+.choice-image-placeholder,
+.entity-image-container,
+.entity-image-placeholder {
+  @apply flex flex-col items-center;
+}
+
+.entity-image-container,
+.choice-image-container {
+  @apply justify-center;
+}
+
+/* Grid layouts */
+.choices-grid {
+  @apply grid gap-4 mb-6;
+  
+  &.choices-grid-1 {
+    @apply grid-cols-1;
+  }
+  
+  &.choices-grid-2 {
+    @apply grid-cols-1 sm:grid-cols-2;
+  }
+  
+  &.choices-grid-3 {
+    @apply grid-cols-1 sm:grid-cols-3;
+  }
+}
+
+.attempts-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+.attempts-list {
+  @apply space-y-2;
+}
+
+/* Main containers */
+.game-container {
+  @apply p-4 bg-white rounded-lg shadow-md;
+}
+
+.subject-card {
+  @apply p-4 bg-white rounded-lg shadow-md;
+}
+
+.attempts-container {
+  @apply mt-8 p-4 bg-white rounded-lg shadow-md;
+}
+
+.recent-attempts {
+  @apply mt-6 bg-white rounded-lg shadow-md p-4;
+}
+
+/* Headers and titles */
+.game-header {
+  @apply mb-4;
+}
+
+.game-title {
+  @apply text-xl font-bold text-center text-gray-800;
+}
+
+.subject-question {
+  @apply text-lg font-bold mb-4 text-center;
+}
+
+.attempts-heading {
+  @apply text-lg font-bold mb-4 text-center;
+}
+
+.recent-attempts-heading {
+  @apply text-lg font-bold mb-2;
+}
+
+/* Progress components */
+.game-progress {
+  @apply my-3;
+}
+
+.progress-text {
+  @apply text-sm font-medium;
+}
+
+.progress-count {
+  @apply font-bold;
+}
+
+.controls {
+  @apply mt-6;
+}
+
+.progress-label {
+  @apply text-gray-600;
+}
+
+.progress-counter {
+  @apply font-bold;
+}
+
+/* Pause buttons */
+.pause-button {
+  @apply px-3 py-1 text-sm rounded-md;
+}
+
+.pause-button-main {
+  @apply bg-gray-200 hover:bg-gray-300 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.pause-icon,
+.pause-button-icon {
+  @apply mr-1;
+}
+
+.pause-button-icon {
+  @apply mr-2;
+}
+
+/* Choice items */
+.choice-item {
+  @apply p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200;
+}
+
+.choice-image-container {
+  @apply mb-2;
+}
+
+.choice-image {
+  @apply w-16 h-16 object-contain;
+}
+
+.choice-image-placeholder {
+  @apply w-16 h-16 bg-gray-200 rounded-full justify-center;
+}
+
+.choice-placeholder-icon {
+  @apply text-3xl text-gray-400;
+}
+
+.choice-name {
+  @apply text-center font-medium;
+}
+
+/* Entity components */
+.entity-image-container {
+  @apply mb-4;
+}
+
+.entity-image {
+  @apply w-32 h-32;
+  
+  &.entity-image-player {
+    @apply object-cover rounded-full;
+  }
+  
+  &.entity-image-team {
+    @apply object-contain;
+  }
+}
+
+.entity-image-placeholder {
+  @apply w-32 h-32 bg-gray-200 rounded-full justify-center;
+}
+
+.entity-placeholder-icon {
+  @apply text-5xl text-gray-400;
+}
+
+.entity-name {
+  @apply text-center text-xl font-bold mb-2;
+}
+
+.entity-subtitle {
+  @apply text-center text-gray-600;
+}
+
+/* Answer overlay - clean style for memory reinforcement */
+.answer-overlay {
+  @apply fixed inset-0 flex items-center justify-center z-50 pointer-events-none opacity-0 transition-opacity duration-300 ease-in-out;
+  backdrop-filter: blur(2px);
+  
+  &.visible {
+    @apply opacity-100;
+  }
+}
+
+.answer-text {
+  @apply text-6xl font-bold text-white text-center;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  font-family: 'Arial Black', Arial, sans-serif;
+  letter-spacing: 2px;
+  line-height: 1.2;
+}
+
+/* Legacy overlay styles (can be removed eventually) */
+.correct-answer-overlay {
+  @apply fixed inset-0 flex items-center justify-center z-50 pointer-events-none opacity-0 transition-opacity duration-300 ease-in-out backdrop-blur-sm;
+}
+
+.overlay-content {
+  @apply p-6 bg-white rounded-lg shadow-xl text-center max-w-md transform transition-all duration-300 ease-in-out border-4;
+}
+
+.team-match-overlay .overlay-content {
+  @apply border-blue-500 scale-100 hover:scale-105;
+}
+
+.result-title {
+  @apply mb-3 text-2xl font-bold;
+}
+
+.overlay-text {
+  @apply text-xl font-bold text-gray-800 px-4;
+}
+
+/* Team name overlay - the old clean style (for backward compatibility) */
+.team-name-overlay {
+  @apply fixed inset-0 flex items-center justify-center z-50 pointer-events-none opacity-0 transition-opacity duration-300 ease-in-out;
+  backdrop-filter: blur(2px);
+  
+  &.visible {
+    @apply opacity-100;
+  }
+}
+
+.team-name-text {
+  @apply text-6xl font-bold text-white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  font-family: 'Arial Black', Arial, sans-serif;
+  letter-spacing: 2px;
+}
+
+/* Attempt items */
+.attempt-item {
+  @apply justify-between p-2 border-b border-gray-100;
+  
+  &.correct-attempt {
+    @apply border-green-500 bg-green-50;
+  }
+  
+  &.incorrect-attempt {
+    @apply border-red-500 bg-red-50;
+  }
+}
+
+.attempt-entity-name {
+  @apply font-medium;
+}
+
+.attempt-result {
+  @apply text-sm font-semibold;
+  
+  &.correct-indicator {
+    @apply text-green-600;
+  }
+  
+  &.incorrect-indicator {
+    @apply text-red-600;
+  }
+}
+
+.correct-icon {
+  @apply text-green-600 mr-2;
+}
+
+.incorrect-icon {
+  @apply text-red-600 mr-2;
+}
+
+/* No attempts message */
+.no-attempts-message {
+  @apply text-gray-500 italic text-sm;
+}
+
+/* Choice states and animations */
+.choice-item {
+  &.correct-choice {
+    @apply bg-green-500 text-white;
+  }
+  
+  &.incorrect-choice {
+    @apply bg-red-500 text-white;
+  }
+  
+  &.correct-answer {
+    @apply bg-green-500 text-white;
+  }
+  
+  &.pulsing {
+    animation: pulse 1s ease-in-out infinite;
+  }
+}
+
+/* Attempt templates and cards */
+.attempt-template {
+  @apply hidden;
+}
+
+.attempt-card {
+  @apply border rounded-md overflow-hidden p-2 mb-2;
+  
+  &.correct-attempt {
+    @apply border-green-500 bg-green-50;
+  }
+  
+  &.incorrect-attempt {
+    @apply border-red-500 bg-red-50;
+  }
+}
+
+/* Recent attempts container */
+.recent-attempts-container {
+  @apply mt-6;
+}
+
+/* Shared template structure from game_frame */
+.attempt-subject-part {
+  @apply p-3 bg-gray-50;
+}
+
+.attempt-subject-image {
+  @apply h-8 w-8 mr-2 object-contain rounded-full;
+}
+
+.attempt-subject-name {
+  @apply font-medium text-sm;
+}
+
+.attempt-answer-part {
+  @apply p-3;
+}
+
+.attempt-answer-image {
+  @apply h-8 w-8 mr-2 object-contain;
+}
+
+.attempt-answer-name {
+  @apply text-sm;
+}
+
+.attempt-result {
+  @apply px-2 py-1 rounded-md text-xs font-medium;
+  
+  &.correct-result {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  &.incorrect-result {
+    @apply bg-red-100 text-red-800;
+  }
+}
+
+.attempt-time {
+  @apply text-xs p-2 bg-gray-50 text-gray-500 text-right;
+}
+
+/* Attempt entity parts */
+.attempt-entity-part {
+  @apply mb-2;
+}
+
+.attempt-entity-name {
+  @apply font-medium text-sm;
+}
+
+.attempt-entity-detail {
+  @apply text-xs text-gray-600;
+}
+
+/* Attempt team parts */
+.attempt-team-part {
+  @apply w-full p-2 text-center;
+}
+
+.attempt-team-logo {
+  @apply max-h-16 max-w-full object-contain;
+}
+
+.attempt-team-name {
+  @apply text-sm font-semibold mt-1 truncate w-full;
+}
+
+/* Attempt player parts */
+.attempt-player-part {
+  @apply w-full p-2 text-center border-t;
+}
+
+.attempt-player-photo {
+  @apply max-h-16 max-w-full object-cover rounded-full;
+}
+
+.attempt-player-name {
+  @apply text-sm font-semibold mt-1 truncate w-full;
+}
+
+/* Result indicators */
+.result-indicator {
+  @apply text-sm font-semibold;
+}
+
+.result-icon {
+  @apply mr-2;
+}
+
+.correct-result {
+  @apply text-green-600;
+}
+
+.incorrect-result {
+  @apply text-red-600;
+}
+
+/* Overlay animations and states */
+.overlay-content {
+  &.scale-105 {
+    transform: scale(1.05);
+  }
+  
+  &.scale-100 {
+    transform: scale(1.0);
+  }
+}
+
+/* Pulse animation for correct answers */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Hidden utility */
+.hidden {
+  @apply hidden;
+}
+
+/* Opacity utilities for overlay */
+.opacity-0 {
+  opacity: 0;
+}
+
+.opacity-100 {
+  opacity: 1;
+}

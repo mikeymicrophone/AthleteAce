@@ -32,8 +32,12 @@ class GameAttemptsController < ApplicationController
     @game_attempt = current_ace.game_attempts.build(game_attempt_params)
 
     if @game_attempt.save
-      # Respond with success, no content needed back usually
-      head :created
+      # Return the saved attempt as JSON with associated entities
+      render json: @game_attempt.as_json(include: {
+        subject_entity: { methods: [:logo_url, :name] },
+        target_entity: { methods: [:logo_url, :name] },
+        chosen_entity: { methods: [:logo_url, :name] }
+      }), status: :created
     else
       # Log errors for debugging
       Rails.logger.error "Failed to save GameAttempt: #{@game_attempt.errors.full_messages.join(', ')}"
@@ -54,7 +58,7 @@ class GameAttemptsController < ApplicationController
       :chosen_entity_type,
       :is_correct,
       :time_elapsed_ms,
-      options_presented: [:id, :type, :name] # Permit array of objects with these keys
+      options_presented: [] # Accept options_presented as a simple array of values
     )
   end
 end

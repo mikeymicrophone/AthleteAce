@@ -1,0 +1,18 @@
+<%= tag.div id: "attempt-template", class: "hidden" do %>
+  <%= tag.div class: "attempt-card" do %>
+    <%= tag.div class: "attempt-entity-part" do %>
+      <%= tag.div class: "attempt-icon-container" do %>
+        <%= tag.img src: "", alt: "", class: "attempt-entity-logo hidden" %>
+        <%= tag.i class: "fas fa-shield-alt text-gray-400 attempt-entity-icon" %>
+      <% end %>
+      <%= tag.div class: "attempt-entity-info" do %>
+        <%= tag.div class: "attempt-entity-name" %>
+        <%= tag.div class: "attempt-entity-detail" %>
+      <% end %>
+    <% end %>
+    <%= tag.div class: "attempt-result" do %>
+      <%= tag.span class: "result-indicator" %>
+      <%= tag.i class: "fas result-icon" %>
+    <% end %>
+  <% end %>
+<% end %>

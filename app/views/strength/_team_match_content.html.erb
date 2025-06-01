@@ -1,0 +1,17 @@
+<%# Content to be inserted directly into team_match_game frame - uses unified game controller %>
+<%= unified_game_container "team_match" do %>
+  <div class="flex flex-col lg:flex-row gap-8">
+    <div class="lg:w-1/3">
+      <%= game_subject_card(subject, "team_match") %>
+    </div>
+
+    <div class="lg:w-2/3">
+      <div class="team-match-container">
+        <%= game_choices_grid(choices, correct_answer, "team_match") %>
+        <%= game_progress_display %>  
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<%= game_correct_answer_overlay("team_match") %>

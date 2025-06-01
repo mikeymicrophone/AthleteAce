@@ -1,0 +1,202 @@
+/* Division Guessing Games Styles */
+
+/* Common flex layouts */
+.team-logo-container,
+.attempt-team-logo-container,
+.attempt-division-icon-container,
+.team-logo-placeholder,
+.recent-attempt-team,
+.division-choice-content,
+.division-icon-wrapper,
+.recent-attempt-team-logo-placeholder {
+  @apply flex justify-center items-center;
+}
+
+.attempt-card,
+.division-choice,
+.division-choice-content {
+  @apply flex flex-col items-center;
+}
+
+/* Grid layouts */
+.attempts-grid {
+  @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4;
+}
+
+.division-choices-grid {
+  @apply grid grid-cols-2 gap-4;
+}
+
+.recent-attempts-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4;
+}
+
+/* Main containers */
+.attempts-container {
+  @apply mt-8 p-4 border border-gray-200 rounded-lg shadow-sm;
+}
+
+.team-card {
+  @apply bg-white rounded-lg shadow-md p-6;
+}
+
+.recent-attempts {
+  @apply mt-6;
+}
+
+/* Headings */
+.attempts-heading {
+  @apply text-lg font-semibold mb-3 text-center text-gray-700;
+}
+
+.recent-attempts-heading {
+  @apply text-lg font-semibold mb-3;
+}
+
+/* Attempt cards template */
+.attempt-card {
+  @apply border rounded-md overflow-hidden;
+}
+
+.attempt-team-part {
+  @apply w-full p-2 text-center;
+}
+
+.attempt-team-logo-container {
+  @apply h-16;
+}
+
+.attempt-team-logo {
+  @apply max-h-16 max-w-full object-contain;
+}
+
+.attempt-team-name {
+  @apply text-sm font-semibold mt-1 truncate w-full;
+}
+
+.attempt-division-part {
+  @apply w-full p-2 text-center border-t;
+}
+
+.attempt-division-icon-container {
+  @apply h-12;
+}
+
+.attempt-division-icon {
+  @apply text-2xl;
+}
+
+.attempt-division-name {
+  @apply text-xs font-medium mt-1 truncate w-full;
+}
+
+/* Team components */
+.team-logo-container {
+  @apply h-32 mb-4;
+}
+
+.team-logo {
+  @apply max-h-32 max-w-full object-contain;
+}
+
+.team-logo-placeholder {
+  @apply h-32 w-32 bg-gray-200 rounded-full;
+}
+
+.team-logo-placeholder-icon {
+  @apply text-6xl text-gray-400;
+}
+
+.team-info {
+  @apply text-center;
+}
+
+.team-info .team-name {
+  @apply text-2xl font-bold mb-2;
+}
+
+.team-league {
+  @apply text-gray-600;
+}
+
+/* Division choices */
+.division-choice {
+  @apply justify-center w-full h-32 p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border-2 border-transparent hover:border-blue-300;
+}
+
+.division-icon-wrapper {
+  @apply text-blue-600 mb-2;
+}
+
+.division-choice-icon {
+  @apply text-xl;
+}
+
+.division-choice .division-name {
+  @apply text-lg font-medium text-center;
+}
+
+/* Recent attempts */
+.recent-attempt-card {
+  @apply border rounded-lg overflow-hidden;
+  
+  &.correct-attempt {
+    @apply border-green-500;
+  }
+  
+  &.incorrect-attempt {
+    @apply border-red-500;
+  }
+}
+
+.recent-attempt-content {
+  @apply p-3;
+  
+  .correct-attempt & {
+    @apply bg-green-50;
+  }
+  
+  .incorrect-attempt & {
+    @apply bg-red-50;
+  }
+}
+
+.recent-attempt-team {
+  @apply mb-2;
+}
+
+.recent-attempt-team-logo {
+  @apply h-8 w-8 mr-2 object-contain;
+}
+
+.recent-attempt-team-logo-placeholder {
+  @apply h-8 w-8 mr-2 bg-gray-200 rounded-full;
+}
+
+.recent-attempt-team-logo-icon {
+  @apply text-gray-500;
+}
+
+.recent-attempt-team-name {
+  @apply font-medium text-sm;
+}
+
+.recent-attempt-guess {
+  @apply text-xs text-gray-600 mb-1;
+}
+
+.recent-attempt-result {
+  @apply text-xs;
+  
+  .correct-attempt & {
+    @apply text-green-600;
+  }
+  
+  .incorrect-attempt & {
+    @apply text-red-600;
+  }
+}
+
+.recent-attempt-timestamp {
+  @apply text-xs p-2 bg-gray-50 text-gray-500 text-right;
+}

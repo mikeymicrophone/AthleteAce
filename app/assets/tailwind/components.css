@@ -7,6 +7,10 @@
 @import "./components/rating_slider.css";
 @import "./components/quests.css";
 @import "./components/navigation.css";
+@import "./components/game_attempts.css";
+@import "./components/division_guess_game.css";
+@import "./components/game_styles.css";
+
 
 .btn {
   @apply inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700;

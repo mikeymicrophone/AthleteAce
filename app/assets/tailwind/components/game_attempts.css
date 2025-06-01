@@ -101,3 +101,41 @@
 .start-playing-button {
   @apply mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
 }
+
+/* Team attempts filter button */
+.sport-section {
+  @apply mb-4;
+}
+
+.sport-title {
+  @apply text-lg font-semibold mb-2;
+}
+
+.teams-buttons {
+  @apply flex flex-wrap gap-2 mb-4;
+}
+
+
+.team-button {
+  @apply bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-3 rounded-lg shadow-md inline-flex items-center text-sm transition-colors duration-150;
+}
+
+.team-button-content {
+  @apply flex items-center;
+}
+
+.team-button-logo {
+  @apply w-5 h-5 mr-2 object-contain;
+}
+
+.team-button-icon {
+  @apply mr-2;
+}
+
+.team-button-name {
+  @apply mr-2;
+}
+
+.team-button-stats {
+  @apply text-xs bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded-full;
+}
