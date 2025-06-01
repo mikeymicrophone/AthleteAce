@@ -208,6 +208,18 @@ export default class extends Controller {
         console.error("Failed to save attempt:", await response.text())
       } else {
         console.log("Game attempt saved successfully")
+        // Get the saved attempt data from the response
+        const savedAttempt = await response.json()
+        
+        // Make sure the attempts container is visible
+        if (this.hasAttemptsContainerTarget) {
+          this.attemptsContainerTarget.classList.remove("hidden")
+        }
+        
+        // Add the attempt to the UI with a slight delay for better UX
+        setTimeout(() => {
+          this.addAttemptToGrid(savedAttempt)
+        }, 500)
       }
     } catch (error) {
       console.error("Error saving attempt:", error)
@@ -522,34 +534,56 @@ export default class extends Controller {
     // Add correct/incorrect styling
     if (attempt.is_correct) {
       card.classList.add("border-green-500")
+      card.querySelector(".attempt-result").textContent = "Correct"
+      card.querySelector(".attempt-result").classList.add("bg-green-100", "text-green-800")
     } else {
       card.classList.add("border-red-500")
+      card.querySelector(".attempt-result").textContent = "Incorrect"
+      card.querySelector(".attempt-result").classList.add("bg-red-100", "text-red-800")
     }
     
-    // Set team info
-    const teamLogo = card.querySelector(".attempt-team-logo")
-    const teamName = card.querySelector(".attempt-team-name")
+    // Set subject (team) info
+    const subjectImage = card.querySelector(".attempt-subject-image")
+    const subjectName = card.querySelector(".attempt-subject-name")
     
+    subjectName.textContent = attempt.subject_entity.name
     if (attempt.subject_entity.logo_url) {
-      teamLogo.src = attempt.subject_entity.logo_url
-      teamLogo.alt = `${attempt.subject_entity.name} logo`
+      subjectImage.src = attempt.subject_entity.logo_url
+      subjectImage.alt = `${attempt.subject_entity.name} logo`
     } else {
-      teamLogo.parentElement.innerHTML = '<i class="fas fa-shield-alt text-3xl text-gray-400"></i>'
+      subjectImage.parentElement.innerHTML = '<i class="fas fa-shield-alt text-3xl text-gray-400"></i>'
     }
     
-    teamName.textContent = attempt.subject_entity.name
+    // Set answer (division) info
+    const answerImage = card.querySelector(".attempt-answer-image")
+    const answerName = card.querySelector(".attempt-answer-name")
     
-    // Set division info
-    const divisionName = card.querySelector(".attempt-division-name")
-    divisionName.textContent = attempt.chosen_entity.name
+    // For division guessing, the answer is the chosen division
+    answerName.textContent = attempt.chosen_entity.name
     
-    // Add to grid
-    this.attemptsGridTarget.appendChild(attemptCard)
+    // Divisions don't typically have logos, but if they did:
+    if (attempt.chosen_entity.logo_url) {
+      answerImage.src = attempt.chosen_entity.logo_url
+      answerImage.alt = `${attempt.chosen_entity.name} logo`
+    } else {
+      answerImage.classList.add('hidden')
+    }
+    
+    // Add timestamp
+    const timeDisplay = card.querySelector(".attempt-time")
+    if (timeDisplay) {
+      const date = new Date(attempt.created_at || Date.now())
+      timeDisplay.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      card.dataset.timestamp = date.getTime()
+    }
+    
+    // Prepend to grid (newest first)
+    this.attemptsGridTarget.prepend(card)
     
     // Limit to 20 attempts
     const attempts = this.attemptsGridTarget.children
     if (attempts.length > 20) {
-      attempts[0].remove()
+      attempts[20].remove()
     }
   }
   
