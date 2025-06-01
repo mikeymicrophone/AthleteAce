@@ -1,6 +1,6 @@
 class DivisionGuessingGamesController < ApplicationController
-  MINIMUM_VIABLE_GAME_CHOICES = 2 # Absolute minimum choices for a game to be playable
-  before_action :authenticate_ace! # Ensure user is logged in
+  MINIMUM_VIABLE_GAME_CHOICES = 2
+  before_action :authenticate_ace!
 
   def new
     setup_game
@@ -33,7 +33,6 @@ class DivisionGuessingGamesController < ApplicationController
   def setup_game
     difficulty = params[:difficulty]&.to_sym || :conference
     difficulty = :conference unless [:conference, :league].include?(difficulty)
-    
     num_choices = params[:num_choices]&.to_i || 4
     num_choices = 4 if num_choices < 2 || num_choices > 8
 
@@ -56,6 +55,5 @@ class DivisionGuessingGamesController < ApplicationController
     session[:division_game_difficulty] = difficulty.to_s
     session[:division_game_choice_ids] = @choices.map(&:id)
     session[:division_game_start_time] = Time.current.to_f
-
   end
 end
