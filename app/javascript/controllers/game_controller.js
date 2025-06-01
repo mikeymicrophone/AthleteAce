@@ -12,8 +12,8 @@ export default class extends Controller {
     "pauseButtonText",   // Text inside pause button
     "subjectCardDisplay", // Player card or team card
     "attemptsContainer",  // Container for recent attempts
-    "attemptsGrid",       // Grid of attempt cards
-    "recentAttemptsList"  // List of recent attempts
+    "attemptsGrid"       // Grid of attempt cards
+    // "recentAttemptsList"  // List of recent attempts
   ]
 
   static values = {
@@ -310,45 +310,45 @@ export default class extends Controller {
     }
     
     // Handle recent attempts list if it exists
-    const loadRecentAttemptsList = (data) => {
-      if (this.hasRecentAttemptsListTarget) {
-        console.log(`[${this.gameTypeValue}] Populating recent attempts list with ${data.length} attempts`)
+    // const loadRecentAttemptsList = (data) => {
+    //   if (this.hasRecentAttemptsListTarget) {
+    //     console.log(`[${this.gameTypeValue}] Populating recent attempts list with ${data.length} attempts`)
         
-        // Clear existing attempts (but not the template)
-        const existingCards = this.recentAttemptsListTarget.querySelectorAll('.attempt-card')
-        existingCards.forEach(card => card.remove())
+    //     // Clear existing attempts (but not the template)
+    //     const existingCards = this.recentAttemptsListTarget.querySelectorAll('.attempt-card')
+    //     existingCards.forEach(card => card.remove())
         
-        // Remove the placeholder if it exists
-        const placeholder = this.recentAttemptsListTarget.querySelector('.no-attempts-message')
-        if (placeholder) {
-          placeholder.remove()
-        }
+    //     // Remove the placeholder if it exists
+    //     const placeholder = this.recentAttemptsListTarget.querySelector('.no-attempts-message')
+    //     if (placeholder) {
+    //       placeholder.remove()
+    //     }
         
-        // If no attempts, show a message
-        if (data.length === 0) {
-          const noAttemptsMsg = document.createElement('div')
-          noAttemptsMsg.className = 'no-attempts-message'
-          noAttemptsMsg.textContent = 'No guesses yet'
-          this.recentAttemptsListTarget.appendChild(noAttemptsMsg)
-          return
-        }
+    //     // If no attempts, show a message
+    //     if (data.length === 0) {
+    //       const noAttemptsMsg = document.createElement('div')
+    //       noAttemptsMsg.className = 'no-attempts-message'
+    //       noAttemptsMsg.textContent = 'No guesses yet'
+    //       this.recentAttemptsListTarget.appendChild(noAttemptsMsg)
+    //       return
+    //     }
         
-        // Process up to 5 most recent attempts in reverse order (newest first)
-        const recentAttempts = data.slice(-5).reverse()
-        recentAttempts.forEach(attempt => {
-          const isCorrect = attempt.correct || attempt.is_correct
-          let entityName = ''
+    //     // Process up to 5 most recent attempts in reverse order (newest first)
+    //     const recentAttempts = data.slice(-5).reverse()
+    //     recentAttempts.forEach(attempt => {
+    //       const isCorrect = attempt.correct || attempt.is_correct
+    //       let entityName = ''
           
-          if (this.gameTypeValue === "team_match") {
-            entityName = attempt.subject_entity?.name || attempt.player_name || 'Unknown Player'
-          } else {
-            entityName = attempt.subject_entity?.name || attempt.team_name || 'Unknown Team'
-          }
+    //       if (this.gameTypeValue === "team_match") {
+    //         entityName = attempt.subject_entity?.name || attempt.player_name || 'Unknown Player'
+    //       } else {
+    //         entityName = attempt.subject_entity?.name || attempt.team_name || 'Unknown Team'
+    //       }
           
-          this.addRecentAttempt(entityName, isCorrect)
-        })
-      }
-    }
+    //       this.addRecentAttempt(entityName, isCorrect)
+    //     })
+    //   }
+    // }
     
     // Fetch attempts from the server
     fetch(`/game_attempts.json?game_type=${gameTypeString}&limit=10`)
@@ -356,23 +356,23 @@ export default class extends Controller {
       .then(data => {
         // Update both interfaces if they exist
         loadGridAttempts(data)
-        loadRecentAttemptsList(data)
+        // loadRecentAttemptsList(data)
       })
       .catch(error => {
         console.error(`Error loading recent ${this.gameTypeValue} attempts:`, error)
         
         // Handle error in recent attempts list if it exists
-        if (this.hasRecentAttemptsListTarget) {
-          // Clear existing attempts
-          const existingCards = this.recentAttemptsListTarget.querySelectorAll('.attempt-card:not(#attempt-template .attempt-card)')
-          existingCards.forEach(card => card.remove())
+        // if (this.hasRecentAttemptsListTarget) {
+        //   // Clear existing attempts
+        //   const existingCards = this.recentAttemptsListTarget.querySelectorAll('.attempt-card:not(#attempt-template .attempt-card)')
+        //   existingCards.forEach(card => card.remove())
           
-          // Show error message
-          const errorMsg = document.createElement('div')
-          errorMsg.className = 'text-red-500 italic text-sm'
-          errorMsg.textContent = 'Error loading attempts'
-          this.recentAttemptsListTarget.appendChild(errorMsg)
-        }
+        //   // Show error message
+        //   const errorMsg = document.createElement('div')
+        //   errorMsg.className = 'text-red-500 italic text-sm'
+        //   errorMsg.textContent = 'Error loading attempts'
+        //   this.recentAttemptsListTarget.appendChild(errorMsg)
+        // }
       })
   }
   
@@ -391,10 +391,10 @@ export default class extends Controller {
     const card = template.querySelector('.attempt-card')
     
     // Clear the "No guesses yet" placeholder if it exists
-    const placeholder = this.recentAttemptsListTarget.querySelector(".no-attempts-message")
-    if (placeholder) {
-      placeholder.remove()
-    }
+    // const placeholder = this.recentAttemptsListTarget.querySelector(".no-attempts-message")
+    // if (placeholder) {
+    //   placeholder.remove()
+    // }
     
     // Set up subject part
     const subjectImage = card.querySelector('.attempt-subject-image')
@@ -439,15 +439,15 @@ export default class extends Controller {
     timeElement.textContent = 'Just now'
     
     // Add to list (newest first)
-    this.recentAttemptsListTarget.prepend(card)
+    // this.recentAttemptsListTarget.prepend(card)
     
-    // Limit the list to 5 attempts
-    const attempts = this.recentAttemptsListTarget.querySelectorAll('.attempt-card')
-    if (attempts.length > 5) {
-      for (let i = 5; i < attempts.length; i++) {
-        attempts[i].remove()
-      }
-    }
+    // // Limit the list to 5 attempts
+    // const attempts = this.recentAttemptsListTarget.querySelectorAll('.attempt-card')
+    // if (attempts.length > 5) {
+    //   for (let i = 5; i < attempts.length; i++) {
+    //     attempts[i].remove()
+    //   }
+    // }
   }
   
   addAttemptToGrid(attempt) {

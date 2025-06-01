@@ -194,16 +194,6 @@ module GameHelper
     tag.span("Progress: #{count} correct".html_safe, class: "progress-label")
   end
   
-  # Renders a section showing recent guesses with template for dynamic updates
-  def game_recent_attempts_section
-    tag.div(class: "recent-attempts", id: "recent-attempts-container") do
-      tag.h3("Recent Guesses", class: "recent-attempts-heading") +
-      tag.div(class: "attempts-list", id: "attempts-list", data: { game_target: "recentAttemptsList" }) do
-        tag.div("No guesses yet", class: "no-attempts-message")
-      end
-    end
-  end
-  
   # Creates the CSS classes for result status indicators
   def attempt_result_classes(is_correct)
     if is_correct
