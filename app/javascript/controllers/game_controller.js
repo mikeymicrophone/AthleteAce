@@ -468,50 +468,57 @@ export default class extends Controller {
     
     // Add correct/incorrect styling
     if (attempt.is_correct) {
-      card.classList.add("correct-attempt")
+      card.classList.add("border-green-500")
+      card.querySelector(".attempt-result").textContent = "Correct"
+      card.querySelector(".attempt-result").classList.add("bg-green-100", "text-green-800")
     } else {
-      card.classList.add("incorrect-attempt")
+      card.classList.add("border-red-500")
+      card.querySelector(".attempt-result").textContent = "Incorrect"
+      card.querySelector(".attempt-result").classList.add("bg-red-100", "text-red-800")
     }
     
-    // Set team info
-    const teamPart = card.querySelector(".attempt-team-part")
-    const teamLogo = teamPart.querySelector(".attempt-team-logo")
-    const teamName = teamPart.querySelector(".attempt-team-name")
+    // Set subject (player) info
+    const subjectImage = card.querySelector(".attempt-subject-image")
+    const subjectName = card.querySelector(".attempt-subject-name")
     
-    // Set appropriate team data
-    if (attempt.is_correct) {
-      teamName.textContent = attempt.chosen_entity.name
-      if (attempt.chosen_entity.logo_url) {
-        teamLogo.src = attempt.chosen_entity.logo_url
-        teamLogo.alt = `${attempt.chosen_entity.name} Logo`
-      } else {
-        teamLogo.classList.add('hidden')
-      }
-    } else {
-      teamName.textContent = attempt.target_entity.name
-      if (attempt.target_entity.logo_url) {
-        teamLogo.src = attempt.target_entity.logo_url
-        teamLogo.alt = `${attempt.target_entity.name} Logo`
-      } else {
-        teamLogo.classList.add('hidden')
-      }
-    }
-    
-    // Set player info
-    const playerPart = card.querySelector(".attempt-player-part")
-    const playerPhoto = playerPart.querySelector(".attempt-player-photo")
-    const playerName = playerPart.querySelector(".attempt-player-name")
-    
-    playerName.textContent = attempt.subject_entity.name
+    subjectName.textContent = attempt.subject_entity.name
     if (attempt.subject_entity.photo_url) {
-      playerPhoto.src = attempt.subject_entity.photo_url
-      playerPhoto.alt = `${attempt.subject_entity.name} Photo`
+      subjectImage.src = attempt.subject_entity.photo_url
+      subjectImage.alt = `${attempt.subject_entity.name} photo`
     } else {
-      playerPhoto.classList.add('hidden')
+      subjectImage.classList.add('hidden')
     }
     
-    // Add a timestamp
-    card.dataset.timestamp = new Date(attempt.created_at).getTime()
+    // Set answer (team) info
+    const answerImage = card.querySelector(".attempt-answer-image")
+    const answerName = card.querySelector(".attempt-answer-name")
+    
+    // Set appropriate team data based on correctness
+    if (attempt.is_correct) {
+      answerName.textContent = attempt.chosen_entity.name
+      if (attempt.chosen_entity.logo_url) {
+        answerImage.src = attempt.chosen_entity.logo_url
+        answerImage.alt = `${attempt.chosen_entity.name} logo`
+      } else {
+        answerImage.classList.add('hidden')
+      }
+    } else {
+      answerName.textContent = attempt.target_entity.name
+      if (attempt.target_entity.logo_url) {
+        answerImage.src = attempt.target_entity.logo_url
+        answerImage.alt = `${attempt.target_entity.name} logo`
+      } else {
+        answerImage.classList.add('hidden')
+      }
+    }
+    
+    // Add timestamp
+    const timeDisplay = card.querySelector(".attempt-time")
+    if (timeDisplay) {
+      const date = new Date(attempt.created_at || Date.now())
+      timeDisplay.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      card.dataset.timestamp = date.getTime()
+    }
     
     // Prepend to grid (newest first)
     this.attemptsGridTarget.prepend(card)

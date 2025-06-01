@@ -61,6 +61,7 @@ class Player < ApplicationRecord
   def photo_url
     photo_urls&.first
   end
+  alias_method :logo_url, :photo_url
 
   def primary_position
     roles.find_by(primary: true)&.position
