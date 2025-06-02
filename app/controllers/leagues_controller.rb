@@ -1,13 +1,11 @@
 class LeaguesController < ApplicationController
+  include Filterable
   before_action :set_league, only: %i[ show edit update destroy ]
+  filterable_by :sport
 
   # GET /leagues or /leagues.json
   def index
-    if params[:sport_id]
-      @leagues = Sport.find(params[:sport_id]).leagues
-    else
-      @leagues = League.all
-    end
+    @leagues = apply_filter :leagues
   end
 
   # GET /leagues/1 or /leagues/1.json

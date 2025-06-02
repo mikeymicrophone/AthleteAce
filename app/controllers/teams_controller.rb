@@ -1,27 +1,11 @@
 class TeamsController < ApplicationController
+  include Filterable
   before_action :set_team, only: %i[ show edit update destroy ]
+  filterable_by :sport, :league, :conference, :division, :state, :city, :stadium
 
   # GET /teams or /teams.json
   def index
-    if params[:sport_id]
-      @teams = Sport.find(params[:sport_id]).teams
-    elsif params[:league_id]
-      @teams = League.find(params[:league_id]).teams
-    elsif params[:conference_id]
-      @conference = Conference.find(params[:conference_id])
-      @teams = @conference.teams
-    elsif params[:division_id]
-      @division = Division.find(params[:division_id])
-      @teams = @division.teams
-    elsif params[:state_id]
-      @teams = State.find(params[:state_id]).teams
-    elsif params[:city_id]
-      @teams = City.find(params[:city_id]).teams
-    elsif params[:stadium_id]
-      @teams = Stadium.find(params[:stadium_id]).teams
-    else
-      @teams = Team.all
-    end
+    @teams = apply_filter(:teams) #apply_filters(Team.all)
 
     # Apply sorting if requested
     case params[:sort]
