@@ -1,9 +1,6 @@
 <%# Filter UI partial for teams index %>
 
-<%= render "shared/filter_panel", 
-    resource: :teams, 
-    current_filters: @current_filters,
-    filter_options: @filter_options %>
+<%= filter_panel :teams, @current_filters, @filter_options %>
 
 <%# Add top-level navigation for different resource types %>
 <%= filterable_navigation :teams, @current_filters if @current_filters.present? %>

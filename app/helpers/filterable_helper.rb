@@ -96,6 +96,134 @@ module FilterableHelper
     end
   end
   
+  # Generate a complete filter UI panel for a resource
+  #
+  # @param resource [Symbol] The resource type (e.g., :players, :teams)
+  # @param current_filters [Hash] Hash of current filters (e.g., { sport: @sport, league: @league })
+  # @param filter_options [Hash] Hash of filter options for each filterable association
+  # @param options [Hash] Additional options for customizing the filter panel
+  # @return [String] HTML filter panel
+  def filter_panel(resource, current_filters = {}, filter_options = {}, options = {})
+    # Set default options
+    options = {
+      container_class: 'filter-panel bg-white rounded-lg shadow mb-6',
+      header_class: 'p-4 border-b border-gray-200',
+      title_class: 'text-lg font-medium text-gray-900',
+      body_class: 'p-4',
+      title: 'Filters'
+    }.merge(options)
+    
+    content_tag :div, class: options[:container_class] do
+      content = []
+      
+      # Add header with title and active filters
+      content << content_tag(:div, class: options[:header_class]) do
+        header_content = []
+        header_content << content_tag(:h2, options[:title], class: options[:title_class])
+        
+        # Add breadcrumbs and filter chips if we have active filters
+        if current_filters.present? && current_filters.any?
+          header_content << filterable_breadcrumbs(resource, current_filters)
+          header_content << filter_chips(resource, current_filters)
+        end
+        
+        safe_join header_content
+      end
+      
+      # Add body with filter selectors
+      content << content_tag(:div, class: options[:body_class]) do
+        body_content = []
+        
+        # Add important filters section
+        body_content << filter_important_section(resource, current_filters, filter_options)
+        
+        # Add advanced filters section
+        body_content << filter_advanced_section(resource, current_filters, filter_options)
+        
+        safe_join body_content
+      end
+      
+      safe_join content
+    end
+  end
+  
+  # Generate the important filters section
+  #
+  # @param resource [Symbol] The resource type
+  # @param current_filters [Hash] Hash of current filters
+  # @param filter_options [Hash] Hash of filter options
+  # @param options [Hash] Additional options
+  # @return [String] HTML for important filters
+  def filter_important_section(resource, current_filters = {}, filter_options = {}, options = {})
+    # Determine which filters to show as important
+    important_filters = if filter_options.present? && current_filters.present?
+                          [:sport, :league, :country, :team].select { |f| filter_options[f].present? && !current_filters[f] }
+                        else
+                          []
+                        end
+    
+    return ''.html_safe if important_filters.empty?
+    
+    content_tag :div, class: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4' do
+      safe_join important_filters.map { |filter_key| filter_selector(resource, filter_key, filter_options[filter_key]) }
+    end
+  end
+  
+  # Generate the advanced filters section
+  #
+  # @param resource [Symbol] The resource type
+  # @param current_filters [Hash] Hash of current filters
+  # @param filter_options [Hash] Hash of filter options
+  # @param options [Hash] Additional options
+  # @return [String] HTML for advanced filters
+  def filter_advanced_section(resource, current_filters = {}, filter_options = {}, options = {})
+    # Determine which filters to show as advanced (all minus important and already applied)
+    important_filters = [:sport, :league, :country, :team]
+    remaining_filters = filter_options.keys - important_filters - current_filters.keys
+    
+    return ''.html_safe if remaining_filters.empty?
+    
+    content_tag :details, class: 'mt-4' do
+      summary = content_tag :summary, 'Advanced Filters', 
+                           class: 'text-sm text-blue-600 cursor-pointer'
+      
+      filters = content_tag :div, class: 'mt-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4' do
+        safe_join remaining_filters.map { |filter_key| filter_selector(resource, filter_key, filter_options[filter_key]) }
+      end
+      
+      safe_join [summary, filters]
+    end
+  end
+  
+  # Generate a single filter selector
+  #
+  # @param resource [Symbol] The resource type
+  # @param filter_key [Symbol] The filter key (e.g., :sport, :league)
+  # @param options [Array] Collection of options for the select
+  # @param html_options [Hash] Additional HTML options
+  # @return [String] HTML for a filter selector
+  def filter_selector(resource, filter_key, options, html_options = {})
+    return ''.html_safe unless options.present?
+    
+    content_tag :div, class: 'filter-group' do
+      label = content_tag :h3, filter_key.to_s.humanize, class: 'text-sm font-medium text-gray-700 mb-1'
+      
+      selector = content_tag :div, class: 'relative' do
+        select_tag "filter_#{filter_key}", 
+                  options_from_collection_for_select(options, :id, :name),
+                  include_blank: "-- Select #{filter_key.to_s.humanize} --",
+                  class: 'block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm',
+                  data: { 
+                    action: 'change->filter#applyFilter',
+                    filter_key: filter_key,
+                    filter_resource: resource
+                  }
+      end
+      
+      safe_join [label, selector]
+    end
+  end
+  
   private
   
   def build_filtered_path(resource, filter_by)

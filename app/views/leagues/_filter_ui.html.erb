@@ -1,9 +1,6 @@
 <%# Filter UI partial for leagues index %>
 
-<%= render "shared/filter_panel", 
-    resource: :leagues, 
-    current_filters: @current_filters,
-    filter_options: @filter_options %>
+<%= filter_panel :leagues, @current_filters, @filter_options %>
 
 <%# Add top-level navigation for different resource types %>
 <%= filterable_navigation :leagues, @current_filters if @current_filters.present? %>

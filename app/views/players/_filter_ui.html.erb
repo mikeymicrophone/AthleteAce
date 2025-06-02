@@ -1,10 +1,7 @@
-<%# Filters for players index %>
+<%# Filters for players index using helper methods %>
 <div data-controller="filter">
-  <%= render 'shared/filter_panel', 
-      resource: :players,
-      current_filters: @current_filters,
-      filter_options: @filter_options %>
-      
+  <%= filter_panel(:players, @current_filters, @filter_options) %>
+  
   <% if @current_filters.any? %>
     <div class="filtered-data-summary mb-4">
       <h2 class="text-lg font-medium text-gray-900">
