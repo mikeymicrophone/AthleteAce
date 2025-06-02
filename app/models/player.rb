@@ -66,6 +66,7 @@ class Player < ApplicationRecord
   def primary_position
     roles.find_by(primary: true)&.position
   end
+  alias_method :position, :primary_position
   
   def secondary_positions
     positions.where.not(id: primary_position&.id)

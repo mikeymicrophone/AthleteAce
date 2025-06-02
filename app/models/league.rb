@@ -6,6 +6,11 @@ class League < ApplicationRecord
   has_many :stadia, through: :teams
   has_many :conferences, dependent: :destroy
   has_many :divisions, through: :conferences
+
+  belongs_to :country,
+             foreign_key: :jurisdiction_id,
+             class_name: "Country",
+             optional: true
   
   # Define which attributes can be searched via Ransack
   def self.ransackable_attributes(auth_object = nil)

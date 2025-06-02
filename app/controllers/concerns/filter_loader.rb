@@ -21,6 +21,9 @@ module FilterLoader
       end
     end
     
+    # Set @current_filters instance variable
+    @current_filters = result
+    
     result
   end
   
@@ -34,6 +37,9 @@ module FilterLoader
       model_class = association.to_s.singularize.classify.constantize
       result[association] = model_class.all
     end
+    
+    # Set @filter_options instance variable
+    @filter_options = result
     
     result
   end

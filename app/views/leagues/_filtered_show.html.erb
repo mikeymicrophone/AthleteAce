@@ -5,7 +5,7 @@
     filtered_breadcrumb: @filtered_breadcrumb,
     current_filters: @current_filters,
     resource_type: :leagues,
-    metadata: capture do %>
+    metadata: capture { %>
       <% if @league.sport %>
         <%= tag.div class: "flex items-center px-3 py-1 bg-gray-100 rounded-full text-sm" do %>
           <%= tag.span "Sport:", class: "mr-1 text-gray-500" %>
@@ -26,4 +26,4 @@
           <%= @league.teams.count %>
         <% end %>
       <% end %>
-    <% end %>
+    <% } %>

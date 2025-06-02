@@ -5,7 +5,7 @@
     filtered_breadcrumb: @filtered_breadcrumb,
     current_filters: @current_filters,
     resource_type: :teams,
-    metadata: capture do %>
+    metadata: capture { %>
       <% if @team.league %>
         <%= tag.div class: "flex items-center px-3 py-1 bg-gray-100 rounded-full text-sm" do %>
           <%= tag.span "League:", class: "mr-1 text-gray-500" %>
@@ -26,4 +26,4 @@
           <%= link_to @team.conference.name, conference_path(@team.conference), class: "text-blue-600 hover:text-blue-800" %>
         <% end %>
       <% end %>
-    <% end %>
+    <% } %>
