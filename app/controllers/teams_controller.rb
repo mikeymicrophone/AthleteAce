@@ -14,16 +14,16 @@ class TeamsController < ApplicationController
     base_query = apply_filters Team.all
     
     # Build the query with proper joins for sorting and searching
-    base_query = base_query.includes(:league, :stadium, :division, :conference)
-                       .joins(league: :sport)
-                       .select("teams.*, leagues.name as league_name, sports.name as sport_name, " +
-                              "stadiums.city as team_city")
+    base_query = base_query.includes(:league, :division, :conference)
+                       .joins(:league => :sport)
+                       .includes(:stadium => :city)
+                       .select("teams.*, leagues.name as league_name, sports.name as sport_name")
     
     # Initialize Ransack search object
     @q = base_query.ransack(params[:q])
     
     # Set default sort if none specified
-    @q.sorts = 'name asc' if @q.sorts.empty?
+    @q.sorts = 'teams.territory asc' if @q.sorts.empty?
     
     # Get the teams from search or filtering
     if params[:q].present?
@@ -34,15 +34,15 @@ class TeamsController < ApplicationController
       # Apply sorting if requested
       case params[:sort]
       when 'mascot'
-        @teams = @teams.order(:mascot)
+        @teams = @teams.order('teams.mascot')
       when 'territory'
-        @teams = @teams.order(:territory)
+        @teams = @teams.order('teams.territory')
       when 'sport'
         @teams = @teams.order('sports.name')
       when 'city'
-        @teams = @teams.order('team_city')
+        @teams = @teams.joins(stadium: :city).order('cities.name')
       else
-        @teams = @teams.order(:name)
+        @teams = @teams.order('teams.territory')
       end
     end
 

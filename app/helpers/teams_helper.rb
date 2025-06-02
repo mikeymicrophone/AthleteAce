@@ -19,11 +19,36 @@ module TeamsHelper
   # Helper to create a search form for teams
   # @param search [Ransack::Search] The Ransack search object
   # @return [String] HTML for the search form
-  def team_search_form search
-    # Handle nil search object gracefully
-    return tag.div(class: "search-form-container") { tag.p "Search is unavailable" } unless search
+  # Helper to create an auto-submitting select dropdown for search forms
+  # @param form [ActionView::Helpers::FormBuilder] The form builder object
+  # @param attribute [Symbol] The model attribute to search on
+  # @param collection [Array] Array of options as [name, id] pairs
+  # @param label_text [String] Text for the field label
+  # @param include_blank [Boolean] Whether to include a blank option
+  # @param blank_text [String] Text for the blank option
+  # @return [String] HTML for the select dropdown
+  def auto_submit_select(form, attribute, collection, label_text, include_blank: true, blank_text: nil)
+    blank_text ||= "-- Select #{label_text} --"
     
-    search_form_for search, class: "search-form" do |f|
+    if include_blank
+      collection = [[blank_text, nil]] + collection
+    end
+    
+    tag.div do
+      form.label(attribute, label_text, class: "form-field-label") +
+      form.select(attribute, 
+                collection, 
+                {}, 
+                { class: "form-field-input", 
+                  onchange: "this.form.submit();" })
+    end
+  end
+
+  def team_search_form(search)
+    # If search is nil, display a message and return
+    return tag.div "No search object available", class: "search-unavailable" if search.nil?
+    
+    search_form_for search, class: "search-form", html: { data: { controller: "autosubmit" } } do |f|
       tag.div class: "search-form-container" do
         content = []
         content << tag.h3("Filter Teams", class: "search-form-title")
@@ -38,10 +63,10 @@ module TeamsHelper
             f.search_field(:territory_or_mascot_cont, class: "form-field-input")
           end
           
-          # City search field (from stadium)
+          # City search field (from stadium's city)
           fields << tag.div do
-            f.label(:stadium_city_cont, "City", class: "form-field-label") +
-            f.search_field(:stadium_city_cont, class: "form-field-input")
+            f.label(:stadium_city_name_cont, "City", class: "form-field-label") +
+            f.search_field(:stadium_city_name_cont, class: "form-field-input")
           end
           
           # League search field
@@ -63,23 +88,33 @@ module TeamsHelper
           advanced_content = tag.div(class: "advanced-filters-content", data: { collapse_target: "content" }) do
             adv_fields = []
             
-            # Sport search field (through league)
-            adv_fields << tag.div do
-              f.label(:league_sport_name_cont, "Sport", class: "form-field-label") +
-              f.search_field(:league_sport_name_cont, class: "form-field-input")
-            end
+            # Sport select dropdown
+            sports = Sport.all.map { |s| [s.name, s.id] }
+            adv_fields << auto_submit_select(f, :league_sport_id_eq, sports, "Sport")
             
-            # Division search field
-            adv_fields << tag.div do
-              f.label(:division_name_cont, "Division", class: "form-field-label") +
-              f.search_field(:division_name_cont, class: "form-field-input")
-            end
+            # League select dropdown
+            leagues = League.all.map { |l| [l.name, l.id] }
+            adv_fields << auto_submit_select(f, :league_id_eq, leagues, "League")
             
-            # Conference search field
-            adv_fields << tag.div do
-              f.label(:conference_name_cont, "Conference", class: "form-field-label") +
-              f.search_field(:conference_name_cont, class: "form-field-input")
-            end
+            # Division select dropdown
+            divisions = Division.all.map { |d| [d.name, d.id] }
+            adv_fields << auto_submit_select(f, :division_id_eq, divisions, "Division")
+            
+            # Conference select dropdown
+            conferences = Conference.all.map { |c| [c.name, c.id] }
+            adv_fields << auto_submit_select(f, :conference_id_eq, conferences, "Conference")
+            
+            # State select dropdown
+            states = State.all.map { |s| [s.name, s.id] }
+            adv_fields << auto_submit_select(f, :stadium_city_state_id_eq, states, "State")
+            
+            # City select dropdown
+            cities = City.all.map { |c| [c.name, c.id] }
+            adv_fields << auto_submit_select(f, :stadium_city_id_eq, cities, "City")
+            
+            # Stadium select dropdown
+            stadiums = Stadium.all.map { |s| [s.name, s.id] }
+            adv_fields << auto_submit_select(f, :stadium_id_eq, stadiums, "Stadium")
             
             safe_join adv_fields
           end
