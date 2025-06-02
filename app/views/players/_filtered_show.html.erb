@@ -1,22 +1,19 @@
 <%# Filtered view for player show page %>
 
-<%= render "shared/filtered_show_header", 
-    resource: @player, 
-    filtered_breadcrumb: @filtered_breadcrumb,
-    current_filters: @current_filters,
-    resource_type: :players,
-    metadata: capture { %>
-      <% if @player.team %>
-        <%= tag.div class: "flex items-center px-3 py-1 bg-gray-100 rounded-full text-sm" do %>
-          <%= tag.span "Team:", class: "mr-1 text-gray-500" %>
-          <%= link_to @player.team.name, team_path(@player.team), class: "text-blue-600 hover:text-blue-800" %>
-        <% end %>
-      <% end %>
-      
-      <% if @player.position.present? %>
-        <%= tag.div class: "px-3 py-1 bg-gray-100 rounded-full text-sm" do %>
-          <%= tag.span "Position:", class: "mr-1 text-gray-500" %>
-          <%= @player.position %>
-        <% end %>
-      <% end %>
-    <% } %>
+<%= filtered_show_header @player, @filtered_breadcrumb, { container_class: "show-header player-header" } %>
+
+<%= tag.div class: "player-metadata" do %>
+  <% if @player.team %>
+    <%= tag.div class: "metadata-tag" do %>
+      <%= tag.span "Team:", class: "tag-label" %>
+      <%= link_to @player.team.name, team_path(@player.team), class: "tag-value" %>
+    <% end %>
+  <% end %>
+  
+  <% if @player.position.present? %>
+    <%= tag.div class: "metadata-tag" do %>
+      <%= tag.span "Position:", class: "tag-label" %>
+      <%= tag.span @player.position, class: "tag-content" %>
+    <% end %>
+  <% end %>
+<% end %>

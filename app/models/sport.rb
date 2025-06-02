@@ -13,12 +13,12 @@ class Sport < ApplicationRecord
     end
   end
   
-  # Define which attributes can be searched via Ransack
+  # Allow all attributes to be searchable with Ransack
   def self.ransackable_attributes(auth_object = nil)
-    ["created_at", "id", "name", "updated_at"]
+    column_names
   end
   
-  # Define which associations can be searched via Ransack
+  # Allow all associations to be searchable with Ransack
   def self.ransackable_associations(auth_object = nil)
     ["leagues", "players", "positions", "teams"]
   end

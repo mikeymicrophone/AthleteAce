@@ -9,4 +9,14 @@ class Conference < ApplicationRecord
   def display_name
     "#{name} (#{abbreviation})"
   end
+  
+  # Allow all attributes to be searchable with Ransack
+  def self.ransackable_attributes(auth_object = nil)
+    column_names
+  end
+  
+  # Allow all associations to be searchable with Ransack
+  def self.ransackable_associations(auth_object = nil)
+    reflect_on_all_associations.map { |a| a.name.to_s }
+  end
 end

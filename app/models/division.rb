@@ -23,6 +23,16 @@ class Division < ApplicationRecord
     ratings.active.where(spectrum: spectrum)
   end
   
+  # Allow all attributes to be searchable with Ransack
+  def self.ransackable_attributes(auth_object = nil)
+    column_names
+  end
+  
+  # Allow all associations to be searchable with Ransack
+  def self.ransackable_associations(auth_object = nil)
+    reflect_on_all_associations.map { |a| a.name.to_s }
+  end
+  
   # Get the average rating for this division on a specific spectrum
   # @param spectrum [Spectrum] The spectrum to get the average rating for
   # @return [Float, nil] The average rating or nil if no ratings exist

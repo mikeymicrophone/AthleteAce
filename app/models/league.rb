@@ -12,13 +12,13 @@ class League < ApplicationRecord
              class_name: "Country",
              optional: true
   
-  # Define which attributes can be searched via Ransack
+  # Allow all attributes to be searchable with Ransack
   def self.ransackable_attributes(auth_object = nil)
-    ["created_at", "id", "jurisdiction_id", "jurisdiction_type", "name", "sport_id", "updated_at"]
+    column_names
   end
   
-  # Define which associations can be searched via Ransack
+  # Allow all associations to be searchable with Ransack
   def self.ransackable_associations(auth_object = nil)
-    ["conferences", "divisions", "jurisdiction", "players", "sport", "stadia", "teams"]
+    reflect_on_all_associations.map { |a| a.name.to_s }
   end
 end
