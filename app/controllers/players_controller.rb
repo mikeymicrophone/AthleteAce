@@ -1,10 +1,15 @@
 class PlayersController < ApplicationController
   include Filterable
+  include FilterLoader
   before_action :set_player, only: %i[ show edit update destroy ]
-  filterable_by :sport, :league, :stadium, :team, :state, :city
+  # Filterable associations are now defined in config/initializers/filterable_associations.rb
 
   # GET /players or /players.json
   def index
+    # Load current filters and set related instance variables
+    @current_filters = load_current_filters
+    
+    # Build the base query using the filters
     base_query = apply_filter :players
   
     # Build the query with proper joins for sorting and searching
@@ -31,7 +36,10 @@ class PlayersController < ApplicationController
     @spectrums = Spectrum.all
     
     # Set current spectrum ID if provided in params
-    set_current_spectrum_id(params[:spectrum_id]) if params[:spectrum_id].present?
+    set_current_spectrum_id params[:spectrum_id] if params[:spectrum_id].present?
+    
+    # Load filter options for selector UI
+    @filter_options = load_filter_options
     
     # Paginate the results
     @pagy, @players = pagy(@players, items: params[:per_page] || 20)
@@ -39,6 +47,19 @@ class PlayersController < ApplicationController
 
   # GET /players/1 or /players/1.json
   def show
+    # Load any filters that were applied when navigating to this show page
+    load_current_filters
+    
+    # Load related ratings
+    @ratings = @player.ratings.includes(:ace)
+    @player_ratings = @player.ratings.includes(:ace).order(created_at: :desc).limit(10)
+    @team_ratings = @player.team.ratings.includes(:ace).order(created_at: :desc).limit(10) if @player.team
+    
+    # Set up filter options for navigation to related resources
+    load_filter_options
+    
+    # Create a filtered breadcrumb for this player
+    @filtered_breadcrumb = build_filtered_breadcrumb @player, @current_filters
   end
 
   # GET /players/new

@@ -1,0 +1,28 @@
+<%# Filters for players index %>
+<div data-controller="filter">
+  <%= render 'shared/filter_panel', 
+      resource: :players,
+      current_filters: @current_filters,
+      filter_options: @filter_options %>
+      
+  <% if @current_filters.any? %>
+    <div class="filtered-data-summary mb-4">
+      <h2 class="text-lg font-medium text-gray-900">
+        <% if @current_filters[:sport] %>
+          <%= @current_filters[:sport].name %> 
+        <% end %>
+        <% if @current_filters[:league] %>
+          <%= @current_filters[:league].name %> 
+        <% end %>
+        <% if @current_filters[:team] %>
+          <%= @current_filters[:team].territory %> <%= @current_filters[:team].mascot %>
+        <% end %>
+        Players
+      </h2>
+      
+      <p class="text-gray-600 text-sm">
+        Showing <%= @pagy.count > 0 ? "#{@pagy.from}-#{@pagy.to} of #{@pagy.count}" : "0" %> players
+      </p>
+    </div>
+  <% end %>
+</div>

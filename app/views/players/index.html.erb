@@ -1,6 +1,6 @@
 <% content_for :title, "Players" %>
 
-<%= index_header("Players", @team) if params[:team_id].present? %>
+<%= render 'filter_ui' %>
 
 <%= player_search_form(@q) %>
 

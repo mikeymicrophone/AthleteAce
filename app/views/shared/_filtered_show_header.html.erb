@@ -1,0 +1,55 @@
+<%# Filtered Show Header - displays breadcrumbs and contextual navigation for show pages %>
+
+<div class="mb-6">
+  <% if filtered_breadcrumb.present? %>
+    <%# Breadcrumb navigation trail %>
+    <nav class="flex mb-4" aria-label="Breadcrumb">
+      <ol class="inline-flex items-center space-x-1 md:space-x-2">
+        <% filtered_breadcrumb.each_with_index do |crumb, index| %>
+          <li class="flex items-center">
+            <% if index > 0 %>
+              <%= tag.span "/", class: "mx-1 text-gray-400" %>
+            <% end %>
+            
+            <% if crumb[:current] %>
+              <%= tag.span crumb[:label], class: "font-medium text-blue-700" %>
+            <% else %>
+              <%= link_to crumb[:path], class: "text-gray-600 hover:text-blue-600" do %>
+                <span class="text-xs text-gray-500"><%= crumb[:type] %></span>
+                <%= crumb[:label] %>
+              <% end %>
+            <% end %>
+          </li>
+        <% end %>
+      </ol>
+    </nav>
+  <% end %>
+  
+  <%# Title and metadata area %>
+  <div class="flex flex-col md:flex-row md:items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800"><%= resource.name %></h1>
+      <% if resource.respond_to?(:description) && resource.description.present? %>
+        <p class="text-gray-600 mt-1"><%= resource.description %></p>
+      <% end %>
+    </div>
+    
+    <% if local_assigns[:metadata].present? %>
+      <div class="mt-3 md:mt-0 flex flex-wrap gap-2">
+        <%= metadata %>
+      </div>
+    <% end %>
+  </div>
+  
+  <%# Related resource navigation when filters are applied %>
+  <% if current_filters.present? && local_assigns[:resource_type].present? %>
+    <%= filterable_context_nav resource_type, current_filters %>
+  <% end %>
+  
+  <%# Action buttons area %>
+  <% if local_assigns[:actions].present? %>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <%= actions %>
+    </div>
+  <% end %>
+</div>

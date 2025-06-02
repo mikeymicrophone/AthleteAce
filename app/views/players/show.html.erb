@@ -1,4 +1,8 @@
+<% content_for :title, @player.name %>
+
 <p style="color: green"><%= notice %></p>
+
+<%= render 'filtered_show' if @filtered_breadcrumb.present? %>
 
 <div class="player-card">
   <!-- Left column: Team and Stadium -->

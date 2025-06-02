@@ -1,11 +1,20 @@
 class TeamsController < ApplicationController
   include Filterable
+  include FilterLoader
   before_action :set_team, only: %i[ show edit update destroy ]
-  filterable_by :sport, :league, :conference, :division, :state, :city, :stadium
+  # We no longer need to specify filterable_by here since it's in the config file
 
   # GET /teams or /teams.json
   def index
-    @teams = apply_filter(:teams) #apply_filters(Team.all)
+    # Apply filters based on params
+    @teams = apply_filters Team.all
+    
+    # Load current filters and options for the UI
+    load_current_filters
+    load_filter_options
+    
+    # Include common associations and paginate
+    @teams = @teams.includes(:league, :stadium, :country, :state).order(:name)
 
     # Apply sorting if requested
     case params[:sort]
@@ -30,6 +39,17 @@ class TeamsController < ApplicationController
 
   # GET /teams/1 or /teams/1.json
   def show
+    # Load any filters that were applied when navigating to this show page
+    load_current_filters
+    
+    # Load related ratings
+    @team_ratings = @team.ratings.includes(:ace).order(created_at: :desc).limit(10)
+    
+    # Set up filter options for navigation to related resources
+    load_filter_options
+    
+    # Create a filtered breadcrumb for this team
+    @filtered_breadcrumb = build_filtered_breadcrumb @team, @current_filters
   end
 
   # GET /teams/new

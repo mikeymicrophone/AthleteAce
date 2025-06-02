@@ -2,6 +2,10 @@
 
 <% content_for :title, "Teams" %>
 
+<%= render 'filter_ui' %>
+
+<%= team_search_form(@q) %>
+
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
   <div class="mb-4 sm:mb-0">
     <div class="text-sm text-gray-600 mb-1">Sort by:</div>

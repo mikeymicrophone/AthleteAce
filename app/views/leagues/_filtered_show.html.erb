@@ -1,0 +1,29 @@
+<%# Filtered view for league show page %>
+
+<%= render "shared/filtered_show_header", 
+    resource: @league, 
+    filtered_breadcrumb: @filtered_breadcrumb,
+    current_filters: @current_filters,
+    resource_type: :leagues,
+    metadata: capture do %>
+      <% if @league.sport %>
+        <%= tag.div class: "flex items-center px-3 py-1 bg-gray-100 rounded-full text-sm" do %>
+          <%= tag.span "Sport:", class: "mr-1 text-gray-500" %>
+          <%= link_to @league.sport.name, sport_path(@league.sport), class: "text-blue-600 hover:text-blue-800" %>
+        <% end %>
+      <% end %>
+      
+      <% if @league.country.present? %>
+        <%= tag.div class: "px-3 py-1 bg-gray-100 rounded-full text-sm" do %>
+          <%= tag.span "Country:", class: "mr-1 text-gray-500" %>
+          <%= link_to @league.country.name, country_path(@league.country), class: "text-blue-600 hover:text-blue-800" %>
+        <% end %>
+      <% end %>
+      
+      <% if @league.teams.any? %>
+        <%= tag.div class: "px-3 py-1 bg-gray-100 rounded-full text-sm" do %>
+          <%= tag.span "Teams:", class: "mr-1 text-gray-500" %>
+          <%= @league.teams.count %>
+        <% end %>
+      <% end %>
+    <% end %>

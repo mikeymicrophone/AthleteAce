@@ -1,0 +1,44 @@
+<%# 
+  Renders filterable links for a resource
+  
+  Usage:
+  <%= render 'shared/filterable_links', 
+      resource: :players,
+      filters: [
+        { label: 'By Sport', association: :sport, collection: @sports },
+        { label: 'By Team', association: :team, collection: @teams }
+      ],
+      current_filters: { sport: @sport, team: @team }
+  %>
+%>
+
+<div class="filter-links my-3">
+  <% filters.each do |filter| %>
+    <div class="filter-group mb-2">
+      <h3 class="text-sm font-medium text-gray-700 mb-1"><%= filter[:label] %></h3>
+      <div class="flex flex-wrap gap-2">
+        <% filter[:collection].each do |item| %>
+          <% 
+            is_active = current_filters[filter[:association]]&.id == item.id
+            # Don't include current filter in the path if it's already active
+            filter_params = current_filters.dup
+            filter_params[filter[:association]] = is_active ? nil : item
+          %>
+          <%= filtered_link_to item.name, resource, filter_params, 
+                html: { 
+                  class: "px-3 py-1 text-sm rounded-full #{is_active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}"
+                } %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+  
+  <% if current_filters.values.any? %>
+    <div class="mt-3">
+      <%= filtered_link_to "Clear Filters", resource, {}, 
+            html: { 
+              class: "px-3 py-1 text-sm rounded-full bg-red-100 text-red-700 hover:bg-red-200"
+            } %>
+    </div>
+  <% end %>
+</div>

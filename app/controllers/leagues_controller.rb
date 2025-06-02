@@ -1,15 +1,35 @@
 class LeaguesController < ApplicationController
   include Filterable
+  include FilterLoader
   before_action :set_league, only: %i[ show edit update destroy ]
-  filterable_by :sport, :country
+  # We no longer need filterable_by as it's defined in the config file
 
   # GET /leagues or /leagues.json
   def index
-    @leagues = apply_filter :leagues
+    # Apply filters based on params
+    @leagues = apply_filters League.all
+    
+    # Load current filters and options for the UI
+    load_current_filters
+    load_filter_options
+    
+    # Include common associations and paginate
+    @leagues = @leagues.includes(:sport, :country).order(:name)
   end
 
   # GET /leagues/1 or /leagues/1.json
   def show
+    # Load any filters that were applied when navigating to this show page
+    load_current_filters
+    
+    # Load teams for this league
+    @teams = @league.teams.includes(:stadium).order(:name)
+    
+    # Set up filter options for navigation to related resources
+    load_filter_options
+    
+    # Create a filtered breadcrumb for this league
+    @filtered_breadcrumb = build_filtered_breadcrumb @league, @current_filters
   end
 
   # GET /leagues/new
