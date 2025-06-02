@@ -1,13 +1,11 @@
 class DivisionsController < ApplicationController
+  include Filterable
   before_action :set_division, only: %i[ show edit update destroy ]
+  filterable_by :conference, :league,:country, :sport
 
   # GET /divisions or /divisions.json
   def index
-    @divisions = if params[:conference_id]
-      Division.where(conference_id: params[:conference_id])
-    else
-      Division.all
-    end
+    @divisions = apply_filter :divisions
     
     @spectrums = Spectrum.all
     

@@ -1,28 +1,12 @@
 class PlayersController < ApplicationController
+  include Filterable
   before_action :set_player, only: %i[ show edit update destroy ]
+  filterable_by :sport, :league, :stadium, :team, :state, :city
 
   # GET /players or /players.json
   def index
-    # Start building the base query
-    base_query = if params[:sport_id]
-      Sport.find(params[:sport_id]).players
-    elsif params[:league_id]
-      League.find(params[:league_id]).players
-    elsif params[:stadium_id]
-      Stadium.find(params[:stadium_id]).players
-    elsif params[:team_id]
-      @team = Team.find(params[:team_id])
-      @team.players
-    elsif params[:state_id]
-      @state = State.find(params[:state_id])
-      @state.players
-    elsif params[:city_id]
-      @city = City.find(params[:city_id])
-      @city.players
-    else
-      Player.all
-    end
-    
+    base_query = apply_filter :players
+  
     # Build the query with proper joins for sorting and searching
     base_query = base_query.joins(:team, team: [:league, league: :sport])
                           .left_joins(:positions)

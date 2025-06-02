@@ -1,9 +1,11 @@
 class CitiesController < ApplicationController
+  include Filterable
   before_action :set_city, only: %i[ show edit update destroy ]
+  filterable_by :state, :country
 
   # GET /cities or /cities.json
   def index
-    @cities = City.all
+    @cities = apply_filter :cities
   end
 
   # GET /cities/1 or /cities/1.json

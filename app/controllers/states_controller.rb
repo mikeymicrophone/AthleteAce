@@ -1,9 +1,11 @@
 class StatesController < ApplicationController
+  include Filterable
   before_action :set_state, only: %i[ show edit update destroy ]
+  filterable_by :country, :sport
 
   # GET /states or /states.json
   def index
-    @states = State.all
+    @states = apply_filter :states
   end
 
   # GET /states/1 or /states/1.json

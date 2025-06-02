@@ -1,9 +1,11 @@
 class CountriesController < ApplicationController
+  include Filterable
   before_action :set_country, only: %i[ show edit update destroy ]
+  filterable_by :sport
 
   # GET /countries or /countries.json
   def index
-    @countries = Country.all
+    @countries = apply_filter :countries
   end
 
   # GET /countries/1 or /countries/1.json

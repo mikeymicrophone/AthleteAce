@@ -1,29 +1,23 @@
 class StadiumsController < ApplicationController
+  include Filterable
   before_action :set_stadium, only: %i[ show edit update destroy ]
+  filterable_by :city, :state, :country, :sport
 
   # GET /stadiums or /stadiums.json
   def index
-    if params[:city_id]
-      @stadiums = City.find(params[:city_id]).stadiums
-    elsif params[:state_id]
-      @stadiums = State.find(params[:state_id]).stadiums
-    elsif params[:country_id]
-      @stadiums = Country.find(params[:country_id]).stadiums
-    else
-      @stadiums = Stadium.all
-    end
+    @stadiums = apply_filter :stadiums
   end
 
-  # GET /stadia/1 or /stadia/1.json
+  # GET /stadiums/1 or /stadiums/1.json
   def show
   end
 
-  # GET /stadia/new
+  # GET /stadiums/new
   def new
     @stadium = Stadium.new
   end
 
-  # GET /stadia/1/edit
+  # GET /stadiums/1/edit
   def edit
   end
 

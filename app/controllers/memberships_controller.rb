@@ -1,9 +1,11 @@
 class MembershipsController < ApplicationController
+  include Filterable
   before_action :set_membership, only: %i[ show edit update destroy ]
+  filterable_by :team, :division, :conference, :league, :sport, :country, :state, :city, :stadium
 
   # GET /memberships or /memberships.json
   def index
-    @memberships = Membership.all
+    @memberships = apply_filter :memberships
   end
 
   # GET /memberships/1 or /memberships/1.json

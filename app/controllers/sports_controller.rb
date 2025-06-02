@@ -1,9 +1,11 @@
 class SportsController < ApplicationController
+  include Filterable
   before_action :set_sport, only: %i[ show edit update destroy ]
+  filterable_by :country
 
   # GET /sports or /sports.json
-  def index
-    @sports = Sport.all
+  def index 
+    @sports = apply_filter :sports
   end
 
   # GET /sports/1 or /sports/1.json

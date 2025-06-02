@@ -1,7 +1,7 @@
 class LeaguesController < ApplicationController
   include Filterable
   before_action :set_league, only: %i[ show edit update destroy ]
-  filterable_by :sport
+  filterable_by :sport, :country
 
   # GET /leagues or /leagues.json
   def index
