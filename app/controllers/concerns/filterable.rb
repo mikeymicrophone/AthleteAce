@@ -14,8 +14,11 @@ module Filterable
     end.each do |association|
       scope = instance_variable_set("@#{association}", association.to_s.singularize.classify.constantize.find(params[association.to_s.singularize + "_id"]))
     end
-
-    scope.send result
+    if scope
+      scope.send result
+    else
+      result.to_s.singularize.classify.constantize.send :all
+    end
   end
 
   def apply_filters(relation)
