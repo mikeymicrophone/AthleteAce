@@ -15,125 +15,174 @@ module TeamsHelper
     link_to 'Quiz Me', "/strength/team_match?team_id=#{team.id}", 
            default_options.merge(options)
   end
-
-  # Helper to create a search form for teams
-  # @param search [Ransack::Search] The Ransack search object
-  # @return [String] HTML for the search form
-  # Helper to create an auto-submitting select dropdown for search forms
-  # @param form [ActionView::Helpers::FormBuilder] The form builder object
-  # @param attribute [Symbol] The model attribute to search on
-  # @param collection [Array] Array of options as [name, id] pairs
-  # @param label_text [String] Text for the field label
+  
+  # Formats a team name for display
+  # @param team [Team] The team to format name for
+  # @return [String] Formatted team name
+  def formatted_team_name(team)
+    if team.territory.present? && team.mascot.present?
+      "#{team.territory} #{team.mascot}"
+    elsif team.territory.present?
+      team.territory
+    elsif team.mascot.present?
+      team.mascot
+    else
+      "Unknown Team"
+    end
+  end
+  
+  # Formats a full team location with city and state
+  # @param team [Team] The team to format location for
+  # @return [String] Formatted team location
+  def formatted_team_location(team)
+    return "Unknown Location" unless team.stadium&.city
+    
+    "#{team.stadium.city.name}, #{team.stadium.city.state.abbreviation}"
+  end
+  
+  # Helper for creating auto-submitting select dropdowns
+  # @param form [ActionView::Helpers::FormBuilder] The form builder
+  # @param attribute [Symbol] The attribute to search on
+  # @param collection [Array] Collection of items for the dropdown
+  # @param label_text [String] Label for the field
   # @param include_blank [Boolean] Whether to include a blank option
   # @param blank_text [String] Text for the blank option
   # @return [String] HTML for the select dropdown
   def auto_submit_select(form, attribute, collection, label_text, include_blank: true, blank_text: nil)
     blank_text ||= "-- Select #{label_text} --"
     
-    if include_blank
-      collection = [[blank_text, nil]] + collection
-    end
+    select_options = include_blank ? [[blank_text, nil]] : []
+    select_options += collection
     
     tag.div do
       form.label(attribute, label_text, class: "form-field-label") +
       form.select(attribute, 
-                collection, 
+                select_options, 
                 {}, 
                 { class: "form-field-input", 
                   onchange: "this.form.submit();" })
     end
   end
 
+  # Creates a search form for teams with filters
+  # @param search [Ransack::Search] The Ransack search object
+  # @return [String] HTML for the teams search form
   def team_search_form(search)
-    # If search is nil, display a message and return
-    return tag.div "No search object available", class: "search-unavailable" if search.nil?
+    # Return an error message if search is nil
+    return tag.div("No search object available", class: "search-unavailable") if search.nil?
     
-    search_form_for search, class: "search-form", html: { data: { controller: "autosubmit" } } do |f|
+    # Create the search form
+    search_form_for search, url: teams_path, html: { class: "search-form" } do |f|
       tag.div class: "search-form-container" do
         content = []
-        content << tag.h3("Filter Teams", class: "search-form-title")
+        
+        # Search form title
+        content << tag.h3("Filter Teams", class: "search-form-title mb-4")
         
         # Basic search fields
-        content << tag.div(class: "search-fields-grid") do
-          fields = []
+        content << tag.div(class: "basic-filters grid grid-cols-1 md:grid-cols-3 gap-4 mb-6") do
+          basic_fields = []
           
-          # Team name search fields (territory and mascot)
-          fields << tag.div do
-            f.label(:territory_or_mascot_cont, "Name contains", class: "form-field-label") +
-            f.search_field(:territory_or_mascot_cont, class: "form-field-input")
+          # Team name search field
+          basic_fields << tag.div do
+            f.label(:territory_or_mascot_cont, "Name contains", class: "form-field-label block mb-1") +
+            f.search_field(:territory_or_mascot_cont, class: "form-field-input w-full p-2 border rounded")
           end
           
-          # City search field (from stadium's city)
-          fields << tag.div do
-            f.label(:stadium_city_name_cont, "City", class: "form-field-label") +
-            f.search_field(:stadium_city_name_cont, class: "form-field-input")
+          # City search field
+          basic_fields << tag.div do
+            f.label(:stadium_city_name_cont, "City", class: "form-field-label block mb-1") +
+            f.search_field(:stadium_city_name_cont, class: "form-field-input w-full p-2 border rounded")
           end
           
           # League search field
-          fields << tag.div do
-            f.label(:league_name_cont, "League", class: "form-field-label") +
-            f.search_field(:league_name_cont, class: "form-field-input")
+          basic_fields << tag.div do
+            f.label(:league_name_cont, "League", class: "form-field-label block mb-1") +
+            f.search_field(:league_name_cont, class: "form-field-input w-full p-2 border rounded")
           end
           
-          safe_join fields
+          safe_join basic_fields
         end
         
-        # Advanced search section (collapsible)
+        # Advanced filters section (collapsible)
         content << tag.div(class: "advanced-filters-container", data: { controller: "collapse" }) do
-          toggle = tag.div(class: "advanced-filters-toggle", data: { action: "click->collapse#toggle" }) do
-            tag.span("Advanced Filters", class: "advanced-filters-text") +
-            tag.i(class: "advanced-filters-icon #{icon_for_resource :chevron_down}")
+          toggle = tag.div(class: "advanced-filters-toggle cursor-pointer flex items-center text-blue-600 mb-3", 
+                         data: { action: "click->collapse#toggle" }) do
+            tag.span("Advanced Filters", class: "mr-2") +
+            tag.i(class: "#{icon_for_resource :chevron_down}")
           end
           
-          advanced_content = tag.div(class: "advanced-filters-content", data: { collapse_target: "content" }) do
+          adv_content = tag.div(class: "advanced-filters-content hidden", data: { collapse_target: "content" }) do
             adv_fields = []
             
-            # Sport select dropdown
-            sports = Sport.all.map { |s| [s.name, s.id] }
-            adv_fields << auto_submit_select(f, :league_sport_id_eq, sports, "Sport")
-            
-            # League select dropdown
-            leagues = League.all.map { |l| [l.name, l.id] }
-            adv_fields << auto_submit_select(f, :league_id_eq, leagues, "League")
-            
-            # Division select dropdown
-            divisions = Division.all.map { |d| [d.name, d.id] }
-            adv_fields << auto_submit_select(f, :division_id_eq, divisions, "Division")
-            
-            # Conference select dropdown
-            conferences = Conference.all.map { |c| [c.name, c.id] }
-            adv_fields << auto_submit_select(f, :conference_id_eq, conferences, "Conference")
-            
-            # State select dropdown
-            states = State.all.map { |s| [s.name, s.id] }
-            adv_fields << auto_submit_select(f, :stadium_city_state_id_eq, states, "State")
-            
-            # City select dropdown
-            cities = City.all.map { |c| [c.name, c.id] }
-            adv_fields << auto_submit_select(f, :stadium_city_id_eq, cities, "City")
-            
-            # Stadium select dropdown
-            stadiums = Stadium.all.map { |s| [s.name, s.id] }
-            adv_fields << auto_submit_select(f, :stadium_id_eq, stadiums, "Stadium")
+            # Only add filters if filter_options are available
+            if defined?(@filter_options) && @filter_options.present?
+              adv_grid = tag.div(class: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4") do
+                grid_fields = []
+                
+                # Sport filter
+                if @filter_options[:sports].present?
+                  sports = @filter_options[:sports].map { |s| [s.name, s.id] }
+                  grid_fields << auto_submit_select(f, :league_sport_id_eq, sports, "Sport")
+                end
+                
+                # League filter
+                if @filter_options[:leagues].present?
+                  leagues = @filter_options[:leagues].map { |l| [l.name, l.id] }
+                  grid_fields << auto_submit_select(f, :league_id_eq, leagues, "League")
+                end
+                
+                # Conference filter
+                if @filter_options[:conferences].present?
+                  conferences = @filter_options[:conferences].map { |c| [c.name, c.id] }
+                  grid_fields << auto_submit_select(f, :conference_id_eq, conferences, "Conference")
+                end
+                
+                # Division filter
+                if @filter_options[:divisions].present?
+                  divisions = @filter_options[:divisions].map { |d| [d.name, d.id] }
+                  grid_fields << auto_submit_select(f, :division_id_eq, divisions, "Division")
+                end
+                
+                # State filter
+                if @filter_options[:states].present?
+                  states = @filter_options[:states].map { |s| [s.name, s.id] }
+                  grid_fields << auto_submit_select(f, :stadium_city_state_id_eq, states, "State")
+                end
+                
+                # City filter
+                if @filter_options[:cities].present?
+                  cities = @filter_options[:cities].map { |c| [c.name, c.id] }
+                  grid_fields << auto_submit_select(f, :stadium_city_id_eq, cities, "City")
+                end
+                
+                # Stadium filter
+                if @filter_options[:stadiums].present?
+                  stadiums = @filter_options[:stadiums].map { |s| [s.name, s.id] }
+                  grid_fields << auto_submit_select(f, :stadium_id_eq, stadiums, "Stadium")
+                end
+                
+                safe_join grid_fields
+              end
+              
+              adv_fields << adv_grid
+            else
+              adv_fields << tag.div("No advanced filter options available", class: "text-gray-500 italic")
+            end
             
             safe_join adv_fields
           end
           
-          toggle + advanced_content
+          toggle + adv_content
         end
         
         # Form actions
-        content << tag.div(class: "form-actions") do
-          reset = link_to "Reset", teams_path, class: "reset-button"
+        content << tag.div(class: "form-actions mt-4") do
+          reset_btn = link_to "Reset", teams_path, class: "px-4 py-2 border border-gray-300 rounded text-gray-700 mr-2"
           
-          submit = button_tag type: "submit", class: "submit-button" do
-            tag.span do
-              tag.i(class: "search-icon #{icon_for_resource :search}") + 
-              tag.span("Search", class: "ml-1")
-            end
-          end
+          submit_btn = f.submit "Apply Filters", class: "px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer"
           
-          reset + submit
+          reset_btn + submit_btn
         end
         
         safe_join content

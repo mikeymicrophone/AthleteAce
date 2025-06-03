@@ -214,69 +214,67 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/**/conferences.json')
   end
 end
 
-# Step 6: Load teams data
-puts "\n----- Seeding Teams -----"
-Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/**/teams.json')).each do |file|
-  teams_file = File.read(file)
-  teams = JSON.parse(teams_file)
-  league = League.find_by(name: teams["league_name"])
-  teams["teams"].each do |team|
-    stadium = Stadium.find_by(name: team["stadium_name"])
-    
-    # Remove keys that aren't attributes but references to other objects
-    team_attributes = team.except("stadium_name")
-    
-    # Find or initialize the team
-    team_record = Team.find_or_initialize_by(
-      mascot: team["mascot"],
-      territory: team["territory"]
-    )
-    
-    # Assign all attributes from JSON
-    team_record.assign_attributes(team_attributes)
-    team_record.league = league
-    team_record.stadium = stadium
-    puts "Saving team: #{team['territory']} #{team['mascot']}"
-    team_record.save!
-    
-    puts "Created team: #{team['territory']} #{team['mascot']}"
-  end
-end
-
 # Step 6: Load players data
 puts "\n----- Seeding Players -----"
 Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/**/players/*.json')).each do |file|
   players_file = File.read(file)
   players = JSON.parse(players_file)
-  team_name = players["team_name"]
-  team = Team.find_by(mascot: team_name)
   
-  if team.nil?
-    puts "Team not found: #{team_name}"
-    next
+  # Handle both single-file and per-team formats
+  if players["league_name"]
+    # Single file format with all players
+    league = League.find_by(name: players["league_name"])
+    if league.nil?
+      puts "League not found: #{players["league_name"]}"
+      next
+    end
+    
+    players["players"].each do |player_data|
+      team = Team.find_by(mascot: player_data["team_name"])
+      if team.nil?
+        puts "Team not found: #{player_data["team_name"]}"
+        next
+      end
+      
+      create_or_update_player(player_data, team)
+    end
+  else
+    # Per-team format
+    team_name = players["team_name"]
+    team = Team.find_by(mascot: team_name)
+    
+    if team.nil?
+      puts "Team not found: #{team_name}"
+      next
+    end
+    
+    players["players"].each do |player_data|
+      create_or_update_player(player_data, team)
+    end
   end
+end
+
+# Helper method to create or update a player
+def create_or_update_player(player_data, team)
+  player_record = Player.find_or_initialize_by(
+    first_name: player_data["first_name"],
+    last_name: player_data["last_name"],
+    team: team
+  )
   
-  players["players"].each do |player|
-    player_record = Player.find_or_initialize_by(
-      first_name: player["first_name"],
-      last_name: player["last_name"],
-      team: team
-    )
-    
-    player_record.assign_attributes(
-      current_position: player["current_position"],
-      birthdate: player["birthdate"],
-      debut_year: player["debut_year"],
-      draft_year: player["draft_year"],
-      active: player["active"],
-      nicknames: player["nicknames"],
-      bio: player["bio"],
-      photo_urls: player["photo_urls"]
-    )
-    
-    player_record.save!
-    puts "Created/updated player: #{player['first_name']} #{player['last_name']}"
-  end
+  player_record.assign_attributes(
+    current_position: player_data["current_position"],
+    birthdate: player_data["birthdate"],
+    debut_year: player_data["debut_year"],
+    draft_year: player_data["draft_year"],
+    active: player_data["active"],
+    nicknames: player_data["nicknames"],
+    bio: player_data["bio"],
+    photo_urls: player_data["photo_urls"]
+  )
+  
+  player_record.save!
+  puts "Created/updated player: #{player_data['first_name']} #{player_data['last_name']}"
 end
 
 # Step 7: Load memberships data
