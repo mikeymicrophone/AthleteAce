@@ -1,7 +1,7 @@
 module TeamsHelper
+  # Generates a link to start a quiz for a given resource
+  # @param resource [Object] The resource to generate the quiz link for
   # @param options [Hash] Additional HTML options for the link
-  # @return [String] HTML link to start the team quiz
-  def team_quiz_link(team, options = {})
   # @return [String] HTML link to start the quiz
   def quiz_link(resource, options = {})
     return unless resource.present?
