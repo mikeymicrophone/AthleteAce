@@ -4,14 +4,14 @@ require_relative 'routes/filterable'
 Rails.application.routes.draw do
   # Load modular route files
   draw :ratings
-  draw :players
-  draw :teams
-  draw :leagues
-  draw :divisions
-  draw :conferences
+  # draw :players
+  # draw :teams
+  # draw :leagues
+  # draw :divisions
+  # draw :conferences
   draw :locations
-  draw :sports
-  draw :stadiums
+  # draw :sports
+  # draw :stadiums
   devise_for :aces
   # Strength training routes for learning athlete names
   get "strength" => "strength#index"
@@ -48,9 +48,6 @@ Rails.application.routes.draw do
   
   resources :goals, except: [:create, :new]
   resources :federations
-  
-  # Load ratings routes from dedicated file
-  draw :ratings
   
   # League organization
   resources :conferences do
