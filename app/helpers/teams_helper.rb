@@ -1,19 +1,20 @@
 module TeamsHelper
-  # Generates a link to start a team quiz
-  # @param team [Team] The team to generate the quiz link for
   # @param options [Hash] Additional HTML options for the link
   # @return [String] HTML link to start the team quiz
   def team_quiz_link(team, options = {})
-    return unless team.present?
+  # @return [String] HTML link to start the quiz
+  def quiz_link(resource, options = {})
+    return unless resource.present?
 
+    resource_type = resource.class.name.underscore
     default_options = {
-      class: 'quiz-button',
-      id: dom_id(team, :quiz_link),
+      class: "quiz-button for-#{resource_type}",
+      id: dom_id(resource, :quiz_link_for),
       data: { turbo: false }
     }
 
-    # Use the direct path since we don't have a named route for team_match with team_id
-    link_to 'Quiz Me', "/strength/team_match?team_id=#{team.id}", 
+    # Use a named route for team_match, dynamically setting the query parameter based on resource type
+    link_to 'Quiz Me', strength_team_match_path(:"#{resource_type}_id" => resource.id), 
            default_options.merge(options)
   end
   

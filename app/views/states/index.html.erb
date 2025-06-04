@@ -15,7 +15,7 @@
       <%= link_to pluralize(state.players.count, "player"), [state, :players] %>
       <%= display_name_with_lazy_logo state.country, logo_attribute: :flag_url %>
       <% if state.teams.any? %>
-        <%= link_to "Quiz Me", state_strength_team_match_path(state), class: "quiz-button", title: "Test your knowledge of teams in #{state.name}" %>
+        <%= quiz_link(state, title: "Test your knowledge of teams in #{state.name}") %>
       <% end %>
     <% end %>
   <% end %>

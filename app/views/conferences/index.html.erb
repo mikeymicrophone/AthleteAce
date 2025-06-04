@@ -14,7 +14,7 @@
       <%= link_to pluralize(conference.divisions.count, "division"), [conference, :divisions] %>
       <%= link_to pluralize(conference.teams.count, "team"), [conference, :teams] %>
       <% if conference.teams.any? %>
-        <%= link_to "Quiz Me", conference_strength_team_match_path(conference), class: "quiz-button", title: "Test your knowledge of teams in #{conference.name}" %>
+        <%= quiz_link(conference, title: "Test your knowledge of teams in #{conference.name}") %>
       <% end %>
     <% end %>
   <% end %>

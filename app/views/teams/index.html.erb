@@ -46,7 +46,7 @@
 
         <div class="team-links md:col-span-1 text-right flex flex-wrap items-center justify-end gap-3">
           <%= link_to pluralize(team.players.count, "player"), [team, :players], class: "text-sm text-blue-600 hover:underline" %>
-          <%= team_quiz_link(team) %>
+          <%= quiz_link(team, title: "Test your knowledge about #{team.name}") %>
         </div>
       </div>
     <% end %>
