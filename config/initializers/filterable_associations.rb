@@ -3,7 +3,7 @@ module FilterableAssociations
   ASSOCIATIONS = {
     players: [:sport, :league, :stadium, :team, :state, :city],
     divisions: [:conference, :league, :country, :sport],
-    conferences: [:league, :country, :sport],
+    conferences: [:league, :country, :sport, :stadium],
     cities: [:state, :country],
     memberships: [:team, :division, :conference, :league, :sport, :country, :state, :city, :stadium],
     stadiums: [:city, :state, :country, :sport],

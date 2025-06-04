@@ -7,7 +7,7 @@ class LeaguesController < ApplicationController
   # GET /leagues or /leagues.json
   def index
     # Apply filters based on params
-    @leagues = apply_filters League.all
+    @leagues = apply_filter :leagues
     
     # Load current filters and options for the UI
     load_current_filters

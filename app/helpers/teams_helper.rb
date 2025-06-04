@@ -187,7 +187,7 @@ module TeamsHelper
   def association_links(resource)
     return unless resource.present?
 
-    model_name = resource.class.name.underscore.singularize.to_sym
+    model_name = resource.class.name.underscore.to_sym
     associations = FilterableAssociations.from model_name
 
     links = associations.map do |assoc|
@@ -195,7 +195,7 @@ module TeamsHelper
       count = resource.send(assoc).count
       next if count.zero?
 
-      link_to pluralize(count, assoc.to_s), [resource, assoc], class: "text-sm text-blue-600 hover:underline"
+      link_to pluralize(count, assoc.to_s.singularize), [resource, assoc], class: "text-sm text-blue-600 hover:underline"
     end.compact
 
     safe_join(links, " | ")

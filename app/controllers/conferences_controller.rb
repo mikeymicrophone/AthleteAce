@@ -1,7 +1,7 @@
 class ConferencesController < ApplicationController
   include Filterable
   before_action :set_conference, only: %i[ show edit update destroy ]
-  filterable_by :league, :country, :sport
+  # filterable_by :league, :country, :sport, :stadium
 
   # GET /conferences or /conferences.json
   def index

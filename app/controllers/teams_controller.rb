@@ -11,7 +11,7 @@ class TeamsController < ApplicationController
     load_filter_options
     
     # Build the base query using the filters
-    base_query = apply_filters Team.all
+    base_query = apply_filter :teams
     
     # Build the query with proper joins for sorting and searching
     base_query = base_query.includes(:league, :division, :conference)
