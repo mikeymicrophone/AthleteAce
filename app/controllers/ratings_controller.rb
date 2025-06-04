@@ -66,6 +66,7 @@ class RatingsController < ApplicationController
     respond_to do |format|
       format.html do
         @spectrum = Spectrum.find(rating_params[:spectrum_id]) if rating_params[:spectrum_id]
+        @spectrums = @spectrum ? [@spectrum] : Spectrum.all
         @rating ||= Rating.new(rating_params)
         @rating.errors.add(:base, e.message)
         render :new, status: :unprocessable_entity

@@ -5,12 +5,13 @@ module TeamsHelper
   # @return [String] HTML link to start the team quiz
   def team_quiz_link(team, options = {})
     return unless team.present?
-    
+
     default_options = {
-      class: 'inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
+      class: 'quiz-button',
+      id: dom_id(team, :quiz_link),
       data: { turbo: false }
     }
-    
+
     # Use the direct path since we don't have a named route for team_match with team_id
     link_to 'Quiz Me', "/strength/team_match?team_id=#{team.id}", 
            default_options.merge(options)
@@ -130,32 +131,27 @@ module TeamsHelper
                 if @filter_options[:leagues].present?
                   leagues = @filter_options[:leagues].map { |l| [l.name, l.id] }
                   grid_fields << auto_submit_select(f, :league_id_eq, leagues, "League")
-                end
-                
+                end  
                 # Conference filter
                 if @filter_options[:conferences].present?
                   conferences = @filter_options[:conferences].map { |c| [c.name, c.id] }
                   grid_fields << auto_submit_select(f, :conference_id_eq, conferences, "Conference")
                 end
-                
                 # Division filter
                 if @filter_options[:divisions].present?
                   divisions = @filter_options[:divisions].map { |d| [d.name, d.id] }
                   grid_fields << auto_submit_select(f, :division_id_eq, divisions, "Division")
                 end
-                
                 # State filter
                 if @filter_options[:states].present?
                   states = @filter_options[:states].map { |s| [s.name, s.id] }
                   grid_fields << auto_submit_select(f, :stadium_city_state_id_eq, states, "State")
                 end
-                
                 # City filter
                 if @filter_options[:cities].present?
                   cities = @filter_options[:cities].map { |c| [c.name, c.id] }
                   grid_fields << auto_submit_select(f, :stadium_city_id_eq, cities, "City")
                 end
-                
                 # Stadium filter
                 if @filter_options[:stadiums].present?
                   stadiums = @filter_options[:stadiums].map { |s| [s.name, s.id] }
@@ -164,27 +160,21 @@ module TeamsHelper
                 
                 safe_join grid_fields
               end
-              
               adv_fields << adv_grid
             else
               adv_fields << tag.div("No advanced filter options available", class: "text-gray-500 italic")
             end
-            
             safe_join adv_fields
           end
-          
           toggle + adv_content
         end
         
         # Form actions
         content << tag.div(class: "form-actions mt-4") do
           reset_btn = link_to "Reset", teams_path, class: "px-4 py-2 border border-gray-300 rounded text-gray-700 mr-2"
-          
           submit_btn = f.submit "Apply Filters", class: "px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer"
-          
           reset_btn + submit_btn
         end
-        
         safe_join content
       end
     end
