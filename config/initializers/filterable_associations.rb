@@ -33,6 +33,10 @@ module FilterableAssociations
     ASSOCIATIONS[model_name] || []
   end
 
+  def self.from(model_name)
+    ASSOCIATIONS.select { |k, v| v.include?(model_name) }.keys
+  end
+
   # Get join path for a specific association
   def self.join_path_for(model, association)
     return nil unless JOIN_PATHS[model] && JOIN_PATHS[model][association]

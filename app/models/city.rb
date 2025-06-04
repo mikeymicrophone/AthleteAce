@@ -3,6 +3,11 @@ class City < ApplicationRecord
   has_many :players, foreign_key: :birth_city_id
   has_many :stadiums
   has_many :teams, through: :stadiums
+  has_many :memberships, through: :teams
+  has_many :divisions, through: :memberships
+  has_many :conferences, through: :divisions
+  has_many :leagues, through: :conferences
+  has_many :sports, through: :leagues
 
   delegate :country, to: :state
   

@@ -5,4 +5,6 @@ Rails.application.routes.draw do
     resources :ratings, only: [:new, :create]
     get 'strength/team_match', to: 'strength#team_match'
   end
+
+  filterable_resources :memberships
 end

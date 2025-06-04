@@ -10,9 +10,7 @@
       <%= display_name_with_lazy_logo city %>
       <%= display_name_with_lazy_logo city.state, logo_attribute: :flag_url %>
       <%= display_name_with_lazy_logo city.country, logo_attribute: :flag_url %>
-      <%= link_to pluralize(city.stadiums.count, "stadium"), [city, :stadiums] %>
-      <%= link_to pluralize(city.teams.count, "team"), [city, :teams] %>
-      <%= link_to pluralize(city.players.count, "player"), [city, :players] %>
+      <%= association_links(city) %>
       <% if city.teams.any? %>
         <%= quiz_link(city, title: "Test your knowledge of teams in #{city.name}") %>
       <% end %>
