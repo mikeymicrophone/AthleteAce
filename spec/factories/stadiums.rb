@@ -5,7 +5,7 @@ FactoryBot.define do
     association :city
     
     # Add optional attributes that might be useful in tests
-    year_opened { rand(1950..2020) }
+    opened_year { rand(1950..2020) }
     address { "123 Stadium Way" }
     
     trait :with_teams do

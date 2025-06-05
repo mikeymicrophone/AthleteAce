@@ -1,6 +1,7 @@
 FactoryBot.define do
   factory :conference do
     sequence(:name) { |n| "Conference #{n}" }
+    sequence(:abbreviation) { |n| "C#{n}" }
     association :league
     
     trait :with_divisions do
