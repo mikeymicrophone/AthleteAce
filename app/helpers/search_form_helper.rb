@@ -1,4 +1,5 @@
 module SearchFormHelper
+  # UNUSED
   # Creates an auto-submitting select field for search forms
   # @param form [ActionView::Helpers::FormBuilder] The form builder
   # @param attribute [Symbol] The attribute to search on (ransack predicate)
@@ -28,6 +29,7 @@ module SearchFormHelper
     end
   end
   
+  # UNUSED
   # Creates a search text field with label
   # @param form [ActionView::Helpers::FormBuilder] The form builder
   # @param attribute [Symbol] The attribute to search on (ransack predicate)
@@ -45,6 +47,7 @@ module SearchFormHelper
     end
   end
   
+  # UNUSED
   # Creates a collapsible section for advanced filters
   # @param title [String] Title for the advanced filters section
   # @param &block [Block] Block containing the advanced filter fields
@@ -66,6 +69,7 @@ module SearchFormHelper
     end
   end
   
+  # UNUSED
   # Creates a complete search form with basic and advanced filters
   # @param search [Object] The Ransack search object
   # @param url [String] URL for the form

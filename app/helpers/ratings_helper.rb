@@ -1,4 +1,5 @@
 module RatingsHelper
+  # UNUSED
   # Display ratings count for a record
   def ratings_count_display(record)
     if record.ratings.active.any?
@@ -8,6 +9,7 @@ module RatingsHelper
     end
   end
   
+  # UNUSED
   # Display ratings details (top 3 spectrums with percentages)
   def ratings_details_display(record)
     return unless record.ratings.active.any?
@@ -23,6 +25,7 @@ module RatingsHelper
     content
   end
   
+  # UNUSED
   # Display empty ratings message
   def empty_ratings_display
     tag.div "No ratings yet", class: "record-stats-empty"

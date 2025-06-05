@@ -23,6 +23,7 @@ module QuestsHelper
     end
   end
   
+  # UNUSED
   # Returns the number of aces currently on a quest
   def quest_participants_count(quest)
     quest.goals.count

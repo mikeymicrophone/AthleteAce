@@ -18,6 +18,7 @@ module TeamsHelper
            default_options.merge(options)
   end
   
+  # UNUSED
   # Formats a team name for display
   # @param team [Team] The team to format name for
   # @return [String] Formatted team name
@@ -33,6 +34,7 @@ module TeamsHelper
     end
   end
   
+  # UNUSED
   # Formats a full team location with city and state
   # @param team [Team] The team to format location for
   # @return [String] Formatted team location
@@ -42,6 +44,7 @@ module TeamsHelper
     "#{team.stadium.city.name}, #{team.stadium.city.state.abbreviation}"
   end
   
+  # UNUSED
   # Helper for creating auto-submitting select dropdowns
   # @param form [ActionView::Helpers::FormBuilder] The form builder
   # @param attribute [Symbol] The attribute to search on

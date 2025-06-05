@@ -14,6 +14,7 @@ module FilterableHelper
     link_to text, path, html_options
   end
   
+  # UNUSED
   # Build a path to a filtered resource
   #
   # @param resource [Symbol] The resource to link to (e.g., :players, :teams)
@@ -147,6 +148,7 @@ module FilterableHelper
     end
   end
   
+  # UNUSED
   # Generate the important filters section
   #
   # @param resource [Symbol] The resource type
@@ -169,6 +171,7 @@ module FilterableHelper
     end
   end
   
+  # UNUSED
   # Generate the advanced filters section
   #
   # @param resource [Symbol] The resource type
@@ -195,6 +198,7 @@ module FilterableHelper
     end
   end
   
+  # UNUSED
   # Generate a single filter selector
   #
   # @param resource [Symbol] The resource type

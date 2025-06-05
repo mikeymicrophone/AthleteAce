@@ -25,6 +25,7 @@ module FilteredShowHelper
     end
   end
   
+  # UNUSED
   # Generate breadcrumb navigation for filtered show pages
   #
   # @param breadcrumbs [Array] Array of breadcrumb items with keys :label, :path, :type, :current
@@ -73,6 +74,7 @@ module FilteredShowHelper
     end
   end
   
+  # UNUSED
   # Generate resource metadata display for the show header
   #
   # @param resource [Object] The resource being displayed

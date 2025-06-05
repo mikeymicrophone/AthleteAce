@@ -3,6 +3,7 @@ module TailwindHelper
   # This helps maintain consistency across filter UI elements
   # and makes it easier to update styles in one place
   
+  # UNUSED
   # Filter panel classes
   def filter_panel_classes
     {
@@ -13,6 +14,7 @@ module TailwindHelper
     }
   end
   
+  # UNUSED
   # Filter breadcrumb classes
   def filter_breadcrumb_classes
     {
@@ -24,6 +26,7 @@ module TailwindHelper
     }
   end
   
+  # UNUSED
   # Filter selector classes
   def filter_selector_classes
     {
@@ -34,6 +37,7 @@ module TailwindHelper
     }
   end
   
+  # UNUSED
   # Filter chip classes
   def filter_chip_classes
     {
@@ -44,12 +48,14 @@ module TailwindHelper
     }
   end
   
+  # UNUSED
   # Navigation link classes
   def nav_link_classes(active = false)
     base = "px-4 py-2 text-sm font-medium rounded-md"
     active ? "#{base} bg-blue-600 text-white" : "#{base} text-gray-700 hover:bg-gray-100"
   end
   
+  # UNUSED
   # Card classes
   def card_classes
     {
@@ -60,6 +66,7 @@ module TailwindHelper
     }
   end
   
+  # UNUSED
   # Button classes by type
   def button_classes(type = :primary, size = :medium)
     base = "inline-flex items-center justify-center font-medium rounded-md"
@@ -93,6 +100,7 @@ module TailwindHelper
     "#{base} #{size_classes} #{type_classes}"
   end
   
+  # UNUSED
   # Badge classes by type
   def badge_classes(type = :default)
     base = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
@@ -115,6 +123,7 @@ module TailwindHelper
     end
   end
   
+  # UNUSED
   # Apply Tailwind utility to an element
   # This helps with extracting common utility patterns
   def tw(utilities)

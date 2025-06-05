@@ -16,6 +16,7 @@ module AcesHelper
     end
   end
   
+  # UNUSED
   # Returns a welcome message for signed in aces
   def ace_welcome_message
     if ace_signed_in?

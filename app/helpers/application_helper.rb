@@ -1,6 +1,7 @@
 module ApplicationHelper
   include Pagy::Frontend
   
+  # UNUSED
   # Renders a Tailwind CSS styled pagination component
   # @param pagy [Pagy] The Pagy object
   # @param nearby_pages [Integer] Number of pages to show on either side of the current page (default: 2)
@@ -87,6 +88,7 @@ module ApplicationHelper
     end
   end
 
+  # UNUSED
   # Returns the active class for navigation links
   def active_class(link_path)
     current_page?(link_path) ? 'border-indigo-500 text-orange-400' : 'border-transparent text-white hover:border-gray-300 hover:text-orange-200'
@@ -103,6 +105,7 @@ module ApplicationHelper
     'index-record'
   end
   
+  # UNUSED
   # Generic index page header with title and optional parent link
   def index_header(title, parent_record = nil, parent_link_text = nil)
     content = tag.h1(title, class: "index-title")
@@ -149,6 +152,7 @@ module ApplicationHelper
     'team-record'
   end
 
+  # UNUSED
   def player_index_record_classes
     'player-record'
   end

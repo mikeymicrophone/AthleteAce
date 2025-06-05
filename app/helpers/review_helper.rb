@@ -1,4 +1,5 @@
 module ReviewHelper
+  # UNUSED
   def team_attempts_filter_button team
     link_to team_strength_game_attempts_path(team), class: "team-button" do
       tag.div class: "team-button-content" do
@@ -13,6 +14,7 @@ module ReviewHelper
     end
   end
 
+  # UNUSED
   def sport_group_team_buttons sport, teams_by_sport
     tag.div class: "sport-section" do
       tag.h3(sport.name, class: "sport-title") +
@@ -29,6 +31,7 @@ module ReviewHelper
     end
   end
 
+  # UNUSED
   def review_attempt_card attempt, show_player_name = true
     tag.div class: "attempt-card #{attempt.correct? ? 'correct-attempt' : 'incorrect-attempt'}" do
       tag.div(class: "attempt-team-part") do

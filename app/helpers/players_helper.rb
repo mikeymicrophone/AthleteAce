@@ -1,4 +1,5 @@
 module PlayersHelper
+  # UNUSED
   # Display player name with logo
   def player_name_display player
     tag.div class: "record-name" do
@@ -6,6 +7,7 @@ module PlayersHelper
     end
   end
   
+  # UNUSED
   # Display player metadata (team, league, sport)
   def player_metadata_display player
     tag.div class: "record-metadata" do
@@ -60,6 +62,7 @@ module PlayersHelper
     end
   end
   
+  # UNUSED
   # Custom sort link helper that enhances Ransack's sort_link with semantic styling
   # @param search [Ransack::Search] The Ransack search object
   # @param attribute [Symbol] The attribute to sort by
@@ -104,6 +107,7 @@ module PlayersHelper
     end
   end
   
+  # UNUSED
   # Helper to create a random sort link
   # @return [String] HTML for the random sort link
   def random_sort_link
