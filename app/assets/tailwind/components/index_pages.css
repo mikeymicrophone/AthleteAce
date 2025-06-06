@@ -23,11 +23,7 @@
 
 /* Index Record Layout */
 .index-record {
-  @apply flex items-center justify-between p-4 mb-2 bg-white rounded shadow hover:bg-orange-50 transition-colors duration-150;
-  @apply grid grid-cols-1 gap-4 items-center rounded-lg shadow-sm;
-}
-
-.index-record {
+  @apply grid grid-cols-1 gap-4 items-center p-4 mb-2 bg-white rounded-lg shadow-sm hover:bg-orange-50 transition-colors duration-150;
   @apply md:grid-cols-3;
 }
 
@@ -71,48 +67,48 @@
   @apply text-sm text-gray-500 italic;
 }
 
-/* Resource-specific styling */
-.player-record {
+/* Container-based resource styling */
+#players .index-record {
   @apply border-l-4 border-blue-400 hover:border-indigo-500;
 }
 
-.team-record {
+#teams .index-record {
   @apply border-l-4 border-orange-400 hover:border-indigo-500;
 }
 
-.league-record {
+#leagues .index-record {
   @apply border-l-4 border-green-400 hover:border-indigo-500;
 }
 
-.country-record {
+#countries .index-record {
   @apply border-l-4 border-yellow-400 hover:border-indigo-500;
 }
 
-.state-record {
+#states .index-record {
   @apply border-l-4 border-purple-400 hover:border-indigo-500;
 }
 
-.city-record {
+#cities .index-record {
   @apply border-l-4 border-pink-400 hover:border-indigo-500;
 }
 
-.stadium-record {
+#stadiums .index-record {
   @apply border-l-4 border-gray-400 hover:border-indigo-500;
 }
 
-.sport-record {
+#sports .index-record {
   @apply border-l-4 border-teal-400 hover:border-indigo-500;
 }
 
-.conference-record {
+#conferences .index-record {
   @apply border-l-4 border-red-400 hover:border-indigo-500;
 }
 
-.division-record {
+#divisions .index-record {
   @apply border-l-4 border-indigo-400 hover:border-indigo-500;
 }
 
-.membership-record {
+#memberships .index-record {
   @apply border-l-4 border-amber-400 hover:border-indigo-500;
 }
 

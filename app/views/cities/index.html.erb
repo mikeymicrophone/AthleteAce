@@ -6,7 +6,7 @@
 
 <div id="cities">
   <% @cities.each do |city| %>
-    <%= tag.div(id: dom_id(city), class: [index_record_base_classes, city_index_record_classes].join(' ')) do %>
+    <%= tag.div(id: dom_id(city), class: "index-record") do %>
       <%= display_name_with_lazy_logo city %>
       <%= display_name_with_lazy_logo city.state, logo_attribute: :flag_url %>
       <%= display_name_with_lazy_logo city.country, logo_attribute: :flag_url %>

@@ -6,7 +6,7 @@
 
 <div id="memberships">
   <% @memberships.each do |membership| %>
-    <%= tag.div(id: dom_id(membership), class: [index_record_base_classes, membership_index_record_classes].join(' ')) do %>
+    <%= tag.div(id: dom_id(membership), class: "index-record") do %>
       <div class="membership-status <%= membership.active? ? 'active' : 'inactive' %>">
         <%= membership.active? ? 'Active' : 'Inactive' %>
       </div>

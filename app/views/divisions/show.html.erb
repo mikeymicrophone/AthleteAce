@@ -29,7 +29,7 @@
     <% if @teams.any? %>
       <div id="teams">
         <% @teams.each do |team| %>
-          <%= tag.div(id: dom_id(team), class: [index_record_base_classes, team_index_record_classes].join(' ')) do %>
+          <%= tag.div(id: dom_id(team), class: "index-record") do %>
             <%= link_to team do %>
               <%= display_name_with_lazy_logo(team) %>
             <% end %>

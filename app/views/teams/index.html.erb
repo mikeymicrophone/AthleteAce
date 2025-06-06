@@ -23,7 +23,7 @@
 
 <div id="teams" class="space-y-4">
   <% @teams.each do |team| %>
-    <%= tag.div(id: dom_id(team), class: [index_record_base_classes, team_index_record_classes, "p-4 rounded-lg shadow-sm"].join(' ')) do %>
+    <%= tag.div(id: dom_id(team), class: "index-record p-4 rounded-lg shadow-sm") do %>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
         <div class="team-info md:col-span-1">
           <div>

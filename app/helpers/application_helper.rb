@@ -100,10 +100,6 @@ module ApplicationHelper
     link_to record.name, record, **merged_options rescue ''
   end
 
-  # Shared Tailwind classes for all index records
-  def index_record_base_classes
-    'index-record'
-  end
   
   # UNUSED
   # Generic index page header with title and optional parent link
@@ -147,51 +143,6 @@ module ApplicationHelper
     tag.div(class: "record-stats", &block)
   end
 
-  # Resource-specific example: Teams
-  def team_index_record_classes
-    'team-record'
-  end
-
-  # UNUSED
-  def player_index_record_classes
-    'player-record'
-  end
-
-  def league_index_record_classes
-    'league-record'
-  end
-
-  def country_index_record_classes
-    'country-record'
-  end
-
-  def state_index_record_classes
-    'state-record'
-  end
-
-  def city_index_record_classes
-    'city-record'
-  end
-
-  def stadium_index_record_classes
-    'stadium-record'
-  end
-
-  def sport_index_record_classes
-    'sport-record'
-  end
-
-  def conference_index_record_classes
-    'conference-record'
-  end
-
-  def division_index_record_classes
-    'division-record'
-  end
-
-  def membership_index_record_classes
-    'membership-record'
-  end
 
   # Renders a collection of records with their names and logos
   # 
