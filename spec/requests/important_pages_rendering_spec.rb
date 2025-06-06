@@ -238,9 +238,8 @@ RSpec.describe "Important Pages Rendering", type: :request do
     let(:ace) { create(:ace) }
 
     context "when signed in" do
-      before { sign_in ace }
-
       it "renders quest page with authentication features" do
+        post ace_session_path, params: { ace: { email: ace.email, password: ace.password } }
         get quest_path(quest)
         expect(response).to have_http_status(:success)
         expect(response.body).to include(quest.name)
@@ -248,6 +247,7 @@ RSpec.describe "Important Pages Rendering", type: :request do
       end
 
       it "renders random quest discovery page" do
+        post ace_session_path, params: { ace: { email: ace.email, password: ace.password } }
         get "/quests/random"
         expect(response).to have_http_status(:success)
         expect(response.body).to include("Quest Discovery")
