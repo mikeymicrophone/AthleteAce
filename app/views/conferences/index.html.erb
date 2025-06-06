@@ -11,8 +11,7 @@
     <%= tag.div(id: dom_id(conference), class: [index_record_base_classes, conference_index_record_classes].join(' ')) do %>
       <%= display_name_with_lazy_logo(conference) %>
       <%= link_to conference.league.name, conference.league %>
-      <%= link_to pluralize(conference.divisions.count, "division"), [conference, :divisions] %>
-      <%= link_to pluralize(conference.teams.count, "team"), [conference, :teams] %>
+      <%= association_links conference %>
       <% if conference.teams.any? %>
         <%= quiz_link(conference, title: "Test your knowledge of teams in #{conference.name}") %>
       <% end %>

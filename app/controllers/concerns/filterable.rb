@@ -7,36 +7,21 @@ module Filterable
     end
   end
 
-  # Apply filters based on params and return the filtered collection
-  # This method sets instance variables for each filter (e.g., @sport, @team)
-  # and builds a filtered query using the appropriate associations
-  def apply_filter(result)
-    # Get all applied filters from params
-    applied_filters = {}
-    
-    # Process all filter params and set instance variables
-    filterable_associations.each do |association|
-      param_key = "#{association}_id"
-      next unless params[param_key].present?
-      
-      # Set the instance variable for this filter
-      model_class = association.to_s.singularize.classify.constantize
-      filter_object = model_class.find_by id: params[param_key]
-      
-      if filter_object
-        instance_variable_set "@#{association}", filter_object
-        applied_filters[association] = filter_object
-      end
+  # Apply ONE filter based on params and return the filtered collection
+  # This method sets aninstance variable for the scope (e.g., @sport, @team)
+  def apply_filter result
+    scope = nil
+    filterable_associations.select do |association|
+      params[association.to_s.foreign_key].present?
+    end.each do |association|
+      scope = instance_variable_set("@#{association}", association.to_s.classify.constantize.find(params[association.to_s.foreign_key]))
     end
-    
-    # Return all records if no filters applied
-    return result.to_s.singularize.classify.constantize.all if applied_filters.empty?
-    
-    # Build the query with all filters applied
-    query = build_filtered_query result, applied_filters
-    
-    # Return the filtered collection
-    query
+
+    if scope.nil?
+      result.to_s.classify.constantize.all
+    else
+      scope.send result
+    end
   end
 
   # Apply multiple filters to a relation
@@ -107,8 +92,9 @@ module Filterable
       if join_path
         # Apply complex joins if a join path is defined
         query = query.joins(*join_path)
-        last_join = join_path.last
-        query = query.where last_join => { id: filter_object.id }
+        # The 'association' variable (e.g., :conference) determines the target table for the WHERE clause
+        target_table_for_where = association.to_s.pluralize.to_sym
+        query = query.where(target_table_for_where => { id: filter_object.id })
       else
         # Try different approaches based on the associations
         if result_class.reflect_on_association(association)

@@ -22,7 +22,8 @@ module FilterableAssociations
       league: { joins: [:team] }
     },
     teams: {
-      country: { joins: [:state] }
+      country: { joins: [:state] },
+      conference: { joins: [memberships: { division: :conference }] }
     }
     # Add more complex join paths as needed
   }.freeze
