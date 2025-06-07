@@ -5,6 +5,12 @@ module Ratable
     has_many :ratings, as: :target, dependent: :destroy
   end
 
+  class_methods do
+    def is_ratable?
+      true
+    end
+  end
+
   def ratings_on(spectrum)
     ratings.active.where(spectrum: spectrum)
   end

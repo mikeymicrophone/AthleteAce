@@ -44,14 +44,11 @@ module RatingsHelper
   # @param record [ActiveRecord::Base] The object being rated (player, team, etc.)
   # @param selected_spectrums [Array<Spectrum>] Collection of currently selected spectrums to display sliders for
   # @return [ActiveSupport::SafeBuffer] The HTML for the rating slider
-  def rating_slider_container(record, selected_spectrums)
+  def rating_slider_container record, selected_spectrums
+    return unless record.is_ratable?
+    
     # Determine the record type from the record class
     record_type = record.class.name.underscore
-    
-    # Validate this is a ratable model
-    unless Rails.application.config.ratable_models_hash[record.class.name]
-      raise ArgumentError, "#{record.class.name} is not in the list of ratable models"
-    end
 
     # The outer div simply wraps everything, matches what we see in the teams page
     tag.div class: "rating-container" do
