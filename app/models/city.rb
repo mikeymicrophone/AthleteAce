@@ -3,16 +3,21 @@ class City < ApplicationRecord
   has_many :players, foreign_key: :birth_city_id
   has_many :stadiums
   has_many :teams, through: :stadiums
+  has_many :memberships, through: :teams
+  has_many :divisions, through: :memberships
+  has_many :conferences, through: :divisions
+  has_many :leagues, through: :conferences
+  has_many :sports, through: :leagues
 
   delegate :country, to: :state
   
-  # Define which attributes can be searched via Ransack
+  # Allow all attributes to be searchable with Ransack
   def self.ransackable_attributes(auth_object = nil)
-    ["created_at", "id", "name", "state_id", "updated_at"]
+    column_names
   end
   
-  # Define which associations can be searched via Ransack
+  # Allow all associations to be searchable with Ransack
   def self.ransackable_associations(auth_object = nil)
-    ["players", "stadiums", "state", "teams"]
+    reflect_on_all_associations.map { |a| a.name.to_s }
   end
 end

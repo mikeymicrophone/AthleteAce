@@ -1,6 +1,6 @@
 <% content_for :title, @team.name %>
 
-<p style="color: green"><%= notice %></p>
+<%= render 'filtered_show' if @filtered_breadcrumb.present? %>
 
 <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
   <div class="flex items-center gap-4 w-full md:w-auto">
@@ -27,64 +27,3 @@
     <% end %>
   </ul>
 <% end %>
-
-<!-- Ratings Section -->
-<div class="mt-8">
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-xl font-bold text-gray-800">Team Ratings</h2>
-    <% if ace_signed_in? %>
-      <%= link_to "Rate this Team", new_team_rating_path(@team), class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white block font-medium" %>
-    <% end %>
-  </div>
-  
-  <div class="bg-white rounded-lg shadow p-6">
-    <% spectrums = Spectrum.all.order(:name) %>
-    <% if spectrums.any? %>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <% spectrums.each do |spectrum| %>
-          <div class="bg-gray-50 rounded-lg shadow-sm overflow-hidden">
-            <div class="p-4">
-              <h3 class="font-semibold text-lg mb-2"><%= spectrum.name %></h3>
-              <p class="text-gray-600 text-sm mb-3"><%= spectrum.description %></p>
-              
-              <% ratings = @team.ratings_on(spectrum) %>
-              <% if ratings.any? %>
-                <% avg_value = @team.average_rating_on(spectrum) %>
-                <div class="mb-2">
-                  <div class="w-full bg-gray-200 rounded-full h-2.5">
-                    <div class="<%= avg_value >= 0 ? 'bg-green-600' : 'bg-red-600' %> h-2.5 rounded-full" style="width: <%= @team.normalized_average_rating_on(spectrum) * 100 %>%"></div>
-                  </div>
-                  <div class="flex justify-between text-xs mt-1">
-                    <span class="text-red-500"><%= spectrum.low_label %></span>
-                    <span class="font-medium"><%= avg_value.round(0) %></span>
-                    <span class="text-green-500"><%= spectrum.high_label %></span>
-                  </div>
-                </div>
-                <p class="text-sm text-gray-500">Based on <%= ratings.count %> <%= 'rating'.pluralize(ratings.count) %></p>
-                
-                <% if ace_signed_in? && current_ace.rated?(@team, spectrum) %>
-                  <% rating = current_ace.rating_for(@team, spectrum) %>
-                  <div class="mt-3 pt-3 border-t border-gray-200">
-                    <p class="text-sm font-medium mb-1">Your Rating: <%= rating.value %></p>
-                    <div class="flex space-x-2">
-                      <%= link_to "Edit", edit_rating_path(rating), class: "text-xs text-blue-600 hover:text-blue-800" %>
-                    </div>
-                  </div>
-                <% end %>
-              <% else %>
-                <p class="text-sm text-gray-500 italic">No ratings yet</p>
-                <% if ace_signed_in? %>
-                  <div class="mt-2">
-                    <%= link_to "Be the first to rate", new_team_rating_path(@team, spectrum_id: spectrum.id), class: "text-sm text-blue-600 hover:text-blue-800" %>
-                  </div>
-                <% end %>
-              <% end %>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    <% else %>
-      <p class="text-gray-500">No rating spectrums have been created yet.</p>
-    <% end %>
-  </div>
-</div>

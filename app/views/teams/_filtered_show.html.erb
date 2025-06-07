@@ -1,0 +1,26 @@
+<%# Filtered view for team show page %>
+
+<%= filtered_show_header @team, @filtered_breadcrumb, { container_class: "show-header team-header" } %>
+
+<div class="team-metadata">
+  <% if @team.league %>
+    <%= tag.div class: "metadata-tag" do %>
+      <%= tag.span "League:", class: "tag-label" %>
+      <%= link_to @team.league.name, league_path(@team.league), class: "tag-value" %>
+    <% end %>
+  <% end %>
+  
+  <% if @team.division.present? %>
+    <%= tag.div class: "metadata-tag" do %>
+      <%= tag.span "Division:", class: "tag-label" %>
+      <%= link_to @team.division.name, division_path(@team.division), class: "tag-value" %>
+    <% end %>
+  <% end %>
+  
+  <% if @team.conference.present? %>
+    <%= tag.div class: "metadata-tag" do %>
+      <%= tag.span "Conference:", class: "tag-label" %>
+      <%= link_to @team.conference.name, conference_path(@team.conference), class: "tag-value" %>
+    <% end %>
+  <% end %>
+</div>

@@ -2,6 +2,10 @@
 
 <% content_for :title, "Teams" %>
 
+<%= render 'filter_ui' %>
+
+<%= team_search_form(@q) %>
+
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
   <div class="mb-4 sm:mb-0">
     <div class="text-sm text-gray-600 mb-1">Sort by:</div>
@@ -19,7 +23,7 @@
 
 <div id="teams" class="space-y-4">
   <% @teams.each do |team| %>
-    <%= tag.div(id: dom_id(team), class: [index_record_base_classes, team_index_record_classes, "p-4 rounded-lg shadow-sm"].join(' ')) do %>
+    <%= tag.div(id: dom_id(team), class: "index-record p-4 rounded-lg shadow-sm") do %>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
         <div class="team-info md:col-span-1">
           <div>
@@ -42,7 +46,7 @@
 
         <div class="team-links md:col-span-1 text-right flex flex-wrap items-center justify-end gap-3">
           <%= link_to pluralize(team.players.count, "player"), [team, :players], class: "text-sm text-blue-600 hover:underline" %>
-          <%= team_quiz_link(team) %>
+          <%= quiz_link(team, title: "Test your knowledge about #{team.name}") %>
         </div>
       </div>
     <% end %>

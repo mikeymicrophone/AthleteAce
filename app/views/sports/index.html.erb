@@ -4,7 +4,7 @@
 
 <div id="sports">
   <% @sports.each do |sport| %>
-    <%= tag.div(id: dom_id(sport), class: [index_record_base_classes, sport_index_record_classes].join(' ')) do %>
+    <%= tag.div(id: dom_id(sport), class: "index-record") do %>
       <%= display_name_with_lazy_logo(sport, logo_attribute: :icon_url) %>
       <%= link_to pluralize(sport.leagues.count, "league"), [sport, :leagues] %>
       <%= link_to pluralize(sport.teams.count, "team"), [sport, :teams] %>

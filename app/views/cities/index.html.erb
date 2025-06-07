@@ -1,20 +1,16 @@
-<p style="color: green"><%= notice %></p>
-
 <% content_for :title, "Cities" %>
 
 <h1>Cities</h1>
 
 <div id="cities">
   <% @cities.each do |city| %>
-    <%= tag.div(id: dom_id(city), class: [index_record_base_classes, city_index_record_classes].join(' ')) do %>
+    <%= tag.div(id: dom_id(city), class: "index-record") do %>
       <%= display_name_with_lazy_logo city %>
       <%= display_name_with_lazy_logo city.state, logo_attribute: :flag_url %>
       <%= display_name_with_lazy_logo city.country, logo_attribute: :flag_url %>
-      <%= link_to pluralize(city.stadiums.count, "stadium"), [city, :stadiums] %>
-      <%= link_to pluralize(city.teams.count, "team"), [city, :teams] %>
-      <%= link_to pluralize(city.players.count, "player"), [city, :players] %>
+      <%= association_links city %>
       <% if city.teams.any? %>
-        <%= link_to "Quiz Me", city_strength_team_match_path(city), class: "quiz-button", title: "Test your knowledge of teams in #{city.name}" %>
+        <%= quiz_link(city, title: "Test your knowledge of teams in #{city.name}") %>
       <% end %>
     <% end %>
   <% end %>

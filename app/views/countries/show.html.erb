@@ -1,14 +1,14 @@
 <%= tag.header @country.name, class: "country-name" %>
 
-<%= render_collection(@country.states) %>
+<%= render_collection @country.states %>
 
 <% @country.states.each do |state| %>
   <%= tag.div class: "state-details" do %>
-    <%= render_collection(state.cities) %>
+    <%= render_collection state.cities %>
     
     <% state.cities.each do |city| %>
       <%= tag.div class: "city-details" do %>
-        <%= render_collection(city.stadiums) %>
+        <%= render_collection city.stadiums %>
       <% end %>
     <% end %>
   <% end %>

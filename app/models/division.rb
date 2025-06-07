@@ -3,6 +3,7 @@ class Division < ApplicationRecord
   has_many :memberships, dependent: :destroy
   has_many :teams, through: :memberships
   has_many :ratings, as: :target, dependent: :destroy
+  has_one :league, through: :conference
   
   validates :name, presence: true
   
@@ -14,20 +15,20 @@ class Division < ApplicationRecord
     end
   end
   
-  # Rating methods
-  
-  # Get ratings for this division on a specific spectrum
-  # @param spectrum [Spectrum] The spectrum to get ratings for
-  # @return [ActiveRecord::Relation] Ratings for this division on the spectrum
-  def ratings_on(spectrum)
-    ratings.active.where(spectrum: spectrum)
+  def ratings_on spectrum
+    ratings.active.where spectrum: spectrum
   end
   
-  # Get the average rating for this division on a specific spectrum
-  # @param spectrum [Spectrum] The spectrum to get the average rating for
-  # @return [Float, nil] The average rating or nil if no ratings exist
-  def average_rating_on(spectrum)
-    ratings = ratings_on(spectrum)
+  def self.ransackable_attributes auth_object = nil
+    column_names
+  end
+  
+  def self.ransackable_associations auth_object = nil
+    reflect_on_all_associations.map { |a| a.name.to_s }
+  end
+  
+  def average_rating_on spectrum
+    ratings = ratings_on spectrum
     ratings.average(:value)&.to_f
   end
 end

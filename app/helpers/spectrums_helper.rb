@@ -1,4 +1,5 @@
 module SpectrumsHelper
+  # UNUSED
   # Get the current selected spectrum IDs based on params, session, or default to Familiarity.
   # @param params [ActionController::Parameters] The request parameters
   # @return [Array<Integer>] The IDs of the current selected spectrums
@@ -19,6 +20,7 @@ module SpectrumsHelper
     end
   end
 
+  # UNUSED
   # Set the current selected spectrum IDs in the session.
   # @param spectrum_ids [Array<Integer>] The IDs to set as current selected spectrums
   def set_selected_spectrum_ids(spectrum_ids)
@@ -32,6 +34,7 @@ module SpectrumsHelper
     Spectrum.where(id: ids).order(:name)
   end
 
+  # UNUSED
   # Get a collection of all spectrums for display in the picker.
   # @param limit [Integer] Maximum number of spectrums to return (currently unused but kept for consistency)
   # @return [ActiveRecord::Relation] Collection of spectrums
@@ -40,6 +43,7 @@ module SpectrumsHelper
     limit.present? ? spectrums.limit(limit) : spectrums
   end
 
+  # UNUSED
   # Generates options for the spectrum select tag.
   # Displays spectrum name without low/high labels.
   # Example: "Familiarity" instead of "Familiarity (Low - High)"

@@ -40,17 +40,14 @@ class Player < ApplicationRecord
     Arel.sql("positions.name")
   end
   
-  # Define which attributes can be searched via Ransack
   def self.ransackable_attributes(auth_object = nil)
     ["active", "bio", "birth_city_id", "birth_country_id", "birthdate", "created_at", "current_position", "debut_year", "draft_year", "first_name", "full_name", "id", "last_name", "league_name", "nicknames", "photo_urls", "position_name", "sport_name", "team_id", "team_name", "team_territory", "updated_at"]
   end
   
-  # Define which associations can be searched via Ransack
   def self.ransackable_associations(auth_object = nil)
     ["birth_city", "birth_country", "positions", "ratings", "roles", "team"]
   end
   
-  # DB-level sampling scope – avoids pulling full result sets into memory
   scope :sampled, ->(n = 50) { order(Arel.sql('RANDOM()')).limit(n) }
   
   def name
@@ -66,6 +63,7 @@ class Player < ApplicationRecord
   def primary_position
     roles.find_by(primary: true)&.position
   end
+  alias_method :position, :primary_position
   
   def secondary_positions
     positions.where.not(id: primary_position&.id)
@@ -81,24 +79,14 @@ class Player < ApplicationRecord
     roles.create(position: position, primary: primary)
   end
   
-  # Rating methods
+  # def all_ratings
+  #   ratings
+  # end
   
-  # Get all ratings for this player
-  # @return [ActiveRecord::Relation] All ratings for this player
-  def all_ratings
-    ratings
-  end
-  
-  # Get ratings for this player on a specific spectrum
-  # @param spectrum [Spectrum] The spectrum to get ratings for
-  # @return [ActiveRecord::Relation] Ratings for this player on the spectrum
   def ratings_on(spectrum)
     ratings.active.where(spectrum: spectrum)
   end
   
-  # Get the average rating value for this player on a spectrum
-  # @param spectrum [Spectrum] The spectrum to get the average for
-  # @return [Float, nil] The average rating or nil if no ratings
   def average_rating_on(spectrum)
     ratings = ratings_on(spectrum)
     return nil if ratings.empty?
@@ -106,9 +94,6 @@ class Player < ApplicationRecord
     ratings.average(:value)&.to_f
   end
   
-  # Get the normalized average rating (0-1) for this player on a spectrum
-  # @param spectrum [Spectrum] The spectrum to get the average for
-  # @return [Float, nil] The normalized average rating or nil if no ratings
   def normalized_average_rating_on(spectrum)
     avg = average_rating_on(spectrum)
     return nil if avg.nil?
@@ -116,10 +101,6 @@ class Player < ApplicationRecord
     (avg + 10_000) / 20_000
   end
 
-  # Calculate statistics for a given set of attempts
-  # @param attempts [ActiveRecord::Relation<Attempt>] An ActiveRecord relation of attempts for this player
-  # @return [Hash] A hash containing total_attempts, correct_attempts, accuracy,
-  #                recent_total, recent_correct, and recent_accuracy
   def calculate_attempt_stats(attempts)
     total_attempts = attempts.size
     correct_attempts = attempts.count(&:correct?)

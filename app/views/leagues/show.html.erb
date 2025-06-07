@@ -1,4 +1,8 @@
+<% content_for :title, @league.name %>
+
 <%= tag.header @league.name, class: "league-name" %>
+
+<%= render 'filtered_show' if @filtered_breadcrumb.present? %>
 
 <%= display_name_with_lazy_logo @league.jurisdiction, logo_attribute: :flag_url %>
 <%= display_name_with_lazy_logo @league.sport, logo_attribute: :icon_url %>

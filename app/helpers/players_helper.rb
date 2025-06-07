@@ -1,13 +1,15 @@
 module PlayersHelper
+  # UNUSED
   # Display player name with logo
-  def player_name_display(player)
+  def player_name_display player
     tag.div class: "record-name" do
       display_name_with_lazy_logo(player, logo_attribute: :image_url)
     end
   end
   
+  # UNUSED
   # Display player metadata (team, league, sport)
-  def player_metadata_display(player)
+  def player_metadata_display player
     tag.div class: "record-metadata" do
       link_to_name(player.team) + 
       " | " + 
@@ -18,17 +20,29 @@ module PlayersHelper
   end
   
   # Display player position tag if available
-  def player_position_display(player)
+  def player_position_display player
     if player.primary_position
       tag.div player.primary_position.name, class: "record-tag"
     end
   end
   
   # Combine all player info elements
-  def player_info_display(player)
+  def player_info_display player
     player_name_display(player) +
     player_metadata_display(player) +
-    player_position_display(player).to_s
+    player_position_display(player)
+  end
+
+  def player_photo_display player
+    tag.div class: "player-photo-container" do
+      if player.photo_urls.present?
+        tag.img src: player.photo_urls.sample, alt: player.full_name, class: "player-photo"
+      else
+        tag.div class: "player-photo-placeholder" do
+          tag.i class: "fa-solid fa-user"
+        end
+      end
+    end
   end
 
   def player_sort_links
@@ -48,6 +62,7 @@ module PlayersHelper
     end
   end
   
+  # UNUSED
   # Custom sort link helper that enhances Ransack's sort_link with semantic styling
   # @param search [Ransack::Search] The Ransack search object
   # @param attribute [Symbol] The attribute to sort by
@@ -92,6 +107,7 @@ module PlayersHelper
     end
   end
   
+  # UNUSED
   # Helper to create a random sort link
   # @return [String] HTML for the random sort link
   def random_sort_link

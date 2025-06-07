@@ -1,0 +1,19 @@
+<%# Filtered view for player show page %>
+
+<%= filtered_show_header @player, @filtered_breadcrumb, { container_class: "show-header player-header" } %>
+
+<%= tag.div class: "player-metadata" do %>
+  <% if @player.team %>
+    <%= tag.div class: "metadata-tag" do %>
+      <%= tag.span "Team:", class: "tag-label" %>
+      <%= link_to @player.team.name, team_path(@player.team), class: "tag-value" %>
+    <% end %>
+  <% end %>
+  
+  <% if @player.position.present? %>
+    <%= tag.div class: "metadata-tag" do %>
+      <%= tag.span "Position:", class: "tag-label" %>
+      <%= tag.span @player.position, class: "tag-content" %>
+    <% end %>
+  <% end %>
+<% end %>

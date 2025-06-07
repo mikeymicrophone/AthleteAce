@@ -1,0 +1,82 @@
+<%# 
+  Filter panel for filterable resources
+  
+  Parameters:
+  - resource: Symbol representing the resource (e.g., :players, :teams)
+  - current_filters: Hash of current filters (e.g., { sport: @sport, league: @league })
+  - filter_options: Hash of filter options for each filterable association
+%>
+
+<div class="filter-panel bg-white rounded-lg shadow mb-6">
+  <div class="p-4 border-b border-gray-200">
+    <h2 class="text-lg font-medium text-gray-900">Filters</h2>
+    
+    <% # Render breadcrumbs if we have active filters %>
+    <% if current_filters.present? && current_filters.any? %>
+      <%= filterable_breadcrumbs resource, current_filters %>
+      <%= filter_chips resource, current_filters %>
+    <% end %>
+  </div>
+  
+  <div class="p-4">
+    <% # Only show top-level filters that aren't already applied %>
+    <% important_filters = if filter_options.present? && current_filters.present?
+                             [:sport, :league, :country, :team].select { |f| filter_options[f].present? && !current_filters[f] }
+                           else
+                             []
+                           end %>
+    
+    <% if important_filters.any? %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <% important_filters.each do |filter_key| %>
+          <div class="filter-group">
+            <h3 class="text-sm font-medium text-gray-700 mb-1"><%= filter_key.to_s.humanize %></h3>
+            <div class="relative">
+              <%= select_tag "filter_#{filter_key}", 
+                options_from_collection_for_select(filter_options[filter_key], :id, :name),
+                include_blank: "-- Select #{filter_key.to_s.humanize} --",
+                class: "block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                data: { 
+                  action: "change->filter#applyFilter",
+                  filter_key: filter_key,
+                  filter_resource: resource
+                }
+              %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+    
+    <% # Show advanced filters if there are any remaining %>
+    <% remaining_filters = filter_options.keys - important_filters - current_filters.keys %>
+    
+    <% if remaining_filters.any? %>
+      <details class="mt-4">
+        <summary class="text-sm text-blue-600 cursor-pointer">
+          Advanced Filters
+        </summary>
+        
+        <div class="mt-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <% remaining_filters.each do |filter_key| %>
+            <div class="filter-group">
+              <h3 class="text-sm font-medium text-gray-700 mb-1"><%= filter_key.to_s.humanize %></h3>
+              <div class="relative">
+                <%= select_tag "filter_#{filter_key}", 
+                  options_from_collection_for_select(filter_options[filter_key], :id, :name),
+                  include_blank: "-- Select #{filter_key.to_s.humanize} --",
+                  class: "block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                  data: { 
+                    action: "change->filter#applyFilter",
+                    filter_key: filter_key,
+                    filter_resource: resource
+                  }
+                %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </details>
+    <% end %>
+  </div>
+</div>

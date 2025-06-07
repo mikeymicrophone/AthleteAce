@@ -13,7 +13,6 @@ export default class extends Controller {
     "subjectCardDisplay", // Player card or team card
     "attemptsContainer",  // Container for recent attempts
     "attemptsGrid"       // Grid of attempt cards
-    // "recentAttemptsList"  // List of recent attempts
   ]
 
   static values = {

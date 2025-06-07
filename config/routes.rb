@@ -1,4 +1,10 @@
+# Split routes into smaller files that can be loaded individually
+require_relative 'routes/filterable'
+
 Rails.application.routes.draw do
+  # Load modular route files
+  draw :ratings
+  draw :locations
   devise_for :aces
   # Strength training routes for learning athlete names
   get "strength" => "strength#index"
@@ -35,9 +41,6 @@ Rails.application.routes.draw do
   
   resources :goals, except: [:create, :new]
   resources :federations
-  
-  # Load ratings routes from dedicated file
-  draw :ratings
   
   # League organization
   resources :conferences do

@@ -1,38 +1,46 @@
 class TeamsController < ApplicationController
+  include Filterable
+  include FilterLoader
   before_action :set_team, only: %i[ show edit update destroy ]
 
-  # GET /teams or /teams.json
   def index
-    if params[:sport_id]
-      @teams = Sport.find(params[:sport_id]).teams
-    elsif params[:league_id]
-      @teams = League.find(params[:league_id]).teams
-    elsif params[:conference_id]
-      @conference = Conference.find(params[:conference_id])
-      @teams = @conference.teams
-    elsif params[:division_id]
-      @division = Division.find(params[:division_id])
-      @teams = @division.teams
-    elsif params[:state_id]
-      @teams = State.find(params[:state_id]).teams
-    elsif params[:city_id]
-      @teams = City.find(params[:city_id]).teams
-    elsif params[:stadium_id]
-      @teams = Stadium.find(params[:stadium_id]).teams
-    else
-      @teams = Team.all
-    end
+    @current_filters = load_current_filters
+    load_filter_options
+    
+    # Build the base query using the filters
+    base_query = apply_filter :teams
 
-    # Apply sorting if requested
-    case params[:sort]
-    when 'mascot'
-      @teams = @teams.order(:mascot)
-    when 'territory'
-      @teams = @teams.order(:territory)
-    when 'sport'
-      @teams = @teams.includes(league: :sport).order('sports.name')
-    when 'city'
-      @teams = @teams.includes(:stadium).order('stadiums.city_id')
+    # Build the query with proper joins for sorting and searching
+    base_query = base_query.includes(:league, :division, :conference)
+                       .joins(:league => :sport)
+                       .includes(:stadium => :city)
+                       .select("teams.*, leagues.name as league_name, sports.name as sport_name")
+    
+    # Initialize Ransack search object
+    @q = base_query.ransack(params[:q])
+    
+    # Set default sort if none specified
+    @q.sorts = 'teams.territory asc' if @q.sorts.empty?
+    
+    # Get the teams from search or filtering
+    if params[:q].present?
+      @teams = @q.result.distinct
+    else
+      @teams = base_query
+      
+      # Apply sorting if requested
+      case params[:sort]
+      when 'mascot'
+        @teams = @teams.order('teams.mascot')
+      when 'territory'
+        @teams = @teams.order('teams.territory')
+      when 'sport'
+        @teams = @teams.order('sports.name')
+      when 'city'
+        @teams = @teams.joins(stadium: :city).order('cities.name')
+      else
+        @teams = @teams.order('teams.territory')
+      end
     end
 
     # Paginate the teams collection
@@ -46,6 +54,17 @@ class TeamsController < ApplicationController
 
   # GET /teams/1 or /teams/1.json
   def show
+    # Load any filters that were applied when navigating to this show page
+    load_current_filters
+    
+    # Load related ratings
+    @team_ratings = @team.ratings.includes(:ace).order(created_at: :desc).limit(10)
+    
+    # Set up filter options for navigation to related resources
+    load_filter_options
+    
+    # Create a filtered breadcrumb for this team
+    @filtered_breadcrumb = build_filtered_breadcrumb @team, @current_filters
   end
 
   # GET /teams/new

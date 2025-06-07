@@ -1,10 +1,13 @@
 class Sport < ApplicationRecord
   has_many :leagues
-  has_many :teams, through: :leagues
+  has_many :conferences, through: :leagues
+  has_many :divisions, through: :conferences
+  has_many :memberships, through: :divisions
+  has_many :teams, through: :memberships
   has_many :players, through: :teams
   has_many :positions, dependent: :destroy
   
-  def create_standard_positions(positions_data)
+  def create_standard_positions positions_data
     positions_data.each do |pos_data|
       positions.find_or_create_by!(name: pos_data[:name]) do |p|
         p.abbreviation = pos_data[:abbreviation] if pos_data[:abbreviation].present?
@@ -13,13 +16,11 @@ class Sport < ApplicationRecord
     end
   end
   
-  # Define which attributes can be searched via Ransack
-  def self.ransackable_attributes(auth_object = nil)
-    ["created_at", "id", "name", "updated_at"]
+  def self.ransackable_attributes auth_object = nil
+    column_names
   end
   
-  # Define which associations can be searched via Ransack
-  def self.ransackable_associations(auth_object = nil)
+  def self.ransackable_associations auth_object = nil
     ["leagues", "players", "positions", "teams"]
   end
 end

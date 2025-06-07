@@ -1,53 +1,6 @@
 <% content_for :title, "My Game Attempts" %>
 
 <%= tag.div class: "game-attempts-container" do %>
-  
-  <% if @teams_by_sport.any? %>
-    <%= tag.div class: "teams-navigation" do %>
-      <%= tag.h2 "Teams by Sport", class: "teams-navigation-title" %>
-      
-      <% @sports.each do |sport| %>
-        <%= sport_group_team_buttons(sport) %>
-      <% end %>
-    <% end %>
-  <% end %>
-
-  <%= tag.div class: "game-attempts-panel" do %>
-    <%= tag.div class: "game-attempts-content" do %>
-      <% if @game_attempts.any? %>
-        <%= tag.div class: "attempts-grid" do %>
-          <% @game_attempts.each do |attempt| %>
-            <%= tag.div class: "attempt-card #{attempt.correct? ? 'correct-attempt' : 'incorrect-attempt'}" do %>
-              <%= tag.div class: "attempt-team-part" do %>
-                <%= tag.div class: "attempt-team-logo-container" do %>
-                  <%= display_name_with_lazy_logo(attempt.target_entity) %>
-                <% end %>
-                <%= tag.p attempt.target_entity.name, class: "attempt-team-name" %>
-              <% end %>
-              
-              <%= tag.div class: "attempt-player-part" do %>
-                <%= tag.div class: "attempt-player-photo-container" do %>
-                  <%= display_name_with_lazy_logo(attempt.subject_entity) %>
-                <% end %>
-                <%= tag.p attempt.subject_entity.full_name, class: "attempt-player-name" %>
-              <% end %>
-              <% unless attempt.correct? %>
-                <%= tag.div class: "chosen-team-indicator" do %>
-                  Your Guess: <%= attempt.chosen_entity.name %>
-                <% end %>
-              <% end %>
-              <%= tag.div class: "attempt-timestamp" do %>
-                <%= time_ago_in_words(attempt.created_at) %> ago
-              <% end %>
-            <% end %>
-          <% end %>
-        <% end %>
-      <% else %>
-        <%= tag.div class: "empty-attempts-message" do %>
-          <%= tag.p "You haven't made any game attempts yet.", class: "empty-attempts-text" %>
-          <%= link_to "Start Playing", strength_team_match_path, class: "start-playing-button" %>
-        <% end %>
-      <% end %>
-    <% end %>
-  <% end %>
+  <%= team_attempts_filter_panel @teams_by_sport, @sports if @teams_by_sport.any? %>
+  <%= game_attempts_panel @game_attempts %>
 <% end %> 

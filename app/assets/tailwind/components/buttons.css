@@ -1,0 +1,21 @@
+/* Button Styles */
+.quiz-button {
+  @apply inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
+}
+
+/* Resource-specific styles */
+.for-team {
+  @apply bg-indigo-600 hover:bg-indigo-700;
+}
+
+.for-league {
+  @apply bg-blue-600 hover:bg-blue-700;
+}
+
+.for-division {
+  @apply bg-green-600 hover:bg-green-700;
+}
+
+.for-state {
+  @apply bg-purple-600 hover:bg-purple-700;
+}

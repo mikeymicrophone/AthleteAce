@@ -1,0 +1,26 @@
+<%# Filtered view for league show page %>
+
+<%= filtered_show_header @league, @filtered_breadcrumb, { container_class: "show-header league-header" } %>
+
+<div class="league-metadata">
+  <% if @league.sport %>
+    <%= tag.div class: "metadata-tag" do %>
+      <%= tag.span "Sport:", class: "tag-label" %>
+      <%= link_to @league.sport.name, sport_path(@league.sport), class: "tag-value" %>
+    <% end %>
+  <% end %>
+  
+  <% if @league.country.present? %>
+    <%= tag.div class: "metadata-tag" do %>
+      <%= tag.span "Country:", class: "tag-label" %>
+      <%= link_to @league.country.name, country_path(@league.country), class: "tag-value" %>
+    <% end %>
+  <% end %>
+      
+  <% if @league.teams.any? %>
+    <%= tag.div class: "metadata-tag" do %>
+      <%= tag.span "Teams:", class: "tag-label" %>
+      <%= @league.teams.count %>
+    <% end %>
+  <% end %>
+</div>

@@ -70,10 +70,6 @@
   @apply max-h-16 max-w-full object-contain;
 }
 
-.attempt-team-name {
-  @apply text-sm font-semibold mt-1 truncate w-full;
-}
-
 .attempt-division-part {
   @apply w-full p-2 text-center border-t;
 }
