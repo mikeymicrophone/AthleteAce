@@ -1,4 +1,6 @@
 class Player < ApplicationRecord
+  include Ratable
+  
   belongs_to :birth_city, optional: true
   belongs_to :birth_country, class_name: 'Country', optional: true
   belongs_to :team
@@ -7,7 +9,6 @@ class Player < ApplicationRecord
   
   has_many :roles, dependent: :destroy
   has_many :positions, through: :roles
-  has_many :ratings, as: :target, dependent: :destroy
   
   # Ransack configuration
   # Define searchable attributes and associations
@@ -83,23 +84,6 @@ class Player < ApplicationRecord
   #   ratings
   # end
   
-  def ratings_on(spectrum)
-    ratings.active.where(spectrum: spectrum)
-  end
-  
-  def average_rating_on(spectrum)
-    ratings = ratings_on(spectrum)
-    return nil if ratings.empty?
-    
-    ratings.average(:value)&.to_f
-  end
-  
-  def normalized_average_rating_on(spectrum)
-    avg = average_rating_on(spectrum)
-    return nil if avg.nil?
-    
-    (avg + 10_000) / 20_000
-  end
 
   def calculate_attempt_stats(attempts)
     total_attempts = attempts.size
