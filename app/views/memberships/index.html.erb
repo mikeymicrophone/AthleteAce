@@ -10,9 +10,9 @@
       <div class="membership-status <%= membership.active? ? 'active' : 'inactive' %>">
         <%= membership.active? ? 'Active' : 'Inactive' %>
       </div>
-      <%= link_to membership.team.name, membership.team %>
-      <%= link_to membership.division.name, membership.division %>
-      <%= link_to membership.division.conference.name, membership.division.conference %>
+      <%= display_name_with_lazy_logo membership.team %>
+      <%= display_name_with_lazy_logo membership.division %>
+      <%= display_name_with_lazy_logo membership.conference %>
       <div class="membership-dates">
         <%= membership.start_date&.strftime('%Y-%m-%d') %> to <%= membership.end_date&.strftime('%Y-%m-%d') || 'Present' %>
       </div>

@@ -5,7 +5,6 @@ class Goal < ApplicationRecord
   validates :status, presence: true, inclusion: { in: %w[not_started in_progress completed] }
   validates :progress, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   
-  # Default values
   after_initialize :set_defaults, if: :new_record?
   
   def set_defaults
@@ -20,17 +19,14 @@ class Goal < ApplicationRecord
     (progress.to_f / total_required * 100).round
   end
   
-  # Get all the required achievements for this goal's quest
   def required_achievements
-    quest.achievements.merge(Highlight.required)
+    quest.achievements.merge Highlight.required
   end
   
-  # Get all the optional achievements for this goal's quest
   def optional_achievements
-    quest.achievements.merge(Highlight.optional)
+    quest.achievements.merge Highlight.optional
   end
   
-  # Get all achievements (both required and optional) for this goal's quest
   def all_achievements
     quest.achievements
   end
