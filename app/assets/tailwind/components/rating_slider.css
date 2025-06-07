@@ -110,29 +110,27 @@
 
 /* Slider sensitivity classes */
 .sensitivity-coarse {
-  /* Default sensitivity - wide range movement */
+  /* Default sensitivity - normal movement */
   @apply w-full;
-  /* No additional styles needed as this is the default */
+  transition: all 0.2s ease;
 }
 
 .sensitivity-medium {
-  /* Medium sensitivity - more controlled movement */
+  /* Medium sensitivity - controlled movement */
   @apply w-full;
-  /* CSS variable to control the input range sensitivity */
-  --slider-sensitivity: 2;
-  /* Scale the effective width to make horizontal movement more precise */
-  transform: scaleX(var(--slider-sensitivity));
-  transform-origin: center;
+  /* Add visual indicator for medium precision */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+  transform: scale(1.02);
+  transition: all 0.2s ease;
 }
 
 .sensitivity-fine {
-  /* Fine sensitivity - very precise movement */
+  /* Fine sensitivity - precise movement */
   @apply w-full;
-  /* CSS variable to control the input range sensitivity */
-  --slider-sensitivity: 4;
-  /* Scale the effective width to make horizontal movement extremely precise */
-  transform: scaleX(var(--slider-sensitivity));
-  transform-origin: center;
+  /* Add visual indicator for fine precision */
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.5);
+  transform: scale(1.05);
+  transition: all 0.2s ease;
 }
 
 /* Rating container */

@@ -31,7 +31,15 @@ module SpectrumsHelper
   # @return [ActiveRecord::Relation<Spectrum>] The current selected spectrums
   def selected_spectrums
     ids = selected_spectrum_ids
-    Spectrum.where(id: ids).order(:name)
+    result = Spectrum.where(id: ids).order(:name)
+    
+    # If no spectrums are selected, return the first available spectrum for debugging
+    if result.empty? && Spectrum.exists?
+      Rails.logger.debug "[SpectrumsHelper] No spectrums selected, returning first spectrum"
+      Spectrum.limit(1)
+    else
+      result
+    end
   end
 
   # UNUSED

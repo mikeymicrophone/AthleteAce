@@ -123,7 +123,7 @@ module RatingsHelper
           max: 10000,
           value: current_value,
           step: 100,
-          class: "slider-input",
+          class: "slider-input rating-slider-input",
           data: {
             rating_slider_target: "slider_#{spectrum_id}",
             action: "input->rating-slider#updateValue change->rating-slider#submitRating",

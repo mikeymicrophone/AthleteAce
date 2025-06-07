@@ -9,10 +9,12 @@
 %>
 
 <%
-  # Prepare data attributes with proper conditional logic
-  data_attrs = { controller: "rating-slider" }
-  data_attrs[:rating_slider_player_id_value] = target.id.to_s if target.is_a?(Player)
-  data_attrs[:rating_slider_team_id_value] = target.id.to_s if target.is_a?(Team)
+  # Prepare data attributes with proper conditional logic for any ratable model
+  data_attrs = { 
+    controller: "rating-slider",
+    rating_slider_target_id_value: target.id.to_s,
+    rating_slider_target_type_value: target.class.name.downcase
+  }
 %>
 
 <%= tag.div(
@@ -44,7 +46,7 @@
           value: target.ratings.active.find_by(spectrum_id: spectrum.id)&.value || 0,
           step: 1,
           id: "rating-input-#{target.class.name.downcase}-#{target.id}-spectrum-#{spectrum.id}",
-          class: "slider-input w-full",
+          class: "slider-input rating-slider-input w-full",
           data: {
             rating_slider_target: "slider_#{spectrum.id}",
             action: "input->rating-slider#updateValue change->rating-slider#submitRating",
