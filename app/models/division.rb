@@ -3,6 +3,7 @@ class Division < ApplicationRecord
   has_many :memberships, dependent: :destroy
   has_many :teams, through: :memberships
   has_many :ratings, as: :target, dependent: :destroy
+  has_one :league, through: :conference
   
   validates :name, presence: true
   
