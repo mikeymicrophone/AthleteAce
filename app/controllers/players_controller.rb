@@ -2,9 +2,7 @@ class PlayersController < ApplicationController
   include Filterable
   include FilterLoader
   before_action :set_player, only: %i[ show edit update destroy ]
-  # Filterable associations are now defined in config/initializers/filterable_associations.rb
-
-  # GET /players or /players.json
+  
   def index
     # Load current filters and set related instance variables
     @current_filters = load_current_filters

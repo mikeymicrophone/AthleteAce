@@ -18,8 +18,8 @@
   <% end %>
       
   <% if @league.teams.any? %>
-    <%= tag.div class: "px-3 py-1 bg-gray-100 rounded-full text-sm" do %>
-      <%= tag.span "Teams:", class: "mr-1 text-gray-500" %>
+    <%= tag.div class: "metadata-tag" do %>
+      <%= tag.span "Teams:", class: "tag-label" %>
       <%= @league.teams.count %>
     <% end %>
   <% end %>

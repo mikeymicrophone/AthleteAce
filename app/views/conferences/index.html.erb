@@ -9,16 +9,12 @@
 <div id="conferences">
   <% @conferences.each do |conference| %>
     <%= tag.div(id: dom_id(conference), class: "index-record") do %>
-      <%= display_name_with_lazy_logo(conference) %>
-      <%= link_to conference.league.name, conference.league %>
+      <%= display_name_with_lazy_logo conference %>
+      <%= display_name_with_lazy_logo conference.league %>
       <%= association_links conference %>
       <% if conference.teams.any? %>
         <%= quiz_link(conference, title: "Test your knowledge of teams in #{conference.name}") %>
       <% end %>
     <% end %>
   <% end %>
-</div>
-
-<div class="actions">
-  <%= link_to "New conference", new_conference_path, class: "button" %>
 </div>

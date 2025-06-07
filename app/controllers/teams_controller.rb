@@ -2,11 +2,8 @@ class TeamsController < ApplicationController
   include Filterable
   include FilterLoader
   before_action :set_team, only: %i[ show edit update destroy ]
-  # We no longer need to specify filterable_by here since it's in the config file
 
-  # GET /teams or /teams.json
   def index
-    # Load current filters and options for the UI
     @current_filters = load_current_filters
     load_filter_options
     

@@ -1,14 +1,14 @@
 <%= tag.header @state.name, class: "state-name" %>
 <%= display_name_with_lazy_logo @state.country, logo_attribute: :flag_url %>
 
-<%= render_collection(@state.cities) %>
+<%= render_collection @state.cities %>
 
-<%= render_collection(@state.stadiums) %>
+<%= render_collection @state.stadiums %>
 
-<%= render_teams_collection(@state.teams) %>
+<%= render_teams_collection @state.teams %>
 
 <% @state.teams.each do |team| %>
   <%= display_name_with_lazy_logo team.league %>
   <%= display_name_with_lazy_logo team.sport %>
-  <%= render_players_collection(team.players, sport_name: team.sport.name) %>
+  <%= render_players_collection team.players, sport_name: team.sport.name %>
 <% end %>

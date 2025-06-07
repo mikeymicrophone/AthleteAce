@@ -1,5 +1,3 @@
-<p style="color: green"><%= notice %></p>
-
 <% content_for :title, "Cities" %>
 
 <h1>Cities</h1>
@@ -10,7 +8,7 @@
       <%= display_name_with_lazy_logo city %>
       <%= display_name_with_lazy_logo city.state, logo_attribute: :flag_url %>
       <%= display_name_with_lazy_logo city.country, logo_attribute: :flag_url %>
-      <%= association_links(city) %>
+      <%= association_links city %>
       <% if city.teams.any? %>
         <%= quiz_link(city, title: "Test your knowledge of teams in #{city.name}") %>
       <% end %>
