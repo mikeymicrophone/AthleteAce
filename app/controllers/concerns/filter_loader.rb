@@ -30,6 +30,8 @@ module FilterLoader
     filterable_associations.each do |association|
       @filter_options[association] = association.to_s.classify.constantize.all
     end
+
+    @filter_options
   end
   
   # Build a breadcrumb trail based on current filters and the viewed resource
