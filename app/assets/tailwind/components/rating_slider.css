@@ -85,6 +85,11 @@
   @apply text-sm text-gray-500 italic;
 }
 
+/* Loading indicator */
+.loading-indicator {
+  @apply text-sm text-gray-500 italic animate-pulse;
+}
+
 /* Multi-spectrum mode colors */
 .spectrum-color-0 { @apply text-blue-500; }
 .spectrum-color-1 { @apply text-green-500; }

@@ -1,7 +1,7 @@
 class RatingsController < ApplicationController
   before_action :authenticate_ace!
   before_action :set_rating, only: [:show, :edit, :update, :destroy]
-  before_action :set_target, only: [:new, :create]
+  before_action :set_target, only: [:new, :create, :for_spectrums]
   before_action :authorize_rating, only: [:edit, :update, :destroy]
 
   # GET /ratings
@@ -105,6 +105,41 @@ class RatingsController < ApplicationController
   def destroy
     @rating.destroy
     redirect_to ratings_url, notice: 'Rating was successfully removed.'
+  end
+
+  # GET /players/1/ratings/for_spectrums
+  # GET /teams/1/ratings/for_spectrums
+  # Returns existing ratings for the current ace and target for the given spectrum IDs
+  def for_spectrums
+    spectrum_ids = params[:spectrum_ids].presence || []
+    spectrum_ids = spectrum_ids.split(',') if spectrum_ids.is_a?(String)
+    spectrum_ids = spectrum_ids.map(&:to_i).reject(&:zero?)
+    
+    if spectrum_ids.empty?
+      render json: { ratings: {} }
+      return
+    end
+    
+    # Find existing ratings for this ace, target, and spectrums
+    ratings = current_ace.ratings.active
+                         .where(target: @target)
+                         .where(spectrum_id: spectrum_ids)
+                         .includes(:spectrum)
+    
+    # Build response hash with spectrum_id as key and rating data as value
+    ratings_hash = {}
+    ratings.each do |rating|
+      ratings_hash[rating.spectrum_id] = {
+        id: rating.id,
+        value: rating.value,
+        spectrum_id: rating.spectrum_id,
+        spectrum_name: rating.spectrum.name
+      }
+    end
+    
+    respond_to do |format|
+      format.json { render json: { ratings: ratings_hash } }
+    end
   end
 
   private

@@ -22,6 +22,9 @@ export default class extends Controller {
     });
     console.log('[RatingSlider] TEMP: connect() called');
     this.initializeAllSliders();
+    
+    // Make the controller available for external access (for spectrum picker)
+    this.element.stimulusController = this;
   }
 
   initializeAllSliders() {
