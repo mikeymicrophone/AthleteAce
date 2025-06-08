@@ -25,12 +25,21 @@ RSpec.describe HierarchicalSortService do
         { attribute: 'position_name', direction: 'desc' }
       ])
     end
+
+    it 'parses random sorts correctly' do
+      service = HierarchicalSortService.new('team_name asc,random,shuffle')
+      expect(service.sort_params).to eq([
+        { attribute: 'team_name', direction: 'asc' },
+        { attribute: 'random', direction: 'random' },
+        { attribute: 'shuffle', direction: 'shuffle' }
+      ])
+    end
   end
 
   describe '#toggle_sort' do
     let(:service) { HierarchicalSortService.new }
 
-    it 'adds new sort at beginning' do
+    it 'adds new sort at end (refines existing)' do
       new_service = service.toggle_sort('team_name')
       expect(new_service.sort_params).to eq([
         { attribute: 'team_name', direction: 'asc' }
@@ -73,12 +82,30 @@ RSpec.describe HierarchicalSortService do
       service = service.toggle_sort('team_name')
       # Add second sort
       service = service.toggle_sort('position_name')
-      # Add third sort (should remove oldest)
+      # Add third sort (should remove last item to make room)
       service = service.toggle_sort('first_name')
       
       expect(service.sort_params.length).to eq(2)
-      expect(service.sort_params[0][:attribute]).to eq('first_name')
-      expect(service.sort_params[1][:attribute]).to eq('position_name')
+      expect(service.sort_params[0][:attribute]).to eq('team_name')  # First remains first
+      expect(service.sort_params[1][:attribute]).to eq('first_name') # Last added replaces position_name
+    end
+
+    it 'maintains hierarchy order when toggling existing sorts' do
+      service = HierarchicalSortService.new
+      
+      # Build a hierarchy: team -> position -> first_name
+      service = service.toggle_sort('team_name')      # 1st level
+      service = service.toggle_sort('position_name')  # 2nd level  
+      service = service.toggle_sort('first_name')     # 3rd level
+      
+      # Toggle team direction (should stay in 1st position)
+      service = service.toggle_sort('team_name')
+      
+      expect(service.sort_params).to eq([
+        { attribute: 'team_name', direction: 'desc' },     # Still 1st, now desc
+        { attribute: 'position_name', direction: 'asc' },  # Still 2nd
+        { attribute: 'first_name', direction: 'asc' }      # Still 3rd
+      ])
     end
   end
 
@@ -99,6 +126,38 @@ RSpec.describe HierarchicalSortService do
         { attribute: 'position_name', direction: 'inactive' }
       ])
       expect(service.to_ransack_sorts).to eq(['team_name asc'])
+    end
+  end
+
+  describe '#to_sql_order' do
+    it 'generates SQL with proper table references' do
+      service = HierarchicalSortService.new('team_name asc,position_name desc')
+      expect(service.to_sql_order).to eq('teams.mascot ASC, positions.name DESC')
+    end
+
+    it 'integrates random into hierarchy' do
+      service = HierarchicalSortService.new('team_name asc,random,position_name desc')
+      expect(service.to_sql_order).to eq('teams.mascot ASC, RANDOM(), positions.name DESC')
+    end
+
+    it 'handles shuffle in hierarchy' do
+      service = HierarchicalSortService.new('team_name asc,shuffle')
+      expect(service.to_sql_order).to eq('teams.mascot ASC, RANDOM()')
+    end
+
+    it 'maps player attributes correctly' do
+      service = HierarchicalSortService.new('first_name asc,last_name desc')
+      expect(service.to_sql_order).to eq('players.first_name ASC, players.last_name DESC')
+    end
+
+    it 'maps league and sport attributes correctly' do
+      service = HierarchicalSortService.new('league_name asc,sport_name desc')
+      expect(service.to_sql_order).to eq('leagues.name ASC, sports.name DESC')
+    end
+
+    it 'returns nil for empty sorts' do
+      service = HierarchicalSortService.new
+      expect(service.to_sql_order).to be_nil
     end
   end
 
@@ -123,9 +182,9 @@ RSpec.describe HierarchicalSortService do
     it 'returns correct priority order' do
       service = HierarchicalSortService.new('team_name asc,position_name desc,first_name asc')
       
-      expect(service.priority_for('team_name')).to eq(1)
-      expect(service.priority_for('position_name')).to eq(2)
-      expect(service.priority_for('first_name')).to eq(3)
+      expect(service.priority_for('team_name')).to eq(1)      # First clicked = highest priority
+      expect(service.priority_for('position_name')).to eq(2)  # Second clicked = refines first
+      expect(service.priority_for('first_name')).to eq(3)     # Third clicked = refines second
       expect(service.priority_for('last_name')).to be_nil
     end
   end

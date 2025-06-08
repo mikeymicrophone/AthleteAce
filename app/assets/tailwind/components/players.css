@@ -27,7 +27,7 @@
 }
 
 .sort-chain-item {
-  @apply bg-white border border-blue-300 rounded-md px-3 py-1 text-sm flex items-center gap-1;
+  @apply bg-white border border-blue-300 rounded-md px-3 py-1 text-sm flex items-center gap-2;
 }
 
 .sort-chain-priority {
@@ -40,6 +40,31 @@
 
 .sort-chain-direction {
   @apply text-gray-600 text-xs;
+}
+
+/* Direct sort direction controls */
+.sort-direction-controls {
+  @apply flex items-center gap-1 ml-2;
+}
+
+.sort-direction-link {
+  @apply inline-flex items-center justify-center w-5 h-5 text-xs rounded-sm transition-colors duration-150 cursor-pointer;
+}
+
+.sort-direction-active {
+  @apply bg-blue-600 text-white;
+}
+
+.sort-direction-inactive {
+  @apply bg-gray-200 text-gray-600 hover:bg-gray-300 hover:text-gray-800;
+}
+
+.sort-direction-remove {
+  @apply bg-red-200 text-red-700 hover:bg-red-300 hover:text-red-800;
+}
+
+.sort-direction-icon {
+  @apply leading-none;
 }
 
 .sort-separator {

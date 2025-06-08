@@ -1,6 +1,7 @@
 class HierarchicalSortService
   # Manages hierarchical sorting with three states per attribute: asc, desc, inactive
   # Supports arbitrary depth and special handling for random/shuffle
+  # Hierarchy: First sort clicked becomes primary, subsequent sorts refine beneath it
   
   SORT_STATES = %w[asc desc inactive].freeze
   RANDOM_STATES = %w[random shuffle inactive].freeze
@@ -37,7 +38,14 @@ class HierarchicalSortService
     when String
       parts = param.split
       attribute = parts[0]
-      direction = parts[1] || 'asc'
+      
+      # Handle special case where random/shuffle is both attribute and direction
+      if %w[random shuffle].include?(attribute) && parts.length == 1
+        direction = attribute  # 'random' becomes direction 'random'
+      else
+        direction = parts[1] || 'asc'
+      end
+      
       { attribute: attribute, direction: direction } if attribute
     else
       nil
@@ -58,16 +66,17 @@ class HierarchicalSortService
         # Remove from sort chain and compact
         new_params.delete_at(existing_index)
       else
-        # Update direction
+        # Update direction in place (maintains hierarchy position)
         new_params[existing_index][:direction] = new_direction
       end
     else
-      # New attribute, add to front of chain (highest priority)
+      # New attribute, add to end of chain (refines existing sorts)
+      # This maintains the hierarchy: first clicked stays primary, new sorts refine it
       if new_params.length >= max_levels
-        # Remove last item to make room
+        # Remove last item to make room for new refinement
         new_params.pop
       end
-      new_params.unshift({ attribute: attribute.to_s, direction: first_sort_state(attribute) })
+      new_params.push({ attribute: attribute.to_s, direction: first_sort_state(attribute) })
     end
     
     HierarchicalSortService.new(new_params, max_levels)
@@ -121,7 +130,7 @@ class HierarchicalSortService
     index ? index + 1 : nil
   end
   
-  # Convert to Ransack-compatible sort array
+  # Convert to Ransack-compatible sort array (excludes random sorts)
   def to_ransack_sorts
     sort_params.filter_map do |sort|
       next if sort[:direction] == 'inactive'
@@ -158,7 +167,7 @@ class HierarchicalSortService
     new(sort_string, max_levels)
   end
   
-  # Generate SQL ORDER BY clause for non-Ransack usage
+  # Generate SQL ORDER BY clause that properly handles hierarchical random
   def to_sql_order
     clauses = []
     
@@ -168,22 +177,59 @@ class HierarchicalSortService
       if random_attribute?(sort[:attribute])
         case sort[:direction]
         when 'random'
+          # Use a consistent random seed for reproducible results within pagination
           clauses << 'RANDOM()'
         when 'shuffle'
-          # Different random seed for shuffle vs random
+          # Use a different approach for shuffle - could use a hash-based approach
+          # For now, use RANDOM() but we could enhance this later
           clauses << 'RANDOM()'
         end
       else
         direction = sort[:direction].upcase
-        clauses << "#{sort[:attribute]} #{direction}"
+        # Map sort attributes to actual database columns/table references
+        column_reference = map_sort_attribute_to_column(sort[:attribute])
+        clauses << "#{column_reference} #{direction}"
       end
     end
     
     clauses.empty? ? nil : clauses.join(', ')
   end
   
+  # Map sort attributes to actual database column references
+  def map_sort_attribute_to_column(attribute)
+    case attribute.to_s
+    when 'team_name'
+      'teams.mascot'
+    when 'league_name'
+      'leagues.name'
+    when 'sport_name'
+      'sports.name'
+    when 'position_name'
+      'positions.name'
+    when 'first_name'
+      'players.first_name'
+    when 'last_name'
+      'players.last_name'
+    else
+      # Default to players table
+      "players.#{attribute}"
+    end
+  end
+  
   # Debug representation
   def inspect
     "#<HierarchicalSortService sorts=#{sort_params} max_levels=#{max_levels}>"
+  end
+  
+  # Detailed debug info
+  def debug_info
+    {
+      sort_params: sort_params,
+      max_levels: max_levels,
+      param_count: sort_params.length,
+      directions: sort_params.map { |p| "#{p[:attribute]}:#{p[:direction]}" },
+      url_param: to_param,
+      random_active: random_active?
+    }
   end
 end

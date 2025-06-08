@@ -7,36 +7,26 @@ class PlayersController < ApplicationController
     # Load current filters and set related instance variables
     @current_filters = load_current_filters
     
-    # Build the base query using the filters
+    # Build the base query using the filters  
     base_query = apply_filter :players
-  
-    # Build the query with proper joins for sorting and searching
-    base_query = base_query.joins(:team, team: [:league, league: :sport])
-                          .left_joins(:positions)
-                          .select("players.*, teams.mascot as team_name, teams.territory as team_territory, " +
-                                 "leagues.name as league_name, sports.name as sport_name, positions.name as position_name")
+    
+    # Simplified query - add joins only for columns we're actually sorting by
+    base_query = base_query.includes(:team, team: [:league, league: :sport])
+                          .includes(:positions)
     
     # Initialize hierarchical sorting
     @sort_service = HierarchicalSortService.from_params(params)
     
-    # Handle sorting - check for random first, then apply hierarchical sorts
-    if @sort_service.random_active?
-      @players = base_query.order(Arel.sql('RANDOM()'))
+    # Apply hierarchical sorting (including integrated random)
+    sql_order = @sort_service.to_sql_order
+    
+    if sql_order
+      # Use custom SQL ORDER BY clause that handles random within hierarchy
+      # Remove distinct since we're not searching and it conflicts with custom ORDER BY
+      @players = base_query.order(Arel.sql(sql_order))
     else
-      # Apply hierarchical sorting
-      ransack_sorts = @sort_service.to_ransack_sorts
-      
-      if ransack_sorts.any?
-        # Initialize Ransack with our custom sorts
-        @q = base_query.ransack(params[:q])
-        @q.sorts = ransack_sorts
-        @players = @q.result(distinct: true)
-      else
-        # No sorts specified, use default
-        @q = base_query.ransack(params[:q])
-        @q.sorts = 'first_name asc'
-        @players = @q.result(distinct: true)
-      end
+      # No sorts specified, use default
+      @players = base_query.order(:first_name)
     end
     
     # Load available spectrums for the rating selector

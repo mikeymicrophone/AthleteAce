@@ -71,11 +71,12 @@ module PlayersHelper
   end
   
   # Display the current hierarchical sort chain
+  # Shows sorts in order: first clicked at top, subsequent clicks refine beneath
   def hierarchical_sort_display
     return "" if @sort_service.sort_params.empty?
     
     tag.div class: "hierarchical-sort-display" do
-      tag.span("Current sort order:", class: "sort-chain-label") +
+      tag.span("Sort order (first → refinements):", class: "sort-chain-label") +
       tag.div(class: "sort-chain") do
         @sort_service.sort_params.filter_map.with_index do |sort, index|
           next if sort[:direction] == 'inactive'
@@ -83,11 +84,86 @@ module PlayersHelper
           tag.div(class: "sort-chain-item") do
             tag.span("#{index + 1}.", class: "sort-chain-priority") +
             tag.span(humanize_sort_attribute(sort[:attribute]), class: "sort-chain-attribute") +
-            tag.span(humanize_sort_direction(sort[:direction], sort[:attribute]), class: "sort-chain-direction")
+            tag.span(humanize_sort_direction(sort[:direction], sort[:attribute]), class: "sort-chain-direction") +
+            sort_direction_controls(sort[:attribute], sort[:direction])
           end
         end.join.html_safe
       end
     end
+  end
+  
+  # Generate direct direction control links for an existing sort
+  def sort_direction_controls(attribute, current_direction)
+    tag.div(class: "sort-direction-controls") do
+      if %w[random shuffle].include?(attribute.to_s)
+        # Random/shuffle controls
+        random_classes = current_direction == 'random' ? 
+          'sort-direction-link sort-direction-active' : 
+          'sort-direction-link sort-direction-inactive'
+        
+        shuffle_classes = current_direction == 'shuffle' ? 
+          'sort-direction-link sort-direction-active' : 
+          'sort-direction-link sort-direction-inactive'
+        
+        random_link = direct_sort_link(attribute, 'random', '🎲', random_classes)
+        shuffle_link = direct_sort_link(attribute, 'shuffle', '🔀', shuffle_classes)
+        remove_link = direct_sort_link(attribute, 'inactive', '✕', 'sort-direction-link sort-direction-remove')
+        
+        random_link + shuffle_link + remove_link
+      else
+        # Regular ascending/descending controls
+        asc_classes = current_direction == 'asc' ? 
+          'sort-direction-link sort-direction-active' : 
+          'sort-direction-link sort-direction-inactive'
+        
+        asc_link = direct_sort_link(attribute, 'asc', '↑', asc_classes)
+        
+        desc_classes = current_direction == 'desc' ? 
+          'sort-direction-link sort-direction-active' : 
+          'sort-direction-link sort-direction-inactive'
+        
+        desc_link = direct_sort_link(attribute, 'desc', '↓', desc_classes)
+        remove_link = direct_sort_link(attribute, 'inactive', '✕', 'sort-direction-link sort-direction-remove')
+        
+        asc_link + desc_link + remove_link
+      end
+    end
+  end
+  
+  # Create a direct sort link that sets a specific direction
+  def direct_sort_link(attribute, target_direction, icon, css_classes)
+    # Create a new service with the specified direction for this attribute
+    new_service = create_service_with_direction(attribute, target_direction)
+    sort_param = new_service.to_param
+    
+    # Build URL parameters
+    url_params = request.query_parameters.except('sort')
+    url_params[:sort] = sort_param unless sort_param.empty?
+    
+    link_to players_path(url_params), 
+            class: css_classes, 
+            data: { turbo_preload: false },
+            title: "#{humanize_sort_attribute(attribute)} #{target_direction == 'inactive' ? 'remove' : target_direction}" do
+      tag.span(icon, class: "sort-direction-icon")
+    end
+  end
+  
+  # Create a new service with a specific direction for an attribute
+  def create_service_with_direction(attribute, target_direction)
+    new_params = @sort_service.sort_params.dup
+    existing_index = @sort_service.find_sort_index(attribute)
+    
+    if existing_index
+      if target_direction == 'inactive'
+        # Remove the sort entirely
+        new_params.delete_at(existing_index)
+      else
+        # Update the direction in place
+        new_params[existing_index][:direction] = target_direction
+      end
+    end
+    
+    HierarchicalSortService.new(new_params, @sort_service.max_levels)
   end
   
   # Create a hierarchical sort link with three states
@@ -107,7 +183,7 @@ module PlayersHelper
     url_params = request.query_parameters.except('sort')
     url_params[:sort] = sort_param unless sort_param.empty?
     
-    link_to players_path(url_params), class: css_classes do
+    link_to players_path(url_params), class: css_classes, data: { turbo_preload: false } do
       content = ""
       
       # Add priority indicator if this sort is active
