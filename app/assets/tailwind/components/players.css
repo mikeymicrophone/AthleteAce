@@ -1,8 +1,8 @@
 /* Player components */
 
-/* Sort links */
+/* Hierarchical sort links */
 .sort-links-container {
-  @apply flex flex-col md:flex-row justify-between items-center gap-4 mb-4;
+  @apply flex flex-col gap-4 mb-6;
 }
 
 .sort-links-group {
@@ -10,19 +10,75 @@
 }
 
 .sort-label {
-  @apply text-sm text-gray-600 mr-1;
+  @apply text-sm text-gray-600 mr-2 font-medium;
 }
 
-.sort-link {
-  @apply px-3 py-1 text-sm rounded-md transition-colors duration-150;
+/* Hierarchical sort display */
+.hierarchical-sort-display {
+  @apply bg-blue-50 border border-blue-200 rounded-lg p-3;
+}
+
+.sort-chain-label {
+  @apply text-sm font-medium text-blue-800 mb-2 block;
+}
+
+.sort-chain {
+  @apply flex flex-wrap gap-2;
+}
+
+.sort-chain-item {
+  @apply bg-white border border-blue-300 rounded-md px-3 py-1 text-sm flex items-center gap-1;
+}
+
+.sort-chain-priority {
+  @apply text-blue-600 font-bold text-xs;
+}
+
+.sort-chain-attribute {
+  @apply text-gray-800 font-medium;
+}
+
+.sort-chain-direction {
+  @apply text-gray-600 text-xs;
+}
+
+.sort-separator {
+  @apply border-gray-200 my-3;
+}
+
+/* Hierarchical sort links */
+.hierarchical-sort-link {
+  @apply px-3 py-2 text-sm rounded-md transition-all duration-150 relative inline-flex items-center gap-1;
 }
 
 .sort-link-active {
-  @apply bg-indigo-100 text-indigo-700 font-medium;
+  @apply bg-indigo-100 text-indigo-700 font-medium border border-indigo-200;
 }
 
 .sort-link-inactive {
-  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-800;
+}
+
+/* Priority badges */
+.sort-priority-badge {
+  @apply bg-indigo-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold absolute -top-1 -left-1;
+}
+
+/* Different colors for different priority levels */
+.sort-link-priority-1 .sort-priority-badge {
+  @apply bg-indigo-600;
+}
+
+.sort-link-priority-2 .sort-priority-badge {
+  @apply bg-purple-600;
+}
+
+.sort-link-priority-3 .sort-priority-badge {
+  @apply bg-pink-600;
+}
+
+.sort-direction-icon {
+  @apply text-sm;
 }
 
 .sort-direction-indicator {

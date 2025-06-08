@@ -16,18 +16,27 @@ class PlayersController < ApplicationController
                           .select("players.*, teams.mascot as team_name, teams.territory as team_territory, " +
                                  "leagues.name as league_name, sports.name as sport_name, positions.name as position_name")
     
-    # Initialize Ransack search object
-    @q = base_query.ransack(params[:q])
+    # Initialize hierarchical sorting
+    @sort_service = HierarchicalSortService.from_params(params)
     
-    # Set default sort if none specified
-    @q.sorts = 'first_name asc' if @q.sorts.empty?
-    
-    # Handle random sorting as a special case
-    if params[:random].present? && params[:random] == 'true'
+    # Handle sorting - check for random first, then apply hierarchical sorts
+    if @sort_service.random_active?
       @players = base_query.order(Arel.sql('RANDOM()'))
     else
-      # Get the result with distinct to avoid duplicates from joins
-      @players = @q.result(distinct: true)
+      # Apply hierarchical sorting
+      ransack_sorts = @sort_service.to_ransack_sorts
+      
+      if ransack_sorts.any?
+        # Initialize Ransack with our custom sorts
+        @q = base_query.ransack(params[:q])
+        @q.sorts = ransack_sorts
+        @players = @q.result(distinct: true)
+      else
+        # No sorts specified, use default
+        @q = base_query.ransack(params[:q])
+        @q.sorts = 'first_name asc'
+        @players = @q.result(distinct: true)
+      end
     end
     
     # Load available spectrums for the rating selector

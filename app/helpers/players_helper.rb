@@ -45,73 +45,156 @@ module PlayersHelper
 
   def player_sort_links
     tag.div class: "sort-links-container" do
-      tag.div class: "sort-links-group" do
-        tag.span class: "sort-label" do
-          "Sort by:"
-        end
-        tailwind_sort_link(@q, :first_name) +
-        tailwind_sort_link(@q, :last_name) +
-        tailwind_sort_link(@q, :team_name, "Team") +
-        tailwind_sort_link(@q, :league_name, "League") +
-        tailwind_sort_link(@q, :sport_name, "Sport") +
-        tailwind_sort_link(@q, :position_name, "Position") +
-        random_sort_link
-      end
-    end
-  end
-  
-  # Custom sort link helper that enhances Ransack's sort_link with semantic styling
-  # @param search [Ransack::Search] The Ransack search object
-  # @param attribute [Symbol] The attribute to sort by
-  # @param label [String] Optional label for the link (defaults to humanized attribute)
-  # @param options [Hash] Additional options for the link
-  # @return [String] HTML for the sort link
-  def tailwind_sort_link(search, attribute, label = nil, options = {})
-    # Extract styling options
-    class_base = options.delete(:class_base) || "sort-link"
-    class_active = options.delete(:class_active) || "sort-link-active"
-    class_inactive = options.delete(:class_inactive) || "sort-link-inactive"
-    icon = options.delete(:icon)
-    
-    # Determine if this sort is currently active
-    current_sort = search.sorts.find { |s| s.name == attribute.to_s }
-    is_active = current_sort.present?
-    
-    # Get the direction arrow if active
-    direction_arrow = if is_active
-      current_sort.dir == "asc" ? "↑" : "↓"
-    else
-      nil
-    end
-    
-    # Build the CSS classes
-    css_classes = is_active ? "#{class_base} #{class_active}" : "#{class_base} #{class_inactive}"
-    
-    # Call Ransack's sort_link with our custom options
-    sort_link_options = options.merge(class: css_classes)
-    
-    # Create the link with custom content
-    sort_link(search, attribute, label, sort_link_options) do
       content = ""
-      if icon.present?
-        content << tag.i(class: "#{icon} mr-1").to_s
+      
+      # Hierarchical sort display
+      if @sort_service.sort_params.any?
+        content << hierarchical_sort_display
+        content << tag.hr(class: "sort-separator")
       end
-      content << (label || attribute.to_s.humanize)
-      if direction_arrow
-        content << " " << tag.span(direction_arrow, class: "sort-direction-indicator").to_s
+      
+      # Individual sort links
+      content << tag.div(class: "sort-links-group") do
+        tag.span("Sort by:", class: "sort-label") +
+        hierarchical_sort_link(:first_name, "First Name") +
+        hierarchical_sort_link(:last_name, "Last Name") +
+        hierarchical_sort_link(:team_name, "Team") +
+        hierarchical_sort_link(:league_name, "League") +
+        hierarchical_sort_link(:sport_name, "Sport") +
+        hierarchical_sort_link(:position_name, "Position") +
+        hierarchical_sort_link(:random, "Random") +
+        hierarchical_sort_link(:shuffle, "Shuffle")
       end
+      
       content.html_safe
     end
   end
   
-  # Helper to create a random sort link
-  # @return [String] HTML for the random sort link
-  def random_sort_link
-    is_random = params[:random] == "true"
-    css_classes = is_random ? "random-sort-link random-sort-link-active" : "random-sort-link random-sort-link-inactive"
+  # Display the current hierarchical sort chain
+  def hierarchical_sort_display
+    return "" if @sort_service.sort_params.empty?
     
-    link_to players_path(random: true), class: css_classes do
-      tag.i(class: "random-sort-icon #{icon_for_resource(:shuffle)}") + "Random"
+    tag.div class: "hierarchical-sort-display" do
+      tag.span("Current sort order:", class: "sort-chain-label") +
+      tag.div(class: "sort-chain") do
+        @sort_service.sort_params.filter_map.with_index do |sort, index|
+          next if sort[:direction] == 'inactive'
+          
+          tag.div(class: "sort-chain-item") do
+            tag.span("#{index + 1}.", class: "sort-chain-priority") +
+            tag.span(humanize_sort_attribute(sort[:attribute]), class: "sort-chain-attribute") +
+            tag.span(humanize_sort_direction(sort[:direction], sort[:attribute]), class: "sort-chain-direction")
+          end
+        end.join.html_safe
+      end
+    end
+  end
+  
+  # Create a hierarchical sort link with three states
+  def hierarchical_sort_link(attribute, label = nil, options = {})
+    label ||= attribute.to_s.humanize
+    current_direction = @sort_service.direction_for(attribute)
+    priority = @sort_service.priority_for(attribute)
+    
+    # Determine CSS classes based on current state
+    css_classes = build_sort_link_classes(current_direction, priority)
+    
+    # Generate the URL for toggling this sort
+    toggle_service = @sort_service.toggle_sort(attribute)
+    sort_param = toggle_service.to_param
+    
+    # Build the new URL preserving other parameters
+    url_params = request.query_parameters.except('sort')
+    url_params[:sort] = sort_param unless sort_param.empty?
+    
+    link_to players_path(url_params), class: css_classes do
+      content = ""
+      
+      # Add priority indicator if this sort is active
+      if priority
+        content << tag.span("#{priority}", class: "sort-priority-badge")
+      end
+      
+      content << label
+      
+      # Add direction indicator
+      if current_direction != 'inactive'
+        content << " " + tag.span(direction_icon(current_direction, attribute), class: "sort-direction-icon")
+      end
+      
+      content.html_safe
+    end
+  end
+  
+  # Build CSS classes for sort links based on state and priority
+  def build_sort_link_classes(direction, priority)
+    base_class = "hierarchical-sort-link"
+    
+    case direction
+    when 'inactive'
+      "#{base_class} sort-link-inactive"
+    when 'asc', 'desc', 'random', 'shuffle'
+      classes = "#{base_class} sort-link-active"
+      classes += " sort-link-priority-#{priority}" if priority
+      classes
+    else
+      "#{base_class} sort-link-inactive"
+    end
+  end
+  
+  # Get appropriate icon for sort direction
+  def direction_icon(direction, attribute)
+    case direction
+    when 'asc'
+      '↑'
+    when 'desc'
+      '↓'
+    when 'random'
+      '🎲'
+    when 'shuffle'
+      '🔀'
+    else
+      ''
+    end
+  end
+  
+  # Humanize sort attribute names
+  def humanize_sort_attribute(attribute)
+    case attribute.to_s
+    when 'team_name'
+      'Team'
+    when 'league_name'
+      'League'
+    when 'sport_name'
+      'Sport'
+    when 'position_name'
+      'Position'
+    when 'first_name'
+      'First Name'
+    when 'last_name'
+      'Last Name'
+    else
+      attribute.to_s.humanize
+    end
+  end
+  
+  # Humanize sort direction
+  def humanize_sort_direction(direction, attribute)
+    case direction
+    when 'asc'
+      if %w[random shuffle].include?(attribute.to_s)
+        'active'
+      else
+        'ascending'
+      end
+    when 'desc'
+      'descending'
+    when 'random'
+      'random'
+    when 'shuffle'
+      'shuffle'
+    else
+      direction.to_s
     end
   end
 end
