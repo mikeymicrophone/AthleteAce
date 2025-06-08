@@ -21,27 +21,15 @@ module FilterLoader
       end
     end
     
-    # Set @current_filters instance variable
     @current_filters = result
-    
-    result
   end
   
   # Load filter options for selectors
-  # Returns a hash with collections for each filterable association
   def load_filter_options
-    result = {}
-    
+    @filter_options = {}
     filterable_associations.each do |association|
-      # Get the model class and load all options
-      model_class = association.to_s.singularize.classify.constantize
-      result[association] = model_class.all
+      @filter_options[association] = association.to_s.classify.constantize.all
     end
-    
-    # Set @filter_options instance variable
-    @filter_options = result
-    
-    result
   end
   
   # Build a breadcrumb trail based on current filters and the viewed resource

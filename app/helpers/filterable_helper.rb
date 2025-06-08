@@ -231,28 +231,19 @@ module FilterableHelper
   private
   
   def build_filtered_path(resource, filter_by)
-    # Start with the base resource path
     path_segments = []
     
-    # Add filter segments
     filter_by.each do |association, object|
-      next unless object
-      
-      # Skip if the object doesn't have an ID
-      next unless object.respond_to?(:id)
-      
+      next unless object&.id
       path_segments.unshift "#{association.to_s.pluralize}/#{object.id}"
     end
     
-    # Add the base resource at the end
     path_segments << resource.to_s
     
-    # Join with slashes and return
     '/' + path_segments.join('/')
   end
   
-  # Sort filters based on a logical hierarchy (e.g., country → state → city)
-  def sort_filters_by_hierarchy(filters)
+  def sort_filters_by_hierarchy filters
     hierarchy_order = {
       sport: 1,
       country: 2,

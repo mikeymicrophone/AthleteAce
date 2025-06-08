@@ -71,28 +71,17 @@ class Player < ApplicationRecord
   end
   
   def add_position(position, primary: false)
-    # If setting a new primary position, unset any existing primary position
-    if primary
-      roles.where(primary: true).update_all(primary: false)
-    end
-    
-    # Create the new role
-    roles.create(position: position, primary: primary)
+    roles.where(primary: true).update_all(primary: false) if primary
+    roles.create position: position, primary: primary
   end
-  
-  # def all_ratings
-  #   ratings
-  # end
-  
 
-  def calculate_attempt_stats(attempts)
+  def calculate_attempt_stats(attempts, since = 1.week.ago)
     total_attempts = attempts.size
-    correct_attempts = attempts.count(&:correct?)
+    correct_attempts = attempts.count &:correct?
 
-    one_week_ago = 1.week.ago
-    recent_attempts = attempts.where("created_at >= ?", one_week_ago)
+    recent_attempts = attempts.where("created_at >= ?", since)
     recent_total = recent_attempts.size
-    recent_correct = recent_attempts.count(&:correct?)
+    recent_correct = recent_attempts.count &:correct?
 
     {
       total_attempts: total_attempts,

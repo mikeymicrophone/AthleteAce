@@ -201,6 +201,6 @@ module TeamsHelper
       link_to pluralize(count, assoc.to_s.singularize), [resource, assoc], class: "text-sm text-blue-600 hover:underline"
     end.compact
 
-    safe_join(links, " | ")
+    safe_join links
   end
 end
