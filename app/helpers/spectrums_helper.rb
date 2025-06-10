@@ -67,7 +67,7 @@ module SpectrumsHelper
 
   # Renders the floating spectrum picker component
   def render_floating_spectrum_picker(highlight_color: 'bg-blue-600')
-    content_tag(:div, id: "spectrum-picker", class: "sticky top-4 right-4 z-50 bg-white p-3 rounded-lg shadow-xl border border-gray-200 w-64 sm:w-72 md:w-80", data: { controller: "spectrum-picker", spectrum_picker_highlight_color_value: highlight_color }) do
+    content_tag(:div, id: "spectrum-picker", class: "sticky top-4 right-4 z-30 bg-white p-2 rounded-lg shadow-xl border border-gray-200 w-auto max-w-xs", data: { controller: "spectrum-picker", spectrum_picker_highlight_color_value: highlight_color }) do
       form_with url: url_for, method: :get, local: true, data: { spectrum_picker_target: "form" } do |form|
         # Collapsed View / Toggle Button
         collapsed_view = content_tag(:div, class: "flex justify-between items-center cursor-pointer", data: { action: "click->spectrum-picker#toggleExpand" }) do
