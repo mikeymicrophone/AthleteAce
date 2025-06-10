@@ -125,7 +125,7 @@ module ApplicationHelper
     entity_name = record.respond_to?(name_attribute) ? record.public_send(name_attribute) : "N/A"
 
     default_options = {
-      class: "lazy-logo-container inline-flex items-center", # Added inline-flex and items-center
+      class: "lazy-logo-container", # Keep semantic class name
       data: {
         controller: "lazy-logo",
         lazy_logo_entity_id_value: record.id,
@@ -138,7 +138,7 @@ module ApplicationHelper
     content_tag(:span, **merged_options) do
       # Placeholder for the image (Stimulus target)
       # Pre-styling for consistent size before image loads to reduce layout shift
-      logo_placeholder = content_tag(:span, "", class: "logo-placeholder mr-1 w-5 h-5 inline-block", data: { lazy_logo_target: "image" })
+      logo_placeholder = content_tag(:span, "", class: "logo-placeholder", data: { lazy_logo_target: "image" })
       
       # Name (Stimulus target, though not strictly necessary if only displaying name)
       name_span = content_tag(:span, entity_name, data: { lazy_logo_target: "name" })
