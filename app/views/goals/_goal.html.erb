@@ -1,0 +1,30 @@
+<%= goal_card goal do %>
+  <%= tag.div class: "goal-card-header" do %>
+    <%= tag.div class: "goal-card-content" do %>
+      <%= tag.div class: "goal-card-meta" do %>
+        <%= tag.h3 class: "goal-card-title" do %>
+          <%= link_to goal.quest.name, goal.quest, class: "goal-card-title-link" %>
+        <% end %>
+        
+        <%= goal_status_badge goal, size: :small %>
+      <% end %>
+      
+      <%= tag.p goal.quest.description, class: "goal-card-description" %>
+      
+      <%= tag.div class: "goal-detail-content" do %>
+        <%= tag.div class: "goal-progress-stats" do %>
+          <%= tag.span "Progress" %>
+          <%= tag.span "#{goal.progress} / #{goal.quest.highlights.required.count} achievements" %>
+        <% end %>
+        
+        <%= goal_progress_bar goal, show_percentage: false, size: :small %>
+        
+        <%= tag.div "#{goal.percent_complete}% complete", class: "goal-progress-external-text" %>
+      <% end %>
+    <% end %>
+    
+    <%= tag.div class: "goal-card-actions" do %>
+      <%= goal_action_buttons goal, layout: :horizontal %>
+    <% end %>
+  <% end %>
+<% end %>

@@ -1,0 +1,95 @@
+/* Index Record Component Styles - Basic Kickoff */
+
+/* CSS Variables for colors - can be customized later */
+:root {
+  --index-record-bg: #ffffff;
+  --index-record-border: #e5e7eb;
+  --index-record-hover-bg: #fef3f2;
+  --index-record-shadow: rgba(0, 0, 0, 0.1);
+  --index-record-hover-shadow: rgba(0, 0, 0, 0.15);
+  --index-record-text: #111827;
+  --index-record-meta-text: #6b7280;
+}
+
+/* Base index record container */
+.index-record {
+  /* Layout and spacing */
+  @apply grid gap-4 items-center p-4 mb-2;
+  @apply grid-cols-1 md:grid-cols-3;
+  
+  /* Visual appearance */
+  background-color: var(--index-record-bg);
+  border: 1px solid var(--index-record-border);
+  @apply rounded-lg;
+  box-shadow: 0 1px 3px var(--index-record-shadow);
+  
+  /* Transitions for interactivity */
+  @apply transition-colors duration-150;
+  
+  /* Hover effects */
+  &:hover {
+    background-color: var(--index-record-hover-bg);
+    box-shadow: 0 4px 6px var(--index-record-hover-shadow);
+  }
+}
+
+/* Record information section */
+.record-info {
+  @apply col-span-1;
+}
+
+.record-name {
+  @apply font-medium text-lg;
+  color: var(--index-record-text);
+}
+
+.record-metadata {
+  @apply text-sm;
+  color: var(--index-record-meta-text);
+}
+
+/* Record content areas */
+.record-content {
+  @apply col-span-1;
+}
+
+.record-actions {
+  @apply col-span-1;
+  @apply text-right;
+}
+
+/* Basic responsive layout adjustments */
+@media (max-width: 768px) {
+  .index-record {
+    @apply grid-cols-1;
+  }
+  
+  .record-info,
+  .record-content,
+  .record-actions {
+    @apply col-span-1;
+  }
+  
+  .record-actions {
+    @apply text-left mt-2;
+  }
+}
+
+/* Placeholder styles for future embellishment */
+.record-tag {
+  @apply text-xs mt-1 inline-block px-2 py-0.5 rounded;
+  @apply bg-gray-100 text-gray-700;
+}
+
+.record-stats {
+  @apply text-right;
+}
+
+.record-stats-count {
+  @apply text-sm;
+}
+
+.record-stats-detail {
+  @apply text-xs;
+  color: var(--index-record-meta-text);
+}

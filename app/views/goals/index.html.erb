@@ -1,0 +1,5 @@
+<% content_for :title, "My Goals" %>
+
+<%= goals_index_page "My Goals", notice: notice do %>
+  <%= goals_collection_with_grouping @goals %>
+<% end %>

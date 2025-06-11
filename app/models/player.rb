@@ -1,4 +1,6 @@
 class Player < ApplicationRecord
+  include Ratable
+  
   belongs_to :birth_city, optional: true
   belongs_to :birth_country, class_name: 'Country', optional: true
   belongs_to :team
@@ -7,7 +9,6 @@ class Player < ApplicationRecord
   
   has_many :roles, dependent: :destroy
   has_many :positions, through: :roles
-  has_many :ratings, as: :target, dependent: :destroy
   
   # Ransack configuration
   # Define searchable attributes and associations
@@ -70,45 +71,17 @@ class Player < ApplicationRecord
   end
   
   def add_position(position, primary: false)
-    # If setting a new primary position, unset any existing primary position
-    if primary
-      roles.where(primary: true).update_all(primary: false)
-    end
-    
-    # Create the new role
-    roles.create(position: position, primary: primary)
-  end
-  
-  # def all_ratings
-  #   ratings
-  # end
-  
-  def ratings_on(spectrum)
-    ratings.active.where(spectrum: spectrum)
-  end
-  
-  def average_rating_on(spectrum)
-    ratings = ratings_on(spectrum)
-    return nil if ratings.empty?
-    
-    ratings.average(:value)&.to_f
-  end
-  
-  def normalized_average_rating_on(spectrum)
-    avg = average_rating_on(spectrum)
-    return nil if avg.nil?
-    
-    (avg + 10_000) / 20_000
+    roles.where(primary: true).update_all(primary: false) if primary
+    roles.create position: position, primary: primary
   end
 
-  def calculate_attempt_stats(attempts)
+  def calculate_attempt_stats(attempts, since = 1.week.ago)
     total_attempts = attempts.size
-    correct_attempts = attempts.count(&:correct?)
+    correct_attempts = attempts.count &:correct?
 
-    one_week_ago = 1.week.ago
-    recent_attempts = attempts.where("created_at >= ?", one_week_ago)
+    recent_attempts = attempts.where("created_at >= ?", since)
     recent_total = recent_attempts.size
-    recent_correct = recent_attempts.count(&:correct?)
+    recent_correct = recent_attempts.count &:correct?
 
     {
       total_attempts: total_attempts,

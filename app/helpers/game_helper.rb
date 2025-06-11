@@ -39,7 +39,6 @@ module GameHelper
     end
   end
   
-  # UNUSED
   # Renders a single choice item button with appropriate data attributes
   def game_choice_item(choice, correct_answer, game_type)
     is_correct = (choice.id == correct_answer.id)
@@ -64,7 +63,6 @@ module GameHelper
     end
   end
   
-  # UNUSED
   # Renders the content inside a choice button
   def render_choice_content(choice, game_type)
     if game_type == "team_match"
@@ -191,14 +189,12 @@ module GameHelper
     end
   end
 
-  # UNUSED
   def progress_counter(correct_count = 0)
     count = tag.span(correct_count.to_s, id: "progress_counter", class: "progress-counter", 
     data: { game_target: "progressCounter" })
     tag.span("Progress: #{count} correct".html_safe, class: "progress-label")
   end
   
-  # UNUSED
   # Creates the CSS classes for result status indicators
   def attempt_result_classes(is_correct)
     if is_correct
@@ -218,7 +214,6 @@ module GameHelper
     end
   end
   
-  # UNUSED
   # Renders an individual recent attempt item
   def game_attempt_item(entity_name, result, game_type, additional_data = {})
     classes = attempt_result_classes(result)

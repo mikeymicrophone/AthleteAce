@@ -1,5 +1,4 @@
 module PlayersHelper
-  # UNUSED
   # Display player name with logo
   def player_name_display player
     tag.div class: "record-name" do
@@ -7,7 +6,6 @@ module PlayersHelper
     end
   end
   
-  # UNUSED
   # Display player metadata (team, league, sport)
   def player_metadata_display player
     tag.div class: "record-metadata" do
@@ -47,176 +45,232 @@ module PlayersHelper
 
   def player_sort_links
     tag.div class: "sort-links-container" do
-      tag.div class: "sort-links-group" do
-        tag.span class: "sort-label" do
-          "Sort by:"
-        end
-        tailwind_sort_link(@q, :first_name) +
-        tailwind_sort_link(@q, :last_name) +
-        tailwind_sort_link(@q, :team_name, "Team") +
-        tailwind_sort_link(@q, :league_name, "League") +
-        tailwind_sort_link(@q, :sport_name, "Sport") +
-        tailwind_sort_link(@q, :position_name, "Position") +
-        random_sort_link
-      end
-    end
-  end
-  
-  # UNUSED
-  # Custom sort link helper that enhances Ransack's sort_link with semantic styling
-  # @param search [Ransack::Search] The Ransack search object
-  # @param attribute [Symbol] The attribute to sort by
-  # @param label [String] Optional label for the link (defaults to humanized attribute)
-  # @param options [Hash] Additional options for the link
-  # @return [String] HTML for the sort link
-  def tailwind_sort_link(search, attribute, label = nil, options = {})
-    # Extract styling options
-    class_base = options.delete(:class_base) || "sort-link"
-    class_active = options.delete(:class_active) || "sort-link-active"
-    class_inactive = options.delete(:class_inactive) || "sort-link-inactive"
-    icon = options.delete(:icon)
-    
-    # Determine if this sort is currently active
-    current_sort = search.sorts.find { |s| s.name == attribute.to_s }
-    is_active = current_sort.present?
-    
-    # Get the direction arrow if active
-    direction_arrow = if is_active
-      current_sort.dir == "asc" ? "↑" : "↓"
-    else
-      nil
-    end
-    
-    # Build the CSS classes
-    css_classes = is_active ? "#{class_base} #{class_active}" : "#{class_base} #{class_inactive}"
-    
-    # Call Ransack's sort_link with our custom options
-    sort_link_options = options.merge(class: css_classes)
-    
-    # Create the link with custom content
-    sort_link(search, attribute, label, sort_link_options) do
       content = ""
-      if icon.present?
-        content << tag.i(class: "#{icon} mr-1").to_s
+      
+      # Hierarchical sort display
+      if @sort_service.sort_params.any?
+        content << hierarchical_sort_display
+        content << tag.hr(class: "sort-separator")
       end
-      content << (label || attribute.to_s.humanize)
-      if direction_arrow
-        content << " " << tag.span(direction_arrow, class: "sort-direction-indicator").to_s
+      
+      # Individual sort links
+      content << tag.div(class: "sort-links-group") do
+        tag.span("Sort by:", class: "sort-label") +
+        hierarchical_sort_link(:first_name, "First Name") +
+        hierarchical_sort_link(:last_name, "Last Name") +
+        hierarchical_sort_link(:team_name, "Team") +
+        hierarchical_sort_link(:league_name, "League") +
+        hierarchical_sort_link(:sport_name, "Sport") +
+        hierarchical_sort_link(:position_name, "Position") +
+        hierarchical_sort_link(:random, "Random") +
+        hierarchical_sort_link(:shuffle, "Shuffle")
       end
+      
       content.html_safe
     end
   end
   
-  # UNUSED
-  # Helper to create a random sort link
-  # @return [String] HTML for the random sort link
-  def random_sort_link
-    is_random = params[:random] == "true"
-    css_classes = is_random ? "random-sort-link random-sort-link-active" : "random-sort-link random-sort-link-inactive"
+  # Display the current hierarchical sort chain
+  # Shows sorts in order: first clicked at top, subsequent clicks refine beneath
+  def hierarchical_sort_display
+    return "" if @sort_service.sort_params.empty?
     
-    link_to players_path(random: true), class: css_classes do
-      tag.i(class: "random-sort-icon #{icon_for_resource(:shuffle)}") + "Random"
+    tag.div class: "hierarchical-sort-display" do
+      tag.span("Sort order (first → refinements):", class: "sort-chain-label") +
+      tag.div(class: "sort-chain") do
+        @sort_service.sort_params.filter_map.with_index do |sort, index|
+          next if sort[:direction] == 'inactive'
+          
+          tag.div(class: "sort-chain-item") do
+            tag.span("#{index + 1}.", class: "sort-chain-priority") +
+            tag.span(humanize_sort_attribute(sort[:attribute]), class: "sort-chain-attribute") +
+            tag.span(humanize_sort_direction(sort[:direction], sort[:attribute]), class: "sort-chain-direction") +
+            sort_direction_controls(sort[:attribute], sort[:direction])
+          end
+        end.join.html_safe
+      end
     end
   end
   
-  # Helper to create a search form for players
-  # @param search [Ransack::Search] The Ransack search object
-  # @return [String] HTML for the search form
-  def player_search_form(search)
-    search_form_for search, class: "search-form" do |f|
-      content = tag.div(class: "search-form-container") do
-        concat(tag.h3("Filter Players", class: "search-form-title"))
+  # Generate direct direction control links for an existing sort
+  def sort_direction_controls(attribute, current_direction)
+    tag.div(class: "sort-direction-controls") do
+      if %w[random shuffle].include?(attribute.to_s)
+        # Random/shuffle controls
+        random_classes = current_direction == 'random' ? 
+          'sort-direction-link sort-direction-active' : 
+          'sort-direction-link sort-direction-inactive'
         
-        # Basic search fields
-        concat(
-          tag.div(class: "search-fields-grid") do
-            # Name search field
-            concat(
-              tag.div do
-                f.label(:full_name_cont, "Name contains", class: "form-field-label") +
-                f.search_field(:full_name_cont, class: "form-field-input")
-              end
-            )
-            
-            # Team search field
-            concat(
-              tag.div do
-                f.label(:team_name_cont, "Team", class: "form-field-label") +
-                f.search_field(:team_name_cont, class: "form-field-input")
-              end
-            )
-            
-            # League search field
-            concat(
-              tag.div do
-                f.label(:league_name_cont, "League", class: "form-field-label") +
-                f.search_field(:league_name_cont, class: "form-field-input")
-              end
-            )
-          end
-        )
+        shuffle_classes = current_direction == 'shuffle' ? 
+          'sort-direction-link sort-direction-active' : 
+          'sort-direction-link sort-direction-inactive'
         
-        # Advanced search section (collapsible)
-        concat(
-          tag.div(class: "advanced-filters-container", data: { controller: "collapse" }) do
-            # Collapsible section toggle
-            concat(
-              tag.div(class: "advanced-filters-toggle", data: { action: "click->collapse#toggle" }) do
-                tag.span("Advanced Filters", class: "advanced-filters-text") +
-                tag.i(class: "advanced-filters-icon #{icon_for_resource(:chevron_down)}")
-              end
-            )
-            
-            # Collapsible content
-            concat(
-              tag.div(class: "advanced-filters-content", data: { collapse_target: "content" }) do
-                # Position search field
-                concat(
-                  tag.div do
-                    f.label(:position_name_cont, "Position", class: "form-field-label") +
-                    f.search_field(:position_name_cont, class: "form-field-input")
-                  end
-                )
-                
-                # Sport search field
-                concat(
-                  tag.div do
-                    f.label(:sport_name_cont, "Sport", class: "form-field-label") +
-                    f.search_field(:sport_name_cont, class: "form-field-input")
-                  end
-                )
-                
-                # Birth country search field
-                concat(
-                  tag.div do
-                    f.label(:birth_country_name_cont, "Birth Country", class: "form-field-label") +
-                    f.search_field(:birth_country_name_cont, class: "form-field-input")
-                  end
-                )
-              end
-            )
-          end
-        )
+        random_link = direct_sort_link(attribute, 'random', '🎲', random_classes)
+        shuffle_link = direct_sort_link(attribute, 'shuffle', '🔀', shuffle_classes)
+        remove_link = direct_sort_link(attribute, 'inactive', '✕', 'sort-direction-link sort-direction-remove')
         
-        # Form actions
-        concat(
-          tag.div(class: "form-actions") do
-            # Reset button
-            concat(
-              link_to("Reset", players_path, class: "reset-button")
-            )
-            
-            # Submit button
-            concat(
-              f.button(type: "submit", class: "submit-button") do
-                tag.i(class: "search-icon #{icon_for_resource(:search)}") + "Search"
-              end
-            )
-          end
-        )
+        random_link + shuffle_link + remove_link
+      else
+        # Regular ascending/descending controls
+        asc_classes = current_direction == 'asc' ? 
+          'sort-direction-link sort-direction-active' : 
+          'sort-direction-link sort-direction-inactive'
+        
+        asc_link = direct_sort_link(attribute, 'asc', '↑', asc_classes)
+        
+        desc_classes = current_direction == 'desc' ? 
+          'sort-direction-link sort-direction-active' : 
+          'sort-direction-link sort-direction-inactive'
+        
+        desc_link = direct_sort_link(attribute, 'desc', '↓', desc_classes)
+        remove_link = direct_sort_link(attribute, 'inactive', '✕', 'sort-direction-link sort-direction-remove')
+        
+        asc_link + desc_link + remove_link
+      end
+    end
+  end
+  
+  # Create a direct sort link that sets a specific direction
+  def direct_sort_link(attribute, target_direction, icon, css_classes)
+    # Create a new service with the specified direction for this attribute
+    new_service = create_service_with_direction(attribute, target_direction)
+    sort_param = new_service.to_param
+    
+    # Build URL parameters
+    url_params = request.query_parameters.except('sort')
+    url_params[:sort] = sort_param unless sort_param.empty?
+    
+    link_to players_path(url_params), 
+            class: css_classes, 
+            data: { turbo_preload: false },
+            title: "#{humanize_sort_attribute(attribute)} #{target_direction == 'inactive' ? 'remove' : target_direction}" do
+      tag.span(icon, class: "sort-direction-icon")
+    end
+  end
+  
+  # Create a new service with a specific direction for an attribute
+  def create_service_with_direction(attribute, target_direction)
+    new_params = @sort_service.sort_params.dup
+    existing_index = @sort_service.find_sort_index(attribute)
+    
+    if existing_index
+      if target_direction == 'inactive'
+        # Remove the sort entirely
+        new_params.delete_at(existing_index)
+      else
+        # Update the direction in place
+        new_params[existing_index][:direction] = target_direction
+      end
+    end
+    
+    HierarchicalSortService.new(new_params, @sort_service.max_levels)
+  end
+  
+  # Create a hierarchical sort link with three states
+  def hierarchical_sort_link(attribute, label = nil, options = {})
+    label ||= attribute.to_s.humanize
+    current_direction = @sort_service.direction_for(attribute)
+    priority = @sort_service.priority_for(attribute)
+    
+    # Determine CSS classes based on current state
+    css_classes = build_sort_link_classes(current_direction, priority)
+    
+    # Generate the URL for toggling this sort
+    toggle_service = @sort_service.toggle_sort(attribute)
+    sort_param = toggle_service.to_param
+    
+    # Build the new URL preserving other parameters
+    url_params = request.query_parameters.except('sort')
+    url_params[:sort] = sort_param unless sort_param.empty?
+    
+    link_to players_path(url_params), class: css_classes, data: { turbo_preload: false } do
+      content = ""
+      
+      # Add priority indicator if this sort is active
+      if priority
+        content << tag.span("#{priority}", class: "sort-priority-badge")
       end
       
-      content
+      content << label
+      
+      # Add direction indicator
+      if current_direction != 'inactive'
+        content << " " + tag.span(direction_icon(current_direction, attribute), class: "sort-direction-icon")
+      end
+      
+      content.html_safe
+    end
+  end
+  
+  # Build CSS classes for sort links based on state and priority
+  def build_sort_link_classes(direction, priority)
+    base_class = "hierarchical-sort-link"
+    
+    case direction
+    when 'inactive'
+      "#{base_class} sort-link-inactive"
+    when 'asc', 'desc', 'random', 'shuffle'
+      classes = "#{base_class} sort-link-active"
+      classes += " sort-link-priority-#{priority}" if priority
+      classes
+    else
+      "#{base_class} sort-link-inactive"
+    end
+  end
+  
+  # Get appropriate icon for sort direction
+  def direction_icon(direction, attribute)
+    case direction
+    when 'asc'
+      '↑'
+    when 'desc'
+      '↓'
+    when 'random'
+      '🎲'
+    when 'shuffle'
+      '🔀'
+    else
+      ''
+    end
+  end
+  
+  # Humanize sort attribute names
+  def humanize_sort_attribute(attribute)
+    case attribute.to_s
+    when 'team_name'
+      'Team'
+    when 'league_name'
+      'League'
+    when 'sport_name'
+      'Sport'
+    when 'position_name'
+      'Position'
+    when 'first_name'
+      'First Name'
+    when 'last_name'
+      'Last Name'
+    else
+      attribute.to_s.humanize
+    end
+  end
+  
+  # Humanize sort direction
+  def humanize_sort_direction(direction, attribute)
+    case direction
+    when 'asc'
+      if %w[random shuffle].include?(attribute.to_s)
+        'active'
+      else
+        'ascending'
+      end
+    when 'desc'
+      'descending'
+    when 'random'
+      'random'
+    when 'shuffle'
+      'shuffle'
+    else
+      direction.to_s
     end
   end
 end

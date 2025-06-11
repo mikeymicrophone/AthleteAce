@@ -1,103 +1,10 @@
 module ApplicationHelper
   include Pagy::Frontend
   
-  # UNUSED
-  # Renders a Tailwind CSS styled pagination component
-  # @param pagy [Pagy] The Pagy object
-  # @param nearby_pages [Integer] Number of pages to show on either side of the current page (default: 2)
-  # @return [String] HTML for the pagination component
-  def tailwind_pagination(pagy, nearby_pages = 2)
-    return unless pagy.pages > 1
-    
-    tag.nav(class: "flex justify-center my-6", "aria-label": "Pagination") do
-      tag.div(class: "relative z-0 inline-flex shadow-sm rounded-md") do
-        # Previous page link
-        if pagy.prev
-          concat(link_to(pagy_url_for(pagy, pagy.prev), 
-            class: "relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50",
-            "aria-label": "Previous") do
-              tag.span(class: "sr-only") { "Previous" } +
-              tag.i(class: "fa-solid fa-chevron-left h-5 w-5")
-          end)
-        else
-          concat(tag.span(
-            class: "relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed",
-            "aria-disabled": "true") do
-              tag.span(class: "sr-only") { "Previous" } +
-              tag.i(class: "fa-solid fa-chevron-left h-5 w-5")
-          end)
-        end
-        
-        # Page links - simplified approach with configurable range
-        from = [1, pagy.page - nearby_pages].max
-        to = [pagy.pages, pagy.page + nearby_pages].min
-        
-        # First page if needed
-        if from > 1
-          concat(link_to(1, pagy_url_for(pagy, 1), 
-            class: "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"))
-          
-          # Gap indicator if needed
-          if from > 2
-            concat(tag.span("...", 
-              class: "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"))
-          end
-        end
-        
-        # Main page numbers
-        (from..to).each do |page|
-          if page == pagy.page
-            concat(tag.span(page, 
-              class: "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-indigo-50 text-sm font-medium text-indigo-600", 
-              "aria-current": "page"))
-          else
-            concat(link_to(page, pagy_url_for(pagy, page), 
-              class: "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"))
-          end
-        end
-        
-        # Last page if needed
-        if to < pagy.pages
-          # Gap indicator if needed
-          if to < pagy.pages - 1
-            concat(tag.span("...", 
-              class: "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"))
-          end
-          
-          concat(link_to(pagy.pages, pagy_url_for(pagy, pagy.pages), 
-            class: "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"))
-        end
-        
-        # Next page link
-        if pagy.next
-          concat(link_to(pagy_url_for(pagy, pagy.next), 
-            class: "relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50",
-            "aria-label": "Next") do
-              tag.span(class: "sr-only") { "Next" } +
-              tag.i(class: "fa-solid fa-chevron-right h-5 w-5")
-          end)
-        else
-          concat(tag.span(
-            class: "relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed",
-            "aria-disabled": "true") do
-              tag.span(class: "sr-only") { "Next" } +
-              tag.i(class: "fa-solid fa-chevron-right h-5 w-5")
-          end)
-        end
-      end
-    end
-  end
 
-  # UNUSED
-  # Returns the active class for navigation links
-  def active_class(link_path)
-    current_page?(link_path) ? 'border-indigo-500 text-orange-400' : 'border-transparent text-white hover:border-gray-300 hover:text-orange-200'
-  end
 
   def link_to_name(record, **options)
-    default_options = { class: 'flex' }
-    merged_options = default_options.merge(options)
-    link_to record.name, record, **merged_options rescue ''
+    link_to record.name, record, **options rescue ''
   end
 
   
@@ -218,7 +125,7 @@ module ApplicationHelper
     entity_name = record.respond_to?(name_attribute) ? record.public_send(name_attribute) : "N/A"
 
     default_options = {
-      class: "lazy-logo-container inline-flex items-center", # Added inline-flex and items-center
+      class: "lazy-logo-container", # Keep semantic class name
       data: {
         controller: "lazy-logo",
         lazy_logo_entity_id_value: record.id,
@@ -231,7 +138,7 @@ module ApplicationHelper
     content_tag(:span, **merged_options) do
       # Placeholder for the image (Stimulus target)
       # Pre-styling for consistent size before image loads to reduce layout shift
-      logo_placeholder = content_tag(:span, "", class: "logo-placeholder mr-1 w-5 h-5 inline-block", data: { lazy_logo_target: "image" })
+      logo_placeholder = content_tag(:span, "", class: "logo-placeholder", data: { lazy_logo_target: "image" })
       
       # Name (Stimulus target, though not strictly necessary if only displaying name)
       name_span = content_tag(:span, entity_name, data: { lazy_logo_target: "name" })

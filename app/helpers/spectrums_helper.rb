@@ -31,7 +31,15 @@ module SpectrumsHelper
   # @return [ActiveRecord::Relation<Spectrum>] The current selected spectrums
   def selected_spectrums
     ids = selected_spectrum_ids
-    Spectrum.where(id: ids).order(:name)
+    result = Spectrum.where(id: ids).order(:name)
+    
+    # If no spectrums are selected, return the first available spectrum for debugging
+    if result.empty? && Spectrum.exists?
+      Rails.logger.debug "[SpectrumsHelper] No spectrums selected, returning first spectrum"
+      Spectrum.limit(1)
+    else
+      result
+    end
   end
 
   # UNUSED
@@ -59,7 +67,7 @@ module SpectrumsHelper
 
   # Renders the floating spectrum picker component
   def render_floating_spectrum_picker(highlight_color: 'bg-blue-600')
-    content_tag(:div, id: "spectrum-picker", class: "sticky top-4 right-4 z-50 bg-white p-3 rounded-lg shadow-xl border border-gray-200 w-64 sm:w-72 md:w-80", data: { controller: "spectrum-picker", spectrum_picker_highlight_color_value: highlight_color }) do
+    content_tag(:div, id: "spectrum-picker", class: "sticky top-4 right-4 z-30 bg-white p-2 rounded-lg shadow-xl border border-gray-200 w-auto max-w-xs", data: { controller: "spectrum-picker", spectrum_picker_highlight_color_value: highlight_color }) do
       form_with url: url_for, method: :get, local: true, data: { spectrum_picker_target: "form" } do |form|
         # Collapsed View / Toggle Button
         collapsed_view = content_tag(:div, class: "flex justify-between items-center cursor-pointer", data: { action: "click->spectrum-picker#toggleExpand" }) do
@@ -101,12 +109,7 @@ module SpectrumsHelper
             hidden_input + initial_inputs + buttons
           end
           
-          # Apply Button
-          apply_button_div = content_tag(:div) do
-            form.submit "Apply Filters", class: "w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2", data: { action: "click->spectrum-picker#submitForm" }
-          end
-
-          multi_select_div + buttons_div + apply_button_div
+          multi_select_div + buttons_div
         end
         
         collapsed_view + expandable_content

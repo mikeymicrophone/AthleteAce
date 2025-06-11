@@ -1,8 +1,4 @@
-<p style="color: green"><%= notice %></p>
-
 <% content_for :title, "Leagues" %>
-
-<%= render 'filter_ui' %>
 
 <div class="mb-4 text-center">
   <%= link_to "Play: Guess the Division", new_division_game_path(difficulty: :league), class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
@@ -11,11 +7,10 @@
 <div id="leagues">
   <% @leagues.each do |league| %>
     <%= tag.div(id: dom_id(league), class: "index-record") do %>
-      <%= display_name_with_lazy_logo(league) %>
-      <%= link_to pluralize(league.teams.count, "team"), [league, :teams] %>
-      <%= link_to pluralize(league.players.count, "player"), [league, :players] %>
-      <%= link_to_name league.jurisdiction %>
-      <%= display_name_with_lazy_logo(league.sport, logo_attribute: :icon_url) %>
+      <%= display_name_with_lazy_logo league %>
+      <%= association_links league %>
+      <%= display_name_with_lazy_logo league.jurisdiction %>
+      <%= display_name_with_lazy_logo league.sport, logo_attribute: :icon_url %>
       <% if league.teams.any? %>
         <%= quiz_link(league, title: "Test your knowledge of teams in #{league.name}") %>
       <% end %>

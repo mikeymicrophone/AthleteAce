@@ -1,0 +1,15 @@
+<% content_for :title, "Goal: #{@goal.quest.name}" %>
+
+<%= goal_detail_page @goal, notice: notice do %>
+  <%= goal_status_section @goal %>
+  
+  <%= quest_description_section @goal.quest %>
+
+  <%= achievements_section @goal.quest.highlights.required, "Required Achievements" %>
+
+  <% if @goal.quest.highlights.optional.any? %>
+    <%= achievements_section @goal.quest.highlights.optional, "Optional Achievements", required: false %>
+  <% end %>
+
+  <%= abandon_quest_section @goal %>
+<% end %>

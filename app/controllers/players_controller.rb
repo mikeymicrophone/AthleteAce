@@ -7,27 +7,26 @@ class PlayersController < ApplicationController
     # Load current filters and set related instance variables
     @current_filters = load_current_filters
     
-    # Build the base query using the filters
+    # Build the base query using the filters  
     base_query = apply_filter :players
-  
-    # Build the query with proper joins for sorting and searching
-    base_query = base_query.joins(:team, team: [:league, league: :sport])
-                          .left_joins(:positions)
-                          .select("players.*, teams.mascot as team_name, teams.territory as team_territory, " +
-                                 "leagues.name as league_name, sports.name as sport_name, positions.name as position_name")
     
-    # Initialize Ransack search object
-    @q = base_query.ransack(params[:q])
+    # Simplified query - add joins only for columns we're actually sorting by
+    base_query = base_query.includes(:team, team: [:league, league: :sport])
+                          .includes(:positions)
     
-    # Set default sort if none specified
-    @q.sorts = 'first_name asc' if @q.sorts.empty?
+    # Initialize hierarchical sorting
+    @sort_service = HierarchicalSortService.from_params(params)
     
-    # Handle random sorting as a special case
-    if params[:random].present? && params[:random] == 'true'
-      @players = base_query.order(Arel.sql('RANDOM()'))
+    # Apply hierarchical sorting (including integrated random)
+    sql_order = @sort_service.to_sql_order
+    
+    if sql_order
+      # Use custom SQL ORDER BY clause that handles random within hierarchy
+      # Remove distinct since we're not searching and it conflicts with custom ORDER BY
+      @players = base_query.order(Arel.sql(sql_order))
     else
-      # Get the result with distinct to avoid duplicates from joins
-      @players = @q.result(distinct: true)
+      # No sorts specified, use default
+      @players = base_query.order(:first_name)
     end
     
     # Load available spectrums for the rating selector
