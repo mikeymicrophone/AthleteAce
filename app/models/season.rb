@@ -23,10 +23,6 @@ class Season < ApplicationRecord
     name
   end
   
-  def display_year
-    "#{year.number}-#{(year.number + 1).to_s.last(2)}"
-  end
-  
   def season_duration
     return nil unless start_date && end_date
     (end_date - start_date).to_i
