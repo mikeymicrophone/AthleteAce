@@ -1,40 +1,5 @@
 <% content_for :title, "My Goals" %>
 
-<div class="w-full goal-container">
-  <% if notice.present? %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
-  <% end %>
-
-  <div class="flex justify-between items-center">
-    <h1 class="font-bold text-4xl">My Goals</h1>
-    <%= link_to "Browse Quests", quests_path, class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white block font-medium" %>
-  </div>
-
-  <div id="goals" class="min-w-full divide-y divide-gray-200 space-y-5">
-    <% if @goals.any? %>
-      <% @goals.group_by(&:status).each do |status, goals| %>
-        <div class="mt-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4 capitalize">
-            <%= status.humanize %> Goals
-            <span class="text-sm font-normal text-gray-500">(<%= goals.count %>)</span>
-          </h2>
-          
-          <div class="space-y-4">
-            <% goals.each do |goal| %>
-              <%= render goal %>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
-    <% else %>
-      <div class="text-center my-16">
-        <div class="mx-auto h-24 w-24 text-gray-400 mb-4">
-          <i class="fa-solid fa-target text-6xl"></i>
-        </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">No goals yet</h3>
-        <p class="text-gray-500 mb-6">Start your journey by adopting a quest and setting some goals.</p>
-        <%= link_to "Browse Quests", quests_path, class: "rounded-md px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium" %>
-      </div>
-    <% end %>
-  </div>
-</div>
+<%= goals_index_page "My Goals", notice: notice do %>
+  <%= goals_collection_with_grouping @goals %>
+<% end %>

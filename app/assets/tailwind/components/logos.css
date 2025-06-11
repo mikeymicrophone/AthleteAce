@@ -1,0 +1,6 @@
+.lazy-logo-container {
+  img {
+    @apply max-h-12 max-w-full object-contain;
+  }
+}
+    

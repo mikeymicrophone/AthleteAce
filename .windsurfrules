@@ -19,3 +19,32 @@ Choose the most appropriate way for each case.
 
 dom_id(team, :quiz_link_for) rather than dom_id(team, :quiz_link)
 
+Parentheses usually do not need to be used in method argument lists.
+
+Arguments do not need to be described in comments if their role is clear from the method name and variable name.
+
+Extra whitespace is not needed except in methods that are over 10 lines long.
+
+While composing markup using tag builders, simple concatenation using the + operator is typically best, 
+because it allows the code's structure to mirror that of the resulting HTML.
+There are sometimes extra steps needed to complete the syntax - for example, all methods on each side of a + need to use parens.
+
+If a collection can be mapped into a result, it is ok to chain a few methods together to massage this out.
+It's frequently not necessary to break this into multiple lines and store the intermediate result.
+If a tag's content is just one method call, place it as the second argument rather than using a block.
+
+Some helpers are fundamental enough that they can be used in multiple contexts.
+As we build these out, we will develop a taxonomy of terms that can evocatively describe various groups of domain models.
+For example, Country, State, and City are all locations.  By consolidating certain helpers, we can prepare for a 
+future situation in which these helpers can incorporate aspects like maps, distance awareness, and timezone awareness.
+If you encounter an opportunity to establish a term, it's fine to pause and ask for guidance.
+
+As we build out the CSS, the expectation is that many of the styling choices will apply broadly to many components.
+If they can be defined at a higher level, or even defined in a rule with many classname/selector combinations, it's a good idea to do so.
+CSS rules can also be nested, which is fine to do even if it's not necessary in the situation at hand.
+
+Rather than putting all the tailwind keywords on one line, they can be grouped or written individually.
+But, it's not necessary to repeat the @apply directive unless comments are being interpolated.
+This will help me learn what more of the tailwind keywords are for.
+When using keywords that are a bit less common, it's ok to begin with a brief comment to explain what the keyword (group) does.
+It's also ok to propose two options, with one commented out so that I can try both.
