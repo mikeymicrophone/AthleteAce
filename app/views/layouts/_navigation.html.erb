@@ -103,6 +103,9 @@
               <%= link_to years_path, class: "nav-dropdown-item #{current_page?(years_path) ? 'active' : ''}" do %>
                 <i class="<%= icon_for_resource(:years) %>"></i> Years
               <% end %>
+              <%= link_to seasons_path, class: "nav-dropdown-item #{current_page?(seasons_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:seasons) %>"></i> Seasons
+              <% end %>
             </div>
           </div>
         </div>

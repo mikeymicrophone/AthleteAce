@@ -28,6 +28,7 @@ module IconHelper
       
       # Temporal Resources
       years: "fa-solid fa-calendar-days",
+      seasons: "fa-solid fa-calendar-alt",
       
       # Generic UI Icons
       chevron_down: "fa-solid fa-chevron-down",

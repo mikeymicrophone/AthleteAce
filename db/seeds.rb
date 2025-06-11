@@ -31,7 +31,7 @@ class SeedVersion < ActiveSupport::CurrentAttributes
   attribute :seeded_models, :array, default: []
 end
 
-SeedVersion.seeded_models = [Country, State, City, Stadium, Sport, League, Conference, Division, Team, Player, Membership, Position, Role, Spectrum, Quest, Achievement, Highlight, Year]
+SeedVersion.seeded_models = [Country, State, City, Stadium, Sport, League, Conference, Division, Team, Player, Membership, Position, Role, Spectrum, Quest, Achievement, Highlight, Year, Season]
 
 ApplicationRecord.before_create do
   self.seed_version ||= SeedVersion.seed_version
@@ -414,5 +414,46 @@ puts "Creating Years from 1800 to #{Date.current.year}..."
 end
 
 puts "Created #{Year.count} years"
+
+puts "\n----- Seeding Seasons -----"
+puts "Loading seasons for big five American leagues..."
+
+Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/**/seasons.json')).each do |file|
+  seasons_file = File.read(file)
+  puts "Loading seasons from #{file}..."
+  seasons_data = JSON.parse(seasons_file)
+  league = League.find_by(name: seasons_data["league_name"])
+  
+  if league.nil?
+    puts "League not found: #{seasons_data["league_name"]}"
+    next
+  end
+  
+  seasons_data["seasons"].each do |season_data|
+    year = Year.find_by(number: season_data["year"])
+    if year.nil?
+      puts "Year not found: #{season_data["year"]}"
+      next
+    end
+    
+    season = Season.find_or_initialize_by(
+      year: year,
+      league: league
+    )
+    
+    season.assign_attributes(
+      start_date: season_data["start_date"] ? Date.parse(season_data["start_date"]) : nil,
+      end_date: season_data["end_date"] ? Date.parse(season_data["end_date"]) : nil,
+      playoff_start_date: season_data["playoff_start_date"] ? Date.parse(season_data["playoff_start_date"]) : nil,
+      playoff_end_date: season_data["playoff_end_date"] ? Date.parse(season_data["playoff_end_date"]) : nil,
+      comments: season_data["comments"] || []
+    )
+    
+    season.save!
+    puts "Created/updated season: #{season.name}"
+  end
+end
+
+puts "Created #{Season.count} seasons"
 
 puts "\n===== Database Seeding Complete! ====="

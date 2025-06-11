@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_11_132434) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_11_141424) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -272,6 +272,25 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_11_132434) do
     t.index ["seed_version"], name: "index_roles_on_seed_version"
   end
 
+  create_table "seasons", force: :cascade do |t|
+    t.bigint "year_id", null: false, comment: "Year when the season began"
+    t.bigint "league_id", null: false, comment: "League the season belongs to"
+    t.date "start_date", comment: "When the regular season started"
+    t.date "end_date", comment: "When the regular season ended"
+    t.date "playoff_start_date", comment: "When the playoffs started"
+    t.date "playoff_end_date", comment: "When the playoffs ended"
+    t.text "comments", default: [], comment: "Array of comments about the season", array: true
+    t.string "seed_version", comment: "Version when this record was seeded"
+    t.datetime "last_seeded_at", comment: "When this record was last seeded"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["league_id"], name: "index_seasons_on_league_id"
+    t.index ["seed_version"], name: "index_seasons_on_seed_version"
+    t.index ["start_date"], name: "index_seasons_on_start_date"
+    t.index ["year_id", "league_id"], name: "index_seasons_on_year_and_league", unique: true
+    t.index ["year_id"], name: "index_seasons_on_year_id"
+  end
+
   create_table "spectrums", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -374,6 +393,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_11_132434) do
   add_foreign_key "ratings", "spectrums"
   add_foreign_key "roles", "players"
   add_foreign_key "roles", "positions"
+  add_foreign_key "seasons", "leagues"
+  add_foreign_key "seasons", "years"
   add_foreign_key "stadiums", "cities"
   add_foreign_key "states", "countries"
   add_foreign_key "teams", "leagues"
