@@ -2,6 +2,7 @@
 require_relative 'routes/filterable'
 
 Rails.application.routes.draw do
+  resources :years, only: [:index, :show]
   # Load modular route files
   draw :ratings
   draw :locations

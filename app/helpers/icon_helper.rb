@@ -26,6 +26,9 @@ module IconHelper
       spectrums: "fa-solid fa-gauge-high",
       memberships: "fa-solid fa-id-card",
       
+      # Temporal Resources
+      years: "fa-solid fa-calendar-days",
+      
       # Generic UI Icons
       chevron_down: "fa-solid fa-chevron-down",
       search: "fa-solid fa-search",

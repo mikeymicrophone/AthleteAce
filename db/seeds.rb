@@ -1,6 +1,29 @@
 # AthleteAce Database Seed File
 # This file loads data from the athlete_ace_data source directory
 
+# Helper method to create or update a player
+def create_or_update_player(player_data, team)
+  player_record = Player.find_or_initialize_by(
+    first_name: player_data["first_name"],
+    last_name: player_data["last_name"],
+    team: team
+  )
+  
+  player_record.assign_attributes(
+    current_position: player_data["current_position"],
+    birthdate: player_data["birthdate"],
+    debut_year: player_data["debut_year"],
+    draft_year: player_data["draft_year"],
+    active: player_data["active"],
+    nicknames: player_data["nicknames"],
+    bio: player_data["bio"],
+    photo_urls: player_data["photo_urls"]
+  )
+  
+  player_record.save!
+  puts "Created/updated player: #{player_data['first_name']} #{player_data['last_name']}"
+end
+
 class SeedVersion < ActiveSupport::CurrentAttributes
   attribute :seed_version, :string
   attribute :last_seeded_at, :datetime
@@ -8,7 +31,7 @@ class SeedVersion < ActiveSupport::CurrentAttributes
   attribute :seeded_models, :array, default: []
 end
 
-SeedVersion.seeded_models = [Country, State, City, Stadium, Sport, League, Conference, Division, Team, Player, Membership, Position, Role, Spectrum, Quest, Achievement, Highlight]
+SeedVersion.seeded_models = [Country, State, City, Stadium, Sport, League, Conference, Division, Team, Player, Membership, Position, Role, Spectrum, Quest, Achievement, Highlight, Year]
 
 ApplicationRecord.before_create do
   self.seed_version ||= SeedVersion.seed_version
@@ -254,29 +277,6 @@ Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/**/players/*.json')).
   end
 end
 
-# Helper method to create or update a player
-def create_or_update_player(player_data, team)
-  player_record = Player.find_or_initialize_by(
-    first_name: player_data["first_name"],
-    last_name: player_data["last_name"],
-    team: team
-  )
-  
-  player_record.assign_attributes(
-    current_position: player_data["current_position"],
-    birthdate: player_data["birthdate"],
-    debut_year: player_data["debut_year"],
-    draft_year: player_data["draft_year"],
-    active: player_data["active"],
-    nicknames: player_data["nicknames"],
-    bio: player_data["bio"],
-    photo_urls: player_data["photo_urls"]
-  )
-  
-  player_record.save!
-  puts "Created/updated player: #{player_data['first_name']} #{player_data['last_name']}"
-end
-
 # Step 7: Load memberships data
 puts "\n----- Seeding Memberships -----"
 Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/**/memberships.json')).each do |file|
@@ -404,5 +404,15 @@ spectrum_data.each do |attributes|
 end
 
 puts "Created #{Spectrum.count} spectrums"
+
+puts "\n----- Seeding Years -----"
+puts "Creating Years from 1800 to #{Date.current.year}..."
+
+(1800..Date.current.year).each do |year_number|
+  year = Year.find_or_initialize_by(number: year_number)
+  year.save!
+end
+
+puts "Created #{Year.count} years"
 
 puts "\n===== Database Seeding Complete! ====="

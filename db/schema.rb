@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_27_021824) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_11_132434) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -343,6 +343,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_27_021824) do
     t.index ["league_id"], name: "index_teams_on_league_id"
     t.index ["seed_version"], name: "index_teams_on_seed_version"
     t.index ["stadium_id"], name: "index_teams_on_stadium_id"
+  end
+
+  create_table "years", force: :cascade do |t|
+    t.integer "number", null: false, comment: "The year number (e.g., 2024)"
+    t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
+    t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["number"], name: "index_years_on_number", unique: true
+    t.index ["seed_version"], name: "index_years_on_seed_version"
   end
 
   add_foreign_key "cities", "states"

@@ -1,0 +1,26 @@
+<% content_for :title, "Years" %>
+
+<%= tag.div class: "w-full" do %>
+  <%= index_header "Years" %>
+  
+  <%= index_collection "years" do %>
+    <% @years.each do |year| %>
+      <%= index_record year do %>
+        <%= record_info_section do %>
+          <%= record_name link_to(year.name, year, class: "text-blue-600 hover:underline") %>
+          <%= record_metadata "Year #{year.number}" %>
+        <% end %>
+        
+        <%= record_content_section do %>
+          <%= tag.p "Historical year record", class: "text-gray-600 text-sm" %>
+        <% end %>
+        
+        <%= record_actions_section do %>
+          <%= link_to "View Details", year, class: "btn btn-outline text-sm" %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+  
+  <%= pagy_nav @pagy if @pagy.pages > 1 %>
+<% end %>
