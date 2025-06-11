@@ -1,6 +1,7 @@
 class Season < ApplicationRecord
   belongs_to :year
   belongs_to :league
+  has_many :campaigns, dependent: :destroy
   
   validates :year, presence: true
   validates :league, presence: true

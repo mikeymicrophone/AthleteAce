@@ -1,0 +1,15 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Campaigns" %>
+
+<h1>Campaigns</h1>
+
+<div id="campaigns">
+  <% @campaigns.each do |campaign| %>
+    <%= tag.div(id: dom_id(campaign), class: "index-record") do %>
+      <%= display_name_with_lazy_logo campaign.team %>
+      <%= display_name_with_lazy_logo campaign.season %>
+      <%= link_to "View", campaign %>
+    <% end %>
+  <% end %>
+</div>

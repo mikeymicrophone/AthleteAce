@@ -6,6 +6,7 @@ module FilterableAssociations
     conferences: [:league, :country, :sport, :stadium],
     cities: [:state, :country],
     memberships: [:team, :division, :conference, :league, :sport, :country, :state, :city, :stadium],
+    campaigns: [:team, :season, :league, :sport, :country, :state, :city, :stadium],
     stadiums: [:city, :state, :country, :sport],
     sports: [:country],
     teams: [:sport, :league, :conference, :division, :state, :city, :stadium],
@@ -24,6 +25,14 @@ module FilterableAssociations
     teams: {
       country: { joins: [:state] },
       conference: { joins: [memberships: { division: :conference }] }
+    },
+    campaigns: {
+      league: { joins: [:season] },
+      sport: { joins: [season: :league] },
+      country: { joins: [team: { stadium: [:city, :state] }] },
+      state: { joins: [team: { stadium: :state }] },
+      city: { joins: [team: { stadium: :city }] },
+      stadium: { joins: [team: :stadium] }
     }
     # Add more complex join paths as needed
   }.freeze

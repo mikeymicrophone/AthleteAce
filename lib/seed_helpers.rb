@@ -77,19 +77,38 @@ module SeedHelpers
   def self.load_json_files(glob_pattern)
     full_pattern = SEED_DATA_ROOT.join(glob_pattern)
     Dir.glob(full_pattern).filter_map do |file_path|
-      # Skip known problematic files
-      next if file_path.include?('nfl_teams_json.json')
-      
       begin
-        {
-          path: file_path,
-          data: JSON.parse(File.read(file_path))
-        }
+        file_content = File.read(file_path)
+        
+        # Handle multi-team JSON format (multiple JSON objects separated by newlines)
+        if file_content.lines.count > 1 && file_content.lines.all? { |line| line.strip.start_with?('{') }
+          # Parse each line as a separate JSON object
+          file_content.lines.filter_map do |line|
+            next if line.strip.empty?
+            begin
+              {
+                path: file_path,
+                data: JSON.parse(line.strip),
+                multi_team_format: true
+              }
+            rescue JSON::ParserError => e
+              log_and_puts "Warning: Skipping invalid JSON line in #{relative_path(file_path)}: #{e.message}"
+              nil
+            end
+          end
+        else
+          # Single JSON object format
+          {
+            path: file_path,
+            data: JSON.parse(file_content),
+            multi_team_format: false
+          }
+        end
       rescue JSON::ParserError => e
         log_and_puts "Warning: Skipping invalid JSON file #{relative_path(file_path)}: #{e.message}"
         nil
       end
-    end
+    end.flatten.compact
   end
   
   # Get relative path from seed data root for logging

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_11_141424) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_11_165529) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -47,6 +47,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_11_141424) do
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
     t.index ["seed_version"], name: "index_achievements_on_seed_version"
     t.index ["target_type", "target_id"], name: "index_achievements_on_target"
+  end
+
+  create_table "campaigns", force: :cascade do |t|
+    t.bigint "team_id", null: false
+    t.bigint "season_id", null: false
+    t.text "comments", default: [], comment: "Array of comments about the campaign", array: true
+    t.string "seed_version", comment: "Version when this record was seeded"
+    t.datetime "last_seeded_at", comment: "When this record was last seeded"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["season_id"], name: "index_campaigns_on_season_id"
+    t.index ["team_id", "season_id"], name: "index_campaigns_on_team_id_and_season_id", unique: true
+    t.index ["team_id"], name: "index_campaigns_on_team_id"
   end
 
   create_table "cities", force: :cascade do |t|
@@ -374,6 +387,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_11_141424) do
     t.index ["seed_version"], name: "index_years_on_seed_version"
   end
 
+  add_foreign_key "campaigns", "seasons"
+  add_foreign_key "campaigns", "teams"
   add_foreign_key "cities", "states"
   add_foreign_key "conferences", "leagues"
   add_foreign_key "divisions", "conferences"

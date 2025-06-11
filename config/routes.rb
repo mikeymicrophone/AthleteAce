@@ -2,7 +2,10 @@
 require_relative 'routes/filterable'
 
 Rails.application.routes.draw do
-  resources :seasons, only: [:index, :show]
+  resources :campaigns, only: [:index, :show]
+  resources :seasons, only: [:index, :show] do
+    resources :campaigns, only: [:index, :show]
+  end
   resources :years, only: [:index, :show]
   # Load modular route files
   draw :ratings
@@ -63,6 +66,7 @@ Rails.application.routes.draw do
     resources :players, shallow: true
     resources :ratings, only: [:new, :create]
     resources :memberships, only: [:new, :create]
+    resources :campaigns, only: [:index, :show]
     get 'strength/game_attempts', to: 'strength#team_game_attempts'
   end
   resources :countries do
