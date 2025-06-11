@@ -48,3 +48,5 @@ But, it's not necessary to repeat the @apply directive unless comments are being
 This will help me learn what more of the tailwind keywords are for.
 When using keywords that are a bit less common, it's ok to begin with a brief comment to explain what the keyword (group) does.
 It's also ok to propose two options, with one commented out so that I can try both.
+
+CSS colors should be declared using CSS variables.
