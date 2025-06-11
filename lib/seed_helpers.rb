@@ -76,11 +76,19 @@ module SeedHelpers
   # Load JSON files matching glob pattern
   def self.load_json_files(glob_pattern)
     full_pattern = SEED_DATA_ROOT.join(glob_pattern)
-    Dir.glob(full_pattern).map do |file_path|
-      {
-        path: file_path,
-        data: JSON.parse(File.read(file_path))
-      }
+    Dir.glob(full_pattern).filter_map do |file_path|
+      # Skip known problematic files
+      next if file_path.include?('nfl_teams_json.json')
+      
+      begin
+        {
+          path: file_path,
+          data: JSON.parse(File.read(file_path))
+        }
+      rescue JSON::ParserError => e
+        log_and_puts "Warning: Skipping invalid JSON file #{relative_path(file_path)}: #{e.message}"
+        nil
+      end
     end
   end
   

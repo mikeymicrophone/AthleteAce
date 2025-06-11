@@ -44,6 +44,8 @@ glob_patterns = {
   memberships: ['sports/**/memberships.json'],
   positions: ['sports/positions/*.json'],
   spectrums: ['ratings/spectrums.json'],
+  quests: ['quests/*.json'],
+  achievements: ['achievements/*.json'],
   seasons: ['sports/**/seasons.json']
 }
 
@@ -56,15 +58,16 @@ begin
   SeedCountries.run(glob_patterns)
   SeedFederations.run(glob_patterns)
   SeedStates.run(glob_patterns)
-  # SeedCities.run(glob_patterns)
-  # SeedStadiums.run(glob_patterns)
-  # SeedLeagues.run(glob_patterns)
-  # SeedConferences.run(glob_patterns)
-  # SeedTeams.run(glob_patterns)
-  # SeedPlayers.run(glob_patterns)
-  # SeedMemberships.run(glob_patterns)
-  # SeedPositions.run(glob_patterns)
+  SeedCities.run(glob_patterns)
+  SeedStadiums.run(glob_patterns)
+  SeedLeagues.run(glob_patterns)
+  SeedConferences.run(glob_patterns)
+  SeedTeams.run(glob_patterns)
+  SeedPlayers.run(glob_patterns)
+  SeedMemberships.run(glob_patterns)
+  SeedPositions.run(glob_patterns)
   SeedSpectrums.run(glob_patterns)
+  SeedQuests.run(glob_patterns)
   SeedYears.run(glob_patterns)
   SeedSeasons.run(glob_patterns)
   
