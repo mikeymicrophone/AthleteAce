@@ -6,21 +6,12 @@
   <%= index_collection "years" do %>
     <% @years.each do |year| %>
       <%= index_record year do %>
-        <%= record_info_section do %>
-          <%= record_name link_to(year.name, year, class: "text-blue-600 hover:underline") %>
-          <%= record_metadata "Year #{year.number}" %>
-        <% end %>
-        
-        <%= record_content_section do %>
-          <%= tag.p "Historical year record", class: "text-gray-600 text-sm" %>
-        <% end %>
-        
-        <%= record_actions_section do %>
-          <%= link_to "View Details", year, class: "btn btn-outline text-sm" %>
+        <%= link_to year do %>
+          <%= tag.header year.name, class: "year-display text-lg font-semibold" %>
         <% end %>
       <% end %>
     <% end %>
   <% end %>
   
-  <%= pagy_nav @pagy if @pagy.pages > 1 %>
+  <%== pagy_nav @pagy if @pagy.pages > 1 %>
 <% end %>
