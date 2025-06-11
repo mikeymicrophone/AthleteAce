@@ -1,2 +1,0 @@
-# Chicago Bulls Players
-players = []

@@ -1,2 +1,0 @@
-# Detroit Pistons Players
-players = []

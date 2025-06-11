@@ -1,2 +1,0 @@
-# Toronto Raptors Players
-players = []

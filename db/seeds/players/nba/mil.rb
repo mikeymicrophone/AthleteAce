@@ -1,2 +1,0 @@
-# Milwaukee Bucks Players
-players = []
