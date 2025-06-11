@@ -46,7 +46,9 @@ glob_patterns = {
   spectrums: ['ratings/spectrums.json'],
   quests: ['quests/*.json'],
   achievements: ['achievements/*.json'],
-  seasons: ['sports/**/seasons.json']
+  seasons: ['sports/**/seasons.json'],
+  expansions: ['sports/**/expansions.json'],
+  transitions: ['sports/**/transitions.json']
 }
 
 # Clean up legacy files
@@ -70,7 +72,7 @@ begin
   SeedQuests.run(glob_patterns[:quests])
   SeedYears.run(glob_patterns[:years] || [])
   SeedSeasons.run(glob_patterns[:seasons])
-  SeedCampaigns.run([])  # Generate from existing data, no JSON files needed
+  SeedCampaigns.run(glob_patterns[:expansions] + glob_patterns[:transitions])  # Process expansion and transition data
   
   SeedHelpers.log_and_puts "\n===== Database Seeding Complete! ====="
 rescue => e
