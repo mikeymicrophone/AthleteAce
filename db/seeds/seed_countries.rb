@@ -4,7 +4,7 @@ class SeedCountries
   def self.run(glob_patterns)
     SeedHelpers.log_and_puts "\n----- Seeding Countries -----"
     
-    glob_patterns[:countries].each do |pattern|
+    glob_patterns.each do |pattern|
       SeedHelpers.load_json_files(pattern).each do |file_data|
         SeedHelpers.log_and_puts "Loading countries from #{SeedHelpers.relative_path(file_data[:path])}"
         

@@ -54,22 +54,23 @@ SeedHelpers.cleanup_legacy_files
 
 # Run seed steps in dependency order
 begin
-  SeedSports.run(glob_patterns)
-  SeedCountries.run(glob_patterns)
-  SeedFederations.run(glob_patterns)
-  SeedStates.run(glob_patterns)
-  SeedCities.run(glob_patterns)
-  SeedStadiums.run(glob_patterns)
-  SeedLeagues.run(glob_patterns)
-  SeedConferences.run(glob_patterns)
-  SeedTeams.run(glob_patterns)
-  SeedPlayers.run(glob_patterns)
-  SeedMemberships.run(glob_patterns)
-  SeedPositions.run(glob_patterns)
-  SeedSpectrums.run(glob_patterns)
-  SeedQuests.run(glob_patterns)
-  SeedYears.run(glob_patterns)
-  SeedSeasons.run(glob_patterns)
+  SeedSports.run(glob_patterns[:sports])
+  SeedCountries.run(glob_patterns[:countries])
+  SeedFederations.run(glob_patterns[:federations])
+  SeedStates.run(glob_patterns[:states])
+  SeedCities.run(glob_patterns[:cities])
+  SeedStadiums.run(glob_patterns[:stadiums])
+  SeedLeagues.run(glob_patterns[:leagues])
+  SeedConferences.run(glob_patterns[:conferences])
+  SeedTeams.run(glob_patterns[:teams])
+  SeedPlayers.run(glob_patterns[:players])
+  SeedMemberships.run(glob_patterns[:memberships])
+  SeedPositions.run(glob_patterns[:positions])
+  SeedSpectrums.run(glob_patterns[:spectrums])
+  SeedQuests.run(glob_patterns[:quests])
+  SeedYears.run(glob_patterns[:years] || [])
+  SeedSeasons.run(glob_patterns[:seasons])
+  SeedCampaigns.run([])  # Generate from existing data, no JSON files needed
   
   SeedHelpers.log_and_puts "\n===== Database Seeding Complete! ====="
 rescue => e

@@ -5,8 +5,8 @@ class SeedQuests
     SeedHelpers.log_and_puts "\n----- Seeding Quests and Achievements -----"
     
     # Check if we have quest patterns
-    if glob_patterns[:quests]
-      glob_patterns[:quests].each do |pattern|
+    if glob_patterns && !glob_patterns.empty?
+      glob_patterns.each do |pattern|
         SeedHelpers.load_json_files(pattern).each do |file_data|
           SeedHelpers.log_and_puts "Loading quests from #{SeedHelpers.relative_path(file_data[:path])}"
           
@@ -24,9 +24,10 @@ class SeedQuests
       end
     end
     
-    # Check if we have achievement patterns
-    if glob_patterns[:achievements]
-      glob_patterns[:achievements].each do |pattern|
+    # Check if we have achievement patterns - for now, skip this section
+    # since we're now receiving a simple array instead of a hash
+    if false # glob_patterns[:achievements]
+      # glob_patterns[:achievements].each do |pattern|
         SeedHelpers.load_json_files(pattern).each do |file_data|
           SeedHelpers.log_and_puts "Loading achievements from #{SeedHelpers.relative_path(file_data[:path])}"
           
