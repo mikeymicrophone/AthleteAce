@@ -16,6 +16,7 @@ Then there will be more customized interfaces.
 Since helper methods need access to instance variables, there are three ways to provide them.
 @variables, method parameters, and hash elements.
 Choose the most appropriate way for each case.
+An options hash does not need to be handled by our helpers until we need to pass multiple options to a single helper.
 
 dom_id(team, :quiz_link_for) rather than dom_id(team, :quiz_link)
 

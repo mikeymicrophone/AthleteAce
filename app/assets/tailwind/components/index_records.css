@@ -93,29 +93,3 @@
   @apply text-xs;
   color: var(--index-record-meta-text);
 }
-
-/* Future expansion areas - commented out for now */
-/*
-.record-image {
-  @apply w-12 h-12 rounded-full object-cover;
-}
-
-.record-status-indicator {
-  @apply w-3 h-3 rounded-full;
-}
-
-.record-priority-high {
-  --index-record-border: #ef4444;
-  --index-record-hover-bg: #fef2f2;
-}
-
-.record-priority-medium {
-  --index-record-border: #f59e0b;
-  --index-record-hover-bg: #fffbeb;
-}
-
-.record-priority-low {
-  --index-record-border: #10b981;
-  --index-record-hover-bg: #f0fdf4;
-}
-*/
