@@ -106,6 +106,9 @@
               <%= link_to seasons_path, class: "nav-dropdown-item #{current_page?(seasons_path) ? 'active' : ''}" do %>
                 <i class="<%= icon_for_resource(:seasons) %>"></i> Seasons
               <% end %>
+              <%= link_to contests_path, class: "nav-dropdown-item #{current_page?(contests_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:contests) %>"></i> Contests
+              <% end %>
             </div>
           </div>
         </div>

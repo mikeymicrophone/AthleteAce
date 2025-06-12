@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_11_165529) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_12_142610) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -84,6 +84,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_11_165529) do
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
     t.index ["league_id"], name: "index_conferences_on_league_id"
     t.index ["seed_version"], name: "index_conferences_on_seed_version"
+  end
+
+  create_table "contests", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.string "context_type", null: false
+    t.bigint "context_id", null: false
+    t.text "contestant_ids"
+    t.date "begin_date"
+    t.date "end_date"
+    t.integer "champion_id"
+    t.text "comments"
+    t.json "details"
+    t.string "seed_version"
+    t.datetime "last_seeded_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["context_type", "context_id"], name: "index_contests_on_context"
   end
 
   create_table "countries", force: :cascade do |t|

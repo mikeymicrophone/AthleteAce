@@ -3,6 +3,7 @@ require_relative 'routes/filterable'
 
 Rails.application.routes.draw do
   resources :campaigns, only: [:index, :show]
+  resources :contests, only: [:index, :show]
   resources :seasons, only: [:index, :show] do
     resources :campaigns, only: [:index, :show]
   end
