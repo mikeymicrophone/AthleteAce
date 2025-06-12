@@ -12,7 +12,7 @@ class SeedVersion < ActiveSupport::CurrentAttributes
   attribute :seeded_models, :array, default: []
 end
 
-SeedVersion.seeded_models = [Country, State, City, Stadium, Sport, League, Conference, Division, Team, Player, Membership, Position, Role, Spectrum, Quest, Achievement, Highlight, Year, Season]
+SeedVersion.seeded_models = [Country, State, City, Stadium, Sport, League, Conference, Division, Team, Player, Membership, Position, Role, Spectrum, Quest, Achievement, Highlight, Year, Season, Contest]
 
 ApplicationRecord.before_create do
   self.seed_version ||= SeedVersion.seed_version
@@ -47,6 +47,7 @@ glob_patterns = {
   quests: ['quests/*.json'],
   achievements: ['achievements/*.json'],
   seasons: ['sports/**/seasons.json'],
+  contests: ['sports/**/contests/*.json'],
   expansions: ['sports/**/expansions.json'],
   transitions: ['sports/**/transitions.json']
 }
@@ -72,6 +73,7 @@ begin
   SeedQuests.run(glob_patterns[:quests])
   SeedYears.run(glob_patterns[:years] || [])
   SeedSeasons.run(glob_patterns[:seasons])
+  SeedContests.run(glob_patterns[:contests])
   SeedCampaigns.run(glob_patterns[:expansions] + glob_patterns[:transitions])  # Process expansion and transition data
   
   SeedHelpers.log_and_puts "\n===== Database Seeding Complete! ====="

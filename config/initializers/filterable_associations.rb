@@ -7,12 +7,16 @@ module FilterableAssociations
     cities: [:state, :country],
     memberships: [:team, :division, :conference, :league, :sport, :country, :state, :city, :stadium],
     campaigns: [:team, :season, :league, :sport, :country, :state, :city, :stadium],
+    contests: [:season, :league, :conference, :division, :sport, :country, :state, :city, :stadium],
     stadiums: [:city, :state, :country, :sport],
     sports: [:country],
     teams: [:sport, :league, :conference, :division, :state, :city, :stadium],
-    countries: [:sport],
-    leagues: [:sport, :country],
-    states: [:country, :sport]
+    countries: [:sport, :contest],
+    leagues: [:sport, :country, :contest],
+    states: [:country, :sport],
+    seasons: [:contest],
+    conferences: [:contest],
+    divisions: [:contest]
   }.freeze
 
   # Define join paths for more complex associations that require intermediates
@@ -33,6 +37,14 @@ module FilterableAssociations
       state: { joins: [team: { stadium: :state }] },
       city: { joins: [team: { stadium: :city }] },
       stadium: { joins: [team: :stadium] }
+    },
+    contests: {
+      league: { joins: [:season] },
+      sport: { joins: [season: :league] },
+      country: { joins: [season: { league: :country }] },
+      state: { joins: [season: { league: :country }] },
+      city: { joins: [season: { league: :country }] },
+      stadium: { joins: [season: { league: :country }] }
     }
     # Add more complex join paths as needed
   }.freeze

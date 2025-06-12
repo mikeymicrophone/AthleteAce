@@ -95,6 +95,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_12_142610) do
     t.date "begin_date"
     t.date "end_date"
     t.integer "champion_id"
+    t.bigint "season_id"
     t.text "comments"
     t.json "details"
     t.string "seed_version"
@@ -102,6 +103,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_12_142610) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["context_type", "context_id"], name: "index_contests_on_context"
+    t.index ["season_id"], name: "index_contests_on_season_id"
   end
 
   create_table "countries", force: :cascade do |t|
@@ -409,6 +411,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_12_142610) do
   add_foreign_key "campaigns", "teams"
   add_foreign_key "cities", "states"
   add_foreign_key "conferences", "leagues"
+  add_foreign_key "contests", "seasons"
   add_foreign_key "divisions", "conferences"
   add_foreign_key "game_attempts", "aces"
   add_foreign_key "goals", "aces"

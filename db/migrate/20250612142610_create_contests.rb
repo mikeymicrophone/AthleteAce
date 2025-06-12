@@ -8,6 +8,7 @@ class CreateContests < ActiveRecord::Migration[8.0]
       t.date :begin_date
       t.date :end_date
       t.integer :champion_id
+      t.references :season, foreign_key: true, null: true
       t.text :comments
       t.json :details
       t.string :seed_version

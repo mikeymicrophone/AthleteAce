@@ -9,6 +9,7 @@ class Country < ApplicationRecord
   has_many :conferences, through: :leagues
   has_many :divisions, through: :leagues
   has_many :memberships, through: :divisions
+  has_many :campaigns, through: :teams
 
   def self.ransackable_attributes auth_object = nil
     column_names

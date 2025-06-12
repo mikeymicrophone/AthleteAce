@@ -9,7 +9,9 @@ class State < ApplicationRecord
   has_many :conferences, through: :divisions
   has_many :leagues, through: :conferences
   has_many :sports, through: :leagues
-  
+  has_many :campaigns, through: :teams
+  has_many :contests, through: :teams
+
   # Allow all attributes to be searchable with Ransack
   def self.ransackable_attributes auth_object = nil
     column_names
