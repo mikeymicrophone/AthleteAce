@@ -6,6 +6,9 @@ class Campaign < ApplicationRecord
   has_one :sport, through: :league
   has_many :contestants, dependent: :destroy
   has_many :contests, through: :contestants
+  has_many :activations, dependent: :destroy
+  has_many :contracts, through: :activations
+  has_many :activated_players, through: :contracts, source: :player
   
   validates :team_id, presence: true
   validates :season_id, presence: true

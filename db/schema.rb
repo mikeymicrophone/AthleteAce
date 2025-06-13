@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_13_032426) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_13_162156) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -48,6 +48,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_13_032426) do
     t.json "details"
     t.index ["seed_version"], name: "index_achievements_on_seed_version"
     t.index ["target_type", "target_id"], name: "index_achievements_on_target"
+  end
+
+  create_table "activations", force: :cascade do |t|
+    t.bigint "contract_id", null: false
+    t.bigint "campaign_id", null: false
+    t.date "start_date"
+    t.date "end_date"
+    t.json "details"
+    t.string "seed_version"
+    t.datetime "last_seeded_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["campaign_id"], name: "index_activations_on_campaign_id"
+    t.index ["contract_id"], name: "index_activations_on_contract_id"
   end
 
   create_table "campaigns", force: :cascade do |t|
@@ -120,6 +134,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_13_032426) do
     t.datetime "updated_at", null: false
     t.index ["context_type", "context_id"], name: "index_contests_on_context"
     t.index ["season_id"], name: "index_contests_on_season_id"
+  end
+
+  create_table "contracts", force: :cascade do |t|
+    t.bigint "player_id", null: false
+    t.bigint "team_id", null: false
+    t.date "start_date"
+    t.date "end_date"
+    t.decimal "total_dollar_value"
+    t.json "details"
+    t.string "seed_version"
+    t.datetime "last_seeded_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["player_id"], name: "index_contracts_on_player_id"
+    t.index ["team_id"], name: "index_contracts_on_team_id"
   end
 
   create_table "countries", force: :cascade do |t|
@@ -424,6 +453,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_13_032426) do
     t.index ["seed_version"], name: "index_years_on_seed_version"
   end
 
+  add_foreign_key "activations", "campaigns"
+  add_foreign_key "activations", "contracts"
   add_foreign_key "campaigns", "seasons"
   add_foreign_key "campaigns", "teams"
   add_foreign_key "cities", "states"
@@ -431,6 +462,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_13_032426) do
   add_foreign_key "contestants", "campaigns"
   add_foreign_key "contestants", "contests"
   add_foreign_key "contests", "seasons"
+  add_foreign_key "contracts", "players"
+  add_foreign_key "contracts", "teams"
   add_foreign_key "divisions", "conferences"
   add_foreign_key "game_attempts", "aces"
   add_foreign_key "goals", "aces"

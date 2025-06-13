@@ -4,6 +4,8 @@ class Team < ApplicationRecord
   belongs_to :league
   belongs_to :stadium, optional: true
   has_many :players
+  has_many :contracts, dependent: :destroy
+  has_many :contract_players, through: :contracts, source: :player
   has_many :memberships, dependent: :destroy
   has_many :campaigns, dependent: :destroy
   has_one :active_membership, -> { where(active: true) }, class_name: 'Membership'
