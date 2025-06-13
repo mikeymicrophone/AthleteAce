@@ -42,20 +42,19 @@ class SeedContests
           # Ensure details is a hash if present  
           attributes['details'] ||= {}
           
-          # Determine contestant_ids
-          raw_contestants = contest_data['contestant_ids'] || contest_data['contestant_names']
-          contestants = if raw_contestants.to_s.downcase == 'all'
-                          contestant_ids_for_context(context)
-                        else
-                          team_ids_from_mixed(raw_contestants)
-                        end
-          attributes['contestant_ids'] = contestants
+          # Remove contestant and champion name data from attributes since we'll handle separately
+          attributes = attributes.except('contestant_ids', 'contestant_names', 'champion_name')
           
-          SeedHelpers.find_or_create_with_changes(
+          contest = SeedHelpers.find_or_create_with_changes(
             Contest,
             { name: contest_data['name'], context: context },
             attributes.merge('context' => context, 'season' => season)
           )
+          
+          # Handle contestants via the new Contestant join table
+          if contest_data['contestant_ids'] || contest_data['contestant_names']
+            create_contestants_for_contest(contest, contest_data, context, season)
+          end
         end
       end
     end
@@ -105,10 +104,39 @@ class SeedContests
   end
   
   def self.team_id_by_name(name)
-    Team.find_by(name: name)&.id
+    # Try finding by mascot first, then by territory
+    team = Team.find_by(mascot: name) || Team.find_by(territory: name)
+    team&.id
   end
   
   def self.team_ids_from_mixed(values)
     Array(values).map { |v| numeric_id_or_team_name(v) }.compact
+  end
+  
+  def self.create_contestants_for_contest(contest, contest_data, context, season)
+    # Clear existing contestants for this contest
+    contest.contestants.destroy_all
+    
+    # Determine which teams should participate
+    raw_contestants = contest_data['contestant_ids'] || contest_data['contestant_names']
+    team_ids = if raw_contestants.to_s.downcase == 'all'
+                 contestant_ids_for_context(context)
+               else
+                 team_ids_from_mixed(raw_contestants)
+               end
+    
+    # Create contestants by finding or creating campaigns for each team
+    team_ids.each do |team_id|
+      team = Team.find_by(id: team_id)
+      next unless team && season
+      
+      # Find or create campaign for this team in this season
+      campaign = Campaign.find_or_create_by(team: team, season: season)
+      
+      # Create contestant entry
+      Contestant.find_or_create_by(contest: contest, campaign: campaign)
+    end
+    
+    SeedHelpers.log_and_puts "Created #{contest.contestants.count} contestants for contest: #{contest.name}"
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_12_142610) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_13_032426) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -45,6 +45,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_12_142610) do
     t.datetime "updated_at", null: false
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.json "details"
     t.index ["seed_version"], name: "index_achievements_on_seed_version"
     t.index ["target_type", "target_id"], name: "index_achievements_on_target"
   end
@@ -86,12 +87,27 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_12_142610) do
     t.index ["seed_version"], name: "index_conferences_on_seed_version"
   end
 
+  create_table "contestants", force: :cascade do |t|
+    t.bigint "contest_id", null: false
+    t.bigint "campaign_id", null: false
+    t.integer "placing"
+    t.integer "wins"
+    t.integer "losses"
+    t.json "tiebreakers"
+    t.string "seed_version"
+    t.datetime "last_seeded_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["campaign_id"], name: "index_contestants_on_campaign_id"
+    t.index ["contest_id", "campaign_id"], name: "index_contestants_on_contest_id_and_campaign_id", unique: true
+    t.index ["contest_id"], name: "index_contestants_on_contest_id"
+  end
+
   create_table "contests", force: :cascade do |t|
     t.string "name"
     t.text "description"
     t.string "context_type", null: false
     t.bigint "context_id", null: false
-    t.text "contestant_ids"
     t.date "begin_date"
     t.date "end_date"
     t.integer "champion_id"
@@ -270,6 +286,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_12_142610) do
     t.datetime "updated_at", null: false
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.json "details"
     t.index ["seed_version"], name: "index_quests_on_seed_version"
   end
 
@@ -411,6 +428,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_12_142610) do
   add_foreign_key "campaigns", "teams"
   add_foreign_key "cities", "states"
   add_foreign_key "conferences", "leagues"
+  add_foreign_key "contestants", "campaigns"
+  add_foreign_key "contestants", "contests"
   add_foreign_key "contests", "seasons"
   add_foreign_key "divisions", "conferences"
   add_foreign_key "game_attempts", "aces"

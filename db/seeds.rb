@@ -12,7 +12,7 @@ class SeedVersion < ActiveSupport::CurrentAttributes
   attribute :seeded_models, :array, default: []
 end
 
-SeedVersion.seeded_models = [Country, State, City, Stadium, Sport, League, Conference, Division, Team, Player, Membership, Position, Role, Spectrum, Quest, Achievement, Highlight, Year, Season, Contest]
+SeedVersion.seeded_models = [Country, State, City, Stadium, Sport, League, Conference, Division, Team, Player, Membership, Position, Role, Spectrum, Quest, Achievement, Highlight, Year, Season, Contest, Contestant]
 
 ApplicationRecord.before_create do
   self.seed_version ||= SeedVersion.seed_version

@@ -5,6 +5,9 @@ class Division < ApplicationRecord
   has_many :memberships, dependent: :destroy
   has_many :teams, through: :memberships
   has_one :league, through: :conference
+  has_many :campaigns, through: :teams
+  has_many :contestants, through: :campaigns
+  has_many :contests, through: :contestants
   
   validates :name, presence: true
   

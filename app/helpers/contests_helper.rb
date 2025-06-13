@@ -63,6 +63,9 @@ module ContestsHelper
         end.to_s.html_safe +
         if contest.details.present?
           contest_details_section(contest)
+        end.to_s.html_safe +
+        if contest.contestants.any?
+          contest_contestants_section(contest)
         end.to_s.html_safe
       end
     end
@@ -134,6 +137,69 @@ module ContestsHelper
       tag.div(class: "details-content") do
         tag.pre(JSON.pretty_generate(contest.details), class: "details-json")
       end
+    end
+  end
+  
+  def contest_contestants_section(contest)
+    tag.div class: "contestants-section" do
+      tag.h3("Contestants", class: "contestants-title") +
+      if contest.final_standings.any?
+        contest_standings_table(contest)
+      else
+        contest_participants_list(contest)
+      end
+    end
+  end
+  
+  def contest_standings_table(contest)
+    tag.table(class: "standings-table") do
+      tag.thead do
+        tag.tr do
+          tag.th("Place") +
+          tag.th("Team") +
+          tag.th("Wins") +
+          tag.th("Losses") +
+          tag.th("Record")
+        end
+      end +
+      tag.tbody do
+        contest.final_standings.map do |contestant|
+          tag.tr(class: contestant_row_class(contestant)) do
+            tag.td(contestant.placing || "—") +
+            tag.td(contestant.campaign.team.mascot) +
+            tag.td(contestant.wins || "—") +
+            tag.td(contestant.losses || "—") +
+            tag.td(contestant_record(contestant))
+          end
+        end.join.html_safe
+      end
+    end
+  end
+  
+  def contest_participants_list(contest)
+    tag.ul(class: "participants-list") do
+      contest.contestants.includes(campaign: :team).map do |contestant|
+        tag.li(contestant.campaign.team.mascot, class: "participant-item")
+      end.join.html_safe
+    end
+  end
+  
+  def contestant_row_class(contestant)
+    case contestant.placing
+    when 1
+      "winner"
+    when 2
+      "runner-up"
+    else
+      "participant"
+    end
+  end
+  
+  def contestant_record(contestant)
+    if contestant.wins && contestant.losses
+      "#{contestant.wins}-#{contestant.losses}"
+    else
+      "—"
     end
   end
 end
