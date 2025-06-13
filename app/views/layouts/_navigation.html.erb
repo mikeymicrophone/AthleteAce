@@ -40,6 +40,12 @@
               <%= link_to memberships_path, class: "nav-dropdown-item #{current_page?(memberships_path) ? 'active' : ''}" do %>
                 <i class="<%= icon_for_resource(:memberships) %>"></i> Memberships
               <% end %>
+              <%= link_to contracts_path, class: "nav-dropdown-item #{current_page?(contracts_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:contracts) %>"></i> Contracts
+              <% end %>
+              <%= link_to activations_path, class: "nav-dropdown-item #{current_page?(activations_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:activations) %>"></i> Activations
+              <% end %>
             </div>
           </div>
           

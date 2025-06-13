@@ -8,6 +8,10 @@ class City < ApplicationRecord
   has_many :conferences, through: :divisions
   has_many :leagues, through: :conferences
   has_many :sports, through: :leagues
+  has_many :campaigns, through: :teams
+  has_many :contests, through: :campaigns
+  has_many :contracts, through: :teams
+  has_many :activations, through: :contracts
 
   delegate :country, to: :state
   

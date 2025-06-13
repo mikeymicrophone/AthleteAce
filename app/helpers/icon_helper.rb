@@ -30,6 +30,10 @@ module IconHelper
       years: "fa-solid fa-calendar-days",
       seasons: "fa-solid fa-calendar-alt",
       
+      # Contracts & Activations
+      contracts: "fa-solid fa-file-contract",
+      activations: "fa-solid fa-play-circle",
+      
       # Generic UI Icons
       chevron_down: "fa-solid fa-chevron-down",
       search: "fa-solid fa-search",
