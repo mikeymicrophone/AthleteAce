@@ -61,7 +61,7 @@ class SeedPlayers
     sport_index = path_parts.find_index('sports')
     return nil unless sport_index && sport_index + 1 < path_parts.length
     
-    sport_name = path_parts[sport_index + 1]
+    sport_name = path_parts[sport_index + 1].capitalize
     Sport.find_by(name: sport_name)
   end
   
