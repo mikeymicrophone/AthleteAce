@@ -1,0 +1,88 @@
+# UGC Backup Metadata Template
+# Automatically generated during backup process
+
+backup_timestamp: "2024-12-15T14:30:22Z"
+rails_env: "development"
+seed_version: "003.2024.12.15"
+
+# Record counts at time of backup
+total_records:
+  aces: 3
+  spectrums: 5
+  ratings: 47
+  quests: 2
+  achievements: 8
+  highlights: 6
+  goals: 4
+  game_attempts: 152
+
+# Backup file categories included
+backup_categories:
+  - "aces_and_ratings"
+  - "quest_system" 
+  - "game_attempts"
+
+# Backup file information
+backup_files:
+  aces_and_ratings.yml:
+    size_bytes: 12450
+    record_counts:
+      aces: 3
+      spectrums: 5
+      ratings: 47
+  
+  quest_system.yml:
+    size_bytes: 8930
+    record_counts:
+      quests: 2
+      achievements: 8
+      highlights: 6
+      goals: 4
+  
+  game_attempts.yml:
+    size_bytes: 45680
+    record_counts:
+      game_attempts: 152
+
+# Configuration used during backup
+backup_configuration:
+  preserve_timestamps: true
+  include_identifiers: true
+  include_context_identifiers: true
+  backup_game_attempts: true
+
+# Core model counts (for reference - these will be reset)
+core_model_counts:
+  countries: 2
+  states: 65
+  cities: 150
+  stadiums: 75
+  sports: 8
+  leagues: 25
+  conferences: 12
+  divisions: 45
+  teams: 120
+  players: 2890
+  memberships: 120
+  positions: 35
+  roles: 3240
+  years: 25
+  seasons: 100
+  campaigns: 1200
+  contests: 50
+  contestants: 2400
+  contracts: 8
+  activations: 12
+
+# Warnings or notes from backup process
+backup_notes:
+  - "All ratings successfully exported with target identifiers"
+  - "2 quests with nested structure preserved"
+  - "Game attempts include all polymorphic entity identifiers"
+  - "No circular dependencies detected in quest system"
+
+# Validation checksums (optional - for data integrity)
+checksums:
+  aces_and_ratings.yml: "sha256:abc123def456..."
+  quest_system.yml: "sha256:def456ghi789..."
+  game_attempts.yml: "sha256:ghi789jkl012..."
