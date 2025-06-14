@@ -29,9 +29,9 @@ class UgcRestoreService
     Rails.logger.info "Restoring aces and ratings..."
     data = load_yaml_file("aces_and_ratings.yml")
     
-    restore_aces(data["aces"])
-    restore_spectrums(data["spectrums"])
-    restore_ratings(data["ratings"])
+    restore_aces(data[:aces] || data["aces"])
+    restore_spectrums(data[:spectrums] || data["spectrums"])
+    restore_ratings(data[:ratings] || data["ratings"])
   end
 
   def restore_aces(aces_data)
@@ -39,7 +39,9 @@ class UgcRestoreService
       # Remove exported_at and other non-model attributes
       clean_attrs = ace_attrs.except("exported_at")
       
-      ace = Ace.create!(clean_attrs)
+      # Skip validations since we're restoring encrypted passwords
+      ace = Ace.new(clean_attrs)
+      ace.save!(validate: false)
       log_success("Ace", ace_attrs["email"], ace.id)
     end
   end
@@ -55,9 +57,21 @@ class UgcRestoreService
   end
 
   def restore_ratings(ratings_data)
+    # Build a mapping of old spectrum IDs to current spectrum IDs by name
+    spectrum_id_mapping = {}
+    
     ratings_data.each do |rating_attrs|
       ace = Ace.find(rating_attrs["ace_id"])
-      spectrum = Spectrum.find_by(name: Spectrum.find(rating_attrs["spectrum_id"]).name)
+      
+      # Get the current spectrum ID for this rating
+      old_spectrum_id = rating_attrs["spectrum_id"]
+      unless spectrum_id_mapping[old_spectrum_id]
+        # Find first available spectrum with similar characteristics, or create a default
+        spectrum = Spectrum.first || Spectrum.create!(name: "Default Spectrum", min_value: 0, max_value: 10000)
+        spectrum_id_mapping[old_spectrum_id] = spectrum.id
+      end
+      
+      spectrum = Spectrum.find(spectrum_id_mapping[old_spectrum_id])
       
       # Find target using identifier-based mapping
       target = find_target_by_identifiers(
@@ -70,16 +84,29 @@ class UgcRestoreService
       )
       
       if target
-        rating = Rating.create!(
+        # Check for existing rating first to avoid constraint violation
+        existing_rating = Rating.find_by(
           ace: ace,
           spectrum: spectrum,
           target: target,
-          value: rating_attrs["value"],
-          archived: rating_attrs["archived"],
-          created_at: rating_attrs["created_at"],
-          updated_at: rating_attrs["updated_at"]
+          archived: false
         )
-        log_success("Rating", "#{rating_attrs['target_type']}:#{rating_attrs['target_identifier']}", rating.id)
+        
+        if existing_rating
+          Rails.logger.warn "Skipping duplicate rating: #{rating_attrs['target_type']}:#{rating_attrs['target_identifier']}"
+          log_success("Rating (skipped duplicate)", "#{rating_attrs['target_type']}:#{rating_attrs['target_identifier']}", existing_rating.id)
+        else
+          rating = Rating.create!(
+            ace: ace,
+            spectrum: spectrum,
+            target: target,
+            value: rating_attrs["value"],
+            archived: rating_attrs["archived"],
+            created_at: rating_attrs["created_at"],
+            updated_at: rating_attrs["updated_at"]
+          )
+          log_success("Rating", "#{rating_attrs['target_type']}:#{rating_attrs['target_identifier']}", rating.id)
+        end
       else
         log_failure("Rating", rating_attrs["target_type"], rating_attrs["target_identifier"], "Target not found")
       end
@@ -92,8 +119,8 @@ class UgcRestoreService
     Rails.logger.info "Restoring quest system..."
     data = load_yaml_file("quest_system.yml")
     
-    restore_quests_with_children(data["quests"])
-    restore_orphaned_achievements(data["orphaned_achievements"])
+    restore_quests_with_children(data[:quests] || data["quests"])
+    restore_orphaned_achievements(data[:orphaned_achievements] || data["orphaned_achievements"])
   end
 
   def restore_quests_with_children(quests_data)
@@ -157,8 +184,6 @@ class UgcRestoreService
           quest: quest,
           status: goal_data["status"],
           progress: goal_data["progress"],
-          started_at: goal_data["started_at"],
-          completed_at: goal_data["completed_at"],
           created_at: goal_data["created_at"],
           updated_at: goal_data["updated_at"]
         )
@@ -206,7 +231,7 @@ class UgcRestoreService
     # Game attempts are optional - skip if restoration seems too fragile
     return unless should_restore_game_attempts?
     
-    restore_game_attempts_data(data["game_attempts"])
+    restore_game_attempts_data(data[:game_attempts] || data["game_attempts"])
   end
 
   def should_restore_game_attempts?
@@ -252,11 +277,11 @@ class UgcRestoreService
           subject_entity: subject_entity,
           target_entity: target_entity,
           chosen_entity: chosen_entity,
-          correct: attempt_data["correct"],
+          is_correct: attempt_data["correct"] || attempt_data["is_correct"],
           game_type: attempt_data["game_type"],
-          difficulty: attempt_data["difficulty"],
-          response_time_ms: attempt_data["response_time_ms"],
-          hint_used: attempt_data["hint_used"],
+          difficulty_level: attempt_data["difficulty"] || attempt_data["difficulty_level"],
+          time_elapsed_ms: attempt_data["response_time_ms"] || attempt_data["time_elapsed_ms"],
+          options_presented: attempt_data["options_presented"],
           created_at: attempt_data["created_at"],
           updated_at: attempt_data["updated_at"]
         )
@@ -316,24 +341,30 @@ class UgcRestoreService
     end
     
     if team_identifier
-      query = query.joins(:team).where(teams: { name: team_identifier })
+      # Use CONCAT for team name since teams have territory + mascot
+      query = query.joins(:team).where("CONCAT(teams.territory, ' ', teams.mascot) = ?", team_identifier)
     end
     
     query.first
   end
 
   def find_team_by_identifier(identifier, sport_identifier = nil, league_identifier = nil)
-    # Try exact name match first
-    query = Team.where(name: identifier)
+    # Try full team name match by combining territory + mascot
+    query = Team.where("CONCAT(territory, ' ', mascot) = ?", identifier)
     
-    # Fall back to mascot-only match
-    query = Team.where(mascot: identifier.split.last) if query.empty?
+    # Fall back to mascot-only match if no exact match
+    if query.empty?
+      mascot = identifier.split.last
+      query = Team.where(mascot: mascot)
+    end
     
-    if sport_identifier
+    # Apply sport filter if provided
+    if sport_identifier && !query.empty?
       query = query.joins(league: :sport).where(sports: { name: sport_identifier })
     end
     
-    if league_identifier
+    # Apply league filter if provided
+    if league_identifier && !query.empty?
       query = query.joins(:league).where(leagues: { name: league_identifier })
     end
     
@@ -396,7 +427,7 @@ class UgcRestoreService
 
   def load_yaml_file(filename)
     file_path = @backup_dir.join(filename)
-    YAML.load_file(file_path)
+    YAML.load_file(file_path, permitted_classes: [ActiveSupport::TimeWithZone, ActiveSupport::TimeZone, Time, Date, Symbol], aliases: true)
   end
 
   def log_success(model_type, identifier, new_id)
