@@ -1,0 +1,176 @@
+# UGC Restoration Report Template
+# Generated after UGC data restoration process
+
+restoration_timestamp: "2024-12-15T15:45:33Z"
+source_backup: "backup_20241215_143022"
+rails_env: "development"
+
+# Overall restoration statistics
+restoration_summary:
+  successful_restorations: 198
+  failed_mappings: 12
+  restoration_success_rate: 94.3
+
+# Success counts by model type
+success_by_model:
+  Ace: 3
+  Spectrum: 5
+  Rating: 42
+  Quest: 2
+  Achievement: 6
+  Highlight: 6
+  Goal: 4
+  GameAttempt: 130
+
+# Failure counts by model type
+failures_by_model:
+  Rating: 5
+  Achievement: 2
+  GameAttempt: 22
+
+# Detailed information about failed mappings
+failed_mappings_detail:
+  - model_type: "Rating"
+    target_type: "Player"
+    identifier: "Tom Brady"
+    reason: "Player not found - may have been removed from seed data"
+    context:
+      target_team_identifier: "Tampa Bay Buccaneers"
+      target_sport_identifier: "Football"
+  
+  - model_type: "Rating"
+    target_type: "Team"
+    identifier: "Oakland Raiders"
+    reason: "Team not found - likely renamed to Las Vegas Raiders"
+    context:
+      target_sport_identifier: "Football"
+      target_league_identifier: "NFL"
+  
+  - model_type: "Achievement"
+    target_type: "Division"
+    identifier: "NFC Central"
+    reason: "Division not found - reorganized into NFC North"
+    context:
+      target_sport_identifier: "Football"
+      target_league_identifier: "NFL"
+  
+  - model_type: "GameAttempt"
+    target_type: "Player"
+    identifier: "Rob Gronkowski"
+    reason: "Multiple entity remapping failed - subject/target/chosen cascade failure"
+    context:
+      game_type: "team_match"
+      subject_identifier: "Rob Gronkowski"
+
+# Successful remapping examples (for verification)
+successful_remappings:
+  - model_type: "Rating"
+    original_target_id: 123
+    new_target_id: 456
+    target_type: "Player"
+    identifier: "Aaron Judge"
+    remapping_method: "name_and_team_match"
+  
+  - model_type: "Achievement"
+    original_target_id: 789
+    new_target_id: 234
+    target_type: "Team"
+    identifier: "Green Bay Packers"
+    remapping_method: "exact_name_match"
+
+# Quest system restoration details
+quest_restoration_details:
+  - quest_id: 1
+    quest_name: "NFC North Teams"
+    achievements_restored: 3
+    achievements_failed: 1
+    highlights_restored: 3
+    goals_restored: 2
+    notes: "Achievement for 'Detroit Lions' failed - team identifier mismatch"
+  
+  - quest_id: 2
+    quest_name: "AFC East Division"
+    achievements_restored: 3
+    achievements_failed: 0
+    highlights_restored: 3
+    goals_restored: 2
+    notes: "All nested relationships restored successfully"
+
+# Game attempts restoration summary
+game_attempts_summary:
+  total_attempts_in_backup: 152
+  attempts_restored: 130
+  attempts_failed: 22
+  primary_failure_reasons:
+    "subject_entity_not_found": 8
+    "target_entity_not_found": 6
+    "chosen_entity_not_found": 4
+    "multiple_entity_failure": 4
+  notes: "Game attempts had highest failure rate due to triple polymorphic FK dependencies"
+
+# Data integrity checks
+integrity_checks:
+  ace_count_matches: true
+  spectrum_count_matches: true
+  quest_structure_preserved: true
+  foreign_key_constraints_valid: true
+  circular_dependencies_resolved: true
+
+# Performance metrics
+performance_metrics:
+  total_restoration_time_seconds: 45.7
+  records_per_second: 4.3
+  identifier_lookup_cache_hits: 156
+  identifier_lookup_cache_misses: 42
+  database_queries_executed: 234
+
+# Recommendations for next restoration
+recommendations:
+  - "Consider updating team identifier mapping for 'Oakland Raiders' -> 'Las Vegas Raiders'"
+  - "Review division reorganization mapping for NFC Central -> NFC North"
+  - "Game attempts restoration may benefit from relaxed entity matching"
+  - "5 rating targets could not be remapped - may indicate players removed from roster"
+
+# Files processed during restoration
+processed_files:
+  aces_and_ratings.yml:
+    processed_at: "2024-12-15T15:45:15Z"
+    processing_time_seconds: 12.3
+    records_processed: 55
+    records_successful: 50
+    records_failed: 5
+  
+  quest_system.yml:
+    processed_at: "2024-12-15T15:45:28Z"
+    processing_time_seconds: 18.7
+    records_processed: 20
+    records_successful: 18
+    records_failed: 2
+  
+  game_attempts.yml:
+    processed_at: "2024-12-15T15:45:45Z"
+    processing_time_seconds: 14.7
+    records_processed: 152
+    records_successful: 130
+    records_failed: 22
+
+# Post-restoration verification
+post_restoration_verification:
+  ace_login_test: "passed"
+  rating_display_test: "passed" 
+  quest_progress_test: "passed"
+  game_attempt_history_test: "passed_with_warnings"
+  foreign_key_integrity: "passed"
+  
+# Cleanup actions taken
+cleanup_actions:
+  - "Orphaned highlight records cleaned up"
+  - "Invalid quest-achievement relationships removed"
+  - "Duplicate prevention checks applied"
+
+# Next steps
+next_steps:
+  - "Review failed mappings and update identifier logic if needed"
+  - "Test application functionality with restored data"
+  - "Consider archiving successful backup for future reference"
+  - "Update identifier mapping rules based on failure patterns"

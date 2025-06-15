@@ -1,2 +1,0 @@
-# Charlotte Hornets Players
-players = []

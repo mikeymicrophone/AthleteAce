@@ -1,2 +1,0 @@
-# Orlando Magic Players
-players = []

@@ -1,0 +1,110 @@
+/* Activation Components */
+
+/* Index Record Components */
+.activation-name {
+  @apply text-lg font-semibold text-gray-900 mb-1;
+}
+
+.activation-metadata {
+  @apply text-sm text-gray-600 mb-2;
+}
+
+.activation-contract-tag {
+  @apply inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full;
+}
+
+.activation-contract-tag a {
+  @apply text-blue-800 hover:text-blue-900 no-underline;
+}
+
+.activation-stats {
+  @apply text-sm text-gray-500;
+}
+
+.activation-stat-item {
+  @apply inline-block;
+}
+
+/* Show Page Components */
+.activation-show {
+  @apply max-w-7xl mx-auto px-4 py-8;
+}
+
+.activation-show-header {
+  @apply mb-8;
+}
+
+.activation-show-title {
+  @apply text-3xl font-bold text-gray-900;
+}
+
+.activation-show-content {
+  @apply grid grid-cols-1 lg:grid-cols-2 gap-8;
+}
+
+/* Section Components */
+.activation-basic-info,
+.activation-context,
+.activation-details-section {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+}
+
+.activation-section-title {
+  @apply text-xl font-semibold text-gray-900 mb-4;
+}
+
+/* Info Grid Components */
+.activation-info-grid,
+.activation-context-grid {
+  @apply space-y-3;
+}
+
+.activation-info-item {
+  @apply flex flex-col sm:flex-row sm:justify-between;
+}
+
+.activation-info-label {
+  @apply text-sm font-medium text-gray-500 sm:w-1/3;
+}
+
+.activation-info-value {
+  @apply text-sm text-gray-900 sm:w-2/3;
+}
+
+.activation-info-value a {
+  @apply text-blue-600 hover:text-blue-800 transition-colors;
+}
+
+/* Details Section */
+.activation-details-content {
+  @apply bg-gray-50 rounded-md p-4;
+}
+
+.activation-details-json {
+  @apply text-sm text-gray-700 whitespace-pre-wrap font-mono;
+}
+
+/* Actions */
+.activation-show-actions {
+  @apply mt-8 col-span-full;
+}
+
+.activation-back-link {
+  @apply inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .activation-show-content {
+    @apply grid-cols-1;
+  }
+  
+  .activation-info-item {
+    @apply flex-col;
+  }
+  
+  .activation-info-label,
+  .activation-info-value {
+    @apply w-full;
+  }
+}

@@ -4,6 +4,9 @@ class Conference < ApplicationRecord
   has_many :memberships, through: :divisions
   has_many :teams, through: :memberships
   has_many :players, through: :teams
+  has_many :campaigns, through: :teams
+  has_many :contests, through: :campaigns
+  has_many :contracts, through: :teams
   
   validates :name, presence: true
   validates :abbreviation, presence: true

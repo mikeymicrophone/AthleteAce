@@ -1,2 +1,0 @@
-# Minnesota Timberwolves Players
-players = []

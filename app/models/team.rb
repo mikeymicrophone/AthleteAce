@@ -4,10 +4,16 @@ class Team < ApplicationRecord
   belongs_to :league
   belongs_to :stadium, optional: true
   has_many :players
+  has_many :contracts, dependent: :destroy
+  has_many :contract_players, through: :contracts, source: :player
   has_many :memberships, dependent: :destroy
+  has_many :campaigns, dependent: :destroy
   has_one :active_membership, -> { where(active: true) }, class_name: 'Membership'
   has_one :division, through: :active_membership
   has_one :conference, through: :division
+  has_many :campaigns
+  has_many :contestants, through: :campaigns
+  has_many :contests, through: :contestants
   
   delegate :sport, to: :league
   delegate :city, :state, :country, to: :stadium
@@ -25,6 +31,6 @@ class Team < ApplicationRecord
   
   # Define which associations can be searched via Ransack
   def self.ransackable_associations(auth_object = nil)
-    ["active_membership", "conference", "division", "league", "memberships", "players", "ratings", "stadium"]
+    ["active_membership", "campaigns", "conference", "division", "league", "memberships", "players", "ratings", "stadium"]
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_27_021824) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_13_162156) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -45,8 +45,36 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_27_021824) do
     t.datetime "updated_at", null: false
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.json "details"
     t.index ["seed_version"], name: "index_achievements_on_seed_version"
     t.index ["target_type", "target_id"], name: "index_achievements_on_target"
+  end
+
+  create_table "activations", force: :cascade do |t|
+    t.bigint "contract_id", null: false
+    t.bigint "campaign_id", null: false
+    t.date "start_date"
+    t.date "end_date"
+    t.json "details"
+    t.string "seed_version"
+    t.datetime "last_seeded_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["campaign_id"], name: "index_activations_on_campaign_id"
+    t.index ["contract_id"], name: "index_activations_on_contract_id"
+  end
+
+  create_table "campaigns", force: :cascade do |t|
+    t.bigint "team_id", null: false
+    t.bigint "season_id", null: false
+    t.text "comments", default: [], comment: "Array of comments about the campaign", array: true
+    t.string "seed_version", comment: "Version when this record was seeded"
+    t.datetime "last_seeded_at", comment: "When this record was last seeded"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["season_id"], name: "index_campaigns_on_season_id"
+    t.index ["team_id", "season_id"], name: "index_campaigns_on_team_id_and_season_id", unique: true
+    t.index ["team_id"], name: "index_campaigns_on_team_id"
   end
 
   create_table "cities", force: :cascade do |t|
@@ -71,6 +99,56 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_27_021824) do
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
     t.index ["league_id"], name: "index_conferences_on_league_id"
     t.index ["seed_version"], name: "index_conferences_on_seed_version"
+  end
+
+  create_table "contestants", force: :cascade do |t|
+    t.bigint "contest_id", null: false
+    t.bigint "campaign_id", null: false
+    t.integer "placing"
+    t.integer "wins"
+    t.integer "losses"
+    t.json "tiebreakers"
+    t.string "seed_version"
+    t.datetime "last_seeded_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["campaign_id"], name: "index_contestants_on_campaign_id"
+    t.index ["contest_id", "campaign_id"], name: "index_contestants_on_contest_id_and_campaign_id", unique: true
+    t.index ["contest_id"], name: "index_contestants_on_contest_id"
+  end
+
+  create_table "contests", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.string "context_type", null: false
+    t.bigint "context_id", null: false
+    t.date "begin_date"
+    t.date "end_date"
+    t.integer "champion_id"
+    t.bigint "season_id"
+    t.text "comments"
+    t.json "details"
+    t.string "seed_version"
+    t.datetime "last_seeded_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["context_type", "context_id"], name: "index_contests_on_context"
+    t.index ["season_id"], name: "index_contests_on_season_id"
+  end
+
+  create_table "contracts", force: :cascade do |t|
+    t.bigint "player_id", null: false
+    t.bigint "team_id", null: false
+    t.date "start_date"
+    t.date "end_date"
+    t.decimal "total_dollar_value"
+    t.json "details"
+    t.string "seed_version"
+    t.datetime "last_seeded_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["player_id"], name: "index_contracts_on_player_id"
+    t.index ["team_id"], name: "index_contracts_on_team_id"
   end
 
   create_table "countries", force: :cascade do |t|
@@ -237,6 +315,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_27_021824) do
     t.datetime "updated_at", null: false
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.json "details"
     t.index ["seed_version"], name: "index_quests_on_seed_version"
   end
 
@@ -270,6 +349,25 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_27_021824) do
     t.index ["player_id"], name: "index_roles_on_player_id"
     t.index ["position_id"], name: "index_roles_on_position_id"
     t.index ["seed_version"], name: "index_roles_on_seed_version"
+  end
+
+  create_table "seasons", force: :cascade do |t|
+    t.bigint "year_id", null: false, comment: "Year when the season began"
+    t.bigint "league_id", null: false, comment: "League the season belongs to"
+    t.date "start_date", comment: "When the regular season started"
+    t.date "end_date", comment: "When the regular season ended"
+    t.date "playoff_start_date", comment: "When the playoffs started"
+    t.date "playoff_end_date", comment: "When the playoffs ended"
+    t.text "comments", default: [], comment: "Array of comments about the season", array: true
+    t.string "seed_version", comment: "Version when this record was seeded"
+    t.datetime "last_seeded_at", comment: "When this record was last seeded"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["league_id"], name: "index_seasons_on_league_id"
+    t.index ["seed_version"], name: "index_seasons_on_seed_version"
+    t.index ["start_date"], name: "index_seasons_on_start_date"
+    t.index ["year_id", "league_id"], name: "index_seasons_on_year_and_league", unique: true
+    t.index ["year_id"], name: "index_seasons_on_year_id"
   end
 
   create_table "spectrums", force: :cascade do |t|
@@ -345,8 +443,27 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_27_021824) do
     t.index ["stadium_id"], name: "index_teams_on_stadium_id"
   end
 
+  create_table "years", force: :cascade do |t|
+    t.integer "number", null: false, comment: "The year number (e.g., 2024)"
+    t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
+    t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["number"], name: "index_years_on_number", unique: true
+    t.index ["seed_version"], name: "index_years_on_seed_version"
+  end
+
+  add_foreign_key "activations", "campaigns"
+  add_foreign_key "activations", "contracts"
+  add_foreign_key "campaigns", "seasons"
+  add_foreign_key "campaigns", "teams"
   add_foreign_key "cities", "states"
   add_foreign_key "conferences", "leagues"
+  add_foreign_key "contestants", "campaigns"
+  add_foreign_key "contestants", "contests"
+  add_foreign_key "contests", "seasons"
+  add_foreign_key "contracts", "players"
+  add_foreign_key "contracts", "teams"
   add_foreign_key "divisions", "conferences"
   add_foreign_key "game_attempts", "aces"
   add_foreign_key "goals", "aces"
@@ -364,6 +481,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_27_021824) do
   add_foreign_key "ratings", "spectrums"
   add_foreign_key "roles", "players"
   add_foreign_key "roles", "positions"
+  add_foreign_key "seasons", "leagues"
+  add_foreign_key "seasons", "years"
   add_foreign_key "stadiums", "cities"
   add_foreign_key "states", "countries"
   add_foreign_key "teams", "leagues"

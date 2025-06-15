@@ -6,12 +6,19 @@ module FilterableAssociations
     conferences: [:league, :country, :sport, :stadium],
     cities: [:state, :country],
     memberships: [:team, :division, :conference, :league, :sport, :country, :state, :city, :stadium],
+    campaigns: [:team, :season, :league, :sport, :country, :state, :city, :stadium],
+    contests: [:season, :league, :conference, :division, :sport, :country, :state, :city, :stadium],
     stadiums: [:city, :state, :country, :sport],
     sports: [:country],
     teams: [:sport, :league, :conference, :division, :state, :city, :stadium],
-    countries: [:sport],
-    leagues: [:sport, :country],
-    states: [:country, :sport]
+    countries: [:sport, :contest],
+    leagues: [:sport, :country, :contest],
+    states: [:country, :sport],
+    seasons: [:contest],
+    conferences: [:contest],
+    divisions: [:contest],
+    contracts: [:player, :team, :sport, :league, :conference, :division, :state, :city, :stadium],
+    activations: [:contract, :campaign, :player, :team, :season, :league, :sport, :state, :city, :stadium]
   }.freeze
 
   # Define join paths for more complex associations that require intermediates
@@ -24,6 +31,41 @@ module FilterableAssociations
     teams: {
       country: { joins: [:state] },
       conference: { joins: [memberships: { division: :conference }] }
+    },
+    campaigns: {
+      league: { joins: [:season] },
+      sport: { joins: [season: :league] },
+      country: { joins: [team: { stadium: [:city, :state] }] },
+      state: { joins: [team: { stadium: :state }] },
+      city: { joins: [team: { stadium: :city }] },
+      stadium: { joins: [team: :stadium] }
+    },
+    contests: {
+      league: { joins: [:season] },
+      sport: { joins: [season: :league] },
+      country: { joins: [season: { league: :country }] },
+      state: { joins: [season: { league: :country }] },
+      city: { joins: [season: { league: :country }] },
+      stadium: { joins: [season: { league: :country }] }
+    },
+    contracts: {
+      sport: { joins: [team: { league: :sport }] },
+      league: { joins: [team: :league] },
+      conference: { joins: [team: { division: :conference }] },
+      division: { joins: [team: :division] },
+      state: { joins: [team: { stadium: { city: :state } }] },
+      city: { joins: [team: { stadium: :city }] },
+      stadium: { joins: [team: :stadium] }
+    },
+    activations: {
+      player: { joins: [:contract] },
+      team: { joins: [:contract] },
+      sport: { joins: [campaign: { season: { league: :sport } }] },
+      league: { joins: [campaign: { season: :league }] },
+      season: { joins: [:campaign] },
+      state: { joins: [contract: { team: { stadium: { city: :state } } }] },
+      city: { joins: [contract: { team: { stadium: :city } }] },
+      stadium: { joins: [contract: { team: :stadium }] }
     }
     # Add more complex join paths as needed
   }.freeze

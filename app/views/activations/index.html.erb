@@ -1,0 +1,19 @@
+<% content_for :title, "Activations" %>
+
+<%= pagy_nav(@pagy).html_safe %>
+
+<%= index_collection("activations") do %>
+  <% @activations.each do |activation| %>
+    <%= index_record(activation, "activation-record") do %>
+      <%= record_info_section do %>
+        <%= activation_info_display(activation) %>
+      <% end %>
+      
+      <%= record_stats_section do %>
+        <%= activation_stats_display(activation) %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%= pagy_nav(@pagy).html_safe %>

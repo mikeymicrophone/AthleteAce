@@ -1,0 +1,44 @@
+<% content_for :title, "Year #{@year.number}" %>
+
+<%= tag.div class: "w-full" do %>
+  <%= tag.div class: "mb-6" do %>
+    <%= link_to "← Back to Years", years_path, class: "text-blue-600 hover:underline mb-4 inline-block" %>
+    <%= tag.h1 "Year #{@year.number}", class: "text-4xl font-bold text-gray-900" %>
+  <% end %>
+
+  <%= tag.div class: "bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-8" do %>
+    <%= tag.h2 "Year Information", class: "text-2xl font-semibold text-gray-900 mb-4" %>
+    
+    <%= tag.div class: "grid grid-cols-1 md:grid-cols-2 gap-4" do %>
+      <%= tag.div do %>
+        <%= tag.dt "Year Number", class: "font-medium text-gray-700" %>
+        <%= tag.dd @year.number.to_s, class: "text-gray-900 text-lg" %>
+      <% end %>
+      
+      <%= tag.div do %>
+        <%= tag.dt "Created", class: "font-medium text-gray-700" %>
+        <%= tag.dd time_ago_in_words(@year.created_at) + " ago", class: "text-gray-600" %>
+      <% end %>
+      
+      <% if @year.seed_version.present? %>
+        <%= tag.div do %>
+          <%= tag.dt "Seed Version", class: "font-medium text-gray-700" %>
+          <%= tag.dd @year.seed_version, class: "text-gray-600" %>
+        <% end %>
+      <% end %>
+      
+      <% if @year.last_seeded_at.present? %>
+        <%= tag.div do %>
+          <%= tag.dt "Last Seeded", class: "font-medium text-gray-700" %>
+          <%= tag.dd time_ago_in_words(@year.last_seeded_at) + " ago", class: "text-gray-600" %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%# Future sections can be added here for related models %>
+  <%= tag.div class: "bg-gray-50 border border-gray-200 rounded-lg p-6" do %>
+    <%= tag.h3 "Related Information", class: "text-lg font-medium text-gray-900 mb-2" %>
+    <%= tag.p "This section will be expanded when other temporal models (Season, Campaign, Contest, Contract) are added.", class: "text-gray-600" %>
+  <% end %>
+<% end %>

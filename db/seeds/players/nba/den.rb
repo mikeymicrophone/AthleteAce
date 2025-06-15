@@ -1,2 +1,0 @@
-# Denver Nuggets Players
-players = []

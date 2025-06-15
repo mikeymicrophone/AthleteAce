@@ -1,408 +1,86 @@
 # AthleteAce Database Seed File
-# This file loads data from the athlete_ace_data source directory
+# This file orchestrates the seeding process using modular seed files
 
+# Load seed helpers and individual seed classes
+require_relative '../lib/seed_helpers'
+Dir[Rails.root.join('db/seeds/seed_*.rb')].each { |file| require file }
+
+# Configure seed versioning
 class SeedVersion < ActiveSupport::CurrentAttributes
   attribute :seed_version, :string
   attribute :last_seeded_at, :datetime
-
   attribute :seeded_models, :array, default: []
 end
 
-SeedVersion.seeded_models = [Country, State, City, Stadium, Sport, League, Conference, Division, Team, Player, Membership, Position, Role, Spectrum, Quest, Achievement, Highlight]
+SeedVersion.seeded_models = [Country, State, City, Stadium, Sport, League, Conference, Division, Team, Player, Membership, Position, Role, Spectrum, Quest, Achievement, Highlight, Year, Season, Contest, Contestant, Contract]
 
 ApplicationRecord.before_create do
   self.seed_version ||= SeedVersion.seed_version
   self.last_seeded_at ||= SeedVersion.last_seeded_at
 end
 
-puts "===== Seeding AthleteAce Database ====="
-previous_seed_version = SeedVersion.seeded_models.map { |model| model.seeded.last&.seed_version =~ /^(\d+)\.\d+\.\d+\.\d+$/ ; $1.to_i }.max
-puts "Previous seed version: #{previous_seed_version}"
+# Initialize seeding
+SeedHelpers.init_logging
+SeedHelpers.log_and_puts "===== Seeding AthleteAce Database ====="
+
+# Calculate seed version
+previous_seed_version = SeedVersion.seeded_models.map { |model| model.seeded.last&.seed_version =~ /^(\d+)\.\d+\.\d+\.\d+$/ ; $1.to_i }.max || 0
+SeedHelpers.log_and_puts "Previous seed version: #{previous_seed_version}"
 SeedVersion.seed_version = "%03d.#{Time.current.strftime('%Y.%m.%d')}" % (previous_seed_version + 1)
 SeedVersion.last_seeded_at = Time.current
 
-# All database operations inside this block will automatically include 
-# seed_version and last_seeded_at without manual assignment
-# Step 1: Load sports data
-puts "\n----- Seeding Sports -----"
-sports_file = File.read(Rails.root.join('db/seeds/athlete_ace_data/sports/sports.json'))
-sports = JSON.parse(sports_file)
+# Define glob patterns for each resource type
+glob_patterns = {
+  sports: ['sports/sports.json'],
+  countries: ['locations/countries/*.json'],
+  federations: ['locations/federations/federations.json'],
+  states: ['locations/states/*.json'],
+  cities: ['locations/cities/*.json'],
+  stadiums: ['locations/stadiums/*.json'],
+  leagues: ['sports/**/leagues.json'],
+  conferences: ['sports/**/conferences.json'],
+  teams: ['sports/**/teams.json'],
+  players: ['sports/**/players/*.json'],
+  memberships: ['sports/**/memberships.json'],
+  positions: ['sports/positions/*.json'],
+  spectrums: ['ratings/spectrums.json'],
+  quests: ['quests/*.json'],
+  achievements: ['achievements/*.json'],
+  seasons: ['sports/**/seasons.json'],
+  contests: ['sports/**/contests/*.json'],
+  expansions: ['sports/**/expansions.json'],
+  transitions: ['sports/**/transitions.json'],
+  contracts: ['sports/**/contracts/*/*.json']
+}
 
-sports.each do |sport_data|
-  sport = Sport.find_or_initialize_by(name: sport_data["name"])
-  sport.icon_url = sport_data["icon_url"]
-  sport.save!
-  puts "Created sport: #{sport_data['name']}"
-end
+# Clean up legacy files
+SeedHelpers.cleanup_legacy_files
 
-# Step 2: Load location data
-puts "\n----- Seeding Locations -----"
-
-# Countries
-puts "Loading countries..."
-Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/locations/countries/*.json')).each do |file|
-  countries_file = File.read(file)
-  countries = JSON.parse(countries_file)
-  countries.each do |country|
-    country_record = Country.find_or_initialize_by(name: country["name"])
-    country_record.flag_url = country["flag_url"] || ""
-    country_record.save!
-    puts "Created country: #{country['name']}"
-  end
-end
-
-puts "Loading federations..."
-federations_file = File.read(Rails.root.join('db/seeds/athlete_ace_data/locations/federations/federations.json'))
-federations_data = JSON.parse(federations_file)
-federations_data["federations"].each do |federation|
-  federation_record = Federation.find_or_initialize_by(name: federation["name"])
-  federation_record.abbreviation = federation["abbreviation"]
-  federation_record.description = federation["description"]
-  federation_record.logo_url = federation["logo_url"]
-  federation_record.url = federation["url"]
-  federation_record.save!
-end
-
-# States
-puts "Loading states..."
-Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/locations/states/*.json')).each do |file|
-  states_file = File.read(file)
-  states = JSON.parse(states_file)
-  country = Country.find_by(name: states["country_name"])
-  states["states"].each do |state|
-    state_record = State.find_or_initialize_by(
-      name: state["name"],
-      abbreviation: state["abbreviation"]
-    )
-    state_record.country = country
-    state_record.flag_url = state["flag_url"] || ""
-    state_record.save!
-    puts "Created state: #{state['name']}"
-  end
-end
-
-# Cities
-puts "Loading cities..."
-Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/locations/cities/*.json')).each do |file|
-  cities_file = File.read(file)
-  cities = JSON.parse(cities_file)
-  country = Country.find_by(name: cities["country_name"])
+# Run seed steps in dependency order
+begin
+  SeedSports.run(glob_patterns[:sports])
+  SeedCountries.run(glob_patterns[:countries])
+  SeedFederations.run(glob_patterns[:federations])
+  SeedStates.run(glob_patterns[:states])
+  SeedCities.run(glob_patterns[:cities])
+  SeedStadiums.run(glob_patterns[:stadiums])
+  SeedLeagues.run(glob_patterns[:leagues])
+  SeedConferences.run(glob_patterns[:conferences])
+  SeedTeams.run(glob_patterns[:teams])
+  SeedPlayers.run(glob_patterns[:players])
+  SeedMemberships.run(glob_patterns[:memberships])
+  SeedPositions.run(glob_patterns[:positions])
+  SeedSpectrums.run(glob_patterns[:spectrums])
+  SeedQuests.run(glob_patterns[:quests])
+  SeedYears.run(glob_patterns[:years] || [])
+  SeedSeasons.run(glob_patterns[:seasons])
+  SeedContests.run(glob_patterns[:contests])
+  SeedCampaigns.run(glob_patterns[:expansions] + glob_patterns[:transitions])  # Process expansion and transition data
+  SeedContracts.run(glob_patterns[:contracts])
   
-  cities["cities"].each do |city|
-    # Find state by abbreviation
-    state = State.find_by(abbreviation: city["state"], country: country)
-    
-    if state
-      city_record = City.find_or_initialize_by(
-        name: city["name"]
-      )
-      city_record.state = state
-      city_record.save!
-      puts "Created city: #{city['name']}, #{state.abbreviation}"
-    else
-      puts "Warning: Could not find state with abbreviation #{city['state']} in #{cities['country_name']}"
-    end
-  end
+  SeedHelpers.log_and_puts "\n===== Database Seeding Complete! ====="
+rescue => e
+  SeedHelpers.log_and_puts "ERROR: Seeding failed with: #{e.message}"
+  SeedHelpers.log_and_puts e.backtrace.join("\n")
+  raise e
 end
-
-# Step 3: Load stadiums data
-puts "\n----- Seeding Stadiums -----"
-Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/locations/stadiums/*.json')).each do |file|
-  stadiums_file = File.read(file)
-  stadiums = JSON.parse(stadiums_file)
-  country = Country.find_by(name: stadiums["country_name"])
-  
-  stadiums["stadiums"].each do |stadium|
-    # Find the state by name
-    state_name = stadium["state_name"]
-    state = State.find_by("name LIKE ?", "%#{state_name}%")
-    
-    # Find the city by name and state
-    city = nil
-    if state
-      city = City.find_by(name: stadium["city_name"], state: state)
-    end
-    
-    # If city not found, try to find by name only
-    if city.nil?
-      city = City.find_by(name: stadium["city_name"])
-    end
-    
-    if city
-      # Create the stadium
-      stadium_record = Stadium.find_or_initialize_by(name: stadium["name"])
-      stadium_record.assign_attributes(
-        city: city,
-        capacity: stadium["capacity"],
-        opened_year: stadium["opened_year"],
-        address: stadium["address"],
-        url: stadium["url"],
-        logo_url: stadium["logo_url"] || ""
-      )
-      stadium_record.save!
-      
-      puts "Created stadium: #{stadium['name']} in #{city.name}, #{city.state.abbreviation}"
-    else
-      puts "Warning: Could not find city #{stadium['city_name']} in #{stadium['state_name']}"
-    end
-  end
-end
-
-# Step 4: Load leagues data
-puts "\n----- Seeding Leagues -----"
-Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/**/leagues.json')).each do |file|
-  leagues_file = File.read(file)
-  puts "Loading leagues from #{file}..."
-  leagues = JSON.parse(leagues_file)
-  sport = Sport.find_by(name: leagues["sport_name"])
-  if leagues["federation_name"]
-    jurisdiction = Federation.find_by(abbreviation: leagues["federation_name"])
-  else
-    jurisdiction = Country.find_by(name: leagues["country_name"])
-  end
-  leagues["leagues"].each do |league|
-    league_record = League.find_or_initialize_by(
-      name: league["name"]
-    )
-    league_record.assign_attributes(league)
-    league_record.sport = sport
-    league_record.jurisdiction = jurisdiction
-    league_record.save!
-    puts "Created league: #{league['name']}"
-  end
-end
-
-# Step 5: Load conferences and divisions
-puts "\n----- Seeding Conferences and Divisions -----"
-Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/**/conferences.json')).each do |file|
-  conferences_file = File.read(file)
-  puts "Loading conferences from #{file}..."
-  data = JSON.parse(conferences_file)
-  league = League.find_by(name: data["league_name"])
-  
-  if league.nil?
-    puts "League not found: #{data["league_name"]}"
-    next
-  end
-  
-  data["conferences"].each do |conference_data|
-    conference = Conference.find_or_initialize_by(
-      name: conference_data["name"],
-      league: league
-    )
-    conference.assign_attributes({
-      abbreviation: conference_data["abbreviation"],
-      logo_url: conference_data["logo_url"]
-    })
-    conference.save!
-    puts "Created/updated conference: #{conference.name}"
-    
-    if conference_data["divisions"]
-      conference_data["divisions"].each do |division_data|
-        division = Division.find_or_initialize_by(
-          name: division_data["name"],
-          conference: conference
-        )
-        division.assign_attributes({
-          abbreviation: division_data["abbreviation"],
-          logo_url: division_data["logo_url"]
-        })
-        division.save!
-        puts "Created/updated division: #{division.name}"
-      end
-    end
-  end
-end
-
-# Step 6: Load players data
-puts "\n----- Seeding Players -----"
-Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/**/players/*.json')).each do |file|
-  players_file = File.read(file)
-  players = JSON.parse(players_file)
-  
-  # Handle both single-file and per-team formats
-  if players["league_name"]
-    # Single file format with all players
-    league = League.find_by(name: players["league_name"])
-    if league.nil?
-      puts "League not found: #{players["league_name"]}"
-      next
-    end
-    
-    players["players"].each do |player_data|
-      team = Team.find_by(mascot: player_data["team_name"])
-      if team.nil?
-        puts "Team not found: #{player_data["team_name"]}"
-        next
-      end
-      
-      create_or_update_player(player_data, team)
-    end
-  else
-    # Per-team format
-    team_name = players["team_name"]
-    team = Team.find_by(mascot: team_name)
-    
-    if team.nil?
-      puts "Team not found: #{team_name}"
-      next
-    end
-    
-    players["players"].each do |player_data|
-      create_or_update_player(player_data, team)
-    end
-  end
-end
-
-# Helper method to create or update a player
-def create_or_update_player(player_data, team)
-  player_record = Player.find_or_initialize_by(
-    first_name: player_data["first_name"],
-    last_name: player_data["last_name"],
-    team: team
-  )
-  
-  player_record.assign_attributes(
-    current_position: player_data["current_position"],
-    birthdate: player_data["birthdate"],
-    debut_year: player_data["debut_year"],
-    draft_year: player_data["draft_year"],
-    active: player_data["active"],
-    nicknames: player_data["nicknames"],
-    bio: player_data["bio"],
-    photo_urls: player_data["photo_urls"]
-  )
-  
-  player_record.save!
-  puts "Created/updated player: #{player_data['first_name']} #{player_data['last_name']}"
-end
-
-# Step 7: Load memberships data
-puts "\n----- Seeding Memberships -----"
-Dir.glob(Rails.root.join('db/seeds/athlete_ace_data/sports/**/memberships.json')).each do |file|
-  memberships_file = File.read(file)
-  puts "Loading memberships from #{file}..."
-  memberships_data = JSON.parse(memberships_file)
-  league = League.find_by(name: memberships_data["league_name"])
-  
-  if league.nil?
-    puts "League not found: #{memberships_data["league_name"]}"
-    next
-  end
-  
-  memberships_data["memberships"].each do |membership_data|
-    if membership_data["territory_name"]
-      team = Team.find_by(territory: membership_data["territory_name"], mascot: membership_data["team_name"])
-    else
-      team = Team.find_by(mascot: membership_data["team_name"])
-    end
-    conference = Conference.find_by(name: membership_data["conference_name"], league: league)
-    division = Division.find_by(name: membership_data["division_name"], conference: conference)
-    
-    if team.nil?
-      puts "Team not found: #{membership_data["team_name"]}"
-      next
-    end
-    
-    if division.nil?
-      puts "Division not found: #{membership_data["division_name"]}"
-      next
-    end
-    
-    # Deactivate any existing active memberships for this team
-    if membership_data["active"]
-      Membership.where(team: team, active: true).update_all(active: false)
-    end
-    
-    membership = Membership.find_or_initialize_by(
-      team: team,
-      division: division
-    )
-    
-    membership.assign_attributes(
-      start_date: membership_data["start_year"] ? Date.new(membership_data["start_year"], 1, 1) : nil,
-      end_date: membership_data["end_year"] ? Date.new(membership_data["end_year"], 12, 31) : nil,
-      active: membership_data["active"]
-    )
-    
-    membership.save!
-    puts "Created/updated membership: #{team.name} in #{division.name}"
-  end
-end
-
-# Step 8: Create sport positions
-puts "\n----- Creating Sport Positions -----"
-
-# Define position creation helper method
-def create_sport_positions(sport_name)
-  sport = Sport.find_by(name: sport_name)
-  return unless sport
-  
-  # Load positions from JSON file
-  positions_file = Rails.root.join('db', 'seeds', 'athlete_ace_data', 'sports', 'positions', "#{sport_name.downcase}.json")
-  return unless File.exist?(positions_file)
-  
-  positions_data = JSON.parse(File.read(positions_file))
-  
-  positions_data.each do |pos_data|
-    position = Position.find_or_initialize_by(name: pos_data['name'], sport: sport)
-    position.assign_attributes(
-      abbreviation: pos_data['abbreviation'],
-      description: pos_data['description']
-    )
-    position.save!
-    puts "Created position: #{position.name} (#{position.abbreviation}) for #{sport_name}"
-  end
-  
-  # Assign positions to existing players
-  Player.joins(team: { league: :sport }).where(sports: { name: sport_name })
-        .where.not(current_position: [nil, ""]).find_each do |player|
-    
-    # Find matching position based on current_position field
-    position_name = player.current_position
-    position = sport.positions.find_by("name = ? OR abbreviation = ?", position_name, position_name)
-    
-    # If no exact match, try to find a partial match
-    if position.nil?
-      position_name_parts = position_name.split(/[\s\-\/]/).reject { |p| p.length < 2 }
-      position_name_parts.each do |part|
-        position = sport.positions.find_by("name LIKE ? OR abbreviation LIKE ?", "%#{part}%", "%#{part}%")
-        break if position
-      end
-    end
-    
-    # If still no match, use a default position
-    position ||= sport.positions.first
-    
-    # Create role with this position as primary
-    if position
-      role = player.roles.find_or_initialize_by(position: position)
-      role.assign_attributes(primary: true)
-      role.save!
-      puts "Assigned #{position.name} to #{player.name}"
-    end
-  end
-end
-
-# Step 9: Seed sport positions
-puts "\n----- Seeding Sport Positions -----"
-
-# Iterate through all sports and create positions
-Sport.all.each do |sport|
-  puts "Creating #{sport.name} positions..."
-  create_sport_positions(sport.name)
-end
-
-puts "Creating Spectrums..."
-spectrum_data = JSON.parse(File.read(Rails.root.join('db', 'seeds', 'athlete_ace_data', 'ratings', 'spectrums.json')))
-
-spectrum_data.each do |attributes|
-  spectrum = Spectrum.find_or_initialize_by(name: attributes['name'])
-  spectrum.assign_attributes(attributes)
-  spectrum.save!
-  puts "  Created spectrum: #{spectrum.name}"
-end
-
-puts "Created #{Spectrum.count} spectrums"
-
-puts "\n===== Database Seeding Complete! ====="

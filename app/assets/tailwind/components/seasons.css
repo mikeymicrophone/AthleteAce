@@ -1,0 +1,162 @@
+/* Seasons Index Page */
+.seasons-index-page {
+  @apply w-full;
+}
+
+.page-header {
+  @apply mb-6;
+}
+
+.page-title {
+  @apply text-4xl font-bold text-gray-900;
+}
+
+.seasons-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8;
+}
+
+/* Season Item */
+.season-item {
+  @apply bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow;
+}
+
+.season-header {
+  @apply mb-4;
+}
+
+.season-link {
+  @apply block text-blue-600 hover:text-blue-800 no-underline;
+}
+
+.season-name {
+  @apply text-lg font-semibold mb-1;
+}
+
+.season-year {
+  @apply text-sm text-gray-600;
+}
+
+.season-details {
+  @apply space-y-2 mb-4;
+}
+
+.season-meta {
+  @apply flex;
+}
+
+.meta-label {
+  @apply font-medium text-gray-700 mr-1;
+}
+
+.meta-value {
+  @apply text-gray-600;
+}
+
+.season-dates {
+  @apply text-sm text-gray-600 border-l-4 border-blue-200 pl-3;
+}
+
+.season-actions {
+  @apply pt-3 border-t border-gray-100;
+}
+
+/* Season Show Page */
+.season-show-page {
+  @apply w-full;
+}
+
+.season-show-header {
+  @apply mb-6;
+}
+
+.back-link {
+  @apply text-blue-600 hover:underline mb-4 inline-block;
+}
+
+.season-title {
+  @apply text-4xl font-bold text-gray-900;
+}
+
+.season-subtitle {
+  @apply text-xl text-gray-600 mt-2;
+}
+
+.season-content {
+  @apply grid grid-cols-1 lg:grid-cols-2 gap-8;
+}
+
+.season-info-section {
+  @apply bg-white border border-gray-200 rounded-lg p-6 shadow-sm;
+}
+
+.section-title {
+  @apply text-2xl font-semibold text-gray-900 mb-4;
+}
+
+.info-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+.info-item dt {
+  @apply font-medium text-gray-700;
+}
+
+.info-item dd {
+  @apply text-gray-900 text-lg;
+}
+
+.info-item.secondary dd {
+  @apply text-gray-600;
+}
+
+.dates-list {
+  @apply space-y-3;
+}
+
+.date-item {
+  @apply block;
+}
+
+.date-item dt {
+  @apply font-medium text-gray-700;
+}
+
+.date-item dd {
+  @apply text-gray-600;
+}
+
+.comments-section {
+  @apply bg-white border border-gray-200 rounded-lg p-6 shadow-sm mt-8;
+}
+
+.comments-title {
+  @apply text-lg font-medium text-gray-900 mb-4;
+}
+
+.comments-list {
+  @apply space-y-2;
+}
+
+.comment-item {
+  @apply text-gray-600 border-l-4 border-blue-200 pl-4;
+}
+
+.seed-info-section {
+  @apply bg-gray-50 border border-gray-200 rounded-lg p-6 mt-8;
+}
+
+.seed-info-title {
+  @apply text-lg font-medium text-gray-900 mb-2;
+}
+
+.seed-info-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4 text-sm;
+}
+
+.seed-info-item dt {
+  @apply font-medium text-gray-700;
+}
+
+.seed-info-item dd {
+  @apply text-gray-600;
+}

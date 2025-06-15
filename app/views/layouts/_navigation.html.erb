@@ -40,6 +40,12 @@
               <%= link_to memberships_path, class: "nav-dropdown-item #{current_page?(memberships_path) ? 'active' : ''}" do %>
                 <i class="<%= icon_for_resource(:memberships) %>"></i> Memberships
               <% end %>
+              <%= link_to contracts_path, class: "nav-dropdown-item #{current_page?(contracts_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:contracts) %>"></i> Contracts
+              <% end %>
+              <%= link_to activations_path, class: "nav-dropdown-item #{current_page?(activations_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:activations) %>"></i> Activations
+              <% end %>
             </div>
           </div>
           
@@ -89,6 +95,25 @@
               <% end %>
               <%= link_to spectrums_path, class: "nav-dropdown-item #{current_page?(spectrums_path) ? 'active' : ''}" do %>
                 <i class="<%= icon_for_resource(:spectrums) %>"></i> Spectrums
+              <% end %>
+            </div>
+          </div>
+          
+          <!-- Time & Temporal Group -->
+          <div class="nav-group" data-controller="dropdown">
+            <div class="inline-flex items-center text-white nav-group-title" data-action="click->dropdown#toggle">
+              <i class="fa-solid fa-calendar mr-2"></i> Time
+              <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
+            </div>
+            <div class="nav-dropdown" data-dropdown-target="menu">
+              <%= link_to years_path, class: "nav-dropdown-item #{current_page?(years_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:years) %>"></i> Years
+              <% end %>
+              <%= link_to seasons_path, class: "nav-dropdown-item #{current_page?(seasons_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:seasons) %>"></i> Seasons
+              <% end %>
+              <%= link_to contests_path, class: "nav-dropdown-item #{current_page?(contests_path) ? 'active' : ''}" do %>
+                <i class="<%= icon_for_resource(:contests) %>"></i> Contests
               <% end %>
             </div>
           </div>

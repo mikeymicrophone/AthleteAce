@@ -1,2 +1,0 @@
-# Houston Rockets Players
-players = []

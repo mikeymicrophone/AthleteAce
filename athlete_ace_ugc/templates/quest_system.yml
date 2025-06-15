@@ -1,0 +1,161 @@
+# UGC Template: Quest System
+# Nested structure preserves relationships without relying on fragile FKs
+# Quests contain their achievements, highlights, and goals as children
+
+quests:
+  - id: 1
+    name: "NFC North Teams"
+    description: "Learn all players on NFC North teams"
+    created_at: "2024-01-10T09:00:00Z"
+    updated_at: "2024-01-12T14:30:00Z"
+    
+    # Nested achievements belonging to this quest
+    achievements:
+      - id: 1
+        name: "Packers Expert"
+        description: "Know all Green Bay Packers players"
+        target_type: "Team"
+        target_id: 101
+        target_identifier: "Green Bay Packers"
+        target_sport_identifier: "Football"
+        target_league_identifier: "NFL"
+        details:
+          requirement_type: "player_knowledge"
+          minimum_familiarity: 7000
+        created_at: "2024-01-10T09:15:00Z"
+        updated_at: "2024-01-10T09:15:00Z"
+      
+      - id: 2
+        name: "Bears Expert"
+        description: "Know all Chicago Bears players"
+        target_type: "Team"
+        target_id: 102
+        target_identifier: "Chicago Bears"
+        target_sport_identifier: "Football" 
+        target_league_identifier: "NFL"
+        details:
+          requirement_type: "player_knowledge"
+          minimum_familiarity: 7000
+        created_at: "2024-01-10T09:20:00Z"
+        updated_at: "2024-01-10T09:20:00Z"
+    
+    # Nested highlights (quest-achievement relationships)
+    highlights:
+      - id: 1
+        achievement_id: 1  # References nested achievement above
+        required: true
+        position: 1
+        created_at: "2024-01-10T09:25:00Z"
+        updated_at: "2024-01-10T09:25:00Z"
+      
+      - id: 2
+        achievement_id: 2  # References nested achievement above
+        required: true
+        position: 2
+        created_at: "2024-01-10T09:26:00Z"
+        updated_at: "2024-01-10T09:26:00Z"
+    
+    # Nested goals (user adoption of this quest)
+    goals:
+      - id: 1
+        ace_id: 1
+        status: "in_progress"
+        progress: 65
+        started_at: "2024-01-15T12:00:00Z"
+        completed_at: null
+        created_at: "2024-01-15T12:00:00Z"
+        updated_at: "2024-01-16T10:30:00Z"
+      
+      - id: 2
+        ace_id: 2
+        status: "completed"
+        progress: 100
+        started_at: "2024-01-12T08:00:00Z"
+        completed_at: "2024-01-14T16:45:00Z"
+        created_at: "2024-01-12T08:00:00Z"
+        updated_at: "2024-01-14T16:45:00Z"
+
+  - id: 2
+    name: "AFC East Division"
+    description: "Master the AFC East teams and players"
+    created_at: "2024-01-11T10:00:00Z"
+    updated_at: "2024-01-11T10:00:00Z"
+    
+    achievements:
+      - id: 3
+        name: "Patriots Dynasty"
+        description: "Know the New England Patriots roster"
+        target_type: "Team"
+        target_id: 201
+        target_identifier: "New England Patriots"
+        target_sport_identifier: "Football"
+        target_league_identifier: "NFL"
+        details:
+          requirement_type: "historical_knowledge"
+          era: "2000s-2010s"
+        created_at: "2024-01-11T10:15:00Z"
+        updated_at: "2024-01-11T10:15:00Z"
+      
+      - id: 4
+        name: "Bills Mafia"
+        description: "Know the Buffalo Bills players"
+        target_type: "Team"
+        target_id: 202
+        target_identifier: "Buffalo Bills"
+        target_sport_identifier: "Football"
+        target_league_identifier: "NFL"
+        details:
+          requirement_type: "current_roster"
+          season: 2024
+        created_at: "2024-01-11T10:20:00Z"
+        updated_at: "2024-01-11T10:20:00Z"
+    
+    highlights:
+      - id: 3
+        achievement_id: 3
+        required: true
+        position: 1
+        created_at: "2024-01-11T10:25:00Z"
+        updated_at: "2024-01-11T10:25:00Z"
+      
+      - id: 4
+        achievement_id: 4
+        required: false
+        position: 2
+        created_at: "2024-01-11T10:26:00Z"
+        updated_at: "2024-01-11T10:26:00Z"
+    
+    goals:
+      - id: 3
+        ace_id: 1
+        status: "not_started"
+        progress: 0
+        started_at: null
+        completed_at: null
+        created_at: "2024-01-15T12:30:00Z"
+        updated_at: "2024-01-15T12:30:00Z"
+
+# Orphaned achievements (not part of any quest)
+orphaned_achievements:
+  - id: 5
+    name: "MVP Recognition"
+    description: "Identify all MVP award winners"
+    target_type: "League"
+    target_id: 301
+    target_identifier: "NFL"
+    target_sport_identifier: "Football"
+    details:
+      requirement_type: "award_knowledge"
+      award_type: "MVP"
+      time_period: "2010-2024"
+    created_at: "2024-01-12T15:00:00Z"
+    updated_at: "2024-01-12T15:00:00Z"
+
+# Notes for restoration:
+# - Restore quests first (generate new IDs)
+# - Restore nested achievements with quest_id references
+# - Restore highlights using internal achievement_id mapping
+# - Restore goals with ace_id and new quest_id
+# - Handle orphaned achievements separately
+# - Use target_identifier fields for smart FK remapping
+# - Preserve internal relationships through nesting structure

@@ -1,0 +1,171 @@
+# UGC Template: Game Attempts  
+# Game interaction data - lowest priority for preservation
+# Multiple polymorphic FKs make this most fragile during reseed
+
+game_attempts:
+  - id: 1
+    ace_id: 1
+    
+    # Subject entity (what the game was testing knowledge of)
+    subject_entity_type: "Player"
+    subject_entity_id: 123
+    subject_identifier: "Tom Brady"
+    subject_team_identifier: "Tampa Bay Buccaneers"
+    subject_sport_identifier: "Football"
+    
+    # Target entity (what the correct answer should have been)
+    target_entity_type: "Team"
+    target_entity_id: 456
+    target_identifier: "Tampa Bay Buccaneers"
+    target_sport_identifier: "Football"
+    target_league_identifier: "NFL"
+    
+    # Chosen entity (what the user actually selected)
+    chosen_entity_type: "Team"
+    chosen_entity_id: 456
+    chosen_identifier: "Tampa Bay Buccaneers"
+    chosen_sport_identifier: "Football"
+    chosen_league_identifier: "NFL"
+    
+    correct: true
+    game_type: "team_match"
+    difficulty: "medium"
+    response_time_ms: 3500
+    hint_used: false
+    
+    created_at: "2024-01-15T14:30:00Z"
+    updated_at: "2024-01-15T14:30:00Z"
+
+  - id: 2
+    ace_id: 1
+    
+    # Multiple choice question about player position
+    subject_entity_type: "Player"
+    subject_entity_id: 789
+    subject_identifier: "Aaron Donald"
+    subject_team_identifier: "Los Angeles Rams"
+    subject_sport_identifier: "Football"
+    
+    target_entity_type: "Position"
+    target_entity_id: 12
+    target_identifier: "Defensive Tackle"
+    target_sport_identifier: "Football"
+    
+    chosen_entity_type: "Position"
+    chosen_entity_id: 11
+    chosen_identifier: "Defensive End"
+    chosen_sport_identifier: "Football"
+    
+    correct: false
+    game_type: "multiple_choice"
+    difficulty: "hard"
+    response_time_ms: 8200
+    hint_used: true
+    
+    created_at: "2024-01-15T14:35:00Z"
+    updated_at: "2024-01-15T14:35:00Z"
+
+  - id: 3
+    ace_id: 2
+    
+    # Division guessing game
+    subject_entity_type: "Team"
+    subject_entity_id: 234
+    subject_identifier: "Green Bay Packers"
+    subject_sport_identifier: "Football"
+    
+    target_entity_type: "Division" 
+    target_entity_id: 67
+    target_identifier: "NFC North"
+    target_sport_identifier: "Football"
+    target_league_identifier: "NFL"
+    target_conference_identifier: "NFC"
+    
+    chosen_entity_type: "Division"
+    chosen_entity_id: 68
+    chosen_identifier: "NFC Central"  # Old division name
+    chosen_sport_identifier: "Football"
+    chosen_league_identifier: "NFL"
+    chosen_conference_identifier: "NFC"
+    
+    correct: false
+    game_type: "guess_the_division"
+    difficulty: "easy"
+    response_time_ms: 2100
+    hint_used: false
+    
+    created_at: "2024-01-15T14:40:00Z"
+    updated_at: "2024-01-15T14:40:00Z"
+
+  - id: 4
+    ace_id: 1
+    
+    # Phased repetition - learning player names
+    subject_entity_type: "Player"
+    subject_entity_id: 345
+    subject_identifier: "Lamar Jackson"
+    subject_team_identifier: "Baltimore Ravens"
+    subject_sport_identifier: "Football"
+    
+    # For recognition games, target might be the player themselves
+    target_entity_type: "Player"
+    target_entity_id: 345
+    target_identifier: "Lamar Jackson"
+    target_team_identifier: "Baltimore Ravens"
+    target_sport_identifier: "Football"
+    
+    chosen_entity_type: "Player"
+    chosen_entity_id: 345
+    chosen_identifier: "Lamar Jackson"
+    chosen_team_identifier: "Baltimore Ravens"
+    chosen_sport_identifier: "Football"
+    
+    correct: true
+    game_type: "phased_repetition"
+    difficulty: "medium"
+    response_time_ms: 1800
+    hint_used: false
+    
+    created_at: "2024-01-15T14:45:00Z"
+    updated_at: "2024-01-15T14:45:00Z"
+
+  - id: 5
+    ace_id: 2
+    
+    # Image recognition game
+    subject_entity_type: "Player"
+    subject_entity_id: 567
+    subject_identifier: "Stephen Curry"
+    subject_team_identifier: "Golden State Warriors"
+    subject_sport_identifier: "Basketball"
+    
+    target_entity_type: "Player"
+    target_entity_id: 567
+    target_identifier: "Stephen Curry"
+    target_team_identifier: "Golden State Warriors"
+    target_sport_identifier: "Basketball"
+    
+    chosen_entity_type: "Player"
+    chosen_entity_id: 568
+    chosen_identifier: "Klay Thompson"
+    chosen_team_identifier: "Golden State Warriors"
+    chosen_sport_identifier: "Basketball"
+    
+    correct: false
+    game_type: "images"
+    difficulty: "hard"
+    response_time_ms: 4500
+    hint_used: false
+    
+    created_at: "2024-01-15T14:50:00Z"
+    updated_at: "2024-01-15T14:50:00Z"
+
+# Notes for restoration:
+# - Game attempts are lowest priority for preservation
+# - All three polymorphic FKs (subject, target, chosen) will likely shift
+# - Identifier-based remapping is complex due to multiple entity references
+# - Consider whether to restore at all vs. starting fresh
+# - If restoring, use sport/league context for disambiguation
+# - Team identifiers help narrow down player searches
+# - Position restoration depends on whether positions are considered core or UGC
+# - Game statistics (correct/incorrect ratios) could be aggregated and preserved separately

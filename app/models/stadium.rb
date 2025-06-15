@@ -7,6 +7,11 @@ class Stadium < ApplicationRecord
   has_many :divisions, through: :memberships
   has_many :conferences, through: :divisions
   has_many :leagues, through: :conferences
+  has_many :seasons, through: :leagues
+  has_many :campaigns, through: :teams
+  has_many :contracts, through: :teams
+  has_many :contests, through: :teams # this should be through games eventually
+  has_many :activations, through: :contracts
 
   delegate :state, :country, to: :city
   

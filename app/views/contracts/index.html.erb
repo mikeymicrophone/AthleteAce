@@ -1,0 +1,19 @@
+<% content_for :title, "Contracts" %>
+
+<%= pagy_nav(@pagy).html_safe %>
+
+<%= index_collection("contracts") do %>
+  <% @contracts.each do |contract| %>
+    <%= index_record(contract, "contract-record") do %>
+      <%= record_info_section do %>
+        <%= contract_info_display(contract) %>
+      <% end %>
+      
+      <%= record_stats_section do %>
+        <%= contract_stats_display(contract) %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%= pagy_nav(@pagy).html_safe %>

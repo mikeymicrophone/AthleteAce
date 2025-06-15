@@ -1,2 +1,0 @@
-# Cleveland Cavaliers Players
-players = []

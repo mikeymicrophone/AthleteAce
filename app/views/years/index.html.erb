@@ -1,0 +1,17 @@
+<% content_for :title, "Years" %>
+
+<%= tag.div class: "w-full" do %>
+  <%= index_header "Years" %>
+  
+  <%= index_collection "years" do %>
+    <% @years.each do |year| %>
+      <%= index_record year do %>
+        <%= link_to year do %>
+          <%= tag.header year.name, class: "year-display text-lg font-semibold" %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+  
+  <%== pagy_nav @pagy if @pagy.pages > 1 %>
+<% end %>

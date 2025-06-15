@@ -1,2 +1,0 @@
-# Phoenix Suns Players
-players = []

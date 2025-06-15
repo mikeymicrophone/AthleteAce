@@ -51,3 +51,9 @@ When using keywords that are a bit less common, it's ok to begin with a brief co
 It's also ok to propose two options, with one commented out so that I can try both.
 
 CSS colors should be declared using CSS variables.
+
+When we have a method that is applying a certain configuration based on which model, or which record is being displayed, 
+we should use lookup-table-style methods rather than if/else statements.
+
+Additionally, for phrases that are part of the interface, they should be established in a YAML file.
+This will allow us to translate the interface into other languages.

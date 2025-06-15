@@ -1,2 +1,0 @@
-# Atlanta Hawks Players
-players = []

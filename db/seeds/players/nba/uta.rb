@@ -1,2 +1,0 @@
-# Utah Jazz Players
-players = []

@@ -1,0 +1,12 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "#{@campaign.team.name} - #{@campaign.season.name}" %>
+
+<%= tag.header "#{@campaign.team.name} - #{@campaign.season.name}", class: "campaign-title" %>
+
+<%= tag.div class: "campaign-details" do %>
+  <%= display_name_with_lazy_logo @campaign.team %>
+  <%= display_name_with_lazy_logo @campaign.season %>
+  <%= display_name_with_lazy_logo @campaign.league %>
+  <%= display_name_with_lazy_logo @campaign.sport %>
+<% end %>

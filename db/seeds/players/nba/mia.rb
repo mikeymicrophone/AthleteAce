@@ -1,2 +1,0 @@
-# Miami Heat Players
-players = []

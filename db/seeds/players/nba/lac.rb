@@ -1,2 +1,0 @@
-# LA Clippers Players
-players = []
