@@ -1,3 +1,6 @@
 [submodule "db/seeds/athlete_ace_data"]
 	path = db/seeds/athlete_ace_data
 	url = https://github.com/mikeymicrophone/athlete_ace_data
+[submodule "db/seeds/athlete_ace_ugc"]
+	path = db/seeds/athlete_ace_ugc
+	url = git@github.com:mikeymicrophone/athlete_ace_ugc.git

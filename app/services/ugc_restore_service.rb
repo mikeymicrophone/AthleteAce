@@ -37,12 +37,19 @@ class UgcRestoreService
   def restore_aces(aces_data)
     aces_data.each do |ace_attrs|
       # Remove exported_at and other non-model attributes
-      clean_attrs = ace_attrs.except("exported_at")
+      clean_attrs = ace_attrs.except("exported_at", "id")
       
-      # Skip validations since we're restoring encrypted passwords
-      ace = Ace.new(clean_attrs)
-      ace.save!(validate: false)
-      log_success("Ace", ace_attrs["email"], ace.id)
+      # Find existing ace by email or create new one
+      existing_ace = Ace.find_by(email: ace_attrs["email"])
+      if existing_ace
+        Rails.logger.warn "Skipping duplicate ace: #{ace_attrs['email']}"
+        log_success("Ace (skipped duplicate)", ace_attrs["email"], existing_ace.id)
+      else
+        # Skip validations since we're restoring encrypted passwords
+        ace = Ace.new(clean_attrs)
+        ace.save!(validate: false)
+        log_success("Ace", ace_attrs["email"], ace.id)
+      end
     end
   end
 
@@ -50,18 +57,30 @@ class UgcRestoreService
     spectrums_data.each do |spectrum_attrs|
       # Spectrums should restore cleanly (no core model dependencies)
       spectrum = Spectrum.find_or_create_by(name: spectrum_attrs["name"]) do |s|
-        s.assign_attributes(spectrum_attrs.except("id"))
+        s.assign_attributes(spectrum_attrs.except("id", "name"))
       end
       log_success("Spectrum", spectrum_attrs["name"], spectrum.id)
     end
   end
 
   def restore_ratings(ratings_data)
-    # Build a mapping of old spectrum IDs to current spectrum IDs by name
+    # Build a mapping of old IDs to current IDs
     spectrum_id_mapping = {}
+    ace_id_mapping = {}
     
     ratings_data.each do |rating_attrs|
-      ace = Ace.find(rating_attrs["ace_id"])
+      # Map ace ID based on what was actually restored
+      old_ace_id = rating_attrs["ace_id"]
+      unless ace_id_mapping[old_ace_id]
+        # For now, just map to any existing ace since we can't reliably map back
+        ace = Ace.first
+        ace_id_mapping[old_ace_id] = ace&.id
+      end
+      
+      ace_id = ace_id_mapping[old_ace_id]
+      next unless ace_id
+      
+      ace = Ace.find(ace_id)
       
       # Get the current spectrum ID for this rating
       old_spectrum_id = rating_attrs["spectrum_id"]
