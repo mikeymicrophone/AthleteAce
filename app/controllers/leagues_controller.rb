@@ -7,9 +7,17 @@ class LeaguesController < ApplicationController
     @current_filters = load_current_filters
     
     base_query = apply_filter :leagues
-    base_query = base_query.includes(:sport, :country)
     
     @sort_service = HierarchicalSortService.from_params(params)
+    
+    # Add joins based on what sorting requires
+    required_joins = @sort_service.required_joins
+    if required_joins.any?
+      base_query = base_query.joins(required_joins)
+    end
+    
+    # Always include for display purposes
+    base_query = base_query.includes(:sport, :country)
     
     sql_order = @sort_service.to_sql_order
     

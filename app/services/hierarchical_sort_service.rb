@@ -150,6 +150,22 @@ class HierarchicalSortService
     random_sort = sort_params.find { |p| random_attribute?(p[:attribute]) && p[:direction] != 'inactive' }
     random_sort ? random_sort[:direction] : nil
   end
+
+  # Get required joins for current sort parameters
+  def required_joins
+    joins_needed = []
+    
+    sort_params.each do |sort|
+      next if sort[:direction] == 'inactive'
+      next if random_attribute?(sort[:attribute])
+      
+      attribute_joins = REQUIRED_JOINS_BY_ATTRIBUTE[sort[:attribute]] || []
+      joins_needed.concat(attribute_joins)
+    end
+    
+    # Remove duplicates and return unique joins
+    joins_needed.uniq
+  end
   
   # Convert to URL parameter format
   def to_param
@@ -208,6 +224,25 @@ class HierarchicalSortService
     'alphabetical' => 'leagues.name',
     'country_name' => 'countries.name',
     'sport_name' => 'sports.name'
+  }.freeze
+
+  # Lookup table for required joins based on sort attributes
+  REQUIRED_JOINS_BY_ATTRIBUTE = {
+    # Player sorting joins
+    'team_name' => [:team],
+    'league_name' => [team: :league],
+    'sport_name' => [team: [league: :sport]],
+    'position_name' => [:positions],
+    
+    # League sorting joins  
+    'country_name' => [:country],
+    'alphabetical' => [], # leagues.name - no join needed
+    
+    # No joins needed for these
+    'first_name' => [],
+    'last_name' => [],
+    'random' => [],
+    'shuffle' => []
   }.freeze
 
   # Map sort attributes to actual database column references

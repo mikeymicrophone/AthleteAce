@@ -10,19 +10,24 @@ class PlayersController < ApplicationController
     # Build the base query using the filters  
     base_query = apply_filter :players
     
-    # Simplified query - add joins only for columns we're actually sorting by
-    base_query = base_query.includes(:team, team: [:league, league: :sport])
-                          .includes(:positions)
-    
     # Initialize hierarchical sorting
     @sort_service = HierarchicalSortService.from_params(params)
+    
+    # Add joins based on what sorting requires
+    required_joins = @sort_service.required_joins
+    if required_joins.any?
+      base_query = base_query.joins(required_joins)
+    end
+    
+    # Always include for display purposes (separate from sorting joins)
+    base_query = base_query.includes(:team, team: [:league, league: :sport])
+                          .includes(:positions)
     
     # Apply hierarchical sorting (including integrated random)
     sql_order = @sort_service.to_sql_order
     
     if sql_order
       # Use custom SQL ORDER BY clause that handles random within hierarchy
-      # Remove distinct since we're not searching and it conflicts with custom ORDER BY
       @players = base_query.order(Arel.sql(sql_order))
     else
       # No sorts specified, use default
