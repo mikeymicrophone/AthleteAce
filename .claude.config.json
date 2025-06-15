@@ -1,5 +1,11 @@
 {
   "autoApprove": [
-    { "tool": "file",     "command": "save" }
+    { "tool": "file",     "command": "save" },
+    
+    { "tool": "linear",   "command": "list_my_issues" },
+    { "tool": "linear",   "command": "list_projects" },
+    
+    { "tool": "browsermcp", "command": "browser_navigate"},
+    { "tool": "browsermcp", "command": "browser_click"}
   ]
 }

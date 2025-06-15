@@ -195,24 +195,53 @@ class HierarchicalSortService
     clauses.empty? ? nil : clauses.join(', ')
   end
   
+  # Lookup table for sort attribute to database column mapping
+  SORT_COLUMN_MAPPING = {
+    # Player attributes
+    'team_name' => 'teams.mascot',
+    'first_name' => 'players.first_name',
+    'last_name' => 'players.last_name',
+    'position_name' => 'positions.name',
+    
+    # League attributes  
+    'league_name' => 'leagues.name',
+    'alphabetical' => 'leagues.name',
+    'country_name' => 'countries.name',
+    'sport_name' => 'sports.name'
+  }.freeze
+
   # Map sort attributes to actual database column references
   def map_sort_attribute_to_column(attribute)
-    case attribute.to_s
-    when 'team_name'
-      'teams.mascot'
-    when 'league_name'
-      'leagues.name'
-    when 'sport_name'
-      'sports.name'
-    when 'position_name'
-      'positions.name'
-    when 'first_name'
-      'players.first_name'
-    when 'last_name'
-      'players.last_name'
+    SORT_COLUMN_MAPPING[attribute.to_s] || default_column_mapping(attribute)
+  end
+
+  private
+
+  def default_column_mapping(attribute)
+    # Handle dynamic attributes with table prefixes
+    if attribute.match?(/^league_/)
+      "leagues.#{attribute.sub(/^league_/, '')}"
+    elsif attribute.match?(/^player_/)
+      "players.#{attribute.sub(/^player_/, '')}"
     else
-      # Default to players table
-      "players.#{attribute}"
+      # Default fallback
+      "#{infer_table_context}.#{attribute}"
+    end
+  end
+
+  def infer_table_context
+    league_keys = SORT_COLUMN_MAPPING.keys.select { |k| k.match?(/league|country|sport|alphabetical/) }
+    player_keys = SORT_COLUMN_MAPPING.keys.select { |k| k.match?(/team|position|first_name|last_name/) }
+    
+    has_league_attrs = sort_params.any? { |p| league_keys.include?(p[:attribute]) }
+    has_player_attrs = sort_params.any? { |p| player_keys.include?(p[:attribute]) }
+    
+    if has_league_attrs && !has_player_attrs
+      'leagues'
+    elsif has_player_attrs && !has_league_attrs  
+      'players'
+    else
+      'leagues'
     end
   end
   
