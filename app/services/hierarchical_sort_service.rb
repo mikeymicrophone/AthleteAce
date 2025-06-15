@@ -152,19 +152,22 @@ class HierarchicalSortService
   end
 
   # Get required joins for current sort parameters
-  def required_joins
-    joins_needed = []
+  def required_joins(context = nil)
+    # Determine context if not provided
+    context ||= infer_table_context.to_sym
     
-    sort_params.each do |sort|
-      next if sort[:direction] == 'inactive'
-      next if random_attribute?(sort[:attribute])
-      
-      attribute_joins = REQUIRED_JOINS_BY_ATTRIBUTE[sort[:attribute]] || []
-      joins_needed.concat(attribute_joins)
-    end
-    
-    # Remove duplicates and return unique joins
-    joins_needed.uniq
+    sort_params
+      .reject { |sort| sort[:direction] == 'inactive' || random_attribute?(sort[:attribute]) }
+      .flat_map { |sort| 
+        joins_config = REQUIRED_JOINS_BY_ATTRIBUTE[sort[:attribute]]
+        if joins_config.is_a?(Hash)
+          joins_config[context] || []
+        else
+          # Fallback for old format
+          joins_config || []
+        end
+      }
+      .uniq
   end
   
   # Convert to URL parameter format
@@ -193,12 +196,11 @@ class HierarchicalSortService
       if random_attribute?(sort[:attribute])
         case sort[:direction]
         when 'random'
-          # Use a consistent random seed for reproducible results within pagination
-          clauses << 'RANDOM()'
+          # Use a consistent random seed based on hour of year for reproducible results within pagination
+          clauses << "setseed(#{time_based_seed}); RANDOM()"
         when 'shuffle'
-          # Use a different approach for shuffle - could use a hash-based approach
-          # For now, use RANDOM() but we could enhance this later
-          clauses << 'RANDOM()'
+          # Use a different seed for shuffle to differentiate from random
+          clauses << "setseed(#{time_based_seed(1)}); RANDOM()"
         end
       else
         direction = sort[:direction].upcase
@@ -227,22 +229,23 @@ class HierarchicalSortService
   }.freeze
 
   # Lookup table for required joins based on sort attributes
+  # Context-aware joins - different for players vs leagues
   REQUIRED_JOINS_BY_ATTRIBUTE = {
     # Player sorting joins
-    'team_name' => [:team],
-    'league_name' => [team: :league],
-    'sport_name' => [team: [league: :sport]],
-    'position_name' => [:positions],
+    'team_name' => { players: [:team], leagues: [] },
+    'league_name' => { players: [team: :league], leagues: [] },
+    'sport_name' => { players: [team: [league: :sport]], leagues: [:sport] },
+    'position_name' => { players: [:positions], leagues: [] },
     
     # League sorting joins  
-    'country_name' => [:country],
-    'alphabetical' => [], # leagues.name - no join needed
+    'country_name' => { players: [], leagues: [:country] },
+    'alphabetical' => { players: [], leagues: [] }, # leagues.name - no join needed
     
     # No joins needed for these
-    'first_name' => [],
-    'last_name' => [],
-    'random' => [],
-    'shuffle' => []
+    'first_name' => { players: [], leagues: [] },
+    'last_name' => { players: [], leagues: [] },
+    'random' => { players: [], leagues: [] },
+    'shuffle' => { players: [], leagues: [] }
   }.freeze
 
   # Map sort attributes to actual database column references
@@ -295,5 +298,13 @@ class HierarchicalSortService
       url_param: to_param,
       random_active: random_active?
     }
+  end
+
+  private
+
+  # Generate a time-based seed for consistent random ordering within an hour
+  def time_based_seed(offset = 0)
+    seed = Time.current.yday * 24 + Time.current.hour + offset
+    seed.to_f / 10000
   end
 end

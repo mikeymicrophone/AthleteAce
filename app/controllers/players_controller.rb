@@ -4,46 +4,33 @@ class PlayersController < ApplicationController
   before_action :set_player, only: %i[ show edit update destroy ]
   
   def index
-    # Load current filters and set related instance variables
-    @current_filters = load_current_filters
+    load_current_filters
     
-    # Build the base query using the filters  
     base_query = apply_filter :players
     
-    # Initialize hierarchical sorting
     @sort_service = HierarchicalSortService.from_params(params)
     
-    # Add joins based on what sorting requires
-    required_joins = @sort_service.required_joins
+    required_joins = @sort_service.required_joins(:players)
     if required_joins.any?
       base_query = base_query.joins(required_joins)
     end
     
-    # Always include for display purposes (separate from sorting joins)
-    base_query = base_query.includes(:team, team: [:league, league: :sport])
-                          .includes(:positions)
+    base_query = base_query.includes(:positions, team: {league: :sport})
     
-    # Apply hierarchical sorting (including integrated random)
     sql_order = @sort_service.to_sql_order
     
     if sql_order
-      # Use custom SQL ORDER BY clause that handles random within hierarchy
       @players = base_query.order(Arel.sql(sql_order))
     else
-      # No sorts specified, use default
       @players = base_query.order(:first_name)
     end
     
-    # Load available spectrums for the rating selector
     @spectrums = Spectrum.all
     
-    # Set current spectrum ID if provided in params
     set_current_spectrum_id params[:spectrum_id] if params[:spectrum_id].present?
     
-    # Load filter options for selector UI
-    @filter_options = load_filter_options
+    load_filter_options
     
-    # Paginate the results
     @pagy, @players = pagy(@players, items: params[:per_page] || 20)
   end
 

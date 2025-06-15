@@ -11,7 +11,7 @@ class LeaguesController < ApplicationController
     @sort_service = HierarchicalSortService.from_params(params)
     
     # Add joins based on what sorting requires
-    required_joins = @sort_service.required_joins
+    required_joins = @sort_service.required_joins(:leagues)
     if required_joins.any?
       base_query = base_query.joins(required_joins)
     end
