@@ -175,6 +175,31 @@ YAML.load_file(file_path,
 - **Key Success**: Smart duplicate detection, 50 new ratings discovered, 1,127 game attempts
 - **Graceful Handling**: Skipped 79 existing records without errors
 
+## Backup Storage Location
+
+UGC backups are stored in `db/seeds/athlete_ace_ugc/backups/` as a Git submodule. This provides several advantages:
+
+- **Version Control**: Backups are tracked and can be shared across environments
+- **Team Collaboration**: Developers can access shared backup sets for testing
+- **Environment Consistency**: Production backups can be used for staging/development
+- **Historical Tracking**: Git history provides audit trail of backup operations
+
+### Directory Structure
+```
+db/seeds/athlete_ace_ugc/
+├── backups/                    (Git submodule)
+│   ├── backup_20241215_143022/
+│   │   ├── aces_and_ratings.yml
+│   │   ├── quest_system.yml
+│   │   ├── game_attempts.yml
+│   │   ├── backup_metadata.yml
+│   │   └── restoration_report.yml
+│   └── backup_20241216_091234/
+│       └── ...
+└── templates/
+    └── ... (development templates)
+```
+
 ## Workflow Commands
 
 ### Complete Automated Workflow

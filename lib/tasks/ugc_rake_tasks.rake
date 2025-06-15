@@ -7,7 +7,7 @@ namespace :ugc do
     puts "🔄 Starting UGC backup..."
     
     backup_timestamp = Time.current.strftime("%Y%m%d_%H%M%S")
-    backup_dir = Rails.root.join("athlete_ace_ugc", "backups", "backup_#{backup_timestamp}")
+    backup_dir = Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups", "backup_#{backup_timestamp}")
     
     # Create backup directory
     FileUtils.mkdir_p(backup_dir)
@@ -58,7 +58,7 @@ namespace :ugc do
       puts "Usage: rails ugc:restore[20241215_143022]"
       puts ""
       puts "Available backups:"
-      backup_dirs = Dir.glob(Rails.root.join("athlete_ace_ugc", "backups", "backup_*"))
+      backup_dirs = Dir.glob(Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups", "backup_*"))
       if backup_dirs.any?
         backup_dirs.each do |dir|
           timestamp = File.basename(dir).sub("backup_", "")
@@ -70,7 +70,7 @@ namespace :ugc do
       exit 1
     end
     
-    backup_dir = Rails.root.join("athlete_ace_ugc", "backups", "backup_#{backup_timestamp}")
+    backup_dir = Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups", "backup_#{backup_timestamp}")
     
     unless Dir.exist?(backup_dir)
       puts "❌ Error: Backup directory not found: #{backup_dir}"
@@ -97,7 +97,7 @@ namespace :ugc do
     Rake::Task["ugc:backup"].invoke
     
     # Get the backup timestamp from the most recent backup
-    backup_dirs = Dir.glob(Rails.root.join("athlete_ace_ugc", "backups", "backup_*"))
+    backup_dirs = Dir.glob(Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups", "backup_*"))
     latest_backup = backup_dirs.max_by { |dir| File.ctime(dir) }
     backup_timestamp = File.basename(latest_backup).sub("backup_", "")
     
@@ -110,7 +110,7 @@ namespace :ugc do
     
     unless ['yes', 'y'].include?(confirmation)
       puts "❌ Full reseed cancelled after backup."
-      puts "🔧 Backup is available at: athlete_ace_ugc/backups/backup_#{backup_timestamp}"
+      puts "🔧 Backup is available at: db/seeds/athlete_ace_ugc/backups/backup_#{backup_timestamp}"
       exit 0
     end
     
@@ -133,7 +133,7 @@ namespace :ugc do
 
   desc "List available UGC backups"
   task list_backups: :environment do
-    backup_dirs = Dir.glob(Rails.root.join("athlete_ace_ugc", "backups", "backup_*"))
+    backup_dirs = Dir.glob(Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups", "backup_*"))
     
     if backup_dirs.empty?
       puts "No UGC backups found."
@@ -186,7 +186,7 @@ namespace :ugc do
     puts ""
     
     # Check if backup directory exists
-    backup_root = Rails.root.join("athlete_ace_ugc", "backups")
+    backup_root = Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups")
     if Dir.exist?(backup_root)
       puts "✅ Backup directory exists: #{backup_root}"
     else
@@ -238,7 +238,7 @@ namespace :ugc do
 
   desc "Clean up old UGC backups (keeps last 5)"
   task cleanup_backups: :environment do
-    backup_dirs = Dir.glob(Rails.root.join("athlete_ace_ugc", "backups", "backup_*"))
+    backup_dirs = Dir.glob(Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups", "backup_*"))
     
     if backup_dirs.length <= 5
       puts "Only #{backup_dirs.length} backups found. No cleanup needed."
@@ -270,7 +270,7 @@ namespace :ugc do
       exit 1
     end
     
-    backup_dir = Rails.root.join("athlete_ace_ugc", "backups", "backup_#{backup_timestamp}")
+    backup_dir = Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups", "backup_#{backup_timestamp}")
     
     unless Dir.exist?(backup_dir)
       puts "❌ Error: Backup directory not found: #{backup_dir}"

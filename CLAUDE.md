@@ -48,6 +48,12 @@ Key filterable URLs: `/teams/123/players`, `/leagues/456/teams/123/players`
 - **Versioned Seeding**: Tracks seed versions to prevent duplicate data
 - **Helper Methods**: Centralized player creation logic in `db/seeds.rb`
 
+### UGC Preservation System
+- **Backup Location**: `db/seeds/athlete_ace_ugc/backups/` (Git submodule for version control)
+- **Identifier-Based Remapping**: Preserves user data during core model reseeding
+- **Commands**: `rails ugc:backup`, `rails ugc:restore[timestamp]`, `rails ugc:full_reseed`
+- **Documentation**: See `docs/ugc_preservation_system.md` for complete implementation details
+
 ### Authentication & Games
 - **Devise** for user authentication (`Ace` model)
 - **Strength Training**: Various game modes for learning athlete names
