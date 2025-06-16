@@ -159,13 +159,7 @@ class HierarchicalSortService
     sort_params
       .reject { |sort| sort[:direction] == 'inactive' || random_attribute?(sort[:attribute]) }
       .flat_map { |sort| 
-        joins_config = REQUIRED_JOINS_BY_ATTRIBUTE[sort[:attribute]]
-        if joins_config.is_a?(Hash)
-          joins_config[context] || []
-        else
-          # Fallback for old format
-          joins_config || []
-        end
+        get_required_joins_for_attribute(sort[:attribute], context)
       }
       .uniq
   end
@@ -196,11 +190,13 @@ class HierarchicalSortService
       if random_attribute?(sort[:attribute])
         case sort[:direction]
         when 'random'
-          # Use a consistent random seed based on hour of year for reproducible results within pagination
-          clauses << "setseed(#{time_based_seed}); RANDOM()"
+          # Use a consistent hash-based seed for reproducible results within pagination
+          table_id = primary_table_id
+          clauses << "MD5(CONCAT(#{table_id}, '#{time_based_seed}'))"
         when 'shuffle'
           # Use a different seed for shuffle to differentiate from random
-          clauses << "setseed(#{time_based_seed(1)}); RANDOM()"
+          table_id = primary_table_id
+          clauses << "MD5(CONCAT(#{table_id}, '#{time_based_seed(1)}'))"
         end
       else
         direction = sort[:direction].upcase
@@ -213,50 +209,68 @@ class HierarchicalSortService
     clauses.empty? ? nil : clauses.join(', ')
   end
   
-  # Lookup table for sort attribute to database column mapping
-  SORT_COLUMN_MAPPING = {
-    # Player attributes
-    'team_name' => 'teams.mascot',
-    'first_name' => 'players.first_name',
-    'last_name' => 'players.last_name',
-    'position_name' => 'positions.name',
-    
-    # League attributes  
-    'league_name' => 'leagues.name',
-    'alphabetical' => 'leagues.name',
-    'country_name' => 'countries.name',
-    'sport_name' => 'sports.name'
-  }.freeze
-
-  # Lookup table for required joins based on sort attributes
-  # Context-aware joins - different for players vs leagues
-  REQUIRED_JOINS_BY_ATTRIBUTE = {
-    # Player sorting joins
-    'team_name' => { players: [:team], leagues: [] },
-    'league_name' => { players: [team: :league], leagues: [] },
-    'sport_name' => { players: [team: [league: :sport]], leagues: [:sport] },
-    'position_name' => { players: [:positions], leagues: [] },
-    
-    # League sorting joins  
-    'country_name' => { players: [], leagues: [:country] },
-    'alphabetical' => { players: [], leagues: [] }, # leagues.name - no join needed
-    
-    # No joins needed for these
-    'first_name' => { players: [], leagues: [] },
-    'last_name' => { players: [], leagues: [] },
-    'random' => { players: [], leagues: [] },
-    'shuffle' => { players: [], leagues: [] }
-  }.freeze
-
   # Map sort attributes to actual database column references
   def map_sort_attribute_to_column(attribute)
-    SORT_COLUMN_MAPPING[attribute.to_s] || default_column_mapping(attribute)
+    context = infer_table_context.to_sym
+    
+    # Try to get from dynamic configuration first
+    if defined?(HierarchicalSortConfigBuilder)
+      dynamic_config = HierarchicalSortConfigBuilder.build_config
+      if dynamic_config[context] && dynamic_config[context][:attributes]
+        column_mapping = dynamic_config[context][:attributes][attribute.to_s]
+        return column_mapping if column_mapping
+      end
+    end
+    
+    # Fallback to legacy mapping or default
+    legacy_mapping(attribute) || default_column_mapping(attribute)
   end
 
   private
 
+  # Get required joins for an attribute in the current context
+  def get_required_joins_for_attribute(attribute, context)
+    # Try dynamic configuration first
+    if defined?(HierarchicalSortConfigBuilder)
+      dynamic_config = HierarchicalSortConfigBuilder.build_config
+      if dynamic_config[context] && dynamic_config[context][:joins]
+        joins_config = dynamic_config[context][:joins][attribute.to_s]
+        return joins_config if joins_config
+      end
+    end
+    
+    # Fallback to legacy configuration
+    legacy_joins = legacy_joins_mapping[attribute.to_s]
+    if legacy_joins.is_a?(Hash)
+      legacy_joins[context] || []
+    else
+      legacy_joins || []
+    end
+  end
+
+  # Legacy mapping for backward compatibility
+  def legacy_mapping(attribute)
+    all_legacy_mappings[attribute.to_s]
+  end
+
+  # Legacy joins mapping for backward compatibility
+  def legacy_joins_mapping
+    {
+      'team_name' => { players: [:team], leagues: [] },
+      'league_name' => { players: [team: :league], leagues: [] },
+      'sport_name' => { players: [team: [league: :sport]], leagues: [:sport] },
+      'position_name' => { players: [:positions], leagues: [] },
+      'country_name' => { players: [], leagues: [:country] },
+      'alphabetical' => { players: [], leagues: [] },
+      'first_name' => { players: [], leagues: [] },
+      'last_name' => { players: [], leagues: [] },
+      'random' => { players: [], leagues: [] },
+      'shuffle' => { players: [], leagues: [] }
+    }
+  end
+
+  # Handle dynamic attributes with table prefixes
   def default_column_mapping(attribute)
-    # Handle dynamic attributes with table prefixes
     if attribute.match?(/^league_/)
       "leagues.#{attribute.sub(/^league_/, '')}"
     elsif attribute.match?(/^player_/)
@@ -267,9 +281,10 @@ class HierarchicalSortService
     end
   end
 
+  # Infer the table context based on the sort parameters
   def infer_table_context
-    league_keys = SORT_COLUMN_MAPPING.keys.select { |k| k.match?(/league|country|sport|alphabetical/) }
-    player_keys = SORT_COLUMN_MAPPING.keys.select { |k| k.match?(/team|position|first_name|last_name/) }
+    league_keys = all_legacy_mappings.keys.select { |k| k.match?(/league|country|sport|alphabetical/) }
+    player_keys = all_legacy_mappings.keys.select { |k| k.match?(/team|position|first_name|last_name/) }
     
     has_league_attrs = sort_params.any? { |p| league_keys.include?(p[:attribute]) }
     has_player_attrs = sort_params.any? { |p| player_keys.include?(p[:attribute]) }
@@ -281,6 +296,20 @@ class HierarchicalSortService
     else
       'leagues'
     end
+  end
+
+  # Return all legacy mappings as a hash
+  def all_legacy_mappings
+    {
+      'team_name' => 'teams.mascot',
+      'first_name' => 'players.first_name',
+      'last_name' => 'players.last_name',
+      'position_name' => 'positions.name',
+      'league_name' => 'leagues.name',
+      'alphabetical' => 'leagues.name',
+      'country_name' => 'countries.name',
+      'sport_name' => 'sports.name'
+    }
   end
   
   # Debug representation
@@ -306,5 +335,13 @@ class HierarchicalSortService
   def time_based_seed(offset = 0)
     seed = Time.current.yday * 24 + Time.current.hour + offset
     seed.to_f / 10000
+  end
+
+  def primary_table_id
+    if infer_table_context == 'leagues'
+      'leagues.id'
+    else
+      'players.id'
+    end
   end
 end
