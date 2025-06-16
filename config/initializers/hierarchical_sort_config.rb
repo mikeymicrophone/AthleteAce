@@ -4,7 +4,8 @@
 # Define which models support hierarchical sorting
 HIERARCHICAL_SORT_MODELS = {
   players: 'Player',
-  leagues: 'League'
+  leagues: 'League',
+  divisions: 'Division'
 }.freeze
 
 # Helper class to build dynamic configuration

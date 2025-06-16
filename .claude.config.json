@@ -2,6 +2,9 @@
   "autoApprove": [
     { "tool": "file",     "command": "save" },
     
+    { "tool": "git",      "command": "git_log"},
+    { "tool": "git",      "command": "git_show"},
+    
     { "tool": "linear",   "command": "list_my_issues" },
     { "tool": "linear",   "command": "list_projects" },
     

@@ -21,6 +21,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Development Server
 - `bin/dev` - Start development server with Procfile.dev (Rails + Tailwind CSS)
 - `rails server` - Start Rails server only
+- Puma-dev server running at http://athleteace.test (primary development server)
+- Can start another server with `binding.break` for debugging purposes
 
 ## Architecture Overview
 
@@ -63,6 +65,7 @@ Key filterable URLs: `/teams/123/players`, `/leagues/456/teams/123/players`
 
 ### Ruby Style (.windsurfrules)
 - Minimize parentheses in method calls when not needed for clarity
+- In Ruby it's great to not use parentheses when they are not needed.
 - Use Rails tag builders instead of raw HTML in ERB templates
 - Create reusable helper methods for common template patterns
 - Parametrize helper methods to work across multiple domain models
@@ -91,3 +94,6 @@ Use descriptive suffixes: `dom_id(team, :quiz_link_for)` rather than `dom_id(tea
 - **Pagy** for pagination
 - **Ransack** for search functionality
 - **Devise** for authentication
+
+## Development Guidance
+- Let's not add handling for various input types (hash, array, string) until we need it.

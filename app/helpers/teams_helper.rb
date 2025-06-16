@@ -187,7 +187,7 @@ module TeamsHelper
   # Generates association links for a given resource based on FilterableAssociations
   # @param resource [Object] The resource to generate association links for
   # @return [String] HTML for the association links
-  def association_links(resource)
+  def association_links resource
     return unless resource.present?
 
     model_name = resource.class.name.underscore.to_sym
@@ -198,9 +198,9 @@ module TeamsHelper
       count = resource.send(assoc).count
       next if count.zero?
 
-      link_to pluralize(count, assoc.to_s.singularize), [resource, assoc], class: "text-sm text-blue-600 hover:underline"
+      tag.div link_to(pluralize(count, assoc.to_s.singularize), [resource, assoc]), class: "association-to-collection #{assoc}"
     end.compact
 
-    safe_join links
+    tag.div safe_join(links), class: "association-links #{model_name}"
   end
 end

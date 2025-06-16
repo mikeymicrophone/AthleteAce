@@ -17,6 +17,12 @@ module SortableHelper
       'sport_name' => 'Sport', 
       'random' => 'Random',
       'shuffle' => 'Shuffle'
+    },
+    'divisions' => {
+      'name' => 'Name',
+      'abbreviation' => 'Abbreviation',
+      'random' => 'Random',
+      'shuffle' => 'Shuffle'
     }
   }.freeze
 
@@ -175,6 +181,8 @@ module SortableHelper
       'players'
     when /leagues/i
       'leagues'
+    when /divisions/i
+      'divisions'
     else
       # Try to infer from controller
       controller_name = params[:controller]

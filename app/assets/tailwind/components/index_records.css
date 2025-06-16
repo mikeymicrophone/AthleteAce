@@ -33,6 +33,15 @@
   }
 }
 
+.index-record .association-links {
+  /* @apply flex flex-col gap-2; */
+}
+
+.association-links a.association-to-collection {
+  /* display: block; */
+}
+
+
 /* Record information section */
 .record-info {
   @apply col-span-1;
