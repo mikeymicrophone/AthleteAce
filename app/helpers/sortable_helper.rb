@@ -58,7 +58,9 @@ module SortableHelper
         @sort_service.sort_params.filter_map.with_index do |sort, index|
           next if sort[:direction] == 'inactive'
           
-          tag.div(class: "sort-chain-item") do
+          sort_resource = determine_sort_resource(sort[:attribute], resource_type)
+          
+          tag.div(class: "sort-chain-item", data: { sort_resource: sort_resource }) do
             tag.span("#{index + 1}.", class: "sort-chain-priority") +
             tag.span(humanize_sort_attribute_for(sort[:attribute], resource_type), class: "sort-chain-attribute") +
             tag.span(humanize_sort_direction(sort[:direction], sort[:attribute]), class: "sort-chain-direction") +
@@ -74,6 +76,7 @@ module SortableHelper
     priority = @sort_service.priority_for(attribute)
     
     css_classes = build_sort_link_classes(current_direction, priority)
+    sort_resource = determine_sort_resource(attribute, resource_type)
     
     toggle_service = @sort_service.toggle_sort(attribute)
     sort_param = toggle_service.to_param
@@ -83,7 +86,9 @@ module SortableHelper
     
     path_method = "#{resource_type}_path"
     
-    link_to send(path_method, url_params), class: css_classes, data: { turbo_preload: false } do
+    link_to send(path_method, url_params), 
+            class: css_classes, 
+            data: { turbo_preload: false, resource: sort_resource } do
       content = ""
       
       if priority
@@ -236,6 +241,48 @@ module SortableHelper
       'shuffle'
     else
       direction.to_s
+    end
+  end
+
+  def determine_sort_resource(attribute, resource_type)
+    # Map sort attributes to their corresponding resource types
+    case attribute.to_s
+    when 'sport_name'
+      'sport'
+    when 'league_name'
+      'league'  
+    when 'conference_name'
+      'conference'
+    when 'division_name'
+      'division'
+    when 'team_name'
+      'team'
+    when 'first_name', 'last_name'
+      'player'
+    when 'position_name'
+      'position'
+    when 'country_name'
+      'country'
+    when 'state_name'
+      'state'
+    when 'city_name'
+      'city'
+    when 'stadium_name'
+      'stadium'
+    else
+      # Default to the resource type being sorted if no specific mapping
+      case resource_type
+      when 'players'
+        'player'
+      when 'leagues'
+        'league'
+      when 'divisions'
+        'division'
+      when 'teams'
+        'team'
+      else
+        resource_type&.singularize || 'default'
+      end
     end
   end
 end

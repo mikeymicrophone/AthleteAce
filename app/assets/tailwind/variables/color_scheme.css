@@ -1,0 +1,27 @@
+:root {
+  /* Brand/Primary Entities */
+  --color-sport:           #5ec6fa;   /* Sport (light blue) */
+  --color-league:          #ffa726;   /* League (orange) */
+  --color-conference:      #f44336;   /* Conference (red) */
+  --color-division:        #f06292;   /* Division (pink) */
+  --color-membership:      #7c3aed;   /* Membership (purple) */
+  --color-team:            #2962ff;   /* Team (blue) */
+  --color-player:          #a259e6;   /* Player (violet) */
+  --color-position:        #b388ff;   /* Position (lavender) */
+  --color-role:            #d1b3ff;   /* Role (light lavender) */
+  --color-contract:        #b2dfdb;   /* Contract (mint green) */
+  --color-campaign:        #4fc3f7;   /* Campaign (sky blue) */
+  --color-season:          #80deea;   /* Season (aqua) */
+  --color-year:            #e6ee9c;   /* Year (light yellow-green) */
+  --color-contest:         #ffe082;   /* Contest (yellow) */
+  --color-stadium:         #81c784;   /* Stadium (green) */
+  --color-residence:       #c62828;   /* Residence (dark red) */
+
+  /* Location/Jurisdiction */
+  --color-jurisdiction:    #bdbdbd;   /* Jurisdiction (light gray) */
+  --color-federation:      #424242;   /* Federation (dark gray) */
+  --color-country:         #42a5f5;   /* Country (blue) */
+  --color-state:           #4dd0e1;   /* State (teal) */
+  --color-city:            #ffd54f;   /* City (gold) */
+
+}

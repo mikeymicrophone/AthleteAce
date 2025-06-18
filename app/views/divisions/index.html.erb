@@ -1,4 +1,3 @@
-
 <% content_for :title, "Divisions" %>
 
 <%= division_sort_links %>
@@ -7,15 +6,9 @@
 
 <div id="divisions">
   <% @divisions.each do |division| %>
-    <%= tag.div(id: dom_id(division), class: "index-record") do %>
-      <div class="division-info">
-        <%= display_name_with_lazy_logo division %>
-        <%= display_name_with_lazy_logo division.conference %>
-        <%= display_name_with_lazy_logo division.league %>
-      </div>
-      
-      <%= rating_slider_container(division, selected_spectrums) %>
-
+    <%= tag.div id: dom_id(division), class: "index-record" do %>
+      <%= logo_bank_for division %>      
+      <%= rating_slider_container division, selected_spectrums %>
       <%= association_links division %>
       <%= quiz_link division, title: "Test your knowledge of teams in this division" %>
     <% end %>

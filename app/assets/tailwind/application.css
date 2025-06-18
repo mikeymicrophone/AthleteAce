@@ -1,3 +1,4 @@
 @import "tailwindcss";
+@import "./variables/color_scheme.css";
 @import "./components.css";
 @import "./pagy.tailwind.css";
