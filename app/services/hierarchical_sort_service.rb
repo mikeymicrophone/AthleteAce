@@ -150,6 +150,19 @@ class HierarchicalSortService
     random_sort = sort_params.find { |p| random_attribute?(p[:attribute]) && p[:direction] != 'inactive' }
     random_sort ? random_sort[:direction] : nil
   end
+
+  # Get required joins for current sort parameters
+  def required_joins(context = nil)
+    # Determine context if not provided
+    context ||= infer_table_context.to_sym
+    
+    sort_params
+      .reject { |sort| sort[:direction] == 'inactive' || random_attribute?(sort[:attribute]) }
+      .flat_map { |sort| 
+        get_required_joins_for_attribute(sort[:attribute], context)
+      }
+      .uniq
+  end
   
   # Convert to URL parameter format
   def to_param
@@ -177,12 +190,13 @@ class HierarchicalSortService
       if random_attribute?(sort[:attribute])
         case sort[:direction]
         when 'random'
-          # Use a consistent random seed for reproducible results within pagination
-          clauses << 'RANDOM()'
+          # Use a consistent hash-based seed for reproducible results within pagination
+          table_id = primary_table_id
+          clauses << "MD5(CONCAT(#{table_id}, '#{time_based_seed}'))"
         when 'shuffle'
-          # Use a different approach for shuffle - could use a hash-based approach
-          # For now, use RANDOM() but we could enhance this later
-          clauses << 'RANDOM()'
+          # Use a different seed for shuffle to differentiate from random
+          table_id = primary_table_id
+          clauses << "MD5(CONCAT(#{table_id}, '#{time_based_seed(1)}'))"
         end
       else
         direction = sort[:direction].upcase
@@ -197,23 +211,105 @@ class HierarchicalSortService
   
   # Map sort attributes to actual database column references
   def map_sort_attribute_to_column(attribute)
-    case attribute.to_s
-    when 'team_name'
-      'teams.mascot'
-    when 'league_name'
-      'leagues.name'
-    when 'sport_name'
-      'sports.name'
-    when 'position_name'
-      'positions.name'
-    when 'first_name'
-      'players.first_name'
-    when 'last_name'
-      'players.last_name'
-    else
-      # Default to players table
-      "players.#{attribute}"
+    context = infer_table_context.to_sym
+    
+    # Try to get from dynamic configuration first
+    if defined?(HierarchicalSortConfigBuilder)
+      dynamic_config = HierarchicalSortConfigBuilder.build_config
+      if dynamic_config[context] && dynamic_config[context][:attributes]
+        column_mapping = dynamic_config[context][:attributes][attribute.to_s]
+        return column_mapping if column_mapping
+      end
     end
+    
+    # Fallback to legacy mapping or default
+    legacy_mapping(attribute) || default_column_mapping(attribute)
+  end
+
+  private
+
+  # Get required joins for an attribute in the current context
+  def get_required_joins_for_attribute(attribute, context)
+    # Try dynamic configuration first
+    if defined?(HierarchicalSortConfigBuilder)
+      dynamic_config = HierarchicalSortConfigBuilder.build_config
+      if dynamic_config[context] && dynamic_config[context][:joins]
+        joins_config = dynamic_config[context][:joins][attribute.to_s]
+        return joins_config if joins_config
+      end
+    end
+    
+    # Fallback to legacy configuration
+    legacy_joins = legacy_joins_mapping[attribute.to_s]
+    if legacy_joins.is_a?(Hash)
+      legacy_joins[context] || []
+    else
+      legacy_joins || []
+    end
+  end
+
+  # Legacy mapping for backward compatibility
+  def legacy_mapping(attribute)
+    all_legacy_mappings[attribute.to_s]
+  end
+
+  # Legacy joins mapping for backward compatibility
+  def legacy_joins_mapping
+    {
+      'team_name' => { players: [:team], leagues: [] },
+      'league_name' => { players: [team: :league], leagues: [] },
+      'sport_name' => { players: [team: [league: :sport]], leagues: [:sport] },
+      'position_name' => { players: [:positions], leagues: [] },
+      'country_name' => { players: [], leagues: [:country] },
+      'alphabetical' => { players: [], leagues: [] },
+      'first_name' => { players: [], leagues: [] },
+      'last_name' => { players: [], leagues: [] },
+      'random' => { players: [], leagues: [] },
+      'shuffle' => { players: [], leagues: [] }
+    }
+  end
+
+  # Handle dynamic attributes with table prefixes
+  def default_column_mapping(attribute)
+    if attribute.match?(/^league_/)
+      "leagues.#{attribute.sub(/^league_/, '')}"
+    elsif attribute.match?(/^player_/)
+      "players.#{attribute.sub(/^player_/, '')}"
+    else
+      # Default fallback
+      "#{infer_table_context}.#{attribute}"
+    end
+  end
+
+  # Infer the table context based on the sort parameters
+  def infer_table_context
+    league_keys = all_legacy_mappings.keys.select { |k| k.match?(/league|country|sport|alphabetical/) }
+    player_keys = all_legacy_mappings.keys.select { |k| k.match?(/team|position|first_name|last_name/) }
+    
+    has_league_attrs = sort_params.any? { |p| league_keys.include?(p[:attribute]) }
+    has_player_attrs = sort_params.any? { |p| player_keys.include?(p[:attribute]) }
+    
+    if has_league_attrs && !has_player_attrs
+      'leagues'
+    elsif has_player_attrs && !has_league_attrs  
+      'players'
+    else
+      'leagues'
+    end
+  end
+
+  # Return all legacy mappings as a hash
+  def all_legacy_mappings
+    {
+      'team_name' => 'teams.mascot',
+      'first_name' => 'players.first_name',
+      'last_name' => 'players.last_name',
+      'position_name' => 'positions.name',
+      'league_name' => 'leagues.name',
+      'alphabetical' => 'leagues.name',
+      'country_name' => 'countries.name',
+      'sport_name' => 'sports.name'
+    }
   end
   
   # Debug representation
@@ -231,5 +327,21 @@ class HierarchicalSortService
       url_param: to_param,
       random_active: random_active?
     }
+  end
+
+  private
+
+  # Generate a time-based seed for consistent random ordering within an hour
+  def time_based_seed(offset = 0)
+    seed = Time.current.yday * 24 + Time.current.hour + offset
+    seed.to_f / 10000
+  end
+
+  def primary_table_id
+    if infer_table_context == 'leagues'
+      'leagues.id'
+    else
+      'players.id'
+    end
   end
 end

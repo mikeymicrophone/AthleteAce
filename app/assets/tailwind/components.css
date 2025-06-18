@@ -10,6 +10,7 @@
 @import "./components/name_pulse.css";
 @import "./components/navigation.css";
 @import "./components/rating_slider.css";
+@import "./components/sorting_links.css";
 @import "./components/strength.css";
 @import "./components/team_choices.css";
 @import "./components/team_game_attempts.css";

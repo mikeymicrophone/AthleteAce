@@ -1,0 +1,215 @@
+/* Sorting Links Styles */
+
+.sort-links-container {
+  @apply mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200;
+}
+
+.sort-separator {
+  @apply my-3 border-gray-300;
+}
+
+.sort-links-group {
+  @apply flex flex-wrap items-center gap-2;
+}
+
+.sort-label {
+  @apply text-sm font-medium text-gray-700 mr-2;
+}
+
+/* Hierarchical Sort Links */
+.hierarchical-sort-link {
+  @apply inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-md 
+         border transition-all duration-200 hover:shadow-sm;
+}
+
+.sort-link-inactive {
+  @apply text-gray-600 bg-white border-gray-300 hover:bg-gray-50 hover:border-gray-400;
+}
+
+.sort-link-active {
+  @apply text-white font-semibold border-transparent shadow-sm;
+}
+
+/* Resource-based coloring for active sort links */
+.sort-link-active[data-resource="sport"] {
+  background-color: var(--color-sport);
+}
+
+.sort-link-active[data-resource="league"] {
+  background-color: var(--color-league);
+}
+
+.sort-link-active[data-resource="conference"] {
+  background-color: var(--color-conference);
+}
+
+.sort-link-active[data-resource="division"] {
+  background-color: var(--color-division);
+}
+
+.sort-link-active[data-resource="membership"] {
+  background-color: var(--color-membership);
+}
+
+.sort-link-active[data-resource="team"] {
+  background-color: var(--color-team);
+}
+
+.sort-link-active[data-resource="player"] {
+  background-color: var(--color-player);
+}
+
+.sort-link-active[data-resource="position"] {
+  background-color: var(--color-position);
+}
+
+.sort-link-active[data-resource="stadium"] {
+  background-color: var(--color-stadium);
+}
+
+.sort-link-active[data-resource="country"] {
+  background-color: var(--color-country);
+}
+
+.sort-link-active[data-resource="state"] {
+  background-color: var(--color-state);
+}
+
+.sort-link-active[data-resource="city"] {
+  background-color: var(--color-city);
+}
+
+/* Priority badges */
+.sort-priority-badge {
+  @apply inline-flex items-center justify-center w-5 h-5 text-xs font-bold 
+         bg-white/30 text-white rounded-full mr-1;
+}
+
+.sort-direction-icon {
+  @apply text-sm opacity-90;
+}
+
+/* Hierarchical Sort Display */
+.hierarchical-sort-display {
+  @apply mb-4;
+}
+
+.sort-chain-label {
+  @apply text-sm font-medium text-gray-700 mb-2 block;
+}
+
+.sort-chain {
+  @apply flex flex-wrap gap-2;
+}
+
+.sort-chain-item {
+  @apply flex items-center gap-1 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm;
+}
+
+.sort-chain-priority {
+  @apply font-bold text-gray-500 mr-1;
+}
+
+.sort-chain-attribute {
+  @apply font-medium text-gray-800;
+}
+
+.sort-chain-direction {
+  @apply text-gray-600 text-xs;
+}
+
+/* Sort Direction Controls */
+.sort-direction-controls {
+  @apply flex items-center gap-1 ml-2;
+}
+
+.sort-direction-link {
+  @apply inline-flex items-center justify-center w-6 h-6 text-xs rounded 
+         border transition-all duration-200 hover:shadow-sm;
+}
+
+.sort-direction-active {
+  @apply bg-gray-700 text-white border-gray-700;
+}
+
+.sort-direction-inactive {
+  @apply bg-gray-100 text-gray-500 border-gray-300 hover:bg-gray-200 hover:border-gray-400;
+}
+
+.sort-direction-remove {
+  @apply bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:border-red-300;
+}
+
+/* Priority-based visual weight */
+.sort-link-priority-1 {
+  @apply ring-2 ring-white/50;
+}
+
+.sort-link-priority-2 {
+  @apply ring-1 ring-white/30;
+}
+
+.sort-link-priority-3 {
+  @apply opacity-90;
+}
+
+/* Resource type indicators in sort chain */
+.sort-chain-item[data-sort-resource="sport"] {
+  @apply border-l-4;
+  border-left-color: var(--color-sport);
+}
+
+.sort-chain-item[data-sort-resource="league"] {
+  @apply border-l-4;
+  border-left-color: var(--color-league);
+}
+
+.sort-chain-item[data-sort-resource="conference"] {
+  @apply border-l-4;
+  border-left-color: var(--color-conference);
+}
+
+.sort-chain-item[data-sort-resource="division"] {
+  @apply border-l-4;
+  border-left-color: var(--color-division);
+}
+
+.sort-chain-item[data-sort-resource="membership"] {
+  @apply border-l-4;
+  border-left-color: var(--color-membership);
+}
+
+.sort-chain-item[data-sort-resource="team"] {
+  @apply border-l-4;
+  border-left-color: var(--color-team);
+}
+
+.sort-chain-item[data-sort-resource="player"] {
+  @apply border-l-4;
+  border-left-color: var(--color-player);
+}
+
+.sort-chain-item[data-sort-resource="position"] {
+  @apply border-l-4;
+  border-left-color: var(--color-position);
+}
+
+.sort-chain-item[data-sort-resource="stadium"] {
+  @apply border-l-4;
+  border-left-color: var(--color-stadium);
+}
+
+.sort-chain-item[data-sort-resource="country"] {
+  @apply border-l-4;
+  border-left-color: var(--color-country);
+}
+
+.sort-chain-item[data-sort-resource="state"] {
+  @apply border-l-4;
+  border-left-color: var(--color-state);
+}
+
+.sort-chain-item[data-sort-resource="city"] {
+  @apply border-l-4;
+  border-left-color: var(--color-city);
+}

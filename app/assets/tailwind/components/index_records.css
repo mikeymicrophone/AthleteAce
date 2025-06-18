@@ -15,7 +15,7 @@
 .index-record {
   /* Layout and spacing */
   @apply grid gap-4 items-center p-4 mb-2;
-  @apply grid-cols-1 md:grid-cols-3;
+  @apply grid-cols-1 md:grid-cols-5;
   
   /* Visual appearance */
   background-color: var(--index-record-bg);
@@ -31,6 +31,35 @@
     background-color: var(--index-record-hover-bg);
     box-shadow: 0 4px 6px var(--index-record-hover-shadow);
   }
+}
+
+.index-record .association-links {
+  /* @apply flex flex-col gap-2; */
+  border: 1px solid red;
+}
+
+.association-links div.association-to-collection.teams {
+  color: var(--color-team);
+}
+
+.association-links div.association-to-collection.memberships {
+  color: var(--color-membership);
+}
+
+.association-links div.association-to-collection.players {
+  color: var(--color-player);
+}
+
+.association-links div.association-to-collection.campaigns {
+  color: var(--color-campaign);
+}
+
+.association-links div.association-to-collection.contracts {
+  color: var(--color-contract);
+}
+
+.association-links div.association-to-collection.contests {
+  color: var(--color-contest);
 }
 
 /* Record information section */

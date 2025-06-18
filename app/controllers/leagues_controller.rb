@@ -4,10 +4,30 @@ class LeaguesController < ApplicationController
   before_action :set_league, only: %i[ show ]
 
   def index
-    @leagues = apply_filter :leagues
-    load_current_filters
+    @current_filters = load_current_filters
+    
+    base_query = apply_filter :leagues
+    
+    @sort_service = HierarchicalSortService.from_params(params)
+    
+    # Add joins based on what sorting requires
+    required_joins = @sort_service.required_joins(:leagues)
+    if required_joins.any?
+      base_query = base_query.joins(required_joins)
+    end
+    
+    # Always include for display purposes
+    base_query = base_query.includes(:sport, :country)
+    
+    sql_order = @sort_service.to_sql_order
+    
+    if sql_order
+      @leagues = base_query.order(Arel.sql(sql_order))
+    else
+      @leagues = base_query.order(:name)
+    end
+    
     load_filter_options
-    @leagues = @leagues.includes(:sport, :country).order(:name)
   end
 
   def show
