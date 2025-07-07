@@ -77,7 +77,7 @@ group :development do
   gem "web-console"
 end
 
-gem "tailwindcss-rails", "~> 4.2"
+gem "tailwindcss-rails", "~> 4.3"
 
 gem "nokogiri", "~> 1.18"
 
