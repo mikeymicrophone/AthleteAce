@@ -66,7 +66,7 @@ group :test do
   gem 'capybara', '~> 3.39'
   gem 'selenium-webdriver', '~> 4.10'
   gem 'webdrivers', '~> 5.3'
-  gem 'database_cleaner-active_record', '~> 2.1'
+  gem 'database_cleaner-active_record', '~> 2.2'
   gem 'shoulda-matchers', '~> 5.3'
   gem 'rails-controller-testing', '~> 1.0'
   gem 'simplecov', '~> 0.22.0', require: false
