@@ -8,12 +8,16 @@ module PlayersHelper
   
   # Display player metadata (team, league, sport)
   def player_metadata_display player
+    metadata_items = [
+      link_to_name(player.team)
+    ]
+
+    metadata_items << display_name_with_lazy_logo(player.current_organization) if player.current_organization.present?
+    metadata_items << display_name_with_lazy_logo(player.league)
+    metadata_items << display_name_with_lazy_logo(player.sport, logo_attribute: :icon_url)
+
     tag.div class: "record-metadata" do
-      link_to_name(player.team) + 
-      " | " + 
-      display_name_with_lazy_logo(player.league) + 
-      " | " + 
-      display_name_with_lazy_logo(player.sport, logo_attribute: :icon_url)
+      safe_join metadata_items, " | "
     end
   end
   

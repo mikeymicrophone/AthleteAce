@@ -6,6 +6,7 @@ class Player < ApplicationRecord
   belongs_to :team
   delegate :sport, to: :team
   delegate :league, to: :team
+  delegate :current_organization, to: :team, allow_nil: true
   
   has_many :roles, dependent: :destroy
   has_many :positions, through: :roles

@@ -23,4 +23,11 @@
       <%= link_to @team.conference.name, conference_path(@team.conference), class: "tag-value" %>
     <% end %>
   <% end %>
+
+  <% if @team.current_organization.present? %>
+    <%= tag.div class: "metadata-tag" do %>
+      <%= tag.span "Organization:", class: "tag-label" %>
+      <%= link_to @team.current_organization.name, organization_path(@team.current_organization), class: "tag-value" %>
+    <% end %>
+  <% end %>
 </div>

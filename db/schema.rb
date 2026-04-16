@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_15_120000) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_15_133000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -270,6 +270,30 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_15_120000) do
     t.index ["team_id"], name: "index_memberships_on_team_id"
   end
 
+  create_table "organization_affiliations", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "team_id", null: false
+    t.date "start_date"
+    t.date "end_date"
+    t.json "details"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "team_id", "start_date"], name: "index_org_affiliations_on_org_team_start", unique: true
+    t.index ["organization_id"], name: "index_organization_affiliations_on_organization_id"
+    t.index ["team_id"], name: "index_organization_affiliations_on_team_id"
+  end
+
+  create_table "organizations", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "abbreviation"
+    t.text "description"
+    t.string "url"
+    t.string "logo_url"
+    t.integer "founded_year"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "players", force: :cascade do |t|
     t.string "first_name"
     t.string "last_name"
@@ -477,6 +501,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_15_120000) do
   add_foreign_key "leagues", "sports"
   add_foreign_key "memberships", "divisions"
   add_foreign_key "memberships", "teams"
+  add_foreign_key "organization_affiliations", "organizations"
+  add_foreign_key "organization_affiliations", "teams"
   add_foreign_key "players", "cities", column: "birth_city_id"
   add_foreign_key "players", "countries", column: "birth_country_id"
   add_foreign_key "players", "teams"

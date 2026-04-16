@@ -8,9 +8,11 @@ Rails.application.routes.draw do
   resources :divisions, only: [:index, :show]
   resources :teams, only: [:index, :show]
   resources :players, only: [:index, :show]
+  resources :organizations, only: [:index, :show]
   
   # Organizational structure
   resources :memberships, only: [:index, :show]
+  resources :organization_affiliations, only: [:index, :show]
   
   # Time-based resources
   resources :seasons, only: [:index, :show]

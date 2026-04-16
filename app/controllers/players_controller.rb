@@ -15,7 +15,13 @@ class PlayersController < ApplicationController
       base_query = base_query.joins(required_joins)
     end
     
-    base_query = base_query.includes(:positions, team: {league: :sport})
+    base_query = base_query.includes(
+      :positions,
+      team: [
+        { league: :sport },
+        { current_organization_affiliation: :organization }
+      ]
+    )
     
     sql_order = @sort_service.to_sql_order
     

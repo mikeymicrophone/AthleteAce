@@ -75,6 +75,7 @@ begin
   SeedYears.run(glob_patterns[:years] || [])
   SeedSeasons.run(glob_patterns[:seasons])
   SeedContests.run(glob_patterns[:contests])
+  SeedSeasons.sync_references(glob_patterns[:seasons])
   SeedCampaigns.run(glob_patterns[:expansions] + glob_patterns[:transitions])  # Process expansion and transition data
   SeedContracts.run(glob_patterns[:contracts])
   

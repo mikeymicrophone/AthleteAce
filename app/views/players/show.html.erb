@@ -39,6 +39,12 @@
   
   <!-- Right column: League and Sport -->
   <div class="card-section right-section">
+    <% if @player.current_organization.present? %>
+      <div class="section-title">Organization</div>
+      <div class="info-item">
+        <%= display_name_with_lazy_logo(@player.current_organization) %>
+      </div>
+    <% end %>
     <div class="section-title">League</div>
     <div class="info-item">
       <%= display_name_with_lazy_logo(@player.league) %>

@@ -1,0 +1,33 @@
+<% content_for :title, "Organization Affiliations" %>
+
+<div class="w-full space-y-6">
+  <div class="flex items-end justify-between gap-4">
+    <div>
+      <p class="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Dated Team Membership</p>
+      <h1 class="text-4xl font-extrabold text-gray-900">Organization Affiliations</h1>
+    </div>
+    <p class="text-sm text-gray-500"><%= pluralize(@organization_affiliations.size, "affiliation") %></p>
+  </div>
+
+  <div class="space-y-3">
+    <% @organization_affiliations.each do |affiliation| %>
+      <%= link_to organization_affiliation_path(affiliation), class: "block rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-md" do %>
+        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p class="text-lg font-semibold text-gray-950"><%= affiliation.team.name %></p>
+            <p class="text-sm text-gray-600">
+              <%= affiliation.organization.name %>
+              <% if affiliation.team.league.present? %>
+                • <%= affiliation.team.league.name %>
+              <% end %>
+            </p>
+          </div>
+          <div class="text-sm text-gray-500 md:text-right">
+            <div><%= affiliation.start_date&.strftime("%Y-%m-%d") || "Unknown start" %></div>
+            <div><%= affiliation.end_date&.strftime("%Y-%m-%d") || "Present" %></div>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>
