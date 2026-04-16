@@ -3,14 +3,14 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="dropdown"
 export default class extends Controller {
   static targets = ["menu"]
-  
+
   connect() {
-    // Close dropdown when clicking outside
-    document.addEventListener("click", this.closeOnClickOutside.bind(this))
+    this.boundCloseOnClickOutside = this.closeOnClickOutside.bind(this)
+    document.addEventListener("click", this.boundCloseOnClickOutside)
   }
-  
+
   disconnect() {
-    document.removeEventListener("click", this.closeOnClickOutside.bind(this))
+    document.removeEventListener("click", this.boundCloseOnClickOutside)
   }
   
   toggle(event) {

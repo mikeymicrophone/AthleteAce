@@ -11,6 +11,6 @@ class SeasonsController < ApplicationController
   private
 
   def set_season
-    @season = Season.find params[:id]
+    @season = Season.includes(:year, league: :sport, campaigns: :team).find params[:id]
   end
 end

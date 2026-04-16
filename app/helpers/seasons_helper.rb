@@ -28,8 +28,10 @@ module SeasonsHelper
   
   def seasons_index_page
     tag.div class: "seasons-index-page" do
-      tag.header(class: "page-header") do
-        tag.h1("Seasons", class: "page-title")
+      tag.header(class: "seasons-hero") do
+        tag.p("Calendar of competition", class: "seasons-eyebrow") +
+        tag.h1("Seasons", class: "seasons-page-title") +
+        tag.p("Browse every year by league, with the year front and center and the competition highlighted at a glance.", class: "seasons-intro")
       end +
       tag.main(class: "seasons-grid") do
         @seasons.map { |season| season_item(season) }.join.html_safe
@@ -40,39 +42,39 @@ module SeasonsHelper
   
   def season_item(season)
     tag.article class: "season-item" do
-      tag.header(class: "season-header") do
-        link_to(season, class: "season-link") do
-          tag.h3(season_full_name(season), class: "season-name")
+      link_to(season, class: "season-link") do
+        tag.div(class: "season-card-topline") do
+          tag.span(season.league.name, class: "season-league-badge") +
+          tag.span(season.status.humanize, class: "season-status-badge")
         end +
-        tag.p(season_display_name(season), class: "season-year")
-      end +
-      tag.div(class: "season-details") do
-        tag.div(class: "season-meta") do
-          tag.span("League: ", class: "meta-label") +
-          tag.span(season.league.name, class: "meta-value")
+        tag.div(class: "season-primary") do
+          tag.p(season.year.number.to_s, class: "season-year") +
+          tag.p(season_display_name(season), class: "season-format")
         end +
-        tag.div(class: "season-meta") do
-          tag.span("Status: ", class: "meta-label") +
-          tag.span(season.status.humanize, class: "meta-value")
+        tag.div(class: "season-details") do
+          tag.p(season.league.sport.name, class: "season-sport") +
+          season_date_range(season)
         end +
-        if season.start_date
-          tag.div(class: "season-dates") do
-            date_text = "Season: #{season.start_date.strftime('%b %d, %Y')}"
-            date_text += " - #{season.end_date.strftime('%b %d, %Y')}" if season.end_date
-            date_text
-          end
-        end.to_s.html_safe
-      end +
-      tag.footer(class: "season-actions") do
-        link_to("View Details", season, class: "btn btn-outline")
+        tag.footer(class: "season-actions") do
+          tag.span("View season", class: "season-cta")
+        end
       end
     end
+  end
+
+  def season_date_range(season)
+    return "".html_safe unless season.start_date
+
+    date_text = season.start_date.strftime("%b %d, %Y")
+    date_text += " - #{season.end_date.strftime('%b %d, %Y')}" if season.end_date
+
+    tag.p(date_text, class: "season-dates")
   end
   
   def season_show_page(season)
     tag.div class: "season-show-page" do
       tag.div(class: "season-show-header") do
-        link_to("← Back to Seasons", seasons_path, class: "back-link") +
+        link_to("← Back to Seasons", seasons_path, class: "season-back-link") +
         tag.h1(season_full_name(season), class: "season-title") +
         tag.p(season_display_name(season), class: "season-subtitle")
       end +
@@ -80,6 +82,7 @@ module SeasonsHelper
         season_info_section(season) +
         season_dates_section(season)
       end +
+      season_link_banks_section(season) +
       if season.comments.any?
         season_comments_section(season)
       end.to_s.html_safe +
@@ -91,7 +94,7 @@ module SeasonsHelper
   
   def season_info_section(season)
     tag.div class: "season-info-section" do
-      tag.h2("Season Information", class: "section-title") +
+      tag.h2("Season Information", class: "season-section-title") +
       tag.div(class: "info-grid") do
         tag.div(class: "info-item") do
           tag.dt("League") +
@@ -117,7 +120,7 @@ module SeasonsHelper
   
   def season_dates_section(season)
     tag.div class: "season-info-section" do
-      tag.h2("Important Dates", class: "section-title") +
+      tag.h2("Important Dates", class: "season-section-title") +
       tag.div(class: "dates-list") do
         dates_content = ""
         
@@ -153,7 +156,58 @@ module SeasonsHelper
       end
     end
   end
-  
+
+  def season_link_banks_section(season)
+    ordered_campaigns = season.campaigns.sort_by { |campaign| campaign.team.name }
+    ordered_teams = ordered_campaigns.map(&:team)
+
+    tag.section class: "season-link-banks" do
+      season_team_bank(ordered_teams) +
+      season_campaign_bank(ordered_campaigns)
+    end
+  end
+
+  def season_team_bank(teams)
+    tag.div class: "season-link-bank" do
+      tag.div(class: "season-link-bank-header") do
+        tag.h2("Teams In This Season", class: "season-section-title") +
+        tag.p(pluralize(teams.size, "team"), class: "season-link-bank-count")
+      end +
+      if teams.any?
+        tag.div(class: "season-link-bank-grid") do
+          teams.map do |team|
+            link_to(team, class: "season-team-link-card") do
+              display_name_with_lazy_logo(team, link: false)
+            end
+          end.join.html_safe
+        end
+      else
+        tag.p("No teams linked to this season yet.", class: "season-link-bank-empty")
+      end
+    end
+  end
+
+  def season_campaign_bank(campaigns)
+    tag.div class: "season-link-bank" do
+      tag.div(class: "season-link-bank-header") do
+        tag.h2("Campaigns In This Season", class: "season-section-title") +
+        tag.p(pluralize(campaigns.size, "campaign"), class: "season-link-bank-count")
+      end +
+      if campaigns.any?
+        tag.div(class: "season-link-bank-grid") do
+          campaigns.map do |campaign|
+            link_to(campaign, class: "season-campaign-link-card") do
+              tag.span(campaign.team.name, class: "season-campaign-name") +
+              tag.span("Campaign", class: "season-campaign-label")
+            end
+          end.join.html_safe
+        end
+      else
+        tag.p("No campaigns linked to this season yet.", class: "season-link-bank-empty")
+      end
+    end
+  end
+
   def season_comments_section(season)
     tag.div class: "comments-section" do
       tag.h3("Comments", class: "comments-title") +

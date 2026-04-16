@@ -57,9 +57,9 @@ export default class extends Controller {
         this.targetIdSelectTarget.disabled = false;
       })
       .catch(error => {
-        console.error("Error fetching target options:", error);
-        this.targetIdSelectTarget.innerHTML = "<option>Error loading options</option>";
-        this.targetIdSelectTarget.disabled = false;
+        console.error("Error fetching target options:", error)
+        this.targetIdSelectTarget.innerHTML = '<option value="">Error - please refresh</option>'
+        this.targetIdSelectTarget.disabled = true
       });
   }
 }

@@ -6,8 +6,11 @@ export default class extends Controller {
     sequence: Object
   }
 
+  static SHRINK_DURATION = 300
+
   connect() {
-    // Set default sequence if not provided
+    this.animationTimer = null
+
     if (!this.hasSequenceValue) {
       this.sequenceValue = {
         initialDelay: 1000,
@@ -22,70 +25,55 @@ export default class extends Controller {
         }
       }
     }
-    
-    // Start the animation cycle
+
     this.startPulseSequence()
   }
 
   disconnect() {
-    // Clear any pending timeouts when controller disconnects
-    if (this.pulseTimeout) {
-      clearTimeout(this.pulseTimeout)
+    if (this.animationTimer) {
+      clearTimeout(this.animationTimer)
     }
   }
 
   startPulseSequence() {
-    // Start with initial delay
-    this.pulseTimeout = setTimeout(() => {
+    this.animationTimer = setTimeout(() => {
       this.pulseFirstName()
     }, this.sequenceValue.initialDelay)
   }
 
   pulseFirstName() {
-    // Configure animation durations
     this.firstNameTarget.style.setProperty('--grow-duration', `${this.sequenceValue.firstName.growDuration}ms`)
-    this.firstNameTarget.style.setProperty('--shrink-duration', '300ms')
-    
-    // Start the grow animation
+    this.firstNameTarget.style.setProperty('--shrink-duration', `${this.constructor.SHRINK_DURATION}ms`)
+
     this.firstNameTarget.classList.add('pulse-grow')
     this.firstNameTarget.classList.remove('pulse-shrink')
-    
-    // Hold at the larger size
-    this.pulseTimeout = setTimeout(() => {
-      // Start the shrink animation after hold duration
+
+    this.animationTimer = setTimeout(() => {
       this.firstNameTarget.classList.remove('pulse-grow')
       this.firstNameTarget.classList.add('pulse-shrink')
-      
-      // Wait for shrink animation and pause before pulsing last name
-      this.pulseTimeout = setTimeout(() => {
-        // Wait for pause before pulsing last name
-        this.pulseTimeout = setTimeout(() => {
+
+      this.animationTimer = setTimeout(() => {
+        this.animationTimer = setTimeout(() => {
           this.pulseLastName()
         }, this.sequenceValue.pause)
-      }, 300) // Shrink duration
+      }, this.constructor.SHRINK_DURATION)
     }, this.sequenceValue.firstName.holdDuration)
   }
 
   pulseLastName() {
-    // Configure animation durations
     this.lastNameTarget.style.setProperty('--grow-duration', `${this.sequenceValue.lastName.growDuration}ms`)
-    this.lastNameTarget.style.setProperty('--shrink-duration', '300ms')
-    
-    // Start the grow animation
+    this.lastNameTarget.style.setProperty('--shrink-duration', `${this.constructor.SHRINK_DURATION}ms`)
+
     this.lastNameTarget.classList.add('pulse-grow')
     this.lastNameTarget.classList.remove('pulse-shrink')
-    
-    // Hold at the larger size
-    this.pulseTimeout = setTimeout(() => {
-      // Start the shrink animation after hold duration
+
+    this.animationTimer = setTimeout(() => {
       this.lastNameTarget.classList.remove('pulse-grow')
       this.lastNameTarget.classList.add('pulse-shrink')
-      
-      // Wait for shrink animation before restarting cycle
-      this.pulseTimeout = setTimeout(() => {
-        // Restart the cycle
+
+      this.animationTimer = setTimeout(() => {
         this.startPulseSequence()
-      }, 300) // Shrink duration
+      }, this.constructor.SHRINK_DURATION)
     }, this.sequenceValue.lastName.holdDuration)
   }
 }

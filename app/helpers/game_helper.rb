@@ -46,7 +46,7 @@ module GameHelper
     
     data_attrs = {
       action: "click->game#checkAnswer",
-      game_target: "choiceItem"
+      game_target: "answerChoice"
     }
     
     # Add game-specific data attributes
@@ -102,7 +102,7 @@ module GameHelper
   
   # Renders a subject card (player or team) with standardized styling
   def game_subject_card(subject, game_type, additional_data = {})
-    data_attrs = { game_target: "subjectCardDisplay" }
+    data_attrs = { game_target: "questionCard" }
     
     # Add appropriate data attributes based on game type
     if game_type == "team_match"

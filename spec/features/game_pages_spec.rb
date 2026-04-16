@@ -57,9 +57,9 @@ RSpec.feature "Game Pages Functionality", type: :feature do
 
     scenario "displays team choices", js: true do
       visit strength_team_match_path
-      
+
       expect(page).to have_css(".choices-grid")
-      expect(page).to have_css("[data-game-target='choiceItem']", count: 4) # Typically 4 choices
+      expect(page).to have_css("[data-game-target='answerChoice']", count: 4) # Typically 4 choices
     end
   end
 
@@ -82,9 +82,9 @@ RSpec.feature "Game Pages Functionality", type: :feature do
 
     scenario "shows division choices", js: true do
       visit new_division_game_path
-      
+
       expect(page).to have_css(".choices-grid")
-      expect(page).to have_css("[data-game-target='choiceItem']")
+      expect(page).to have_css("[data-game-target='answerChoice']")
     end
   end
 
