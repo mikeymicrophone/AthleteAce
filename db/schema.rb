@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_13_162156) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_15_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -363,6 +363,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_13_162156) do
     t.datetime "last_seeded_at", comment: "When this record was last seeded"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "champion_id"
+    t.bigint "championship_contest_id"
+    t.index ["champion_id"], name: "index_seasons_on_champion_id"
+    t.index ["championship_contest_id"], name: "index_seasons_on_championship_contest_id"
     t.index ["league_id"], name: "index_seasons_on_league_id"
     t.index ["seed_version"], name: "index_seasons_on_seed_version"
     t.index ["start_date"], name: "index_seasons_on_start_date"
@@ -481,7 +485,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_13_162156) do
   add_foreign_key "ratings", "spectrums"
   add_foreign_key "roles", "players"
   add_foreign_key "roles", "positions"
+  add_foreign_key "seasons", "contests", column: "championship_contest_id"
   add_foreign_key "seasons", "leagues"
+  add_foreign_key "seasons", "teams", column: "champion_id"
   add_foreign_key "seasons", "years"
   add_foreign_key "stadiums", "cities"
   add_foreign_key "states", "countries"

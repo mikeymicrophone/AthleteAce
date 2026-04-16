@@ -2,7 +2,8 @@ class Contest < ApplicationRecord
   belongs_to :context, polymorphic: true
   belongs_to :champion, class_name: 'Team', optional: true
   belongs_to :season, optional: true
-  
+  has_one :championship_season, class_name: "Season", foreign_key: :championship_contest_id
+
   has_many :contestants, dependent: :destroy
   has_many :campaigns, through: :contestants
   has_many :teams, through: :campaigns

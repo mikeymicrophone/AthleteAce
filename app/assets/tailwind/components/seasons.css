@@ -69,6 +69,34 @@
   @apply mt-8 space-y-3 border-t border-gray-100 pt-5;
 }
 
+.season-champion-bank {
+  @apply rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3;
+}
+
+.season-champion-label {
+  @apply block text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-amber-700;
+}
+
+.season-champion-link {
+  @apply mt-2 flex text-gray-950 no-underline;
+}
+
+.season-champion-link:hover {
+  @apply text-amber-900;
+}
+
+.season-champion-link .lazy-logo-container {
+  @apply flex items-center gap-3;
+}
+
+.season-champion-link .logo-placeholder {
+  @apply h-9 w-9;
+}
+
+.season-champion-link [data-lazy-logo-target="name"] {
+  @apply font-semibold;
+}
+
 .season-sport {
   @apply text-sm font-semibold uppercase tracking-[0.22em] text-sky-700;
 }

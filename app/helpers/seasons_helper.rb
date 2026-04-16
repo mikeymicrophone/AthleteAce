@@ -52,6 +52,7 @@ module SeasonsHelper
           tag.p(season_display_name(season), class: "season-format")
         end +
         tag.div(class: "season-details") do
+          season_champion_badge(season) +
           tag.p(season.league.sport.name, class: "season-sport") +
           season_date_range(season)
         end +
@@ -69,6 +70,33 @@ module SeasonsHelper
     date_text += " - #{season.end_date.strftime('%b %d, %Y')}" if season.end_date
 
     tag.p(date_text, class: "season-dates")
+  end
+
+  def season_champion_badge(season)
+    champion = season_champion_for(season)
+    return "".html_safe unless champion
+
+    tag.div(class: "season-champion-bank") do
+      tag.span("Champion", class: "season-champion-label") +
+      link_to(champion, class: "season-champion-link") do
+        display_name_with_lazy_logo(champion, link: false)
+      end
+    end
+  end
+
+  def season_champion_for(season)
+    return season.champion if season.champion.present?
+
+    contests = season.contests.select { |contest| contest.champion.present? }
+    return nil if contests.empty?
+
+    preferred_contest =
+      contests.find { |contest| contest.context_type == "League" } ||
+      contests.find { |contest| contest.context_type == "Conference" } ||
+      contests.find { |contest| contest.name.to_s.match?(/final|championship|cup|super bowl|world series/i) } ||
+      contests.first
+
+    preferred_contest&.champion
   end
   
   def season_show_page(season)
