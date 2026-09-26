@@ -44,7 +44,7 @@ class TeamsController < ApplicationController
     end
 
     # Paginate the teams collection
-    @pagy, @teams = pagy @teams, items: params[:per_page] || Pagy::DEFAULT[:items]
+    @pagy, @teams = pagy @teams, limit: per_page
 
     @spectrums = Spectrum.all
     

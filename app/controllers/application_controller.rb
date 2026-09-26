@@ -10,11 +10,19 @@ class ApplicationController < ActionController::Base
 
   helper_method :admin_signed_in?
 
+  MAX_PER_PAGE = 100
+
   protected
 
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: [])
     devise_parameter_sanitizer.permit(:account_update, keys: [])
+  end
+
+  # Page size from ?per_page=, capped so one request can't load a whole table
+  def per_page(default = Pagy::DEFAULT[:limit])
+    requested = params[:per_page].to_i
+    requested.positive? ? [requested, MAX_PER_PAGE].min : default
   end
 
   def admin_signed_in?

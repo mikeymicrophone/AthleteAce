@@ -46,7 +46,7 @@ class GoalsController < ApplicationController
     @goal.destroy
 
     respond_to do |format|
-      format.html { redirect_to quests_path, notice: "You've abandoned the quest." }
+      format.html { redirect_to quests_path, status: :see_other, notice: "You've abandoned the quest." }
       format.json { head :no_content }
     end
   end

@@ -37,7 +37,7 @@ class PlayersController < ApplicationController
     
     load_filter_options
     
-    @pagy, @players = pagy(@players, items: params[:per_page] || 20)
+    @pagy, @players = pagy(@players, limit: per_page(20))
   end
 
   # GET /players/1 or /players/1.json

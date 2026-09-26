@@ -35,9 +35,36 @@ RSpec.describe "Page regressions", type: :request do
     end
   end
 
+  it "links filtered breadcrumbs to each filter's page" do
+    player = create(:player)
+    get team_player_path(player.team, player)
+    breadcrumb_hrefs = Nokogiri::HTML(response.body).css("a.breadcrumb-link").map { |link| link["href"] }
+    expect(breadcrumb_hrefs).to eq([team_path(player.team)])
+  end
+
+  it "honors per_page up to a cap" do
+    league = create(:league)
+    create_list(:team, 3, league: league)
+
+    get teams_path, params: { per_page: 2 }
+    expect(response.body.scan(/class="[^"]*index-record/).size).to eq(2)
+
+    get teams_path, params: { per_page: 1_000_000 }
+    expect(response.body.scan(/class="[^"]*index-record/).size).to eq(3)
+  end
+
   context "when signed in" do
     let(:ace) { create(:ace) }
     before { sign_in ace }
+
+    it "renders abandon links that send a DELETE" do
+      goal = ace.adopt_quest(create(:quest))
+      get goal_path(goal)
+      expect(response.body).to include(%(data-turbo-method="delete"))
+
+      expect { delete goal_path(goal) }.to change(Goal, :count).by(-1)
+      expect(response).to have_http_status(:see_other)
+    end
 
     it "shows a message instead of redirecting when no division game can be set up" do
       get new_division_game_path
