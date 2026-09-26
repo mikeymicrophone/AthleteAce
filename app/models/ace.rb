@@ -19,22 +19,8 @@ class Ace < ApplicationRecord
     goals.where(quest: quest).destroy_all
   end
   
-  # Rating methods
-  
-  # Rate a target on a spectrum with a value
-  # @param target [Object] The target to rate (Player, Team, etc.)
-  # @param spectrum [Spectrum] The spectrum to rate on
-  # @param value [Integer] The rating value (-10,000 to 10,000)
-  # @param notes [String] Optional notes about the rating
-  # @return [Rating] The created or updated rating
-  def rate(target, spectrum, value, notes = nil)
-    rating = ratings.find_or_initialize_by(target: target, spectrum: spectrum)
-    rating.value = value
-    rating.notes = notes if notes.present?
-    rating.save
-    rating
-  end
-  
+  # Rating methods (RatingService.replace records new ratings)
+
   # Get all ratings for a specific target
   # @param target [Object] The target to get ratings for
   # @return [ActiveRecord::Relation] The ratings for the target

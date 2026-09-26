@@ -1,7 +1,7 @@
 class Player < ApplicationRecord
   include Ratable
   
-  belongs_to :birth_city, optional: true
+  belongs_to :birth_city, class_name: 'City', optional: true
   belongs_to :birth_country, class_name: 'Country', optional: true
   belongs_to :team
   delegate :sport, to: :team

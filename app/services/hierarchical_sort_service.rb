@@ -216,16 +216,6 @@ class HierarchicalSortService
   def map_sort_attribute_to_column(attribute, context = nil)
     context = sortable_context(context).to_sym
 
-    # Try to get from dynamic configuration first
-    if defined?(HierarchicalSortConfigBuilder)
-      dynamic_config = HierarchicalSortConfigBuilder.build_config
-      if dynamic_config[context] && dynamic_config[context][:attributes]
-        column_mapping = dynamic_config[context][:attributes][attribute.to_s]
-        return column_mapping if column_mapping
-      end
-    end
-    
-    # Fallback to legacy mapping or default
     legacy_mapping(attribute) || default_column_mapping(attribute, context)
   end
 
@@ -233,16 +223,6 @@ class HierarchicalSortService
 
   # Get required joins for an attribute in the current context
   def get_required_joins_for_attribute(attribute, context)
-    # Try dynamic configuration first
-    if defined?(HierarchicalSortConfigBuilder)
-      dynamic_config = HierarchicalSortConfigBuilder.build_config
-      if dynamic_config[context] && dynamic_config[context][:joins]
-        joins_config = dynamic_config[context][:joins][attribute.to_s]
-        return joins_config if joins_config
-      end
-    end
-    
-    # Fallback to legacy configuration
     legacy_joins = legacy_joins_mapping[attribute.to_s]
     if legacy_joins.is_a?(Hash)
       legacy_joins[context] || []

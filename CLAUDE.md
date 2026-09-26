@@ -37,12 +37,13 @@ AthleteAce is a sports data application with hierarchical relationships:
 ### Filterable System
 The application's core feature is a sophisticated filtering system that allows navigation through related resources:
 
-- **Filterable Concern** (`app/controllers/concerns/filterable.rb`): Provides filtering logic with intelligent join path resolution
-- **FilterableAssociations** (`config/initializers/filterable_associations.rb`): Centralized configuration defining which models can filter others
-- **Modular Routes** (`config/routes/filterable.rb`): DSL for generating filtered resource routes
-- **Filter Helpers** (`app/helpers/filterable_*.rb`): UI components for filter panels and navigation
+- **Filterable Concern** (`app/controllers/concerns/filterable.rb`): `apply_filter` scopes a collection through the filtering record's association (e.g. `@team.players`)
+- **FilterLoader** (`app/controllers/concerns/filter_loader.rb`): Loads current filters and builds breadcrumbs for filtered show pages
+- **FilterableAssociations** (`config/initializers/filterable_associations.rb`): Centralized configuration defining which models can filter others; each listed model must define an association named for the resource
+- **Modular Routes** (`config/routes/filterable.rb`): DSL for generating filtered index/show routes
+- **View Helpers**: `association_links` (TeamsHelper) and `filtered_show_header` (FilteredShowHelper)
 
-Key filterable URLs: `/teams/123/players`, `/leagues/456/teams/123/players`
+Key filterable URLs: `/teams/123/players`, `/teams/123/players/456` (one level of nesting). See `docs/filterable.md`.
 
 ### Data Seeding Architecture
 - **JSON-driven**: All sports data lives in `db/seeds/athlete_ace_data/` as JSON files
