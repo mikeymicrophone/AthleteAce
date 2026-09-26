@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_26_105551) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_26_154001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -341,6 +341,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_26_105551) do
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
     t.json "details"
+    t.bigint "creator_id"
+    t.index ["creator_id"], name: "index_quests_on_creator_id"
     t.index ["seed_version"], name: "index_quests_on_seed_version"
   end
 
@@ -508,6 +510,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_26_105551) do
   add_foreign_key "players", "countries", column: "birth_country_id"
   add_foreign_key "players", "teams"
   add_foreign_key "positions", "sports"
+  add_foreign_key "quests", "aces", column: "creator_id", on_delete: :nullify
   add_foreign_key "ratings", "aces"
   add_foreign_key "ratings", "spectrums"
   add_foreign_key "roles", "players"
