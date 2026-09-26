@@ -45,7 +45,7 @@ class GameAttemptsController < ApplicationController
     else
       # Log errors for debugging
       Rails.logger.error "Failed to save GameAttempt: #{@game_attempt.errors.full_messages.join(', ')}"
-      render json: { errors: @game_attempt.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: @game_attempt.errors.full_messages }, status: :unprocessable_content
     end
   end
 

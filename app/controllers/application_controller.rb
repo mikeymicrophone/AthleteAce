@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::Base
-  include Pagy::Backend
+  include Pagy::Method
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
   
@@ -20,7 +20,7 @@ class ApplicationController < ActionController::Base
   end
 
   # Page size from ?per_page=, capped so one request can't load a whole table
-  def per_page(default = Pagy::DEFAULT[:limit])
+  def per_page(default = Pagy::OPTIONS[:limit])
     requested = params[:per_page].to_i
     requested.positive? ? [requested, MAX_PER_PAGE].min : default
   end

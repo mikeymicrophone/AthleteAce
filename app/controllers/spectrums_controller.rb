@@ -28,7 +28,7 @@ class SpectrumsController < ApplicationController
     if @spectrum.save
       redirect_to @spectrum, notice: 'Spectrum was successfully created.'
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -37,7 +37,7 @@ class SpectrumsController < ApplicationController
     if @spectrum.update(spectrum_params)
       redirect_to @spectrum, notice: 'Spectrum was successfully updated.'
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
