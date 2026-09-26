@@ -1,35 +1,38 @@
 class DivisionGuessingGamesController < ApplicationController
   MINIMUM_VIABLE_GAME_CHOICES = 2
+  SETUP_FAILED_MESSAGE = "Could not set up a new game. Please try a different difficulty or ensure your database has sufficient data.".freeze
   before_action :authenticate_ace!
 
   def new
-    setup_game
+    game_ready = setup_game
     respond_to do |format|
-      format.html
-      format.turbo_stream
+      # new.html.erb shows its own message when there's no game
+      format.html { flash.now[:alert] = SETUP_FAILED_MESSAGE unless game_ready }
+      format.turbo_stream { game_ready ? render : head(:unprocessable_entity) }
     end
   end
 
   def update
-    setup_game
+    game_ready = setup_game
     respond_to do |format|
-      format.turbo_stream
+      format.turbo_stream { game_ready ? render : head(:unprocessable_entity) }
     end
   end
 
   # This action is now just for setting up a new question when the client calls loadNextQuestion()
   # Game attempt creation is handled via the standard GameAttemptsController
   def create
-    setup_game
-    
+    game_ready = setup_game
+
     respond_to do |format|
       format.html { redirect_to new_division_game_path }
-      format.turbo_stream
+      format.turbo_stream { game_ready ? render : head(:unprocessable_entity) }
     end
   end
 
   private
 
+  # Returns whether a game could be set up
   def setup_game
     difficulty = params[:difficulty]&.to_sym || :conference
     difficulty = :conference unless [:conference, :league].include?(difficulty)
@@ -40,9 +43,7 @@ class DivisionGuessingGamesController < ApplicationController
     game_data = service.call
 
     if game_data.nil? || game_data.team.nil? || game_data.correct_division.nil? || game_data.choices.blank? || game_data.choices.length < MINIMUM_VIABLE_GAME_CHOICES
-      flash[:alert] = "Could not set up a new game. Please try a different difficulty or ensure your database has sufficient data."
-      redirect_to new_division_game_path 
-      return
+      return false
     end
 
     @team = game_data.team
@@ -55,5 +56,6 @@ class DivisionGuessingGamesController < ApplicationController
     session[:division_game_difficulty] = difficulty.to_s
     session[:division_game_choice_ids] = @choices.map(&:id)
     session[:division_game_start_time] = Time.current.to_f
+    true
   end
 end

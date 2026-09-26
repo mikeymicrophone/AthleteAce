@@ -16,7 +16,7 @@ class GameAttemptsController < ApplicationController
     @game_attempts = scope.order(created_at: :desc).limit(limit)
     
     respond_to do |format|
-      format.html # index.html.erb
+      format.html { redirect_to strength_game_attempts_path }
       format.json do
         render json: @game_attempts.as_json(include: {
           subject_entity: { methods: [:logo_url, :name] },

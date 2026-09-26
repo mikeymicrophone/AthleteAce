@@ -20,11 +20,15 @@ module SpectrumsHelper
     end
   end
 
-  # UNUSED
   # Set the current selected spectrum IDs in the session.
   # @param spectrum_ids [Array<Integer>] The IDs to set as current selected spectrums
   def set_selected_spectrum_ids(spectrum_ids)
     session[:selected_spectrum_ids] = spectrum_ids.map(&:to_i).reject(&:zero?)
+  end
+
+  # Select a single spectrum, e.g. from a ?spectrum_id= link
+  def set_current_spectrum_id(spectrum_id)
+    set_selected_spectrum_ids([spectrum_id])
   end
 
   # Get the current selected spectrum objects.

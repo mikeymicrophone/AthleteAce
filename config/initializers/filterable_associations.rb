@@ -2,8 +2,8 @@ module FilterableAssociations
   # Define associations that can be used for filtering
   ASSOCIATIONS = {
     players: [:sport, :league, :stadium, :team, :state, :city],
-    divisions: [:conference, :league, :country, :sport],
-    conferences: [:league, :country, :sport, :stadium],
+    divisions: [:conference, :league, :country, :sport, :contest],
+    conferences: [:league, :country, :sport, :stadium, :contest],
     cities: [:state, :country],
     memberships: [:team, :division, :conference, :league, :sport, :country, :state, :city, :stadium],
     campaigns: [:team, :season, :league, :sport, :country, :state, :city, :stadium],
@@ -15,8 +15,6 @@ module FilterableAssociations
     leagues: [:sport, :country, :contest],
     states: [:country, :sport],
     seasons: [:contest],
-    conferences: [:contest],
-    divisions: [:contest],
     contracts: [:player, :team, :sport, :league, :conference, :division, :state, :city, :stadium],
     activations: [:contract, :campaign, :player, :team, :season, :league, :sport, :state, :city, :stadium]
   }.freeze

@@ -137,7 +137,8 @@ class StrengthController < ApplicationController
     
     # Select a random player for the quiz
     @current_player = players.sample
-    Rails.logger.debug "TEAM MATCH: Selected player: #{@current_player.name} (Team: #{@current_player.team.mascot})"
+    return redirect_to(strength_path, alert: "No players are available for this game yet.") unless @current_player
+    Rails.logger.debug { "TEAM MATCH: Selected player: #{@current_player.name} (Team: #{@current_player.team.mascot})" }
     
     # Double-check that the player's team is in our pool
     unless filter_params[:team_ids].present? && filter_params[:team_ids].include?(@current_player.team_id)

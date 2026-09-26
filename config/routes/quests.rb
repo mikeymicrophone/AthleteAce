@@ -7,7 +7,7 @@ Rails.application.routes.draw do
   end
   
   resources :quests do
-    resources :highlights
+    resources :highlights, except: [:index, :show]
     resources :goals, only: [:create]
     collection do
       get :random
@@ -15,5 +15,5 @@ Rails.application.routes.draw do
   end
   
   resources :highlights, only: [:new, :create]
-  resources :goals, except: [:create, :new]
+  resources :goals, only: [:index, :show, :update, :destroy]
 end

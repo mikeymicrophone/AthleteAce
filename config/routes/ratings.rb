@@ -3,7 +3,7 @@ Rails.application.routes.draw do
   # Base ratings resources
   resources :ratings
   resources :spectrums do
-    resources :ratings
+    resources :ratings, only: [:index]
   end
   
   # Dynamic routes for all ratable models (the models' own routes live in sports.rb)

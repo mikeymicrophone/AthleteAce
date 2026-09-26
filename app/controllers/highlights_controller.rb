@@ -1,18 +1,9 @@
 class HighlightsController < ApplicationController
-  before_action :authenticate_ace!, except: [:index, :show]
+  before_action :authenticate_ace!
   before_action :require_admin!, only: [:edit, :update, :destroy]
   before_action :set_quest, except: [:new, :create]
-  before_action :set_highlight, only: [:show, :edit, :update, :destroy]
-  
-  # GET /quests/:quest_id/highlights
-  def index
-    @highlights = @quest.highlights.includes(:achievement).order(position: :asc)
-  end
-  
-  # GET /quests/:quest_id/highlights/:id
-  def show
-  end
-  
+  before_action :set_highlight, only: [:edit, :update, :destroy]
+
   # GET /highlights/new
   # GET /quests/:quest_id/highlights/new
   def new
@@ -46,7 +37,7 @@ class HighlightsController < ApplicationController
       respond_to do |format|
         if @highlight.save
           format.html { redirect_to quest_path(quest), notice: "Achievement was successfully added to quest." }
-          format.json { render :show, status: :created, location: @highlight }
+          format.json { render json: @highlight, status: :created }
         else
           @achievement = Achievement.find(params[:highlight][:achievement_id])
           @available_quests = Quest.where.not(id: @achievement.quest_ids)
@@ -62,7 +53,7 @@ class HighlightsController < ApplicationController
       respond_to do |format|
         if @highlight.save
           format.html { redirect_to quest_path(@quest), notice: "Achievement was successfully added to quest." }
-          format.json { render :show, status: :created, location: @highlight }
+          format.json { render json: @highlight, status: :created }
         else
           @available_achievements = Achievement.where.not(id: @quest.achievement_ids)
           format.html { render :new, status: :unprocessable_entity }
@@ -77,7 +68,7 @@ class HighlightsController < ApplicationController
     respond_to do |format|
       if @highlight.update(highlight_params)
         format.html { redirect_to quest_path(@quest), notice: "Highlight was successfully updated." }
-        format.json { render :show, status: :ok, location: @highlight }
+        format.json { render json: @highlight, status: :ok }
       else
         format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: @highlight.errors, status: :unprocessable_entity }
