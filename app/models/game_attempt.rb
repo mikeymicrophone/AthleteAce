@@ -15,10 +15,12 @@ class GameAttempt < ApplicationRecord
   validate :entity_types_match_game
   validates :subject_entity, :target_entity, presence: { message: :required }, if: :entity_types_valid?
 
-  before_validation :score
-
   def correct?
     is_correct
+  end
+
+  def chose_target?
+    chosen_entity_id.present? && chosen_entity_type == target_entity_type && chosen_entity_id == target_entity_id
   end
 
   # The right answer for this attempt's subject, e.g. a player's team
@@ -45,11 +47,5 @@ class GameAttempt < ApplicationRecord
     return if game_type.blank? || !GAME_TYPES.key?(game_type) || entity_types_valid?
 
     errors.add(:base, "Entity types don't match the #{game_type} game")
-  end
-
-  def score
-    self.is_correct = chosen_entity_id.present? &&
-      chosen_entity_type == target_entity_type &&
-      chosen_entity_id == target_entity_id
   end
 end

@@ -33,6 +33,7 @@ class GameAttemptsController < ApplicationController
     # The answer and correctness are worked out here, not taken from the client
     @game_attempt.target_entity_type = GameAttempt::GAME_TYPES.dig(@game_attempt.game_type, 1)
     @game_attempt.target_entity = @game_attempt.expected_target_entity
+    @game_attempt.is_correct = @game_attempt.chose_target?
 
     if @game_attempt.save
       # Return the saved attempt as JSON with associated entities

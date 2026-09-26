@@ -53,7 +53,9 @@ Key filterable URLs: `/teams/123/players`, `/leagues/456/teams/123/players`
 ### UGC Preservation System
 - **Backup Location**: `db/seeds/athlete_ace_ugc/backups/` (Git submodule for version control)
 - **Identifier-Based Remapping**: Preserves user data during core model reseeding
-- **Commands**: `rails ugc:backup`, `rails ugc:restore[timestamp]`, `rails ugc:full_reseed`
+- **Commands**: `rails ugc:backup`, `rails ugc:restore[timestamp]`, `rails "ugc:full_reseed[float|clear]"`
+- **Reset modes**: `float` (default) keeps ratings, achievements, and game attempts, which attach to whichever new records reuse their ids (useful as sample content); `clear` deletes them with the core data so `ugc:restore` recreates them against the right records, and requires a backup newer than the latest change to them
+- Plain `rails db:seed` is nondestructive (records are upserted), so it keeps ids and UGC intact; the reset is only for clearing out records that seeding can't remove
 - **Documentation**: See `docs/ugc_preservation_system.md` for complete implementation details
 
 ### Authentication & Games

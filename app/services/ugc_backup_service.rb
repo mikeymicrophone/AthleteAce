@@ -2,6 +2,25 @@
 # Exports UGC data to YAML files with smart identifiers for FK remapping
 
 class UgcBackupService
+  BACKUP_ROOT = Pathname.new(ENV.fetch("UGC_BACKUP_ROOT", Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups")))
+  METADATA_FILE = "backup_metadata.yml".freeze
+
+  # Restore doesn't need these, and tokens and IPs shouldn't sit in backup files
+  EXCLUDED_ACE_ATTRIBUTES = %w[reset_password_token reset_password_sent_at confirmation_token current_sign_in_ip last_sign_in_ip].freeze
+
+  def self.backup_dirs
+    Dir.glob(BACKUP_ROOT.join("backup_*")).map { |dir| Pathname.new(dir) }
+  end
+
+  def self.read_metadata(backup_dir)
+    path = Pathname.new(backup_dir).join(METADATA_FILE)
+    return unless path.exist?
+
+    # Older backups stored rails_env as an ActiveSupport::EnvironmentInquirer
+    permitted_classes = [ActiveSupport::TimeWithZone, ActiveSupport::TimeZone, Time, Symbol, ActiveSupport::EnvironmentInquirer]
+    YAML.load_file(path, permitted_classes: permitted_classes).with_indifferent_access
+  end
+
   def initialize(backup_dir)
     @backup_dir = backup_dir
     @backup_timestamp = Time.current
@@ -63,7 +82,7 @@ class UgcBackupService
 
   def export_aces
     Ace.all.map do |ace|
-      ace.attributes.merge(
+      ace.attributes.except(*EXCLUDED_ACE_ATTRIBUTES).merge(
         "exported_at" => @backup_timestamp
       )
     end
@@ -253,13 +272,13 @@ class UgcBackupService
   def write_backup_metadata
     metadata = {
       backup_timestamp: @backup_timestamp,
-      rails_env: Rails.env,
+      rails_env: Rails.env.to_s,
       seed_version: get_current_seed_version,
       total_records: calculate_total_records,
       backup_categories: ["aces_and_ratings", "quest_system", "game_attempts"]
     }
     
-    write_yaml_file("backup_metadata.yml", metadata)
+    write_yaml_file(METADATA_FILE, metadata)
   end
 
   def get_current_seed_version
