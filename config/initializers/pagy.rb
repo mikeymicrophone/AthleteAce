@@ -1,3 +1,3 @@
-# Set default items per page (Pagy 9 calls this :limit; it was :items before)
-Pagy::DEFAULT[:limit] = 5
-Pagy::DEFAULT[:size] = 12
+# Pagy 43 reads app-wide defaults from Pagy::OPTIONS
+Pagy::OPTIONS[:limit] = 5   # records per page
+Pagy::OPTIONS[:slots] = 12  # page links in the series nav

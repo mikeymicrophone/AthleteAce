@@ -17,6 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Code Quality
 - `bundle exec rubocop` - Run Ruby style linter
 - `bundle exec brakeman` - Run security analysis
+- `bin/ci` - Run the local CI steps from `config/ci.rb` (setup, importmap audit, Brakeman, RSpec)
 
 ### Development Server
 - `bin/dev` - Start development server with Procfile.dev (Rails + Tailwind CSS)
@@ -89,12 +90,12 @@ Choose appropriate parameter passing:
 Use descriptive suffixes: `dom_id(team, :quiz_link_for)` rather than `dom_id(team, :quiz_link)`
 
 ## Technology Stack
-- **Rails 8.0.2** with Ruby 3.3.0
+- **Rails 8.1.4** with Ruby 4.0.7 (pinned in `.ruby-version` and `mise.toml`; keep them in sync)
 - **PostgreSQL** database with separate schemas for cable/cache/queue
-- **Tailwind CSS 4.2** for styling
+- **Tailwind CSS 4.3** for styling
 - **Turbo/Stimulus** for JavaScript interactions
 - **RSpec** for testing with FactoryBot, Capybara, Shoulda Matchers
-- **Pagy** for pagination
+- **Pagy 43** for pagination (`Pagy::Method`, `@pagy.series_nav`, defaults in `Pagy::OPTIONS`)
 - **Ransack** for search functionality
 - **Devise** for authentication
 

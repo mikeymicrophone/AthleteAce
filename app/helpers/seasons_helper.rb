@@ -36,7 +36,7 @@ module SeasonsHelper
       tag.main(class: "seasons-grid") do
         @seasons.map { |season| season_item(season) }.join.html_safe
       end +
-      (pagy_nav(@pagy) if @pagy.pages > 1).to_s.html_safe
+      (@pagy.series_nav if @pagy.pages > 1).to_s.html_safe
     end
   end
   

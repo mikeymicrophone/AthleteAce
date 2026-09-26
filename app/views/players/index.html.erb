@@ -4,7 +4,7 @@
 
 <%= render_floating_spectrum_picker %>
 
-<%= pagy_nav(@pagy).html_safe %>
+<%== @pagy.series_nav %>
 
 <%= index_collection("players") do %>
   <% @players.each do |player| %>
@@ -22,4 +22,4 @@
   <% end %>
 <% end %>
 
-<%= pagy_nav(@pagy).html_safe %>
+<%== @pagy.series_nav %>

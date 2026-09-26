@@ -41,8 +41,8 @@ class HighlightsController < ApplicationController
         else
           @achievement = Achievement.find(params[:highlight][:achievement_id])
           @available_quests = Quest.where.not(id: @achievement.quest_ids)
-          format.html { render :new_from_achievement, status: :unprocessable_entity }
-          format.json { render json: @highlight.errors, status: :unprocessable_entity }
+          format.html { render :new_from_achievement, status: :unprocessable_content }
+          format.json { render json: @highlight.errors, status: :unprocessable_content }
         end
       end
     else
@@ -56,8 +56,8 @@ class HighlightsController < ApplicationController
           format.json { render json: @highlight, status: :created }
         else
           @available_achievements = Achievement.where.not(id: @quest.achievement_ids)
-          format.html { render :new, status: :unprocessable_entity }
-          format.json { render json: @highlight.errors, status: :unprocessable_entity }
+          format.html { render :new, status: :unprocessable_content }
+          format.json { render json: @highlight.errors, status: :unprocessable_content }
         end
       end
     end
@@ -70,8 +70,8 @@ class HighlightsController < ApplicationController
         format.html { redirect_to quest_path(@quest), notice: "Highlight was successfully updated." }
         format.json { render json: @highlight, status: :ok }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @highlight.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @highlight.errors, status: :unprocessable_content }
       end
     end
   end
