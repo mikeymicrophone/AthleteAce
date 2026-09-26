@@ -1,4 +1,6 @@
 class HighlightsController < ApplicationController
+  before_action :authenticate_ace!, except: [:index, :show]
+  before_action :require_admin!, only: [:edit, :update, :destroy]
   before_action :set_quest, except: [:new, :create]
   before_action :set_highlight, only: [:show, :edit, :update, :destroy]
   

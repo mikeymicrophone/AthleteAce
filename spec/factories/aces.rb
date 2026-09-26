@@ -8,6 +8,10 @@ FactoryBot.define do
     trait :unconfirmed do
       confirmed_at { nil }
     end
+
+    trait :admin do
+      admin { true }
+    end
     
     trait :with_goals do
       transient do

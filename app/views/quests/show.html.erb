@@ -61,8 +61,10 @@
                   <span class="inline-block px-2 py-1 text-xs bg-gray-100 rounded text-gray-700">
                     Target: <%= link_to_name achievement.target %>
                   </span>
-                  <%= link_to "Edit", edit_quest_highlight_path(@quest, highlight), class: "text-blue-600 hover:text-blue-800" %>
-                  <%= button_to "Remove", quest_highlight_path(@quest, highlight), method: :delete, class: "text-red-600 hover:text-red-800", data: { turbo_confirm: "Are you sure?" } %>
+                  <% if admin_signed_in? %>
+                    <%= link_to "Edit", edit_quest_highlight_path(@quest, highlight), class: "text-blue-600 hover:text-blue-800" %>
+                    <%= button_to "Remove", quest_highlight_path(@quest, highlight), method: :delete, class: "text-red-600 hover:text-red-800", data: { turbo_confirm: "Are you sure?" } %>
+                  <% end %>
                 </div>
               </li>
             <% end %>
@@ -90,8 +92,10 @@
                   <span class="inline-block px-2 py-1 text-xs bg-gray-100 rounded text-gray-700">
                     Target: <%= link_to_name achievement.target %>
                   </span>
-                  <%= link_to "Edit", edit_quest_highlight_path(@quest, highlight), class: "text-blue-600 hover:text-blue-800" %>
-                  <%= button_to "Remove", quest_highlight_path(@quest, highlight), method: :delete, class: "text-red-600 hover:text-red-800", data: { turbo_confirm: "Are you sure?" } %>
+                  <% if admin_signed_in? %>
+                    <%= link_to "Edit", edit_quest_highlight_path(@quest, highlight), class: "text-blue-600 hover:text-blue-800" %>
+                    <%= button_to "Remove", quest_highlight_path(@quest, highlight), method: :delete, class: "text-red-600 hover:text-red-800", data: { turbo_confirm: "Are you sure?" } %>
+                  <% end %>
                 </div>
               </li>
             <% end %>

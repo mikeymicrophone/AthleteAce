@@ -1,7 +1,7 @@
 class SpectrumsController < ApplicationController
   before_action :authenticate_ace!, except: [:index, :show]
+  before_action :require_admin!, only: [:edit, :update, :destroy]
   before_action :set_spectrum, only: [:show, :edit, :update, :destroy]
-  before_action :require_admin, only: [:new, :create, :edit, :update, :destroy]
 
   # GET /spectrums
   def index
@@ -56,13 +56,5 @@ class SpectrumsController < ApplicationController
     # Only allow a list of trusted parameters through.
     def spectrum_params
       params.require(:spectrum).permit(:name, :description, :low_label, :high_label)
-    end
-    
-    # Only allow admins to manage spectrums
-    def require_admin
-      # This is a placeholder for admin authentication
-      # In a real application, you would check if the current ace is an admin
-      # For now, we'll allow all authenticated aces to manage spectrums
-      true
     end
 end
