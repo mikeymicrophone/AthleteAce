@@ -12,7 +12,7 @@
     <% end %>
     <% if @organization.url.present? %>
       <div class="mt-4">
-        <%= link_to @organization.url, @organization.url, class: "text-sm font-semibold text-orange-700 hover:underline" %>
+        <%= external_link_to @organization.url, class: "text-sm font-semibold text-orange-700 hover:underline" %>
       </div>
     <% end %>
   </div>

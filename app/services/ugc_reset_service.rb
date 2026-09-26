@@ -258,7 +258,7 @@ class UgcResetService
               association: association.name,
               all_target_types: target_types,
               core_target_types: core_target_types,
-              record_count: ugc_model.where.not("#{association.name}_type" => nil).count
+              record_count: ugc_model.where.not(association.foreign_type => nil).count
             }
           end
         else
@@ -270,7 +270,7 @@ class UgcResetService
                 ugc_model: ugc_model.name,
                 association: association.name,
                 core_model: target_class.name,
-                record_count: ugc_model.where.not("#{association.name}_id" => nil).count
+                record_count: ugc_model.where.not(association.foreign_key => nil).count
               }
             end
           rescue NameError
