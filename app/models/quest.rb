@@ -1,4 +1,6 @@
 class Quest < ApplicationRecord
+  # The ace who created the quest; seeded quests have none
+  belongs_to :creator, class_name: "Ace", optional: true, inverse_of: :created_quests
   has_many :highlights, dependent: :destroy
   has_many :achievements, through: :highlights
   has_many :goals, dependent: :destroy
