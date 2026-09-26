@@ -50,9 +50,13 @@ RSpec.configure do |config|
   # Include Devise test helpers
   config.include Devise::Test::IntegrationHelpers, type: :feature
   config.include Devise::Test::IntegrationHelpers, type: :system
+  config.include Devise::Test::IntegrationHelpers, type: :request
   config.include Devise::Test::ControllerHelpers, type: :controller
   config.include Devise::Test::ControllerHelpers, type: :view
-  
+
+  # Rails 8 loads routes lazily, and Devise needs them loaded to find its mappings for sign_in
+  config.before(:each) { Rails.application.reload_routes_unless_loaded }
+
   # Configure Capybara
   Capybara.register_driver :selenium_chrome_headless do |app|
     options = Selenium::WebDriver::Chrome::Options.new

@@ -42,62 +42,42 @@ class RatingsController < ApplicationController
   # POST /players/1/ratings
   # POST /teams/1/ratings
   def create
-    Rating.transaction do
-      # Archive existing active rating if present
-      existing = current_ace.ratings.find_by(
-        spectrum_id: rating_params[:spectrum_id],
-        target_type: rating_params[:target_type],
-        target_id: rating_params[:target_id],
-        archived: false
-      )
-      existing&.update!(archived: true) if existing
-
-      # Create new rating
-      @rating = current_ace.ratings.create!(rating_params)
-    end
+    # The target always comes from the URL (e.g. /players/1/ratings), never from the form
+    @rating = RatingService.replace(ace: current_ace, target: @target, **rating_attributes)
 
     respond_to do |format|
       format.html { redirect_to after_rating_path }
       format.json { render json: { success: true, rating: @rating }, status: :created }
       format.js { head :ok }
     end
-  rescue StandardError => e
-    Rails.logger.error "Rating creation failed: #{e.message}"
+  rescue ActiveRecord::RecordInvalid => e
+    @rating = e.record
     respond_to do |format|
       format.html do
-        @spectrum = Spectrum.find(rating_params[:spectrum_id]) if rating_params[:spectrum_id]
+        @spectrum = Spectrum.find_by(id: @rating.spectrum_id)
         @spectrums = @spectrum ? [@spectrum] : Spectrum.all
-        @rating ||= Rating.new(rating_params)
-        @rating.errors.add(:base, e.message)
         render :new, status: :unprocessable_entity
       end
-      format.json { render json: { success: false, errors: [e.message] }, status: :unprocessable_entity }
+      format.json { render json: { success: false, errors: @rating.errors.full_messages }, status: :unprocessable_entity }
       format.js { head :unprocessable_entity }
     end
   end
 
   # PATCH/PUT /ratings/1
+  # Ratings are versioned: the edited rating is archived and a new one takes its place
   def update
-    Rating.transaction do
-      # Archive existing active rating if present
-      existing = current_ace.ratings.find_by(
-        spectrum_id: rating_params[:spectrum_id],
-        target_type: rating_params[:target_type],
-        target_id: rating_params[:target_id],
-        archived: false
-      )
-      existing&.update!(archived: true) if existing
-
-      # Create new rating
-      @rating = current_ace.ratings.create!(rating_params)
-    end
+    original = @rating
+    @target = original.target
+    @target_type = original.target_type.underscore
+    @rating = RatingService.replace(ace: current_ace, target: @target, **rating_attributes.merge(spectrum_id: original.spectrum_id))
 
     redirect_to after_rating_path
-  rescue StandardError => e
-    Rails.logger.error "Rating update failed: #{e.message}"
-    @spectrum = Spectrum.find(rating_params[:spectrum_id]) if rating_params[:spectrum_id]
-    @rating ||= Rating.new(rating_params)
-    @rating.errors.add(:base, e.message)
+  rescue ActiveRecord::RecordInvalid => e
+    # Re-render the form for the rating being edited, with the attempted values and errors
+    @rating = original
+    @rating.assign_attributes(rating_attributes.except(:spectrum_id))
+    @rating.errors.merge!(e.record.errors)
+    @spectrum = @rating.spectrum
     render :edit, status: :unprocessable_entity
   end
 
@@ -175,7 +155,11 @@ class RatingsController < ApplicationController
     
     # Only allow a list of trusted parameters through.
     def rating_params
-      params.require(:rating).permit(:spectrum_id, :value, :notes, :target_id, :target_type)
+      params.require(:rating).permit(:spectrum_id, :value, :notes)
+    end
+
+    def rating_attributes
+      rating_params.to_h.symbolize_keys.slice(:spectrum_id, :value, :notes)
     end
     
     # Ensure the current ace can only modify their own ratings

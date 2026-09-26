@@ -1,8 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe "Authorization for shared content", type: :request do
-  include Devise::Test::IntegrationHelpers
-
   let(:ace) { create(:ace) }
   let(:admin) { create(:ace, :admin) }
   let!(:quest) { create(:quest) }

@@ -55,6 +55,6 @@ class Ace < ApplicationRecord
   # @param spectrum [Spectrum] The spectrum to check
   # @return [Boolean] Whether the ace has rated the target on the spectrum
   def rated?(target, spectrum)
-    ratings.exists?(target: target, spectrum: spectrum)
+    ratings.active.exists?(target: target, spectrum: spectrum)
   end
 end
