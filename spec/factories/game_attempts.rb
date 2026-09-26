@@ -1,12 +1,12 @@
 FactoryBot.define do
   factory :game_attempt do
-    ace { nil }
-    game_type { "MyString" }
-    subject_entity { nil }
-    target_entity { nil }
-    options_presented { "MyText" }
-    chosen_entity { nil }
-    is_correct { false }
-    time_elapsed_ms { 1 }
+    association :ace
+    game_type { "player_team_match" }
+    association :subject_entity, factory: :player
+    target_entity { subject_entity.team }
+    chosen_entity { target_entity }
+    options_presented { [] }
+    is_correct { true }
+    time_elapsed_ms { 1500 }
   end
 end

@@ -1,22 +1,26 @@
 # UGC Restore Service Template
 # Imports UGC data from YAML files with intelligent FK remapping
+#
+# Safe to run more than once: records that already exist are matched and skipped.
 
 class UgcRestoreService
   def initialize(backup_dir)
     @backup_dir = backup_dir
     @restoration_log = []
     @failed_mappings = []
+    @ace_ids = {}      # backup ace id => current ace id, matched by email
+    @spectrum_ids = {} # backup spectrum id => current spectrum id, matched by name
   end
 
   def restore_all
     Rails.logger.info "Starting UGC restoration from #{@backup_dir}"
-    
+
     ActiveRecord::Base.transaction do
       restore_aces_and_ratings
       restore_quest_system
       restore_game_attempts
     end
-    
+
     generate_restoration_report
     Rails.logger.info "UGC restoration completed"
   end
@@ -28,7 +32,7 @@ class UgcRestoreService
   def restore_aces_and_ratings
     Rails.logger.info "Restoring aces and ratings..."
     data = load_yaml_file("aces_and_ratings.yml")
-    
+
     restore_aces(data[:aces] || data["aces"])
     restore_spectrums(data[:spectrums] || data["spectrums"])
     restore_ratings(data[:ratings] || data["ratings"])
@@ -36,63 +40,36 @@ class UgcRestoreService
 
   def restore_aces(aces_data)
     aces_data.each do |ace_attrs|
-      # Remove exported_at and other non-model attributes
-      clean_attrs = ace_attrs.except("exported_at", "id")
-      
-      # Find existing ace by email or create new one
-      existing_ace = Ace.find_by(email: ace_attrs["email"])
-      if existing_ace
-        Rails.logger.warn "Skipping duplicate ace: #{ace_attrs['email']}"
-        log_success("Ace (skipped duplicate)", ace_attrs["email"], existing_ace.id)
+      ace = Ace.find_by(email: ace_attrs["email"])
+
+      if ace
+        log_success("Ace (existing)", ace_attrs["email"], ace.id)
       else
         # Skip validations since we're restoring encrypted passwords
-        ace = Ace.new(clean_attrs)
+        ace = Ace.new(ace_attrs.except("exported_at", "id").slice(*Ace.column_names))
         ace.save!(validate: false)
         log_success("Ace", ace_attrs["email"], ace.id)
       end
+
+      @ace_ids[ace_attrs["id"]] = ace.id
     end
   end
 
   def restore_spectrums(spectrums_data)
     spectrums_data.each do |spectrum_attrs|
-      # Spectrums should restore cleanly (no core model dependencies)
-      spectrum = Spectrum.find_or_create_by(name: spectrum_attrs["name"]) do |s|
-        s.assign_attributes(spectrum_attrs.except("id", "name"))
+      spectrum = Spectrum.find_or_create_by!(name: spectrum_attrs["name"]) do |s|
+        s.assign_attributes(spectrum_attrs.except("id", "name").slice(*Spectrum.column_names))
       end
+      @spectrum_ids[spectrum_attrs["id"]] = spectrum.id
       log_success("Spectrum", spectrum_attrs["name"], spectrum.id)
     end
   end
 
   def restore_ratings(ratings_data)
-    # Build a mapping of old IDs to current IDs
-    spectrum_id_mapping = {}
-    ace_id_mapping = {}
-    
     ratings_data.each do |rating_attrs|
-      # Map ace ID based on what was actually restored
-      old_ace_id = rating_attrs["ace_id"]
-      unless ace_id_mapping[old_ace_id]
-        # For now, just map to any existing ace since we can't reliably map back
-        ace = Ace.first
-        ace_id_mapping[old_ace_id] = ace&.id
-      end
-      
-      ace_id = ace_id_mapping[old_ace_id]
-      next unless ace_id
-      
-      ace = Ace.find(ace_id)
-      
-      # Get the current spectrum ID for this rating
-      old_spectrum_id = rating_attrs["spectrum_id"]
-      unless spectrum_id_mapping[old_spectrum_id]
-        # Find first available spectrum with similar characteristics, or create a default
-        spectrum = Spectrum.first || Spectrum.create!(name: "Default Spectrum", min_value: 0, max_value: 10000)
-        spectrum_id_mapping[old_spectrum_id] = spectrum.id
-      end
-      
-      spectrum = Spectrum.find(spectrum_id_mapping[old_spectrum_id])
-      
-      # Find target using identifier-based mapping
+      label = "#{rating_attrs['target_type']}:#{rating_attrs['target_identifier']}"
+      ace_id = @ace_ids[rating_attrs["ace_id"]]
+      spectrum_id = @spectrum_ids[rating_attrs["spectrum_id"]]
       target = find_target_by_identifiers(
         rating_attrs["target_type"],
         rating_attrs["target_identifier"],
@@ -101,34 +78,33 @@ class UgcRestoreService
         rating_attrs["target_team_identifier"],
         rating_attrs["target_conference_identifier"]
       )
-      
-      if target
-        # Check for existing rating first to avoid constraint violation
-        existing_rating = Rating.find_by(
-          ace: ace,
-          spectrum: spectrum,
-          target: target,
-          archived: false
-        )
-        
-        if existing_rating
-          Rails.logger.warn "Skipping duplicate rating: #{rating_attrs['target_type']}:#{rating_attrs['target_identifier']}"
-          log_success("Rating (skipped duplicate)", "#{rating_attrs['target_type']}:#{rating_attrs['target_identifier']}", existing_rating.id)
-        else
-          rating = Rating.create!(
-            ace: ace,
-            spectrum: spectrum,
-            target: target,
-            value: rating_attrs["value"],
-            archived: rating_attrs["archived"],
-            created_at: rating_attrs["created_at"],
-            updated_at: rating_attrs["updated_at"]
-          )
-          log_success("Rating", "#{rating_attrs['target_type']}:#{rating_attrs['target_identifier']}", rating.id)
-        end
-      else
-        log_failure("Rating", rating_attrs["target_type"], rating_attrs["target_identifier"], "Target not found")
+
+      missing = { "ace" => ace_id, "spectrum" => spectrum_id, "target" => target }.select { |_, found| found.nil? }.keys
+      if missing.any?
+        log_failure("Rating", rating_attrs["target_type"], rating_attrs["target_identifier"], "Not found: #{missing.join(', ')}")
+        next
       end
+
+      existing = Rating.where(ace_id: ace_id, spectrum_id: spectrum_id, target: target)
+      if existing.exists?(created_at: rating_attrs["created_at"])
+        log_success("Rating (skipped duplicate)", label, nil)
+        next
+      end
+
+      # Only one rating per ace, spectrum, and target can be active; keep the one already here
+      archived = rating_attrs["archived"] || existing.active.exists?
+
+      rating = Rating.create!(
+        ace_id: ace_id,
+        spectrum_id: spectrum_id,
+        target: target,
+        value: rating_attrs["value"],
+        notes: rating_attrs["notes"],
+        archived: archived,
+        created_at: rating_attrs["created_at"],
+        updated_at: rating_attrs["updated_at"]
+      )
+      log_success("Rating", label, rating.id)
     end
   end
 
@@ -137,108 +113,98 @@ class UgcRestoreService
   def restore_quest_system
     Rails.logger.info "Restoring quest system..."
     data = load_yaml_file("quest_system.yml")
-    
+
     restore_quests_with_children(data[:quests] || data["quests"])
     restore_orphaned_achievements(data[:orphaned_achievements] || data["orphaned_achievements"])
   end
 
   def restore_quests_with_children(quests_data)
     quests_data.each do |quest_data|
-      # Create quest first
-      quest_attrs = quest_data.except("achievements", "highlights", "goals")
-      quest = Quest.create!(quest_attrs.except("id"))
-      
-      # Create nested achievements with quest reference
-      achievement_id_mapping = {}
+      quest = Quest.find_by(name: quest_data["name"])
+      if quest
+        log_success("Quest (existing)", quest_data["name"], quest.id)
+      else
+        quest_attrs = quest_data.except("id", "achievements", "highlights", "goals").slice(*Quest.column_names)
+        quest = Quest.create!(quest_attrs)
+        log_success("Quest", quest_data["name"], quest.id)
+      end
+
+      # Map the backup's achievement ids to current ones for this quest's highlights
+      achievement_ids = {}
       quest_data["achievements"].each do |achievement_data|
-        old_achievement_id = achievement_data["id"]
-        
-        target = find_target_by_identifiers(
-          achievement_data["target_type"],
-          achievement_data["target_identifier"],
-          achievement_data["target_sport_identifier"],
-          achievement_data["target_league_identifier"],
-          achievement_data["target_team_identifier"],
-          achievement_data["target_conference_identifier"]
-        )
-        
-        if target
-          achievement = Achievement.create!(
-            name: achievement_data["name"],
-            description: achievement_data["description"],
-            target: target,
-            details: achievement_data["details"],
-            created_at: achievement_data["created_at"],
-            updated_at: achievement_data["updated_at"]
-          )
-          achievement_id_mapping[old_achievement_id] = achievement.id
-          log_success("Achievement", achievement_data["name"], achievement.id)
-        else
-          log_failure("Achievement", achievement_data["target_type"], achievement_data["target_identifier"], "Target not found")
-        end
+        achievement = restore_achievement(achievement_data, "Achievement")
+        achievement_ids[achievement_data["id"]] = achievement.id if achievement
       end
-      
-      # Create highlights using achievement ID mapping
+
       quest_data["highlights"].each do |highlight_data|
-        old_achievement_id = highlight_data["achievement_id"]
-        new_achievement_id = achievement_id_mapping[old_achievement_id]
-        
-        if new_achievement_id
-          Highlight.create!(
-            quest: quest,
-            achievement_id: new_achievement_id,
-            required: highlight_data["required"],
-            position: highlight_data["position"],
-            created_at: highlight_data["created_at"],
-            updated_at: highlight_data["updated_at"]
-          )
+        achievement_id = achievement_ids[highlight_data["achievement_id"]]
+        next unless achievement_id
+
+        Highlight.find_or_create_by!(quest: quest, achievement_id: achievement_id) do |highlight|
+          highlight.required = highlight_data["required"]
+          highlight.position = highlight_data["position"]
+          highlight.created_at = highlight_data["created_at"]
+          highlight.updated_at = highlight_data["updated_at"]
         end
       end
-      
-      # Create goals
+
       quest_data["goals"].each do |goal_data|
-        ace = Ace.find(goal_data["ace_id"])
-        Goal.create!(
-          ace: ace,
-          quest: quest,
-          status: goal_data["status"],
-          progress: goal_data["progress"],
-          created_at: goal_data["created_at"],
-          updated_at: goal_data["updated_at"]
-        )
+        ace_id = @ace_ids[goal_data["ace_id"]]
+        unless ace_id
+          log_failure("Goal", "Ace", goal_data["ace_id"], "Ace not in backup")
+          next
+        end
+
+        Goal.find_or_create_by!(ace_id: ace_id, quest: quest) do |goal|
+          goal.status = goal_data["status"]
+          goal.progress = goal_data["progress"]
+          goal.created_at = goal_data["created_at"]
+          goal.updated_at = goal_data["updated_at"]
+        end
       end
-      
-      log_success("Quest", quest_data["name"], quest.id)
     end
   end
 
   def restore_orphaned_achievements(orphaned_data)
     return unless orphaned_data
-    
+
     orphaned_data.each do |achievement_data|
-      target = find_target_by_identifiers(
-        achievement_data["target_type"],
-        achievement_data["target_identifier"],
-        achievement_data["target_sport_identifier"],
-        achievement_data["target_league_identifier"],
-        achievement_data["target_team_identifier"],
-        achievement_data["target_conference_identifier"]
-      )
-      
-      if target
-        achievement = Achievement.create!(
-          name: achievement_data["name"],
-          description: achievement_data["description"],
-          target: target,
-          details: achievement_data["details"],
-          created_at: achievement_data["created_at"],
-          updated_at: achievement_data["updated_at"]
-        )
-        log_success("Orphaned Achievement", achievement_data["name"], achievement.id)
-      else
-        log_failure("Orphaned Achievement", achievement_data["target_type"], achievement_data["target_identifier"], "Target not found")
-      end
+      restore_achievement(achievement_data, "Orphaned Achievement")
     end
+  end
+
+  # Finds or creates the achievement, matching on name and target
+  def restore_achievement(achievement_data, log_label)
+    target = find_target_by_identifiers(
+      achievement_data["target_type"],
+      achievement_data["target_identifier"],
+      achievement_data["target_sport_identifier"],
+      achievement_data["target_league_identifier"],
+      achievement_data["target_team_identifier"],
+      achievement_data["target_conference_identifier"]
+    )
+
+    unless target
+      log_failure(log_label, achievement_data["target_type"], achievement_data["target_identifier"], "Target not found")
+      return
+    end
+
+    achievement = Achievement.find_by(name: achievement_data["name"], target: target)
+    if achievement
+      log_success("#{log_label} (existing)", achievement_data["name"], achievement.id)
+      return achievement
+    end
+
+    achievement = Achievement.create!(
+      name: achievement_data["name"],
+      description: achievement_data["description"],
+      target: target,
+      details: achievement_data["details"],
+      created_at: achievement_data["created_at"],
+      updated_at: achievement_data["updated_at"]
+    )
+    log_success(log_label, achievement_data["name"], achievement.id)
+    achievement
   end
 
   # === GAME ATTEMPTS RESTORATION ===
@@ -246,10 +212,10 @@ class UgcRestoreService
   def restore_game_attempts
     Rails.logger.info "Restoring game attempts..."
     data = load_yaml_file("game_attempts.yml")
-    
+
     # Game attempts are optional - skip if restoration seems too fragile
     return unless should_restore_game_attempts?
-    
+
     restore_game_attempts_data(data[:game_attempts] || data["game_attempts"])
   end
 
@@ -261,9 +227,8 @@ class UgcRestoreService
 
   def restore_game_attempts_data(attempts_data)
     attempts_data.each do |attempt_data|
-      ace = Ace.find(attempt_data["ace_id"])
-      
-      # Find all three entities
+      ace_id = @ace_ids[attempt_data["ace_id"]]
+
       subject_entity = find_target_by_identifiers(
         attempt_data["subject_entity_type"],
         attempt_data["subject_identifier"],
@@ -271,7 +236,7 @@ class UgcRestoreService
         nil, # league not needed for subject
         attempt_data["subject_team_identifier"]
       )
-      
+
       target_entity = find_target_by_identifiers(
         attempt_data["target_entity_type"],
         attempt_data["target_identifier"],
@@ -280,7 +245,7 @@ class UgcRestoreService
         attempt_data["target_team_identifier"],
         attempt_data["target_conference_identifier"]
       )
-      
+
       chosen_entity = find_target_by_identifiers(
         attempt_data["chosen_entity_type"],
         attempt_data["chosen_identifier"],
@@ -289,30 +254,38 @@ class UgcRestoreService
         attempt_data["chosen_team_identifier"],
         attempt_data["chosen_conference_identifier"]
       )
-      
-      if subject_entity && target_entity && chosen_entity
-        game_attempt = GameAttempt.create!(
-          ace: ace,
-          subject_entity: subject_entity,
-          target_entity: target_entity,
-          chosen_entity: chosen_entity,
-          is_correct: attempt_data["correct"] || attempt_data["is_correct"],
-          game_type: attempt_data["game_type"],
-          difficulty_level: attempt_data["difficulty"] || attempt_data["difficulty_level"],
-          time_elapsed_ms: attempt_data["response_time_ms"] || attempt_data["time_elapsed_ms"],
-          options_presented: attempt_data["options_presented"],
-          created_at: attempt_data["created_at"],
-          updated_at: attempt_data["updated_at"]
-        )
-        log_success("GameAttempt", attempt_data["game_type"], game_attempt.id)
-      else
-        missing_entities = []
-        missing_entities << "subject" unless subject_entity
-        missing_entities << "target" unless target_entity
-        missing_entities << "chosen" unless chosen_entity
-        
+
+      missing_entities = []
+      missing_entities << "ace" unless ace_id
+      missing_entities << "subject" unless subject_entity
+      missing_entities << "target" unless target_entity
+      # A timed-out attempt has no chosen entity; only report one that couldn't be found
+      missing_entities << "chosen" if attempt_data["chosen_entity_type"] && chosen_entity.nil?
+
+      if missing_entities.any?
         log_failure("GameAttempt", attempt_data["game_type"], attempt_data["id"], "Missing entities: #{missing_entities.join(', ')}")
+        next
       end
+
+      if GameAttempt.exists?(ace_id: ace_id, game_type: attempt_data["game_type"], subject_entity: subject_entity, created_at: attempt_data["created_at"])
+        log_success("GameAttempt (skipped duplicate)", attempt_data["game_type"], nil)
+        next
+      end
+
+      game_attempt = GameAttempt.create!(
+        ace_id: ace_id,
+        subject_entity: subject_entity,
+        target_entity: target_entity,
+        chosen_entity: chosen_entity,
+        is_correct: attempt_data.key?("is_correct") ? attempt_data["is_correct"] : attempt_data["correct"],
+        game_type: attempt_data["game_type"],
+        difficulty_level: attempt_data["difficulty"] || attempt_data["difficulty_level"],
+        time_elapsed_ms: attempt_data["response_time_ms"] || attempt_data["time_elapsed_ms"],
+        options_presented: attempt_data["options_presented"],
+        created_at: attempt_data["created_at"],
+        updated_at: attempt_data["updated_at"]
+      )
+      log_success("GameAttempt", attempt_data["game_type"], game_attempt.id)
     end
   end
 
@@ -350,21 +323,26 @@ class UgcRestoreService
   end
 
   def find_player_by_identifier(identifier, sport_identifier = nil, team_identifier = nil)
-    first_name, last_name = identifier.split(" ", 2)
-    return nil unless first_name && last_name
-    
-    query = Player.where(first_name: first_name, last_name: last_name)
-    
-    if sport_identifier
-      query = query.joins(team: { league: :sport }).where(sports: { name: sport_identifier })
+    words = identifier.split(" ")
+
+    # The identifier is "first last", and either part can have spaces, so try each split point
+    (1...words.size).each do |split_at|
+      query = Player.where(first_name: words[0...split_at].join(" "), last_name: words[split_at..].join(" "))
+
+      if sport_identifier
+        query = query.joins(team: { league: :sport }).where(sports: { name: sport_identifier })
+      end
+
+      if team_identifier
+        # Use CONCAT for team name since teams have territory + mascot
+        query = query.joins(:team).where("CONCAT(teams.territory, ' ', teams.mascot) = ?", team_identifier)
+      end
+
+      player = query.first
+      return player if player
     end
-    
-    if team_identifier
-      # Use CONCAT for team name since teams have territory + mascot
-      query = query.joins(:team).where("CONCAT(teams.territory, ' ', teams.mascot) = ?", team_identifier)
-    end
-    
-    query.first
+
+    nil
   end
 
   def find_team_by_identifier(identifier, sport_identifier = nil, league_identifier = nil)

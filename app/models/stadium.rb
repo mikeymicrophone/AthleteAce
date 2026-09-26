@@ -2,11 +2,11 @@ class Stadium < ApplicationRecord
   belongs_to :city
   has_many :teams
   has_many :players, through: :teams
-  has_many :sports, through: :teams
   has_many :memberships, through: :teams
   has_many :divisions, through: :memberships
   has_many :conferences, through: :divisions
-  has_many :leagues, through: :conferences
+  has_many :leagues, -> { distinct }, through: :teams
+  has_many :sports, -> { distinct }, through: :leagues
   has_many :seasons, through: :leagues
   has_many :campaigns, through: :teams
   has_many :contracts, through: :teams

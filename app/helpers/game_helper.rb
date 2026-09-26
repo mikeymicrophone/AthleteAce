@@ -111,8 +111,7 @@ module GameHelper
       data_attrs[:guessable_id] = subject.team_id if subject.respond_to?(:team_id)
     else
       # For division guess, subject is a team and answer is their division
-      data_attrs[:guessable_id] = subject.id #TODO: check this
-      data_attrs[:guessable_answer_id] = subject.division_id if subject.respond_to?(:division_id)
+      data_attrs[:guessable_id] = subject.id
     end
     
     data_attrs.merge!(additional_data)

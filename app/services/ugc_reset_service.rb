@@ -33,17 +33,31 @@ class UgcResetService
     GameAttempt    # Game interaction data
   ].freeze
 
-  def initialize
+  # UGC that points at core records by id. Reseeding reuses ids, so these rows end up
+  # attached to whichever new record gets their old id.
+  DEPENDENT_UGC_MODELS = [Highlight, Achievement, Rating, GameAttempt].freeze
+
+  # What happens to DEPENDENT_UGC_MODELS during a reset:
+  #   float - keep them; they attach to new records, which keeps content in the interface for testing and design
+  #   clear - delete them with the core data so ugc:restore can recreate them against the right records
+  MODES = %w[float clear].freeze
+
+  def initialize(mode: "float")
+    @mode = mode.to_s
+    raise ArgumentError, "Unknown reset mode #{mode.inspect}; use #{MODES.join(' or ')}" unless MODES.include?(@mode)
+
     @reset_log = []
   end
 
   def reset_core_models
-    Rails.logger.info "Starting core model reset..."
-    
+    Rails.logger.info "Starting core model reset (#{@mode} mode)..."
+
     validate_model_separation
-    
+    ensure_recent_backup! if @mode == "clear"
+
     ActiveRecord::Base.transaction do
       disable_foreign_key_checks
+      clear_dependent_ugc if @mode == "clear"
       clear_core_models
       reset_sequences
       enable_foreign_key_checks
@@ -95,6 +109,27 @@ class UgcResetService
       ActiveRecord::Base.connection.execute("SET FOREIGN_KEY_CHECKS = 1;")
     when 'sqlite', 'sqlite3'
       ActiveRecord::Base.connection.execute("PRAGMA foreign_keys = ON;")
+    end
+  end
+
+  # Clear mode deletes user data, so only proceed if a backup already holds all of it
+  def ensure_recent_backup!
+    latest_change = DEPENDENT_UGC_MODELS.filter_map { |model| model.maximum(:updated_at) }.max
+    return unless latest_change
+
+    latest_backup = self.class.latest_backup_time
+    return if latest_backup && latest_backup >= latest_change
+
+    raise "Clear mode deletes #{DEPENDENT_UGC_MODELS.map(&:name).join(', ')} records, but the newest backup " \
+          "(#{latest_backup || 'none'}) is older than the latest change to them (#{latest_change}). Run rails ugc:backup first."
+  end
+
+  def clear_dependent_ugc
+    DEPENDENT_UGC_MODELS.each do |model|
+      record_count = model.count
+      model.delete_all
+      log_model_reset(model, record_count)
+      Rails.logger.info "Cleared #{record_count} records from #{model.table_name}"
     end
   end
 
@@ -169,8 +204,10 @@ class UgcResetService
     
     report = {
       reset_timestamp: Time.current,
+      mode: @mode,
       core_models_reset: CORE_MODELS.map(&:name),
-      ugc_models_preserved: UGC_MODELS.map(&:name),
+      ugc_models_cleared: @mode == "clear" ? DEPENDENT_UGC_MODELS.map(&:name) : [],
+      ugc_models_preserved: (@mode == "clear" ? UGC_MODELS - DEPENDENT_UGC_MODELS : UGC_MODELS).map(&:name),
       reset_details: @reset_log,
       new_record_counts: new_counts,
       preserved_record_counts: preserved_counts,
@@ -221,7 +258,7 @@ class UgcResetService
               association: association.name,
               all_target_types: target_types,
               core_target_types: core_target_types,
-              record_count: ugc_model.where.not("#{association.name}_type" => nil).count
+              record_count: ugc_model.where.not(association.foreign_type => nil).count
             }
           end
         else
@@ -233,7 +270,7 @@ class UgcResetService
                 ugc_model: ugc_model.name,
                 association: association.name,
                 core_model: target_class.name,
-                record_count: ugc_model.where.not("#{association.name}_id" => nil).count
+                record_count: ugc_model.where.not(association.foreign_key => nil).count
               }
             end
           rescue NameError
@@ -343,20 +380,37 @@ class UgcResetService
     content.include?("when \"#{target_type}\"")
   end
 
-  def self.preview_reset
+  def self.latest_backup_time
+    UgcBackupService.backup_dirs.filter_map do |dir|
+      UgcBackupService.read_metadata(dir)&.dig(:backup_timestamp)
+    rescue Psych::Exception
+      nil
+    end.max
+  end
+
+  def self.preview_reset(mode = "float")
     # Show what would be reset without actually doing it
     puts "Core models that would be reset:"
     CORE_MODELS.each do |model|
       count = model.count rescue 0
       puts "  #{model.name}: #{count} records"
     end
-    
-    puts "\nUGC models that would be preserved:"
-    UGC_MODELS.each do |model|
-      count = model.count rescue 0
-      puts "  #{model.name}: #{count} records"
+
+    cleared = mode.to_s == "clear" ? DEPENDENT_UGC_MODELS : []
+
+    if cleared.any?
+      puts "\nUGC models that would be cleared (ugc:restore recreates them from the latest backup):"
+      cleared.each do |model|
+        count = model.count rescue 0
+        puts "  #{model.name}: #{count} records"
+      end
     end
-    
-    puts "\nTo proceed with reset: UgcResetService.new.reset_core_models"
+
+    puts "\nUGC models that would be preserved:"
+    (UGC_MODELS - cleared).each do |model|
+      count = model.count rescue 0
+      note = DEPENDENT_UGC_MODELS.include?(model) ? " (will attach to whichever new records reuse their ids)" : ""
+      puts "  #{model.name}: #{count} records#{note}"
+    end
   end
 end

@@ -38,3 +38,9 @@
 vendor/snapshot-52425.html
 *.sql
 db/.DS_Store
+
+# macOS Finder metadata
+.DS_Store
+
+# SimpleCov output
+/coverage/

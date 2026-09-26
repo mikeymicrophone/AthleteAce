@@ -7,7 +7,7 @@ namespace :ugc do
     puts "🔄 Starting UGC backup..."
     
     backup_timestamp = Time.current.strftime("%Y%m%d_%H%M%S")
-    backup_dir = Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups", "backup_#{backup_timestamp}")
+    backup_dir = UgcBackupService::BACKUP_ROOT.join("backup_#{backup_timestamp}")
     
     # Create backup directory
     FileUtils.mkdir_p(backup_dir)
@@ -21,14 +21,26 @@ namespace :ugc do
     puts "⚠️  Next step: rails ugc:reset_core_models"
   end
 
-  desc "Reset core sports hierarchy models (clears seeded data, preserves UGC)"
-  task reset_core_models: :environment do
+  desc "Reset core sports hierarchy models. mode=float (default) keeps ratings, achievements, and game attempts, which attach to the new records; mode=clear deletes them for ugc:restore to recreate (needs a fresh backup)"
+  task :reset_core_models, [:mode] => :environment do |t, args|
+    mode = args[:mode] || "float"
+    unless UgcResetService::MODES.include?(mode)
+      puts "❌ Unknown mode #{mode.inspect}. Use: rails \"ugc:reset_core_models[float]\" or rails \"ugc:reset_core_models[clear]\""
+      exit 1
+    end
+
     puts "⚠️  WARNING: This will DELETE all core sports data and reseed from JSON files!"
-    puts "🛡️  UGC data (aces, ratings, quests, etc.) will be preserved."
+    if mode == "clear"
+      puts "🧹 Clear mode: ratings, achievements, highlights, and game attempts will also be deleted."
+      puts "   Restore them afterwards with rails ugc:restore[backup_timestamp]."
+    else
+      puts "🛡️  Float mode: UGC is kept. Ratings, achievements, and game attempts will attach to"
+      puts "   whichever new records reuse their ids."
+    end
     puts ""
-    
+
     # Show what will be affected
-    UgcResetService.preview_reset
+    UgcResetService.preview_reset(mode)
     puts ""
     
     print "Are you sure you want to continue? (yes/no): "
@@ -42,11 +54,11 @@ namespace :ugc do
     puts "🔄 Starting core model reset..."
     
     # Run reset service
-    UgcResetService.new.reset_core_models
-    
+    UgcResetService.new(mode: mode).reset_core_models
+
     puts "✅ Core model reset completed!"
     puts "📊 Check the reset report in tmp/ for details"
-    puts "🔧 Next step: rails ugc:restore[backup_timestamp]"
+    puts "🔧 Next step: rails ugc:restore[backup_timestamp]" if mode == "clear"
   end
 
   desc "Restore UGC data after core model reseed"
@@ -58,7 +70,7 @@ namespace :ugc do
       puts "Usage: rails ugc:restore[20241215_143022]"
       puts ""
       puts "Available backups:"
-      backup_dirs = Dir.glob(Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups", "backup_*"))
+      backup_dirs = Dir.glob(UgcBackupService::BACKUP_ROOT.join("backup_*"))
       if backup_dirs.any?
         backup_dirs.each do |dir|
           timestamp = File.basename(dir).sub("backup_", "")
@@ -70,7 +82,7 @@ namespace :ugc do
       exit 1
     end
     
-    backup_dir = Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups", "backup_#{backup_timestamp}")
+    backup_dir = UgcBackupService::BACKUP_ROOT.join("backup_#{backup_timestamp}")
     
     unless Dir.exist?(backup_dir)
       puts "❌ Error: Backup directory not found: #{backup_dir}"
@@ -87,9 +99,15 @@ namespace :ugc do
     puts "🎉 Reseed with UGC preservation complete!"
   end
 
-  desc "Complete reseed workflow with UGC preservation"
-  task full_reseed: :environment do
-    puts "🚀 Starting complete reseed workflow with UGC preservation..."
+  desc "Complete reseed workflow with UGC preservation: backup, reset in the given mode (float or clear), and restore after a clear reset"
+  task :full_reseed, [:mode] => :environment do |t, args|
+    mode = args[:mode] || "float"
+    unless UgcResetService::MODES.include?(mode)
+      puts "❌ Unknown mode #{mode.inspect}. Use: rails \"ugc:full_reseed[float]\" or rails \"ugc:full_reseed[clear]\""
+      exit 1
+    end
+
+    puts "🚀 Starting complete reseed workflow with UGC preservation (#{mode} mode)..."
     puts ""
     
     # Step 1: Backup
@@ -97,7 +115,7 @@ namespace :ugc do
     Rake::Task["ugc:backup"].invoke
     
     # Get the backup timestamp from the most recent backup
-    backup_dirs = Dir.glob(Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups", "backup_*"))
+    backup_dirs = Dir.glob(UgcBackupService::BACKUP_ROOT.join("backup_*"))
     latest_backup = backup_dirs.max_by { |dir| File.ctime(dir) }
     backup_timestamp = File.basename(latest_backup).sub("backup_", "")
     
@@ -110,14 +128,22 @@ namespace :ugc do
     
     unless ['yes', 'y'].include?(confirmation)
       puts "❌ Full reseed cancelled after backup."
-      puts "🔧 Backup is available at: db/seeds/athlete_ace_ugc/backups/backup_#{backup_timestamp}"
+      puts "🔧 Backup is available at: #{latest_backup}"
       exit 0
     end
     
     # Clear the reset task so it can be invoked again
     Rake::Task["ugc:reset_core_models"].reenable
-    Rake::Task["ugc:reset_core_models"].invoke
-    
+    Rake::Task["ugc:reset_core_models"].invoke(mode)
+
+    if mode == "float"
+      # Float mode kept the UGC rows, so restoring would add copies next to them
+      puts ""
+      puts "🎉 Reseed finished. UGC was kept in place (float mode), so the restore step was skipped."
+      puts "🔧 Backup is available at: #{latest_backup}"
+      next
+    end
+
     puts ""
     puts "📋 Step 3: Restoring UGC data..."
     
@@ -133,11 +159,11 @@ namespace :ugc do
 
   desc "List available UGC backups"
   task list_backups: :environment do
-    backup_dirs = Dir.glob(Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups", "backup_*"))
+    backup_dirs = Dir.glob(UgcBackupService::BACKUP_ROOT.join("backup_*"))
     
     if backup_dirs.empty?
       puts "No UGC backups found."
-      return
+      next
     end
     
     puts "Available UGC backups:"
@@ -151,7 +177,7 @@ namespace :ugc do
       metadata_file = File.join(dir, "backup_metadata.yml")
       if File.exist?(metadata_file)
         begin
-          metadata = YAML.load_file(metadata_file)
+          metadata = UgcBackupService.read_metadata(dir)
           total_records = metadata["total_records"]
           seed_version = metadata["seed_version"]
           
@@ -186,7 +212,7 @@ namespace :ugc do
     puts ""
     
     # Check if backup directory exists
-    backup_root = Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups")
+    backup_root = UgcBackupService::BACKUP_ROOT
     if Dir.exist?(backup_root)
       puts "✅ Backup directory exists: #{backup_root}"
     else
@@ -238,11 +264,11 @@ namespace :ugc do
 
   desc "Clean up old UGC backups (keeps last 5)"
   task cleanup_backups: :environment do
-    backup_dirs = Dir.glob(Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups", "backup_*"))
+    backup_dirs = Dir.glob(UgcBackupService::BACKUP_ROOT.join("backup_*"))
     
     if backup_dirs.length <= 5
       puts "Only #{backup_dirs.length} backups found. No cleanup needed."
-      return
+      next
     end
     
     # Sort by creation time and keep the 5 most recent
@@ -270,7 +296,7 @@ namespace :ugc do
       exit 1
     end
     
-    backup_dir = Rails.root.join("db", "seeds", "athlete_ace_ugc", "backups", "backup_#{backup_timestamp}")
+    backup_dir = UgcBackupService::BACKUP_ROOT.join("backup_#{backup_timestamp}")
     
     unless Dir.exist?(backup_dir)
       puts "❌ Error: Backup directory not found: #{backup_dir}"
@@ -297,7 +323,7 @@ namespace :ugc do
     metadata_file = backup_dir.join("backup_metadata.yml")
     if File.exist?(metadata_file)
       begin
-        metadata = YAML.load_file(metadata_file)
+        metadata = UgcBackupService.read_metadata(backup_dir)
         puts "📊 Metadata:"
         puts "   Backup Time: #{metadata['backup_timestamp']}"
         puts "   Rails Env: #{metadata['rails_env']}"

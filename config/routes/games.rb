@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   get "strength/ciphers" => "strength#ciphers"
   get "strength/team_match" => "strength#team_match"
   get "strength/game_attempts" => "strength#game_attempts"
+  get "strength/teams/:team_id/game_attempts" => "strength#team_game_attempts", as: :team_strength_game_attempts
   post "strength/check_answer" => "strength#check_answer", as: :check_answer
 
   # Division Guessing Game

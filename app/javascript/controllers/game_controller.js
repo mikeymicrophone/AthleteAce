@@ -16,8 +16,6 @@ export default class extends Controller {
   ]
 
   static values = {
-    subjectId: Number,
-    correctAnswerId: Number,
     gameType: String,
     frameId: String,
     subjectType: { type: String, default: "" },
@@ -39,7 +37,9 @@ export default class extends Controller {
       this.answerTypeValue = this.gameTypeValue === "team_match" ? "Team" : "Division"
     }
 
-    document.addEventListener("turbo:frame-render", this.handleFrameRender.bind(this))
+    // Keep the bound handler so disconnect can remove the same function
+    this.boundHandleFrameRender = this.handleFrameRender.bind(this)
+    document.addEventListener("turbo:frame-render", this.boundHandleFrameRender)
 
     if (this.hasAttemptsGridTarget) {
       this.loadRecentAttempts()
@@ -50,7 +50,7 @@ export default class extends Controller {
     if (this.nextQuestionTimer) {
       clearTimeout(this.nextQuestionTimer)
     }
-    document.removeEventListener("turbo:frame-render", this.handleFrameRender.bind(this))
+    document.removeEventListener("turbo:frame-render", this.boundHandleFrameRender)
   }
 
   checkAnswer(event) {
@@ -69,8 +69,15 @@ export default class extends Controller {
 
     const optionsPresented = this.answerChoiceTargets.map(choice => parseInt(choice.dataset.guessableId))
 
-    this.sendAttemptData(chosenId, isCorrect, optionsPresented)
+    this.sendAttemptData(this.currentSubjectId(), chosenId, optionsPresented)
     this.handleAnswerUI(button, isCorrect, chosenName)
+  }
+
+  // Read the subject from the question on screen; the server works out the right answer from it
+  currentSubjectId() {
+    const card = this.questionCardTarget
+    const subjectId = this.gameTypeValue === "team_match" ? card.dataset.playerId : card.dataset.guessableId
+    return parseInt(subjectId)
   }
 
   handleAnswerUI(button, isCorrect, chosenName) {
@@ -119,7 +126,7 @@ export default class extends Controller {
     }, 500)
   }
 
-  async sendAttemptData(chosenId, isCorrect, optionsPresented) {
+  async sendAttemptData(subjectId, chosenId, optionsPresented) {
     const endTime = Date.now()
     const timeElapsedMs = endTime - this.startTime
 
@@ -133,19 +140,16 @@ export default class extends Controller {
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content
+          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]')?.content || ""
         },
         body: JSON.stringify({
           game_attempt: {
             game_type: gameTypeString,
-            subject_entity_id: this.subjectIdValue,
+            subject_entity_id: subjectId,
             subject_entity_type: this.subjectTypeValue,
-            target_entity_id: this.correctAnswerIdValue,
-            target_entity_type: this.answerTypeValue,
             chosen_entity_id: chosenId,
             chosen_entity_type: this.answerTypeValue,
             options_presented: optionsPresented,
-            is_correct: isCorrect,
             time_elapsed_ms: timeElapsedMs
           }
         })
@@ -179,33 +183,6 @@ export default class extends Controller {
 
   handleFrameRender(event) {
     if (event.target.id !== this.frameIdValue) return
-
-    const cardDisplay = this.questionCardTarget
-    if (!cardDisplay) return
-
-    if (this.gameTypeValue === "team_match") {
-      const newPlayerId = cardDisplay.dataset.playerId
-      const newGuessableId = cardDisplay.dataset.guessableId
-
-      if (newPlayerId && newPlayerId !== String(this.subjectIdValue)) {
-        this.subjectIdValue = parseInt(newPlayerId)
-      }
-
-      if (newGuessableId && newGuessableId !== String(this.correctAnswerIdValue)) {
-        this.correctAnswerIdValue = parseInt(newGuessableId)
-      }
-    } else if (this.gameTypeValue === "division_guess") {
-      const newSubjectId = cardDisplay.dataset.guessableId
-      const newCorrectAnswerId = cardDisplay.dataset.guessableAnswerId
-
-      if (newSubjectId && newSubjectId !== String(this.subjectIdValue)) {
-        this.subjectIdValue = parseInt(newSubjectId)
-      }
-
-      if (newCorrectAnswerId && newCorrectAnswerId !== String(this.correctAnswerIdValue)) {
-        this.correctAnswerIdValue = parseInt(newCorrectAnswerId)
-      }
-    }
 
     this.startTime = Date.now()
 
@@ -259,8 +236,8 @@ export default class extends Controller {
     const subjectName = card.querySelector(".attempt-subject-name")
 
     subjectName.textContent = attempt.subject_entity.name
-    if (attempt.subject_entity.photo_url) {
-      subjectImage.src = attempt.subject_entity.photo_url
+    if (attempt.subject_entity.logo_url) {
+      subjectImage.src = attempt.subject_entity.logo_url
       subjectImage.alt = `${attempt.subject_entity.name} photo`
     } else {
       subjectImage.classList.add('hidden')

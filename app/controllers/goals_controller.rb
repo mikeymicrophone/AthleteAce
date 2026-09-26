@@ -34,7 +34,7 @@ class GoalsController < ApplicationController
         format.html { redirect_to @goal, notice: "Goal was successfully updated." }
         format.json { render :show, status: :ok, location: @goal }
       else
-        format.html { render :edit, status: :unprocessable_entity }
+        format.html { redirect_to @goal, status: :see_other, alert: "Unable to update goal: #{@goal.errors.full_messages.to_sentence}" }
         format.json { render json: @goal.errors, status: :unprocessable_entity }
       end
     end
@@ -46,7 +46,7 @@ class GoalsController < ApplicationController
     @goal.destroy
 
     respond_to do |format|
-      format.html { redirect_to quests_path, notice: "You've abandoned the quest." }
+      format.html { redirect_to quests_path, status: :see_other, notice: "You've abandoned the quest." }
       format.json { head :no_content }
     end
   end

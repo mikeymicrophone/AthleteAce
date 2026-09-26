@@ -75,7 +75,7 @@ export default class extends Controller {
     const url = `/${path}/${targetId}/ratings`
 
     try {
-      const csrfToken = document.querySelector("meta[name='csrf-token']").content
+      const csrfToken = document.querySelector("meta[name='csrf-token']")?.content || ""
       const response = await fetch(url, {
         method: 'POST',
         headers: {

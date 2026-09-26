@@ -4,7 +4,7 @@ class League < ApplicationRecord
   has_many :conferences, dependent: :destroy
   has_many :divisions, through: :conferences
   has_many :memberships, through: :divisions
-  has_many :teams, through: :memberships
+  has_many :teams
   has_many :players, through: :teams
   has_many :stadiums, through: :teams
   has_many :seasons, dependent: :destroy

@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :season do
-    year { nil }
-    league { nil }
-    comments { "MyText" }
+    association :year
+    association :league
+    comments { ["A season"] }
   end
 end
