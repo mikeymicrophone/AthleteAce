@@ -108,7 +108,7 @@ module GoalsHelper
   def goals_group_section(status, goals, &block)
     tag.div class: "goals-group" do
       tag.h2(class: "goals-group-title") do
-        (status.humanize + " Goals " + tag.span("(#{goals.count})", class: "goals-group-count")).html_safe
+        safe_join [status.titleize, " Goals ", tag.span("(#{goals.count})", class: "goals-group-count")]
       end +
       tag.div(class: "goals-group-list", &block)
     end

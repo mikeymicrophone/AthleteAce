@@ -88,7 +88,7 @@ module SortableHelper
     
     link_to send(path_method, url_params), 
             class: css_classes, 
-            data: { turbo_preload: false, resource: sort_resource } do
+            data: { turbo_prefetch: false, resource: sort_resource } do
       content = ""
       
       if priority
@@ -151,7 +151,7 @@ module SortableHelper
     
     link_to send(path_method, url_params), 
             class: css_classes, 
-            data: { turbo_preload: false },
+            data: { turbo_prefetch: false },
             title: "#{humanize_sort_attribute_for(attribute, resource_type)} #{target_direction == 'inactive' ? 'remove' : target_direction}" do
       tag.span(icon, class: "sort-direction-icon")
     end

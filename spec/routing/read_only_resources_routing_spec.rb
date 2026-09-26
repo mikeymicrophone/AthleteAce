@@ -1,6 +1,16 @@
 require "rails_helper"
 
 RSpec.describe "Read-only resource routes", type: :routing do
+  %w[sports leagues conferences divisions teams players countries states cities stadiums federations].each do |resource|
+    it "routes only index and show for #{resource}" do
+      expect(get: "/#{resource}").to route_to("#{resource}#index")
+      expect(get: "/#{resource}/1").to route_to("#{resource}#show", id: "1")
+      expect(post: "/#{resource}").not_to be_routable
+      expect(patch: "/#{resource}/1").not_to be_routable
+      expect(delete: "/#{resource}/1").not_to be_routable
+    end
+  end
+
   it "does not route writes to players or teams" do
     expect(post: "/players").not_to be_routable
     expect(patch: "/players/1").not_to be_routable

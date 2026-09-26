@@ -140,7 +140,7 @@ export default class extends Controller {
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content
+          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]')?.content || ""
         },
         body: JSON.stringify({
           game_attempt: {
