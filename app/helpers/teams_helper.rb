@@ -198,7 +198,8 @@ module TeamsHelper
       count = resource.send(assoc).count
       next if count.zero?
 
-      tag.div link_to(pluralize(count, assoc.to_s.singularize), [resource, assoc]), class: "association-to-collection #{assoc}"
+      tag.div link_to(pluralize(count, assoc.to_s.singularize), [resource, assoc]),
+              class: "association-to-collection #{assoc}", data: { entity: assoc.to_s.singularize }
     end.compact
 
     tag.div safe_join(links), class: "association-links #{model_name}"

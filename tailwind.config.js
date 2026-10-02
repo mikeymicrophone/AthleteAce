@@ -14,9 +14,6 @@ module.exports = {
       colors: {
         brand: "#3b82f6",
         "brand-dark": "#2563eb"
-      },
-      fontFamily: {
-        serif: ['Lora', 'serif']
       }
     }
   },

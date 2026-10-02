@@ -30,53 +30,9 @@
   @apply text-white font-semibold border-transparent shadow-sm;
 }
 
-/* Resource-based coloring for active sort links */
-.sort-link-active[data-resource="sport"] {
-  background-color: var(--color-sport);
-}
-
-.sort-link-active[data-resource="league"] {
-  background-color: var(--color-league);
-}
-
-.sort-link-active[data-resource="conference"] {
-  background-color: var(--color-conference);
-}
-
-.sort-link-active[data-resource="division"] {
-  background-color: var(--color-division);
-}
-
-.sort-link-active[data-resource="membership"] {
-  background-color: var(--color-membership);
-}
-
-.sort-link-active[data-resource="team"] {
-  background-color: var(--color-team);
-}
-
-.sort-link-active[data-resource="player"] {
-  background-color: var(--color-player);
-}
-
-.sort-link-active[data-resource="position"] {
-  background-color: var(--color-position);
-}
-
-.sort-link-active[data-resource="stadium"] {
-  background-color: var(--color-stadium);
-}
-
-.sort-link-active[data-resource="country"] {
-  background-color: var(--color-country);
-}
-
-.sort-link-active[data-resource="state"] {
-  background-color: var(--color-state);
-}
-
-.sort-link-active[data-resource="city"] {
-  background-color: var(--color-city);
+/* Active sort links take the color of the entity family they sort by */
+.sort-link-active[data-entity] {
+  background-color: var(--entity-color);
 }
 
 /* Priority badges */
@@ -153,63 +109,7 @@
   @apply opacity-90;
 }
 
-/* Resource type indicators in sort chain */
-.sort-chain-item[data-sort-resource="sport"] {
-  @apply border-l-4;
-  border-left-color: var(--color-sport);
-}
-
-.sort-chain-item[data-sort-resource="league"] {
-  @apply border-l-4;
-  border-left-color: var(--color-league);
-}
-
-.sort-chain-item[data-sort-resource="conference"] {
-  @apply border-l-4;
-  border-left-color: var(--color-conference);
-}
-
-.sort-chain-item[data-sort-resource="division"] {
-  @apply border-l-4;
-  border-left-color: var(--color-division);
-}
-
-.sort-chain-item[data-sort-resource="membership"] {
-  @apply border-l-4;
-  border-left-color: var(--color-membership);
-}
-
-.sort-chain-item[data-sort-resource="team"] {
-  @apply border-l-4;
-  border-left-color: var(--color-team);
-}
-
-.sort-chain-item[data-sort-resource="player"] {
-  @apply border-l-4;
-  border-left-color: var(--color-player);
-}
-
-.sort-chain-item[data-sort-resource="position"] {
-  @apply border-l-4;
-  border-left-color: var(--color-position);
-}
-
-.sort-chain-item[data-sort-resource="stadium"] {
-  @apply border-l-4;
-  border-left-color: var(--color-stadium);
-}
-
-.sort-chain-item[data-sort-resource="country"] {
-  @apply border-l-4;
-  border-left-color: var(--color-country);
-}
-
-.sort-chain-item[data-sort-resource="state"] {
-  @apply border-l-4;
-  border-left-color: var(--color-state);
-}
-
-.sort-chain-item[data-sort-resource="city"] {
-  @apply border-l-4;
-  border-left-color: var(--color-city);
+/* Entity family indicators in the sort chain */
+.sort-chain-item[data-entity] {
+  border-left: 4px solid var(--entity-color, transparent);
 }

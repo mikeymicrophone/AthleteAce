@@ -1,0 +1,192 @@
+/* AthleteAce design tokens (AA-168), ported from the redesign canvas's ace.css.
+ *
+ * Colors are light-dark() pairs, so each one follows the nearest color-scheme:
+ *   data-theme="light" or "dark" pins a theme, data-theme="system" follows the OS.
+ *   Without data-theme a page stays light, until the new shell (AA-177) sets it on <html>.
+ * data-side="play" | "feed" | "mod" | "admin" sets the accent for everything inside it.
+ * data-entity="<model>" sets --entity-color to that model's family. */
+
+@theme static {
+  --font-sans: "Instrument Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: "Big Shoulders", "Arial Narrow", "Roboto Condensed", Impact, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  /* Type roles. Display and section pair with font-display and uppercase */
+  --text-display: 1.875rem;
+  --text-display--line-height: 0.92;
+  --text-display--letter-spacing: 0.01em;
+  --text-display--font-weight: 800;
+  --text-display-lg: 4rem;
+  --text-display-lg--line-height: 0.9;
+  --text-display-lg--letter-spacing: 0.005em;
+  --text-display-lg--font-weight: 800;
+  --text-section: 1.25rem;
+  --text-section--line-height: 1;
+  --text-section--letter-spacing: 0.03em;
+  --text-section--font-weight: 800;
+  --text-title: 1.5rem;
+  --text-title--line-height: 1.15;
+  --text-title--letter-spacing: -0.015em;
+  --text-title--font-weight: 600;
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.45;
+  --text-body--font-weight: 500;
+  --text-eyebrow: 0.6875rem;
+  --text-eyebrow--line-height: 1.2;
+  --text-eyebrow--letter-spacing: 0.09em;
+  --text-eyebrow--font-weight: 700;
+
+  /* Ground */
+  --color-ground: light-dark(#F2F1ED, #0C0E12);
+  --color-surface: light-dark(#FFFFFF, #14171D);
+  --color-surface-2: light-dark(#ECEBE6, #1B1F26);
+  --color-surface-3: light-dark(#DFDDD6, #262A32);
+  --color-line: light-dark(#DAD7CF, #2A2F38);
+  --color-line-2: light-dark(#BCB8AD, #3D434F);
+  --color-ink: light-dark(#131418, #F2F1EC);
+  --color-ink-2: light-dark(#45484F, #BDC1CA);
+  --color-ink-3: light-dark(#62656D, #9397A2);
+  --color-edge: light-dark(#131418, #000000);
+  --color-scrim: light-dark(rgb(11 12 15 / 0.52), rgb(0 0 0 / 0.62));
+
+  /* The shell stays dark in both themes */
+  --color-shell: light-dark(#0B0C0F, #07080A);
+  --color-shell-2: light-dark(#16181D, #111318);
+  --color-shell-3: light-dark(#22252C, #1C1F25);
+  --color-shell-line: light-dark(#2B2E36, #262A32);
+  --color-shell-ink: #F2F1EC;
+  --color-shell-ink-2: #A9ADB7;
+
+  /* Sides. accent, accent-text and accent-tint follow data-side (Play by default) */
+  --color-play: #D4FF3A;
+  --color-feed: #FF5A36;
+  --color-mod: #9DB9D6;
+  --color-admin: #E8E6DE;
+  --color-on-accent: #0B0C0F;
+  --color-accent: var(--color-play);
+  --color-accent-text: light-dark(#4A6500, #D4FF3A);
+  --color-accent-tint: light-dark(#EEF8CC, #232A0B);
+
+  /* Status, always shown with an icon and words */
+  --color-ok: light-dark(#0F7A42, #34C27A);
+  --color-on-ok: light-dark(#FFFFFF, #06140C);
+  --color-ok-ink: light-dark(#0B5E33, #7CDDA8);
+  --color-ok-tint: light-dark(#DCF1E3, #0F2C1D);
+  --color-bad: light-dark(#B3261E, #FF6A55);
+  --color-bad-ink: light-dark(#8E1C15, #FF9C8C);
+  --color-bad-tint: light-dark(#FBE2DD, #3A1611);
+  --color-warn: light-dark(#9A4A00, #F2A33A);
+  --color-warn-ink: light-dark(#7A3B00, #F6C27E);
+  --color-warn-tint: light-dark(#FBEACF, #352206);
+  --color-warn-hot: #F5A524;
+  --color-info: light-dark(#1C5DA6, #6FA8F0);
+  --color-info-ink: light-dark(#164C88, #A6C9F6);
+  --color-info-tint: light-dark(#DEE8F5, #10243F);
+
+  /* Entity families. The color names the family, the glyph names the exact type */
+  --color-entity-people: light-dark(#9658EE, #A47AFF);
+  --color-entity-clubs: light-dark(#1450BE, #3372EA);
+  --color-entity-competition: light-dark(#D0306A, #EA5A93);
+  --color-entity-places: light-dark(#00868C, #16A2A6);
+  --color-entity-time: light-dark(#B26A00, #D48A12);
+
+  /* Charts */
+  --color-chart-1: light-dark(#2A78D6, #3987E5);
+  --color-chart-2: light-dark(#EB6834, #D95926);
+  --color-chart-3: light-dark(#1BAF7A, #199E70);
+  --color-chart-grid: light-dark(#E6E4DD, #23272E);
+  --color-chart-axis: light-dark(#C3C0B6, #3A3F48);
+  --color-track: light-dark(#26292F, #2C313A);
+
+  --color-shadow-near: light-dark(rgb(19 20 24 / 0.06), rgb(0 0 0 / 0.5));
+  --color-shadow-far: light-dark(rgb(19 20 24 / 0.1), rgb(0 0 0 / 0.45));
+
+  /* Radii: md (6) and lg (8) come from Tailwind; pills use rounded-full */
+  --radius-tool: 12px;
+  --radius-card: 16px;
+  --radius-panel: 22px;
+
+  --shadow-card: 0 1px 2px var(--color-shadow-near), 0 12px 32px var(--color-shadow-far);
+  /* The game button's hard shadow, like pressing a scoreboard key */
+  --shadow-press: 0 4px 0 var(--color-edge);
+  --shadow-press-sm: 0 3px 0 var(--color-edge);
+}
+
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:where([data-theme="system"], [data-theme="system"] *) {
+      @slot;
+    }
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-ground font-sans text-body text-ink;
+  }
+
+  :where(:root),
+  [data-theme="light"] {
+    color-scheme: light;
+  }
+
+  [data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  [data-theme="system"] {
+    color-scheme: light dark;
+  }
+
+  [data-side="play"] {
+    --color-accent: var(--color-play);
+    --color-accent-text: light-dark(#4A6500, #D4FF3A);
+    --color-accent-tint: light-dark(#EEF8CC, #232A0B);
+  }
+
+  [data-side="feed"] {
+    --color-accent: var(--color-feed);
+    --color-accent-text: light-dark(#B3321A, #FF8A6E);
+    --color-accent-tint: light-dark(#FFE4DB, #37170F);
+  }
+
+  [data-side="mod"] {
+    --color-accent: var(--color-mod);
+    --color-accent-text: light-dark(#2B5A86, #AFC9E4);
+    --color-accent-tint: light-dark(#E2EBF5, #16283A);
+  }
+
+  [data-side="admin"] {
+    --color-accent: var(--color-admin);
+    --color-accent-text: light-dark(#3A3D45, #E8E6DE);
+    --color-accent-tint: light-dark(#E4E2DA, #23262D);
+  }
+
+  /* Each model's family */
+  :is([data-entity="player"], [data-entity="position"], [data-entity="role"], [data-entity="contract"]) {
+    --entity-color: var(--color-entity-people);
+  }
+
+  :is([data-entity="team"], [data-entity="organization"], [data-entity="organization_affiliation"]) {
+    --entity-color: var(--color-entity-clubs);
+  }
+
+  :is([data-entity="sport"], [data-entity="league"], [data-entity="conference"], [data-entity="division"],
+      [data-entity="membership"], [data-entity="federation"]) {
+    --entity-color: var(--color-entity-competition);
+  }
+
+  :is([data-entity="stadium"], [data-entity="city"], [data-entity="state"], [data-entity="country"],
+      [data-entity="residence"], [data-entity="jurisdiction"]) {
+    --entity-color: var(--color-entity-places);
+  }
+
+  :is([data-entity="year"], [data-entity="season"], [data-entity="campaign"], [data-entity="activation"],
+      [data-entity="contest"], [data-entity="contestant"]) {
+    --entity-color: var(--color-entity-time);
+  }
+}

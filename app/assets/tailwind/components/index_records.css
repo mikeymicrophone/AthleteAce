@@ -38,28 +38,9 @@
   border: 1px solid red;
 }
 
-.association-links div.association-to-collection.teams {
-  color: var(--color-team);
-}
-
-.association-links div.association-to-collection.memberships {
-  color: var(--color-membership);
-}
-
-.association-links div.association-to-collection.players {
-  color: var(--color-player);
-}
-
-.association-links div.association-to-collection.campaigns {
-  color: var(--color-campaign);
-}
-
-.association-links div.association-to-collection.contracts {
-  color: var(--color-contract);
-}
-
-.association-links div.association-to-collection.contests {
-  color: var(--color-contest);
+/* Each association link takes the color of its entity family */
+.association-links .association-to-collection[data-entity] {
+  color: var(--entity-color);
 }
 
 /* Record information section */

@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   draw :ratings       # Rating system
   draw :quests        # Quest and achievement system
   draw :games         # Strength training and games
+  draw :design        # Design reference pages (not in production)
 
   # Application health check
   get "up" => "rails/health#show", as: :rails_health_check
