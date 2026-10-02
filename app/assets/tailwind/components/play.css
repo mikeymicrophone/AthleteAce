@@ -1,0 +1,126 @@
+.ace-icon { @apply inline-block shrink-0 align-middle; }
+.app-main { @apply max-w-7xl py-8; }
+.eyebrow { @apply font-mono text-xs uppercase tracking-widest font-semibold text-ink-3; }
+.page-title { @apply font-display text-6xl font-extrabold uppercase leading-none tracking-tight text-ink; }
+.browse-header { @apply flex flex-wrap items-end justify-between gap-5 mb-8 border-b border-line pb-6; }
+.page-actions { @apply flex flex-wrap items-center gap-3; }
+.game-button {
+  @apply inline-flex items-center justify-center gap-2 min-h-11 px-4 py-2 bg-accent text-on-accent border-2 border-ink rounded-lg font-semibold shadow-press transition-transform;
+}
+.game-button:hover { transform: translate(-1px, -1px); }
+.game-button:active { transform: translate(3px, 3px); box-shadow: none; }
+.tool-button {
+  @apply inline-flex items-center justify-center gap-2 min-h-11 px-3 py-2 bg-surface border border-line-2 rounded-lg text-ink font-semibold text-sm cursor-pointer;
+}
+.tool-button:hover { @apply bg-surface-2; }
+.tool-link { @apply inline-flex items-center min-h-11 px-2 text-sm font-semibold text-ink-2; }
+.tool-link:hover { @apply text-accent-text underline; }
+.game-button:focus-visible, .tool-button:focus-visible, .tool-link:focus-visible, .entity-chip:focus-visible, .identity-name:focus-visible {
+  @apply outline-2 outline-offset-4 outline-accent-text;
+}
+.entity-chip {
+  @apply inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-line text-xs font-semibold;
+  color: var(--entity-color, var(--color-ink-2));
+}
+.entity-chip:hover { @apply bg-surface-2; }
+.entity-kind { color: var(--entity-color); }
+.record-identity { @apply flex items-center gap-4 min-w-0; }
+.identity-name { @apply block font-display text-2xl font-bold leading-tight text-ink; }
+.entity-avatar {
+  @apply relative inline-flex shrink-0 items-center justify-center overflow-hidden border border-line rounded-tool bg-surface-2;
+  color: var(--entity-color, var(--color-ink));
+}
+.entity-avatar-small { @apply w-16 h-16; }
+.entity-avatar-large { @apply w-48 h-56; }
+.entity-initials { @apply font-display font-extrabold text-3xl; }
+.entity-avatar-large .entity-initials { @apply text-6xl; }
+.entity-portrait { @apply absolute inset-0 w-full h-full object-contain; }
+.entity-avatar[data-entity="player"] .entity-portrait { @apply object-cover object-top; }
+.flash-notice, .flash-alert { @apply p-4 mb-4 border rounded-tool text-sm font-semibold; }
+.flash-notice { @apply bg-ok-tint text-ok-ink border-ok; }
+.flash-alert { @apply bg-bad-tint text-bad-ink border-bad; }
+.search-form { @apply bg-surface border border-line rounded-card p-5 mb-6; }
+.search-form-title { @apply font-display text-2xl font-bold text-ink; }
+.search-form .form-field-label { @apply block text-xs font-semibold text-ink-2 mb-2; }
+.search-form .form-field-input, .training-filters select {
+  @apply min-h-11 w-full px-3 py-2 rounded-lg border border-line-2 bg-surface text-ink text-sm;
+}
+.search-form .form-field-input:focus, .training-filters select:focus { @apply outline-2 outline-accent-text outline-offset-2; }
+.training-header { @apply mb-8; }
+.training-header .page-title { @apply mt-2 mb-4; }
+.training-intro { @apply max-w-2xl text-ink-2; }
+.training-grid { @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-10; }
+.training-card { @apply relative flex flex-col p-6 rounded-card bg-surface text-ink border-2 border-ink shadow-press transition-transform; }
+.training-card:hover { transform: translateY(-3px); }
+.training-card:focus-visible { @apply outline-2 outline-offset-4 outline-accent-text; }
+.training-card-featured { @apply bg-accent text-on-accent lg:col-span-2; }
+.training-card-icon { @apply flex items-center justify-between mb-6; }
+.training-card-title { @apply font-display text-3xl font-bold mb-2; }
+.training-card-description { @apply text-sm max-w-md; }
+.training-filters, .training-explainer { @apply p-6 bg-surface border border-line rounded-card mb-8; }
+.training-filters h2, .training-explainer h2 { @apply font-display text-2xl font-bold text-ink mb-4; }
+.training-filters label { @apply text-sm font-semibold text-ink-2; }
+.training-explainer { @apply bg-accent-tint text-ink-2; }
+/* Quiz controls use the same visual language as the training and browse screens. */
+.game-container { @apply bg-transparent shadow-none p-0; }
+.game-container .game-header { @apply mb-6; }
+.game-container .game-title { @apply font-display text-4xl font-extrabold uppercase text-left text-ink; }
+.game-container .subject-card { @apply bg-surface-2 border border-line rounded-card shadow-none p-6 flex flex-col items-center; }
+.game-container .subject-question { @apply text-xs uppercase tracking-wide font-mono text-ink-2 mb-5; }
+.game-container .entity-name { @apply mt-5 font-display text-3xl text-ink; }
+.game-container .entity-subtitle { @apply text-sm text-ink-2; }
+.game-container .choice-item {
+  @apply relative bg-surface text-ink p-5 min-h-40 border-2 border-ink rounded-tool shadow-press gap-2 transition-transform;
+}
+.game-container .choice-item:not(:disabled):hover { @apply bg-accent-tint; transform: translateY(-2px); }
+.game-container .choice-item:not(:disabled):active { transform: translate(3px, 3px); box-shadow: none; }
+.game-container .choice-item:focus-visible { @apply outline-2 outline-offset-4 outline-accent-text; }
+.game-container .choice-name { @apply font-display font-bold text-xl leading-tight; }
+.game-container .choice-image-placeholder { @apply bg-surface-2 rounded-tool text-ink-3; }
+.game-container .choice-item:disabled { @apply opacity-50; }
+.choice-status { @apply hidden items-center justify-center gap-1.5 font-mono text-xs font-bold; }
+.game-container .choice-item.correct-choice, .game-container .choice-item.correct-answer { @apply opacity-100 bg-ok-tint text-ok-ink border-ok-ink shadow-none; }
+.game-container .choice-item.incorrect-choice {
+  @apply opacity-100 bg-bad-tint text-bad-ink border-bad-ink shadow-none;
+  background-image: repeating-linear-gradient(135deg, transparent, transparent 8px, color-mix(in srgb, var(--color-bad-ink) 8%, transparent) 8px, color-mix(in srgb, var(--color-bad-ink) 8%, transparent) 10px);
+}
+.correct-choice .choice-status-correct, .correct-answer .choice-status-correct, .incorrect-choice .choice-status-incorrect { @apply inline-flex; }
+.game-container .controls { @apply mt-6 p-4 bg-surface border border-line rounded-tool; }
+.game-container .progress-indicator { @apply mt-0 text-left; }
+.game-container .progress-label { @apply font-mono text-sm text-ink-2; }
+.game-container .progress-counter { @apply text-2xl text-ink font-bold; }
+.game-container .pause-button-main { @apply inline-flex gap-2 bg-surface text-ink min-h-11; }
+.resume-symbol { @apply hidden; }
+[data-paused="true"] .resume-symbol { @apply inline-block; }
+[data-paused="true"] .pause-symbol { @apply hidden; }
+.answer-overlay { @apply bg-shell/80; }
+.answer-overlay .answer-text { @apply font-display text-5xl sm:text-7xl font-extrabold p-6 text-play; text-shadow: none; letter-spacing: normal; }
+.attempts-container { @apply bg-surface border-line shadow-none rounded-card; }
+.attempts-container .attempts-heading { @apply font-display text-2xl text-ink text-left; }
+.attempts-container .attempt-card { @apply bg-surface text-ink border-line; }
+.attempts-container .attempt-subject-part, .attempts-container .attempt-time { @apply bg-surface-2 text-ink-2; }
+.rating-slider-group-container { @apply bg-surface border-line shadow-none; }
+.rating-slider-instance { @apply bg-surface-2 border-line; }
+.rating-slider-instance:hover { @apply bg-surface-2 border-line-2 shadow-none; }
+.slider-label { @apply text-ink-2; }
+.slider-value { @apply bg-surface border-line-2 text-ink shadow-none font-mono; }
+.empty-state-message { @apply text-ink-3 text-sm not-italic py-2 text-left; }
+@media (max-width: 640px) {
+  .page-title { @apply text-5xl; }
+  .app-main { @apply py-6; }
+  .game-container .choices-grid { @apply grid-cols-2 gap-3; }
+  .game-container .choices-grid-1 { @apply grid-cols-1; }
+  .game-container .choice-item { @apply p-3 min-h-36; }
+  .game-container .game-title { @apply text-3xl; }
+  .game-container .subject-card {
+    @apply grid gap-x-4 p-4;
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+  .game-container .subject-question { @apply col-span-2 text-left mb-3; }
+  .game-container .subject-card .entity-avatar-large { @apply w-24 h-28; grid-column: 1; grid-row: 2 / span 2; }
+  .game-container .subject-card .entity-name { @apply text-left text-2xl mt-0 mb-1; grid-column: 2; grid-row: 2; }
+  .game-container .subject-card .entity-subtitle { @apply text-left; grid-column: 2; grid-row: 3; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-button, .training-card, .game-container .choice-item, .answer-overlay { transition: none; transform: none; }
+}

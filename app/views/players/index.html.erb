@@ -1,5 +1,12 @@
 <% content_for :title, "Players" %>
 
+<%= browse_header "Players" do %>
+  <%= link_to strength_path, class: "game-button" do %>
+    <%= icon "player-play", size: 20 %>
+    <%= tag.span "Strength Training" %>
+  <% end %>
+<% end %>
+
 <%= player_sort_links %>
 
 <%= render_floating_spectrum_picker %>
@@ -12,9 +19,9 @@
       <%= record_info_section do %>
         <%= player_info_display(player) %>
       <% end %>
-      
+
       <%= rating_slider_container(player, selected_spectrums) %>
-      
+
       <%= record_stats_section do %>
         <%= ratings_stats_display(player) %>
       <% end %>

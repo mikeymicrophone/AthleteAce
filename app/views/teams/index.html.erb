@@ -1,15 +1,22 @@
 <% content_for :title, "Teams" %>
 
+<%= browse_header "Teams" do %>
+  <%= link_to strength_team_match_path, class: "game-button" do %>
+    <%= icon "player-play", size: 20 %>
+    <%= tag.span "Team Match" %>
+  <% end %>
+<% end %>
+
 <%= team_search_form(@q) %>
 
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
   <div class="mb-4 sm:mb-0">
     <div class="text-sm text-gray-600 mb-1">Sort by:</div>
     <div class="flex flex-wrap gap-2">
-      <%= link_to "Mascot", teams_path(sort: "mascot"), class: "text-sm text-blue-600 hover:underline #{params[:sort] == 'mascot' ? 'font-bold' : ''}" %>
-      <%= link_to "Territory", teams_path(sort: "territory"), class: "text-sm text-blue-600 hover:underline #{params[:sort] == 'territory' ? 'font-bold' : ''}" %>
-      <%= link_to "Sport", teams_path(sort: "sport"), class: "text-sm text-blue-600 hover:underline #{params[:sort] == 'sport' ? 'font-bold' : ''}" %>
-      <%= link_to "City", teams_path(sort: "city"), class: "text-sm text-blue-600 hover:underline #{params[:sort] == 'city' ? 'font-bold' : ''}" %>
+      <%= link_to "Mascot", teams_path(sort: "mascot"), class: "tool-link #{params[:sort] == 'mascot' ? 'font-bold' : ''}" %>
+      <%= link_to "Territory", teams_path(sort: "territory"), class: "tool-link #{params[:sort] == 'territory' ? 'font-bold' : ''}" %>
+      <%= link_to "Sport", teams_path(sort: "sport"), class: "tool-link #{params[:sort] == 'sport' ? 'font-bold' : ''}" %>
+      <%= link_to "City", teams_path(sort: "city"), class: "tool-link #{params[:sort] == 'city' ? 'font-bold' : ''}" %>
     </div>
   </div>
 </div>
@@ -19,29 +26,20 @@
 
 <div id="teams" class="space-y-4">
   <% @teams.each do |team| %>
-    <%= tag.div(id: dom_id(team), class: "index-record p-4 rounded-lg shadow-sm") do %>
+    <%= tag.div(id: dom_id(team), class: "index-record team-record") do %>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-        <div class="team-info md:col-span-1">
-          <div>
-            <div class="text-xl font-semibold text-gray-900">
-              <%= display_name_with_lazy_logo(team) %>
-            </div>
-            <div class="text-sm text-gray-500 mt-1">
-              <span>
-                <%= display_name_with_lazy_logo(team.stadium) %>
-              </span>
-              <span class="mx-1">&bull;</span>
-              <span>
-                <%= display_name_with_lazy_logo(team.league) %>
-              </span>
-            </div>
-          </div>
-        </div>
-        
+        <%= tag.div class: "team-info" do %>
+          <%= record_identity team %>
+          <%= tag.div class: "record-metadata" do %>
+            <%= entity_link team.stadium %>
+            <%= entity_link team.league %>
+          <% end %>
+        <% end %>
+
         <%= rating_slider_container(team, selected_spectrums) %>
 
         <div class="team-links md:col-span-1 text-right flex flex-wrap items-center justify-end gap-3">
-          <%= link_to pluralize(team.players.count, "player"), [team, :players], class: "text-sm text-blue-600 hover:underline" %>
+          <%= link_to pluralize(team.players.count, "player"), [team, :players], class: "tool-link" %>
           <%= quiz_link(team, title: "Test your knowledge about #{team.name}") %>
         </div>
       </div>
@@ -54,11 +52,11 @@
   <div class="my-6 flex justify-center">
     <%== @pagy.series_nav %>
   </div>
-  
+
   <%# Simple per-page selector %>
   <div class="flex justify-center mt-2 mb-8">
     <div class="text-sm text-gray-600">
-      Items per page: 
+      Items per page:
       <% [5, 10, 20, 50].each do |per_page| %>
         <% if params[:per_page].to_i == per_page || (params[:per_page].blank? && per_page == Pagy::OPTIONS[:limit]) %>
           <span class="font-bold px-2"><%= per_page %></span>

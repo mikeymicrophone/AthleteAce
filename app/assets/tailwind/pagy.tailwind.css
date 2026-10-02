@@ -1,22 +1,15 @@
-/* Pagy 43 markup: the current page is aria-current, gaps are role="separator", disabled links have no href */
+/* Pagy 43: the current page is aria-current; disabled links have no href. */
 .pagy {
-  @apply flex space-x-1 font-semibold text-sm text-gray-500;
+  @apply flex flex-wrap gap-1 font-mono text-sm text-ink-2 my-4;
   a:not([role="separator"]) {
-    @apply block rounded-lg px-3 py-1 bg-gray-200;
-    &[href]:hover {
-      @apply bg-gray-300;
-    }
-    &:not([href]) { /* disabled links */
-      @apply text-gray-300 bg-gray-100 cursor-default;
-    }
-    &[aria-current] { /* current page */
-      @apply text-white bg-gray-400;
-    }
+    @apply inline-flex items-center justify-center rounded-lg min-w-11 min-h-11 px-3 border border-line bg-surface;
+    &[href]:hover { @apply bg-surface-2 border-line-2; }
+    &:not([href]) { @apply text-ink-3 cursor-default; }
+    &[aria-current] { @apply text-on-accent bg-accent border-ink font-bold; }
   }
+  a[role="separator"] { @apply inline-flex items-center px-1; }
   label {
-    @apply inline-block whitespace-nowrap bg-gray-200 rounded-lg px-3 py-0.5;
-    input {
-      @apply bg-gray-100 border-none rounded-md;
-    }
+    @apply inline-block whitespace-nowrap bg-surface-2 rounded-lg px-3 py-1;
+    input { @apply bg-surface border border-line rounded-md; }
   }
 }

@@ -1,45 +1,32 @@
 module IconHelper
-  # Returns the appropriate Font Awesome icon class for a given resource
-  def icon_for_resource(resource_name)
-    icon_mappings = {
-      # Entities
-      sports: "fa-solid fa-basketball",
-      leagues: "fa-solid fa-trophy",
-      conferences: "fa-solid fa-sitemap",
-      divisions: "fa-solid fa-diagram-project",
-      teams: "fa-solid fa-users-line",
-      players: "fa-solid fa-person-running",
-      stadiums: "fa-solid fa-landmark",
-      
-      # Locations
-      countries: "fa-solid fa-earth-americas",
-      states: "fa-solid fa-map",
-      cities: "fa-solid fa-city",
-      
-      # Quests & Ratings
-      quests: "fa-solid fa-scroll",
-      goals: "fa-solid fa-bullseye",
-      highlights: "fa-solid fa-star",
-      achievements: "fa-solid fa-medal",
-      strength: "fa-solid fa-dumbbell",
-      ratings: "fa-solid fa-ranking-star",
-      spectrums: "fa-solid fa-gauge-high",
-      memberships: "fa-solid fa-id-card",
-      
-      # Temporal Resources
-      years: "fa-solid fa-calendar-days",
-      seasons: "fa-solid fa-calendar-alt",
-      
-      # Contracts & Activations
-      contracts: "fa-solid fa-file-contract",
-      activations: "fa-solid fa-play-circle",
-      
-      # Generic UI Icons
-      chevron_down: "fa-solid fa-chevron-down",
-      search: "fa-solid fa-search",
-      shuffle: "fa-solid fa-shuffle"
-    }
-    
-    icon_mappings[resource_name.to_sym] || "fa-solid fa-circle-info"
+  # Only trusted, vendored SVG contents can be rendered. A caller cannot supply a file path.
+  ICON_CONTENTS = Rails.root.glob("vendor/tabler/icons/*.svg").to_h do |path|
+    [path.basename(".svg").to_s, Nokogiri::XML(path.read).at_css("svg").inner_html.freeze]
+  end.freeze
+
+  RESOURCE_ICONS = {
+    sport: "ball-basketball", league: "stack-2", conference: "layout-columns",
+    division: "tournament", team: "shield", player: "shirt-sport",
+    stadium: "building-stadium", country: "world", state: "map", city: "building-community",
+    quest: "script", goal: "target", highlight: "star", achievement: "medal",
+    strength: "barbell", rating: "list-numbers", spectrum: "gauge", membership: "id-badge-2",
+    year: "calendar", season: "calendar", contest: "medal", contract: "file-certificate",
+    activation: "player-play", organization: "shield", position: "shirt-sport",
+    chevron_down: "chevron-down", search: "search", shuffle: "arrows-shuffle"
+  }.freeze
+
+  def icon name, size: 24, **options
+    content = ICON_CONTENTS.fetch name.to_s
+    tag.svg content.html_safe, **options.merge(
+      class: ["ace-icon", options[:class]].compact.join(" "),
+      width: size, height: size, viewBox: "0 0 24 24", fill: "none",
+      stroke: "currentColor", "stroke-width": 2, "stroke-linecap": "round",
+      "stroke-linejoin": "round", "aria-hidden": true, focusable: false
+    )
+  end
+
+  def icon_for_resource resource_name, **options
+    name = RESOURCE_ICONS.fetch resource_name.to_s.singularize.to_sym, "info-circle"
+    icon name, **options
   end
 end

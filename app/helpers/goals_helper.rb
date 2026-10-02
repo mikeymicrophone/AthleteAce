@@ -7,46 +7,46 @@ module GoalsHelper
     status_config = {
       'not_started' => {
         text: 'Not Started',
-        icon: 'fa-solid fa-circle-pause',
+        icon: 'player-pause',
         css_class: 'goal-status-badge goal-status-not-started'
       },
       'in_progress' => {
-        text: 'In Progress', 
-        icon: 'fa-solid fa-circle-play',
+        text: 'In Progress',
+        icon: 'player-play',
         css_class: 'goal-status-badge goal-status-in-progress'
       },
       'completed' => {
         text: 'Completed',
-        icon: 'fa-solid fa-circle-check', 
+        icon: 'check',
         css_class: 'goal-status-badge goal-status-completed'
       }
     }
-    
+
     config = status_config[goal.status]
     size_class = "goal-status-badge-#{size}"
-    
+
     tag.span class: "#{config[:css_class]} #{size_class}" do
-      tag.i(class: "#{config[:icon]} goal-status-icon") + 
+      icon(config[:icon], size: 18, class: "goal-status-icon") +
       config[:text]
     end
   end
 
   # Renders a progress bar for a goal
-  # @param goal [Goal] The goal object  
+  # @param goal [Goal] The goal object
   # @param show_percentage [Boolean] Whether to show percentage inside bar
   # @param size [Symbol] Size variant (:small, :medium, :large)
   # @return [String] HTML for the progress bar
   def goal_progress_bar(goal, show_percentage: true, size: :medium)
     size_class = "goal-progress-bar-#{size}"
-    
+
     tag.div class: "goal-progress-container" do
-      bar_content = tag.div class: "goal-progress-bar #{size_class}", 
+      bar_content = tag.div class: "goal-progress-bar #{size_class}",
                            style: "width: #{goal.percent_complete}%" do
         if show_percentage && goal.percent_complete > 15
           tag.span "#{goal.percent_complete}%", class: "goal-progress-text"
         end
       end
-      
+
       tag.div(class: "goal-progress-track") { bar_content } +
       if show_percentage && goal.percent_complete <= 15
         tag.div "#{goal.percent_complete}% complete", class: "goal-progress-external-text"
@@ -65,13 +65,13 @@ module GoalsHelper
       abandon_button = link_to goal_path(goal),
       data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to abandon this quest?" },
       class: "goal-action-button goal-action-danger",
-      title: "Abandon Quest",
+      title: "Abandon Quest", aria: { label: "Abandon Quest" },
       id: dom_id(goal, :abandon_button_for) do
-        tag.i class: "fa-solid fa-trash"
+        icon "trash", size: 18
       end
     end
 
-    tag.div class: "goal-actions goal-actions-#{layout}" do      
+    tag.div class: "goal-actions goal-actions-#{layout}" do
       safe_join [view_quest_button, view_goal_button, abandon_button].compact
     end
   end
@@ -89,7 +89,7 @@ module GoalsHelper
   def goal_container(**options, &block)
     default_options = { class: "goal-container" }
     merged_options = default_options.merge(options)
-    
+
     tag.div **merged_options, &block
   end
 
@@ -131,7 +131,7 @@ module GoalsHelper
   def goals_empty_state
     tag.div class: "goals-empty-state" do
       (tag.div(class: "goals-empty-icon") do
-         tag.i class: "fa-solid fa-target text-6xl"
+         icon "target", size: 64
        end +
        tag.h3("No goals yet", class: "goals-empty-title") +
        tag.p("Start your journey by adopting a quest and setting some goals.", class: "goals-empty-description") +
@@ -162,7 +162,7 @@ module GoalsHelper
          tag.div do
            (tag.div(class: "goal-progress-stats") do
               (tag.span("Progress") +
-               tag.span("#{goal.progress} / #{goal.quest.highlights.required.count} achievements", 
+               tag.span("#{goal.progress} / #{goal.quest.highlights.required.count} achievements",
                        class: "goal-progress-stats-value")).html_safe
             end +
             goal_progress_bar(goal)).html_safe
@@ -182,21 +182,21 @@ module GoalsHelper
   # Renders abandon quest section if applicable
   def abandon_quest_section(goal)
     return unless goal.status != 'completed'
-    
+
     tag.div class: "goal-page-actions justify-end" do
       link_to goal_path(goal),
               data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to abandon this quest? This action cannot be undone." },
               class: "goal-action-button goal-action-danger",
-              title: "Abandon Quest",
+              title: "Abandon Quest", aria: { label: "Abandon Quest" },
               id: dom_id(goal, :abandon_button_detail) do
-(tag.i(class: "fa-solid fa-trash mr-2") + "Abandon Quest").html_safe
+(icon("trash", size: 18, class: "mr-2") + "Abandon Quest").html_safe
       end
     end
   end
 
   # Renders a goal card wrapper
   # @param goal [Goal] The goal object
-  # @param options [Hash] Additional HTML options  
+  # @param options [Hash] Additional HTML options
   # @return [String] HTML for goal card
   def goal_card(goal, **options, &block)
     default_options = {
@@ -204,7 +204,7 @@ module GoalsHelper
       class: "goal-card"
     }
     merged_options = default_options.merge(options)
-    
+
     tag.div **merged_options, &block
   end
 
@@ -219,11 +219,11 @@ module GoalsHelper
         content += tag.p(subtitle, class: "goal-page-subtitle") if subtitle.present?
         content
       end
-      
+
       if block_given?
         header_content + tag.div(class: "goal-page-actions", &block)
       else
-        header_content  
+        header_content
       end
     end
   end
@@ -233,12 +233,12 @@ module GoalsHelper
   # @param required [Boolean] Whether this achievement is required
   # @return [String] HTML for achievement item
   def achievement_item(highlight, required: true)
-    icon_class = required ? "fa-solid fa-star achievement-icon-required" : 
-                           "fa-regular fa-star achievement-icon-optional"
-    
+    icon_class = required ? "achievement-icon-required" :
+                           "achievement-icon-optional"
+
     tag.div class: "achievement-item" do
       (tag.div(class: "achievement-icon-container") do
-         tag.i class: icon_class
+         icon "star", class: icon_class
        end +
        tag.div(class: "achievement-content") do
          (tag.h3(highlight.achievement.name, class: "achievement-name") +

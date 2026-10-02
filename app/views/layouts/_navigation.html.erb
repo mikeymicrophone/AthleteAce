@@ -1,136 +1,49 @@
-<nav class="navigation-container">
-  <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
-    <div class="relative flex items-center justify-between h-16">
-      <div class="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
-        <div class="flex-shrink-0 flex items-center">
-          <%= link_to root_path, class: "text-white text-xl font-bold" do %>
-            <i class="fa-solid fa-medal mr-2"></i> Athlete Ace
+<%= tag.nav class: "navigation-container", aria: { label: "Main navigation" } do %>
+  <%= tag.div class: "navigation-inner" do %>
+    <%= link_to root_path, class: "ace-brand" do %>
+      <%= tag.span icon("bolt", size: 24), class: "ace-brand-mark" %>
+      <%= tag.span "Athlete Ace" %>
+    <% end %>
+
+    <%= tag.div class: "nav-menu" do %>
+      <%= link_to strength_path, class: "nav-play #{controller_name == 'strength' ? 'active' : ''}" do %>
+        <%= icon "player-play", size: 18 %>
+        <%= tag.span "Play" %>
+      <% end %>
+      <% {
+        "Teams" => %w[sports leagues conferences divisions teams players stadiums memberships contracts activations],
+        "Locations" => %w[countries states cities],
+        "Quests" => %w[quests goals achievements strength game_history ratings spectrums],
+        "Time" => %w[years seasons contests]
+      }.each do |label, resources| %>
+        <%= tag.div class: "nav-group", data: { controller: "dropdown" } do %>
+          <%= tag.button type: "button", class: "nav-group-title", aria: { expanded: false, controls: "nav-#{label.downcase}" },
+            data: { dropdown_target: "toggle", action: "click->dropdown#toggle keydown.esc->dropdown#escape" } do %>
+            <%= tag.span label %>
+            <%= icon "chevron-down", size: 16 %>
           <% end %>
-        </div>
-        
-        <div class="sm:ml-6 flex sm:space-x-8 nav-menu">
-          <!-- Entities Group -->
-          <div class="nav-group" data-controller="dropdown">
-            <div class="inline-flex items-center text-white nav-group-title" data-action="click->dropdown#toggle">
-              <i class="fa-solid fa-trophy mr-2"></i> Teams
-              <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
-            </div>
-            <div class="nav-dropdown" data-dropdown-target="menu">
-              <%= link_to sports_path, class: "nav-dropdown-item #{current_page?(sports_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:sports) %>"></i> Sports
+          <%= tag.div id: "nav-#{label.downcase}", class: "nav-dropdown", data: { dropdown_target: "menu", action: "keydown.esc->dropdown#escape" } do %>
+            <%= tag.p label, class: "nav-dropdown-heading" %>
+            <% resources.each do |resource| %>
+              <% path = resource == "game_history" ? strength_game_attempts_path : public_send("#{resource}_path") %>
+              <%= link_to path, class: "nav-dropdown-item #{current_page?(path) ? 'active' : ''}" do %>
+                <%= resource == "game_history" ? icon("history", size: 20) : icon_for_resource(resource, size: 20) %>
+                <%= tag.span resource.titleize %>
               <% end %>
-              <%= link_to leagues_path, class: "nav-dropdown-item #{current_page?(leagues_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:leagues) %>"></i> Leagues
-              <% end %>
-              <%= link_to conferences_path, class: "nav-dropdown-item #{current_page?(conferences_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:conferences) %>"></i> Conferences
-              <% end %>
-              <%= link_to divisions_path, class: "nav-dropdown-item #{current_page?(divisions_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:divisions) %>"></i> Divisions
-              <% end %>
-              <%= link_to teams_path, class: "nav-dropdown-item #{current_page?(teams_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:teams) %>"></i> Teams
-              <% end %>
-              <%= link_to players_path, class: "nav-dropdown-item #{current_page?(players_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:players) %>"></i> Players
-              <% end %>
-              <%= link_to stadiums_path, class: "nav-dropdown-item #{current_page?(stadiums_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:stadiums) %>"></i> Stadiums
-              <% end %>
-              <%= link_to memberships_path, class: "nav-dropdown-item #{current_page?(memberships_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:memberships) %>"></i> Memberships
-              <% end %>
-              <%= link_to contracts_path, class: "nav-dropdown-item #{current_page?(contracts_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:contracts) %>"></i> Contracts
-              <% end %>
-              <%= link_to activations_path, class: "nav-dropdown-item #{current_page?(activations_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:activations) %>"></i> Activations
-              <% end %>
-            </div>
-          </div>
-          
-          <!-- Locations Group -->
-          <div class="nav-group" data-controller="dropdown">
-            <div class="inline-flex items-center text-white nav-group-title" data-action="click->dropdown#toggle">
-              <i class="fa-solid fa-earth-americas mr-2"></i> Locations
-              <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
-            </div>
-            <div class="nav-dropdown" data-dropdown-target="menu">
-              <%= link_to countries_path, class: "nav-dropdown-item #{current_page?(countries_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:countries) %>"></i> Countries
-              <% end %>
-              <%= link_to states_path, class: "nav-dropdown-item #{current_page?(states_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:states) %>"></i> States
-              <% end %>
-              <%= link_to cities_path, class: "nav-dropdown-item #{current_page?(cities_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:cities) %>"></i> Cities
-              <% end %>
-            </div>
-          </div>
-          
-          <!-- Quests & Ratings Group -->
-          <div class="nav-group" data-controller="dropdown">
-            <div class="inline-flex items-center text-white nav-group-title" data-action="click->dropdown#toggle">
-              <i class="fa-solid fa-scroll mr-2"></i> Quests
-              <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
-            </div>
-            <div class="nav-dropdown" data-dropdown-target="menu">
-              <%= link_to quests_path, class: "nav-dropdown-item #{current_page?(quests_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:quests) %>"></i> Quests
-              <% end %>
-              <%= link_to goals_path, class: "nav-dropdown-item #{controller_name == 'goals' ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:goals) %>"></i> Goals
-              <% end %>
-              <%= link_to achievements_path, class: "nav-dropdown-item #{current_page?(achievements_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:achievements) %>"></i> Achievements
-              <% end %>
-              <%= link_to strength_path, class: "nav-dropdown-item #{current_page?(strength_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:strength) %>"></i> Strength
-              <% end %>
-              <%= link_to "/strength/game_attempts", class: "nav-dropdown-item #{current_page?('/strength/game_attempts') ? 'active' : ''}" do %>
-                <i class="fa-solid fa-history"></i> Game History
-              <% end %>
-              <%= link_to ratings_path, class: "nav-dropdown-item #{controller_name == 'ratings' ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:ratings) %>"></i> Ratings
-              <% end %>
-              <%= link_to spectrums_path, class: "nav-dropdown-item #{current_page?(spectrums_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:spectrums) %>"></i> Spectrums
-              <% end %>
-            </div>
-          </div>
-          
-          <!-- Time & Temporal Group -->
-          <div class="nav-group" data-controller="dropdown">
-            <div class="inline-flex items-center text-white nav-group-title" data-action="click->dropdown#toggle">
-              <i class="fa-solid fa-calendar mr-2"></i> Time
-              <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
-            </div>
-            <div class="nav-dropdown" data-dropdown-target="menu">
-              <%= link_to years_path, class: "nav-dropdown-item #{current_page?(years_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:years) %>"></i> Years
-              <% end %>
-              <%= link_to seasons_path, class: "nav-dropdown-item #{current_page?(seasons_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:seasons) %>"></i> Seasons
-              <% end %>
-              <%= link_to contests_path, class: "nav-dropdown-item #{current_page?(contests_path) ? 'active' : ''}" do %>
-                <i class="<%= icon_for_resource(:contests) %>"></i> Contests
-              <% end %>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="flex items-center space-x-4">
-        <% if ace_signed_in? %>
-          <%= link_to random_quests_path, class: "rounded-md px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium" do %>
-            <span class="flex items-center">
-              <i class="fa-solid fa-flag-checkered mr-2"></i>
-              Begin Quest
-            </span>
+            <% end %>
           <% end %>
         <% end %>
-        <%= ace_auth_links %>
-      </div>
-    </div>
-  </div>
-</nav>
+      <% end %>
+      <% if ace_signed_in? %>
+        <%= link_to random_quests_path, class: "nav-quest", aria: { label: "Begin Quest" }, title: "Begin Quest" do %>
+          <%= icon "flag", size: 16 %>
+          <%= tag.span "Begin Quest" %>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <%= tag.div class: "nav-account" do %>
+      <%= ace_auth_links %>
+    <% end %>
+  <% end %>
+<% end %>

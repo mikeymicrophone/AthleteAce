@@ -89,5 +89,27 @@ RSpec.describe "Navigation", type: :system do
       # Dropdown should be hidden again
       expect(page).not_to have_css(".nav-dropdown", visible: true)
     end
+
+    it "keeps mobile navigation usable with keyboard dismissal", js: true do
+      page.current_window.resize_to 390, 844
+      visit root_path
+
+      %w[Teams Locations Quests Time].each do |label|
+        button = find_button label
+        button.click
+        expect(button["aria-expanded"]).to eq("true")
+        expect(page).to have_css(".nav-dropdown.active", visible: true)
+        button.send_keys :escape
+        expect(button["aria-expanded"]).to eq("false")
+        expect(page).not_to have_css(".nav-dropdown.active")
+      end
+
+      within ".nav-menu" do
+        expect(page).to have_link("Begin Quest")
+      end
+      expect(page.evaluate_script("document.documentElement.scrollWidth <= window.innerWidth")).to be(true)
+    ensure
+      page.current_window.resize_to 1400, 1400
+    end
   end
 end
