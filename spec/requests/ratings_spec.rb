@@ -82,3 +82,79 @@ RSpec.describe "Ratings", type: :request do
     end
   end
 end
+
+RSpec.describe "Shared rating rows", type: :request do
+  let(:ace) { create(:ace) }
+  let(:player) { create(:player) }
+  let(:spectrum) { create(:familiarity) }
+  let(:stream_headers) { { "Accept" => "text/vnd.turbo-stream.html" } }
+
+  def document
+    Nokogiri::HTML response.body
+  end
+
+  it "shows your own exact value and averages only active ratings" do
+    sign_in ace
+    create(:rating, ace: ace, target: player, spectrum: spectrum, value: 4300)
+    create(:rating, target: player, spectrum: spectrum, value: 1700)
+    create(:rating, target: player, spectrum: spectrum, value: -9000, archived: true)
+
+    get player_path(player)
+
+    expect(document.at_css(".rating-slider-input")["value"]).to eq("4300")
+    expect(document.at_css(".slider-value").text).to eq("+4,300")
+    expect(document.at_css(".rating-summary").text).to include("Aces average +3,000 · 2 ratings")
+    expect(document.at_css(".average-marker")["style"]).to eq("left: 65.0%")
+  end
+
+  it "never shows another ace's rating as yours and distinguishes an unrated zero" do
+    sign_in ace
+    create(:rating, target: player, spectrum: spectrum, value: 8000)
+    get player_path(player)
+    expect(document.at_css(".slider-value").text).to eq("Not rated")
+    expect(document.at_css(".rating-slider-instance")["data-rated"]).to eq("false")
+
+    create(:rating, ace: ace, target: player, spectrum: spectrum, value: 0)
+    get player_path(player)
+    expect(document.at_css(".slider-value").text).to eq("0")
+    expect(document.at_css(".rating-slider-instance")["data-rated"]).to eq("true")
+  end
+
+  it "replaces the row with the saved value and recomputed average without counting the archived version" do
+    sign_in ace
+    original = create(:rating, ace: ace, target: player, spectrum: spectrum, value: 1000)
+    create(:rating, target: player, spectrum: spectrum, value: 3000)
+
+    post player_ratings_path(player), params: { rating: { spectrum_id: spectrum.id, value: 5000 } }, headers: stream_headers
+
+    expect(response).to have_http_status(:ok)
+    expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+    expect(document.at_css("turbo-stream")["target"]).to eq("rating_spectrum_#{spectrum.id}_player_#{player.id}")
+    expect(response.body).to include("+5,000", "Aces average +4,000 · 2 ratings", "Saved")
+    expect(original.reload).to be_archived
+  end
+
+  it "returns public averages as read-only rows without exposing personal JSON ratings" do
+    create(:rating, target: player, spectrum: spectrum, value: 2000)
+    get for_spectrums_player_ratings_path(player), params: { spectrum_ids: spectrum.id.to_s }, headers: stream_headers
+
+    expect(response).to have_http_status(:ok)
+    expect(document.at_css("turbo-stream")["target"]).to eq("rating_rows_player_#{player.id}")
+    expect(response.body).to include("Aces average +2,000 · 1 rating", "disabled", "Not rated")
+
+    get for_spectrums_player_ratings_path(player), params: { spectrum_ids: spectrum.id.to_s }, as: :json
+    expect(response.parsed_body).to eq("ratings" => {})
+    post player_ratings_path(player), params: { rating: { spectrum_id: spectrum.id, value: 4000 } }
+    expect(response).to redirect_to(new_ace_session_path)
+    expect(player.ratings.active.count).to eq(1)
+  end
+
+  it "renders an empty selection rather than keeping obsolete rows" do
+    sign_in ace
+    get for_spectrums_player_ratings_path(player), params: { spectrum_ids: "" }, headers: stream_headers
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Select a spectrum")
+    expect(response.body).not_to include("rating-slider-input")
+  end
+end

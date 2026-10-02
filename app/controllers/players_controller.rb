@@ -42,19 +42,22 @@ class PlayersController < ApplicationController
 
   # GET /players/1 or /players/1.json
   def show
-    # Load any filters that were applied when navigating to this show page
     load_current_filters
-    
-    # Load related ratings
-    @ratings = @player.ratings.includes(:ace)
-    @player_ratings = @player.ratings.includes(:ace).order(created_at: :desc).limit(10)
-    @team_ratings = @player.team.ratings.includes(:ace).order(created_at: :desc).limit(10) if @player.team
-    
-    # Set up filter options for navigation to related resources
-    load_filter_options
-    
-    # Create a filtered breadcrumb for this player
     @filtered_breadcrumb = build_filtered_breadcrumb @player, @current_filters
+    @spectrums = Spectrum.order :name
+    @seasons = Season.where(id: @player.campaigns.select(:season_id)).includes(:year, :league).recent
+
+    if ace_signed_in?
+      attempts = current_ace.game_attempts.where subject_entity: @player
+      seen = attempts.count
+      right = attempts.where(is_correct: true).count
+      last_miss = attempts.where(is_correct: false).maximum :created_at
+      @memory_stats = {
+        seen: seen,
+        accuracy: seen.positive? ? "#{(right.fdiv(seen) * 100).round}%" : "—",
+        last_miss: last_miss ? last_miss.to_date.strftime("%b %-d, %Y") : "—"
+      }
+    end
   end
 
   private

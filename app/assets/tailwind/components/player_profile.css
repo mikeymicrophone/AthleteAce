@@ -1,0 +1,45 @@
+.player-profile { @apply max-w-5xl mx-auto; }
+.player-breadcrumbs { @apply mb-6; }
+.player-breadcrumbs ol { @apply flex flex-wrap items-center gap-2; }
+.player-breadcrumbs li { @apply flex items-center gap-2 min-w-0; }
+.player-breadcrumbs li > .ace-icon { @apply text-ink-3; }
+.player-breadcrumbs [aria-current="page"] { @apply text-xs font-semibold text-ink-2; }
+.player-breadcrumbs .entity-chip { @apply min-h-9; }
+.player-hero { @apply flex items-center gap-8 pb-8 mb-8 border-b border-line; }
+.player-hero-details { @apply min-w-0 flex-1; }
+.player-hero .page-title { @apply mt-2 mb-3 text-7xl; overflow-wrap: anywhere; }
+.player-status-line { @apply text-sm text-ink-2 mb-4; }
+.player-status-line:empty { display: none; }
+.profile-chips { @apply flex flex-wrap gap-2; }
+.profile-chips .entity-chip { @apply min-h-9; }
+.player-hero .page-actions { @apply mt-6; }
+.profile-portrait {
+  @apply relative shrink-0 w-44 h-52 overflow-hidden rounded-card border border-line;
+  background: var(--jersey-color, var(--color-surface-2));
+  color: var(--jersey-ink, var(--color-ink-2));
+}
+.profile-jersey { @apply flex flex-col items-center justify-center h-full gap-2; }
+.profile-jersey.hidden { display: none; }
+.profile-jersey span { @apply font-display font-extrabold text-2xl tracking-wide; }
+.profile-photo { @apply absolute inset-0 w-full h-full object-cover object-top; }
+.profile-section { @apply mb-8; }
+.profile-section-title { @apply font-display text-2xl font-extrabold uppercase tracking-wide mb-4; }
+.memory-stats { @apply grid grid-cols-3 gap-3; }
+.memory-stat { @apply p-4 bg-surface border border-line rounded-tool; }
+.memory-value { @apply mt-2 font-mono text-2xl font-bold; }
+.memory-stat:last-child .memory-value { @apply text-base leading-8; }
+.profile-empty { @apply text-sm text-ink-3; }
+.memory-stats + .profile-empty { @apply mt-3; }
+.profile-related { @apply grid sm:grid-cols-2 gap-x-6 gap-y-5; }
+.profile-related dt { @apply mb-2; }
+@media (max-width: 640px) {
+  .player-hero { @apply items-start gap-4 pb-6 mb-6; }
+  .profile-portrait { @apply w-24 h-32; }
+  .profile-jersey .ace-icon { width: 72px; height: 72px; }
+  .profile-jersey span { @apply text-lg; }
+  .player-hero .page-title { @apply text-4xl; }
+  .player-hero .game-button { @apply text-xs px-3 text-left; }
+  .player-hero .page-actions { @apply mt-4; }
+  .memory-stat { @apply p-3; }
+  .memory-stat:last-child .memory-value { @apply text-xs leading-8; }
+}

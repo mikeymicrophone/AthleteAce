@@ -38,7 +38,7 @@ RSpec.describe "Page regressions", type: :request do
   it "links filtered breadcrumbs to each filter's page" do
     player = create(:player)
     get team_player_path(player.team, player)
-    breadcrumb_hrefs = Nokogiri::HTML(response.body).css("a.breadcrumb-link").map { |link| link["href"] }
+    breadcrumb_hrefs = Nokogiri::HTML(response.body).css("nav[aria-label=Breadcrumb] a").map { |link| link["href"] }
     expect(breadcrumb_hrefs).to eq([team_path(player.team)])
   end
 

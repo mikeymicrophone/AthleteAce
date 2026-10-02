@@ -99,12 +99,6 @@
 .attempts-container .attempts-heading { @apply font-display text-2xl text-ink text-left; }
 .attempts-container .attempt-card { @apply bg-surface text-ink border-line; }
 .attempts-container .attempt-subject-part, .attempts-container .attempt-time { @apply bg-surface-2 text-ink-2; }
-.rating-slider-group-container { @apply bg-surface border-line shadow-none; }
-.rating-slider-instance { @apply bg-surface-2 border-line; }
-.rating-slider-instance:hover { @apply bg-surface-2 border-line-2 shadow-none; }
-.slider-label { @apply text-ink-2; }
-.slider-value { @apply bg-surface border-line-2 text-ink shadow-none font-mono; }
-.empty-state-message { @apply text-ink-3 text-sm not-italic py-2 text-left; }
 @media (max-width: 640px) {
   .page-title { @apply text-5xl; }
   .app-main { @apply py-6; }

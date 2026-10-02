@@ -1,5 +1,5 @@
 class RatingsController < ApplicationController
-  before_action :authenticate_ace!
+  before_action :authenticate_ace!, except: :for_spectrums
   before_action :set_rating, only: [:show, :edit, :update, :destroy]
   before_action :set_target, only: [:new, :create, :for_spectrums]
   before_action :authorize_rating, only: [:edit, :update, :destroy]
@@ -48,6 +48,10 @@ class RatingsController < ApplicationController
     respond_to do |format|
       format.html { redirect_to after_rating_path }
       format.json { render json: { success: true, rating: @rating }, status: :created }
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(helpers.rating_row_id(@target, @rating.spectrum),
+          partial: "ratings/slider", locals: { record: @target, spectrum: @rating.spectrum, saved: true })
+      end
       format.js { head :ok }
     end
   rescue ActiveRecord::RecordInvalid => e
@@ -59,6 +63,7 @@ class RatingsController < ApplicationController
         render :new, status: :unprocessable_content
       end
       format.json { render json: { success: false, errors: @rating.errors.full_messages }, status: :unprocessable_content }
+      format.turbo_stream { head :unprocessable_content }
       format.js { head :unprocessable_content }
     end
   end
@@ -95,16 +100,11 @@ class RatingsController < ApplicationController
     spectrum_ids = spectrum_ids.split(',') if spectrum_ids.is_a?(String)
     spectrum_ids = spectrum_ids.map(&:to_i).reject(&:zero?)
     
-    if spectrum_ids.empty?
-      render json: { ratings: {} }
-      return
-    end
-    
     # Find existing ratings for this ace, target, and spectrums
-    ratings = current_ace.ratings.active
+    ratings = current_ace ? current_ace.ratings.active
                          .where(target: @target)
                          .where(spectrum_id: spectrum_ids)
-                         .includes(:spectrum)
+                         .includes(:spectrum) : Rating.none
     
     # Build response hash with spectrum_id as key and rating data as value
     ratings_hash = {}
@@ -119,6 +119,10 @@ class RatingsController < ApplicationController
     
     respond_to do |format|
       format.json { render json: { ratings: ratings_hash } }
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.update(helpers.rating_rows_id(@target),
+          partial: "ratings/slider_rows", locals: { record: @target, spectrums: Spectrum.where(id: spectrum_ids).order(:name) })
+      end
     end
   end
 

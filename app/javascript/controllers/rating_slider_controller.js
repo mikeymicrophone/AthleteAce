@@ -1,110 +1,99 @@
 import { Controller } from "@hotwired/stimulus"
+import { Turbo } from "@hotwired/turbo-rails"
 
 export default class extends Controller {
-  static targets = []
-  static values = {
-    targetId: Number,
-    targetType: String
-  }
+  static targets = ["slider", "precisionButton"]
+  static values = { precision: { type: String, default: "coarse" } }
 
-  connect() {
-    this.initializeAllSliders()
-    this.element.stimulusController = this
-  }
-
-  initializeAllSliders() {
-    const sliders = this.element.querySelectorAll('input[type="range"].rating-slider-input')
-
-    sliders.forEach(slider => {
-      const spectrumId = slider.dataset.ratingSliderSpectrumIdParam
-      const valueLabel = this.element.querySelector(`[data-rating-slider-target="value_${spectrumId}"]`)
-
-      if (valueLabel) {
-        this.updateValueLabel(slider.value, valueLabel)
-      }
+  precisionValueChanged() {
+    this.precisionButtonTargets.forEach(button => {
+      button.setAttribute("aria-pressed", String(button.dataset.precision === this.precisionValue))
     })
+  }
+
+  changePrecision(event) {
+    this.precisionValue = event.currentTarget.dataset.precision
+  }
+
+  sliderTargetConnected(slider) {
+    slider.setAttribute("aria-valuetext", this.rowFor(slider).dataset.rated === "true" ? this.formatValue(slider.value) : "Not rated")
+  }
+
+  get increment() { return this.precisionValue === "fine" ? 100 : 1000 }
+
+  formatValue(value) {
+    const number = Number(value)
+    return `${number > 0 ? "+" : ""}${number.toLocaleString()}`
+  }
+
+  rowFor(slider) { return slider.closest(".rating-slider-instance") }
+
+  showDraft(slider) {
+    const row = this.rowFor(slider)
+    row.querySelector(".slider-value").textContent = this.formatValue(slider.value)
+    slider.setAttribute("aria-valuetext", this.formatValue(slider.value))
+    row.querySelector(".status-indicator").textContent = "Not saved yet"
   }
 
   updateValue(event) {
     const slider = event.target
-    const spectrumId = slider.dataset.ratingSliderSpectrumIdParam
-    const valueLabel = this.element.querySelector(`[data-rating-slider-target="value_${spectrumId}"]`)
-
-    if (valueLabel) {
-      this.updateValueLabel(slider.value, valueLabel)
-    }
+    slider.value = Math.round(Number(slider.value) / this.increment) * this.increment
+    this.showDraft(slider)
   }
 
-  updateValueLabel(value, labelElement) {
-    if (labelElement) {
-      labelElement.textContent = value
-    }
-  }
-
-  async submitRating(event) {
+  adjustWithKeyboard(event) {
     const slider = event.target
-    const ratingValue = slider.value
-    const spectrumId = slider.dataset.ratingSliderSpectrumIdParam
+    if (slider.disabled) return
+    const increments = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 10, PageDown: -10 }
+    let value
+    if (event.key === "Home") value = -10000
+    else if (event.key === "End") value = 10000
+    else if (event.key in increments) value = Number(slider.value) + increments[event.key] * this.increment
+    else return
+    event.preventDefault()
+    slider.value = Math.max(-10000, Math.min(10000, value))
+    this.showDraft(slider)
+    this.save(slider)
+  }
 
-    const statusLabel = this.element.querySelector(`[data-rating-slider-target="status_${spectrumId}"]`)
+  submitRating(event) { this.save(event.target) }
 
-    if (!spectrumId) {
-      console.error("[RatingSlider] Spectrum ID not found")
-      if (statusLabel) statusLabel.textContent = "Error: Spectrum ID missing"
-      return
-    }
+  retry(event) { this.save(event.currentTarget.closest(".rating-slider-instance").querySelector("input")) }
 
-    let targetType, targetId
-
-    if (this.hasTargetTypeValue && this.hasTargetIdValue) {
-      targetType = this.targetTypeValue
-      targetId = this.targetIdValue
-    } else {
-      targetType = this.element.dataset.ratingSliderTargetType
-      targetId = this.element.dataset.ratingSliderTargetId
-    }
-
-    if (!targetType || !targetId) {
-      console.error("[RatingSlider] Target ID or Type not found")
-      if (statusLabel) statusLabel.textContent = "Error: Target missing"
-      return
-    }
-
-    targetType = targetType.charAt(0).toUpperCase() + targetType.slice(1)
-    const path = targetType.toLowerCase() + 's'
-    const url = `/${path}/${targetId}/ratings`
-
+  async save(slider) {
+    if (slider.disabled) return
+    const row = this.rowFor(slider)
+    const status = row.querySelector(".status-indicator")
+    const retry = row.querySelector(".rating-retry")
+    const focusedAtStart = document.activeElement === slider
+    slider.disabled = true
+    row.setAttribute("aria-busy", "true")
+    status.textContent = "Saving…"
+    retry.classList.add("hidden")
     try {
-      const csrfToken = document.querySelector("meta[name='csrf-token']")?.content || ""
-      const response = await fetch(url, {
-        method: 'POST',
+      const response = await fetch(slider.dataset.ratingSliderUrl, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken,
-          'Accept': 'application/json'
+          "Content-Type": "application/json", "Accept": "text/vnd.turbo-stream.html",
+          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]')?.content || ""
         },
-        body: JSON.stringify({
-          rating: {
-            value: ratingValue,
-            spectrum_id: spectrumId,
-            target_id: targetId,
-            target_type: targetType
-          },
-          spectrum_id: spectrumId
-        })
+        body: JSON.stringify({ rating: { value: Number(slider.value), spectrum_id: slider.dataset.ratingSliderSpectrumIdParam } })
       })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        slider.value = data.rating.value
-        const valueLabel = this.element.querySelector(`[data-rating-slider-target="value_${spectrumId}"]`)
-        if (valueLabel) this.updateValueLabel(data.rating.value, valueLabel)
-      } else {
-        console.error("Error saving rating:", data)
-      }
+      if (!response.ok || !response.headers.get("content-type")?.includes("turbo-stream")) throw new Error("Rating was not saved")
+      const keepFocus = focusedAtStart && (document.activeElement === slider || document.activeElement === document.body)
+      const stream = await response.text()
+      await Turbo.renderStreamMessage(stream)
+      // Turbo removes the old row. Wait for the replacement before returning keyboard focus.
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const replacement = document.getElementById(row.id)?.querySelector("input")
+        if (keepFocus && replacement) replacement.focus({ preventScroll: true })
+      }))
     } catch (error) {
-      console.error("Network error:", error)
+      slider.disabled = false
+      row.removeAttribute("aria-busy")
+      status.textContent = "Couldn’t save your rating."
+      retry.classList.remove("hidden")
+      if (focusedAtStart && document.activeElement === document.body) slider.focus({ preventScroll: true })
     }
   }
 }

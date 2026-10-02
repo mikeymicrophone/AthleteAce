@@ -1,0 +1,40 @@
+<% your_rating = current_ace&.rating_for(record, spectrum) %>
+<% summary = record.ratings_on(spectrum).pick(Arel.sql("COUNT(*)"), Arel.sql("AVG(value)")) %>
+<% count, average = summary %>
+<% average = average&.to_f %>
+<% row_id = rating_row_id record, spectrum %>
+<% saved = local_assigns.fetch :saved, false %>
+
+<%= tag.div id: row_id, class: "rating-slider-instance", data: { spectrum_id: spectrum.id, rated: your_rating.present? } do %>
+  <%= tag.div class: "slider-header" do %>
+    <%= tag.label spectrum.name, for: "#{row_id}_input", class: "slider-label" %>
+    <%= tag.span signed_rating(your_rating&.value), class: "slider-value", data: { rating_slider_target: "value" } %>
+  <% end %>
+  <%= tag.div class: "slider-track" do %>
+    <% if average %>
+      <%= tag.div class: "average-track", aria: { hidden: true } do %>
+        <%= tag.span "", class: "average-marker", style: "left: #{(average + 10_000) / 200}%", title: "Aces average #{signed_rating average}" %>
+      <% end %>
+    <% end %>
+    <%# An integer track keeps existing off-grid ratings exact; Stimulus applies the selected increments to new input. %>
+    <%= tag.input type: "range", id: "#{row_id}_input", min: -10000, max: 10000, step: 1,
+      value: your_rating&.value || 0, disabled: !ace_signed_in?, class: "rating-slider-input",
+      aria: { describedby: "#{row_id}_summary" }, data: {
+        rating_slider_target: "slider", rating_slider_spectrum_id_param: spectrum.id,
+        rating_slider_url: polymorphic_path([record, :ratings]),
+        action: "input->rating-slider#updateValue change->rating-slider#submitRating keydown->rating-slider#adjustWithKeyboard"
+      } %>
+  <% end %>
+  <%= tag.div class: "slider-endpoints" do %>
+    <%= tag.span spectrum.low_label %>
+    <%= tag.span spectrum.high_label %>
+  <% end %>
+  <%= tag.div id: "#{row_id}_summary", class: "rating-summary" do %>
+    <%= tag.span "", class: "average-key", aria: { hidden: true } %>
+    <%= tag.span average ? "Aces average #{signed_rating average} · #{pluralize count, 'rating'}" : "No ratings yet" %>
+  <% end %>
+  <%= tag.div class: "slider-status", role: "status", aria: { live: "polite" } do %>
+    <%= tag.span saved ? "Saved" : "", class: "status-indicator", data: { rating_slider_target: "status" } %>
+    <%= tag.button "Retry", type: "button", class: "rating-retry hidden", data: { action: "rating-slider#retry" } %>
+  <% end %>
+<% end %>
