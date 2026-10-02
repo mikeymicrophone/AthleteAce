@@ -24,6 +24,11 @@
         rating_slider_url: polymorphic_path([record, :ratings]),
         action: "input->rating-slider#updateValue change->rating-slider#submitRating keydown->rating-slider#adjustWithKeyboard"
       } %>
+    <% unless ace_signed_in? %>
+      <%= tag.button "", type: "button", class: "rating-sign-in-trigger",
+        aria: { label: "Sign in to rate #{spectrum.name}", describedby: "#{row_id}_status" },
+        data: { action: "rating-slider#promptSignIn" } %>
+    <% end %>
   <% end %>
   <%= tag.div class: "slider-endpoints" do %>
     <%= tag.span spectrum.low_label %>
@@ -33,8 +38,11 @@
     <%= tag.span "", class: "average-key", aria: { hidden: true } %>
     <%= tag.span average ? "Aces average #{signed_rating average} · #{pluralize count, 'rating'}" : "No ratings yet" %>
   <% end %>
-  <%= tag.div class: "slider-status", role: "status", aria: { live: "polite" } do %>
+  <%= tag.div id: "#{row_id}_status", class: "slider-status", role: "status", aria: { live: "polite" } do %>
     <%= tag.span saved ? "Saved" : "", class: "status-indicator", data: { rating_slider_target: "status" } %>
+    <% unless ace_signed_in? %>
+      <%= link_to "Sign in", new_ace_session_path, class: "rating-sign-in-link hidden" %>
+    <% end %>
     <%= tag.button "Retry", type: "button", class: "rating-retry hidden", data: { action: "rating-slider#retry" } %>
   <% end %>
 <% end %>

@@ -29,6 +29,9 @@
 .rating-slider-instance[data-rated="false"] .rating-slider-input::-moz-range-thumb { background: var(--color-surface); }
 .rating-slider-input:disabled { cursor: default; }
 .rating-slider-input:focus-visible { @apply outline-2 outline-offset-2 outline-accent-text rounded-md; }
+.rating-sign-in-trigger { @apply absolute inset-0 z-2 w-full h-full bg-transparent cursor-pointer rounded-md; }
+.rating-sign-in-trigger:focus-visible { @apply outline-2 outline-offset-2 outline-accent-text; }
+.rating-sign-in-link { @apply underline font-semibold text-ink-2; }
 /* Native range thumbs travel between their centers, inset by half their width. */
 .average-track { @apply absolute inset-x-3 pointer-events-none; top: 22px; z-index: 1; }
 .average-marker, .average-key {

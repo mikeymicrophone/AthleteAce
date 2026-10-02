@@ -28,6 +28,13 @@ export default class extends Controller {
 
   rowFor(slider) { return slider.closest(".rating-slider-instance") }
 
+  promptSignIn(event) {
+    const row = this.rowFor(event.currentTarget)
+    row.querySelector(".status-indicator").textContent = "You need to sign in to rate."
+    row.querySelector(".rating-sign-in-link").classList.remove("hidden")
+    row.querySelector(".slider-status").scrollIntoView({ block: "nearest" })
+  }
+
   showDraft(slider) {
     const row = this.rowFor(slider)
     row.querySelector(".slider-value").textContent = this.formatValue(slider.value)

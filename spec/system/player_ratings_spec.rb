@@ -23,6 +23,34 @@ RSpec.describe "Player profiles and rating controls", type: :system do
     expect(row).to have_css("input:not([disabled])")
   end
 
+  it "explains the sign-in requirement when a visitor clicks or uses the keyboard on a slider" do
+    sign_out ace
+    create(:rating, target: player, spectrum: familiarity, value: 8000)
+    visit player_path(player)
+
+    row = row_for familiarity
+    expect(row).not_to have_link("Sign in")
+    # Keep the clicked track at the bottom of the viewport, where its message could be missed.
+    page.execute_script <<~JS
+      const track = document.querySelector('#rating_spectrum_#{familiarity.id}_player_#{player.id} .slider-track');
+      window.scrollTo(0, track.getBoundingClientRect().bottom + window.scrollY - window.innerHeight);
+    JS
+    row.find("button[aria-label='Sign in to rate Familiarity']").click
+    expect(row).to have_content("You need to sign in to rate.")
+    expect(row).to have_link("Sign in", href: new_ace_session_path)
+    expect(page.evaluate_script("document.querySelector('#rating_spectrum_#{familiarity.id}_player_#{player.id} .slider-status').getBoundingClientRect().bottom <= window.innerHeight")).to be(true)
+    expect(row).to have_css(".slider-value", text: "Not rated")
+    expect(row).to have_content("Aces average +8,000 · 1 rating")
+    expect(row.find("input")).to be_disabled
+    expect(row.find("input").value).to eq("0")
+    expect(player.ratings.count).to eq(1)
+
+    row_for(skill).find("button[aria-label='Sign in to rate Skill']").send_keys :enter
+    expect(row_for(skill)).to have_content("You need to sign in to rate.")
+    within(row_for(skill)) { click_link "Sign in" }
+    expect(page).to have_current_path(new_ace_session_path)
+  end
+
   it "preserves existing exact values and saves keyboard changes with coarse and fine precision" do
     original = create(:rating, ace: ace, target: player, spectrum: familiarity, value: 4300)
     create(:rating, target: player, spectrum: familiarity, value: 1700)
