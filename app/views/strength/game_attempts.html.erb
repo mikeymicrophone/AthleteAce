@@ -1,6 +1,128 @@
-<% content_for :title, "My Game Attempts" %>
+<% content_for :title, @team ? "#{@team.name} · Game history" : "Game history" %>
+<%= tag.div class: "history-page" do %>
+  <%= tag.header class: "browse-header" do %>
+    <%= tag.div do %>
+      <%= tag.p "Your practice", class: "eyebrow" %>
+      <%= tag.h1 "Game history", class: "page-title" %>
+      <%= tag.div(entity_link(@team), class: "history-team-heading") if @team %>
+    <% end %>
+    <%= link_to strength_path, class: "game-button" do %>
+      <%= icon "player-play", size: 18 %><%= tag.span "Play again" %>
+    <% end %>
+  <% end %>
 
-<%= tag.div class: "game-attempts-container" do %>
-  <%= team_attempts_filter_panel @teams_by_sport, @sports if @teams_by_sport.any? %>
-  <%= game_attempts_panel @game_attempts %>
-<% end %> 
+  <%= tag.div class: "history-controls" do %>
+    <%= tag.nav class: "history-tabs", aria: { label: "History views" } do %>
+      <%= link_to "Overall", strength_game_attempts_path(game_type: @history.game_type), aria: { current: @history_tab == "overall" ? "page" : nil } %>
+      <%= link_to "By team", strength_game_attempts_path(view: "teams", game_type: @history.game_type), aria: { current: @history_tab == "teams" ? "page" : nil } %>
+    <% end %>
+    <%= form_with url: history_game_filter_path, method: :get, class: "history-filter" do |form| %>
+      <%= form.hidden_field :view, value: @history_tab %>
+      <%= form.label :game_type, "Game" %>
+      <%= form.select :game_type, [["All games", ""], *GameHistory::GAMES.map { |value, label| [label, value] }], selected: @history.game_type %>
+      <%= form.submit "Apply", class: "tool-button" %>
+    <% end %>
+  <% end %>
+
+  <%= tag.section class: "history-panel history-accuracy", aria: { labelledby: "history-accuracy-title" } do %>
+    <%= tag.div class: "history-panel-heading" do %>
+      <%= tag.div do %>
+        <%= tag.h2 "Accuracy · last 7 days", id: "history-accuracy-title", class: "profile-section-title" %>
+        <%= tag.p "#{(@history.today - 6).strftime('%b %-d')} – #{@history.today.strftime('%b %-d, %Y')} · #{@history.time_zone.tzinfo.identifier}", class: "history-caption" %>
+      <% end %>
+      <%= tag.div class: "history-score" do %>
+        <%= tag.strong history_accuracy(@history.current_week[:accuracy]), class: "history-score-value" %>
+        <%= tag.span "#{@history.current_week[:correct]} of #{@history.current_week[:total]} correct", class: "history-caption" %>
+      <% end %>
+    <% end %>
+    <% if @history.current_week[:total].positive? %>
+      <% change = @history.accuracy_change %>
+      <%= tag.p(change ? "#{change.positive? ? '+' : ''}#{change} pts vs the previous 7 days" : "No attempts in the previous 7 days to compare.", class: "history-comparison") %>
+      <%= history_chart @history.days.last(7) %>
+      <%= tag.p "Select a point for the day’s results. Gaps mean no attempts.", class: "history-caption history-chart-help" %>
+    <% else %>
+      <%= tag.p "No attempts in the last 7 days. Play a game to start your accuracy trend.", class: "history-empty" %>
+    <% end %>
+  <% end %>
+
+  <% if @team %>
+    <%= tag.div class: "history-team-actions" do %>
+      <%= link_to "All teams", strength_game_attempts_path(view: "teams", game_type: @history.game_type), class: "tool-link" %>
+      <%= link_to "Practice Team Match", strength_team_match_path(team_id: @team.id), class: "tool-button" %>
+    <% end %>
+  <% else %>
+    <%= tag.div class: "history-insights" do %>
+      <% if @history_tab == "overall" && @history.game_type != "guess_the_division" %>
+        <%= tag.section class: "history-panel", aria: { labelledby: "history-mixups-title" } do %>
+          <%= tag.h2 "Teams you mix up", id: "history-mixups-title", class: "profile-section-title" %>
+          <%= tag.p "All-time Team Match · both directions", class: "history-caption" %>
+          <% if @history.mixups.any? %>
+            <%= tag.ul class: "history-mixups" do %>
+              <% @history.mixups.each do |pair| %>
+                <%= tag.li class: "history-mixup" do %>
+                  <%= tag.div class: "history-pair" do %>
+                    <%= entity_link pair[:teams].first %>
+                    <%= tag.span "↔", aria: { hidden: true } %>
+                    <%= entity_link pair[:teams].last %>
+                  <% end %>
+                  <%= tag.div class: "history-mixup-detail" do %>
+                    <%= tag.span pluralize(pair[:count], "mix-up"), class: "history-count" %>
+                    <%= link_to "Drill", strength_team_match_path(team_ids: pair[:teams].map(&:id)), class: "tool-button",
+                      aria: { label: "Drill #{pair[:teams].map(&:name).join(' and ')}" } %>
+                  <% end %>
+                  <% division = pair[:teams].first.division %>
+                  <%= tag.p "Both in #{division.name}", class: "history-caption" if division && division == pair[:teams].last.division %>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% else %>
+            <%= tag.p "No team mix-ups recorded yet.", class: "history-empty" %>
+          <% end %>
+        <% end %>
+      <% end %>
+      <%= tag.section class: "history-panel history-teams", aria: { labelledby: "history-teams-title" } do %>
+        <%= tag.div class: "history-panel-heading" do %>
+          <%= tag.div do %>
+            <%= tag.h2 "By team, weakest first", id: "history-teams-title", class: "profile-section-title" %>
+            <%= tag.p "All-time accuracy · #{@history.game_type ? GameHistory::GAMES[@history.game_type] : 'all games'}", class: "history-caption" %>
+          <% end %>
+          <% if @history_tab == "overall" && @history.team_stats.size > 5 %>
+            <%= link_to "All #{@history.team_stats.size}", strength_game_attempts_path(view: "teams", game_type: @history.game_type), class: "tool-link" %>
+          <% end %>
+        <% end %>
+        <% if @history.team_stats.any? %>
+          <%= tag.ul class: "history-team-list" do %>
+            <% (@history_tab == "teams" ? @history.team_stats : @history.team_stats.first(5)).each do |stat| %>
+              <%= tag.li do %>
+                <%= link_to team_strength_game_attempts_path(stat[:team], game_type: @history.game_type), class: "history-team-link" do %>
+                  <%= tag.div class: "history-team-name" do %>
+                    <%= entity_avatar stat[:team] %>
+                    <%= tag.div do %>
+                      <%= tag.span stat[:team].name, class: "history-team-title" %>
+                      <%= tag.span "#{stat[:correct]} of #{stat[:total]} correct", class: "history-caption" %>
+                    <% end %>
+                  <% end %>
+                  <%= tag.strong history_accuracy(stat[:accuracy]), class: "history-team-accuracy" %>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% else %>
+          <%= tag.p "Your teams will appear here after you play.", class: "history-empty" %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= tag.section class: "history-panel", aria: { labelledby: "history-recent-title" } do %>
+    <%= tag.h2 "Recent attempts", id: "history-recent-title", class: "profile-section-title" %>
+    <% if @game_attempts.any? %>
+      <%= tag.ol class: "history-attempts" do %>
+        <%= render partial: "strength/history_attempt", collection: @game_attempts, as: :attempt %>
+      <% end %>
+      <%== @pagy.series_nav %>
+    <% else %>
+      <%= tag.p "No attempts match this history yet.", class: "history-empty" %>
+    <% end %>
+  <% end %>
+<% end %>

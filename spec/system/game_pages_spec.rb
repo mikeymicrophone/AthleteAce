@@ -47,7 +47,7 @@ RSpec.describe "Game pages", type: :system do
 
       visit strength_game_attempts_path
 
-      expect(page).to have_content("Teams by Sport")
+      expect(page).to have_content("By team, weakest first")
       click_link href: team_strength_game_attempts_path(attempt.target_entity)
       expect(page).to have_content(attempt.subject_entity.full_name)
     end

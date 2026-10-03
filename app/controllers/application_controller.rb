@@ -7,12 +7,23 @@ class ApplicationController < ActionController::Base
   
   # Configure permitted parameters for Devise
   before_action :configure_permitted_parameters, if: :devise_controller?
+  after_action :store_browsing_location, unless: :devise_controller?
 
   helper_method :admin_signed_in?
 
   MAX_PER_PAGE = 100
 
   protected
+
+  # Remember a page the visitor actually viewed, not a background request or an auth form.
+  # Devise consumes this local path after a successful sign-in or password reset.
+  def store_browsing_location
+    return if ace_signed_in? || !request.get? || !request.format.html?
+    return if request.xhr? || turbo_frame_request? || !response.successful?
+    return unless response.media_type == "text/html"
+
+    store_location_for :ace, request.fullpath
+  end
 
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: [])

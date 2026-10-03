@@ -1,0 +1,23 @@
+<%= tag.li id: dom_id(attempt, :history), class: "history-attempt" do %>
+  <%= tag.div class: "history-attempt-heading" do %>
+    <%= tag.span class: "history-result #{attempt.correct? ? 'history-correct' : 'history-incorrect'}" do %>
+      <%= icon attempt.correct? ? "check" : "x", size: 16 %>
+      <%= attempt.correct? ? "Correct" : "Incorrect" %>
+    <% end %>
+    <%= tag.span GameHistory::GAMES.fetch(attempt.game_type), class: "history-caption" %>
+    <%= tag.time "#{time_ago_in_words attempt.created_at} ago", datetime: attempt.created_at.iso8601,
+      title: attempt.created_at.in_time_zone.strftime("%b %-d, %Y at %H:%M %Z"), class: "history-attempt-time" %>
+  <% end %>
+  <%= tag.div class: "history-attempt-subject" do %>
+    <%= history_entity attempt.subject_entity, "Subject no longer available" %>
+  <% end %>
+  <%= tag.div class: "history-answer" do %>
+    <% unless attempt.correct? %>
+      <%= tag.span "You chose", class: "history-caption" %>
+      <%= history_entity attempt.chosen_entity, attempt.chosen_entity_id ? "Answer no longer available" : "No answer" %>
+      <%= icon "arrow-right", size: 16 %>
+    <% end %>
+    <%= tag.span "Answer", class: "history-caption" %>
+    <%= history_entity attempt.target_entity, "Answer no longer available" %>
+  <% end %>
+<% end %>

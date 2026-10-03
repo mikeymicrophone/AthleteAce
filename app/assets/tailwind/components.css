@@ -21,3 +21,5 @@
 
 @import "./components/play.css";
 @import "./components/player_profile.css";
+@import "./components/account.css";
+@import "./components/game_history.css";

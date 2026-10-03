@@ -1,0 +1,22 @@
+.account-card { @apply max-w-lg mx-auto my-4 sm:my-10 p-6 sm:p-8 bg-surface border border-line rounded-panel shadow-card; }
+.account-heading { @apply mb-8; }
+.account-mark { @apply inline-flex items-center justify-center w-12 h-12 rounded-tool bg-accent text-on-accent mb-6; }
+.account-heading .page-title { @apply text-5xl mt-2 mb-4; }
+.account-description { @apply text-sm text-ink-2; }
+.account-form { @apply space-y-5; }
+.account-field label { @apply block text-sm font-semibold text-ink mb-2; }
+.account-input { @apply w-full min-h-12 px-3 py-2 border border-line-2 rounded-lg bg-surface text-ink; }
+.account-input:focus-visible { @apply outline-2 outline-offset-2 outline-accent-text; }
+.account-hint { @apply text-xs text-ink-3 mt-2; }
+.account-options { @apply flex flex-wrap items-center justify-between gap-3 text-sm; }
+.account-remember { @apply flex items-center gap-2 min-h-11; }
+.account-remember input { @apply w-4 h-4; accent-color: var(--color-accent-text); }
+.account-form .game-button { @apply w-full min-h-12 cursor-pointer; }
+.account-links { @apply flex flex-col items-start gap-1 border-t border-line mt-7 pt-5 text-sm; }
+.account-links a, .account-options a { @apply inline-flex items-center min-h-11 font-semibold text-ink-2 underline underline-offset-4; }
+.account-links a:hover, .account-options a:hover { @apply text-accent-text; }
+.account-links a:focus-visible, .account-options a:focus-visible { @apply outline-2 outline-offset-2 outline-accent-text rounded-sm; }
+.account-errors { @apply p-4 mb-5 border border-bad rounded-tool bg-bad-tint text-bad-ink text-sm; }
+.account-errors h2 { @apply font-semibold mb-2; }
+.account-errors ul { @apply list-disc pl-5 space-y-1; }
+.account-field .field_with_errors .account-input { @apply border-bad; }

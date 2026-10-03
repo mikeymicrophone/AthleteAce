@@ -113,6 +113,11 @@ class StrengthController < ApplicationController
       # Important: Restrict to ONLY these teams
       filter_params[:team_ids] = teams_pool.map(&:id)
       Rails.logger.debug { "TEAM MATCH: Restricting to teams: #{filter_params[:team_ids]}" }
+    elsif filter_params[:team_ids].present?
+      teams_pool = Team.where(id: filter_params[:team_ids]).to_a
+      return redirect_to(strength_game_attempts_path, alert: "Those teams are no longer available.") if teams_pool.empty?
+
+      filter_params[:team_ids] = teams_pool.map &:id
     elsif ace_signed_in? && no_scope_specified? &&
           filter_params[:team_id].blank? && filter_params[:sport_id].blank? && filter_params[:league_id].blank?
       # No scope specified, use quest teams for logged-in users
@@ -130,6 +135,9 @@ class StrengthController < ApplicationController
     Rails.logger.debug { "TEAM MATCH: Found #{players.size} players with filter params: #{filter_params}" }
 
     if players.empty?
+      if filter_params[:team_id].present? || params[:team_ids].present?
+        return redirect_to strength_game_attempts_path, alert: "No players are available for those teams."
+      end
       Rails.logger.debug { "TEAM MATCH: No players found with filtered teams, using sample" }
       players = Player.sampled(50)
     end
@@ -239,77 +247,22 @@ class StrengthController < ApplicationController
   end
   
   def game_attempts
-    @game_attempts = current_ace.game_attempts.order(created_at: :desc)
-    
-    # Calculate team statistics for teams with attempts
-    @team_stats = {}
-    
-    # Get all teams that have attempts
-    team_attempts = @game_attempts.where(target_entity_type: 'Team')
-    teams_with_attempts = Team.where(id: team_attempts.pluck(:target_entity_id).uniq)
-    
-    # For each team, calculate stats
-    teams_with_attempts.each do |team|
-      team_attempts_array = team_attempts.where(target_entity_id: team.id)
-      
-      total_attempts = team_attempts_array.size
-      correct_attempts = team_attempts_array.count(&:correct?)
-      
-      @team_stats[team] = {
-        total_attempts: total_attempts,
-        correct_attempts: correct_attempts,
-        accuracy: total_attempts > 0 ? (correct_attempts.to_f / total_attempts * 100).round : 0
-      }
-    end
-    
-    # Group teams by sport
-    @teams_by_sport = {}
-    @team_stats.keys.each do |team|
-      sport = team.sport || 'Other'
-      @teams_by_sport[sport] ||= []
-      @teams_by_sport[sport] << team
-    end
-    
-    # Sort sports alphabetically and teams within each sport
-    @sports = @teams_by_sport.keys.sort
-    @teams_by_sport.each do |sport, teams|
-      @teams_by_sport[sport] = teams.sort_by(&:name)
-    end
+    load_game_history
   end
 
-  # Team-specific game attempts grouped by player
   def team_game_attempts
-    @team = Team.find(params[:team_id])
-    
-    # Find all game attempts where this team was the target
-    @attempts_by_player = {}
-    @player_stats = {}
-    
-    # Get all attempts for this team
-    attempts = current_ace.game_attempts.where(target_entity_type: 'Team', target_entity_id: @team.id)
-    
-    # Get unique player IDs from the attempts
-    player_ids = attempts.select(:subject_entity_id).distinct.pluck(:subject_entity_id)
-
-    # For each player, calculate stats and store their attempts relation
-    player_ids.each do |player_id|
-      player = Player.find_by(id: player_id)
-      next unless player # Skip if player not found
-
-      player_specific_attempts = attempts.where(subject_entity_id: player_id)
-      
-      # Store the player's attempts (as a relation)
-      @attempts_by_player[player] = player_specific_attempts
-      
-      # Calculate stats using the Player model method, passing the relation
-      @player_stats[player] = player.calculate_attempt_stats(player_specific_attempts)
-    end
-    
-    # Sort players by name
-    @players = @attempts_by_player.keys.sort_by(&:full_name)
+    @team = Team.find params[:team_id]
+    load_game_history
+    render :game_attempts
   end
   
   private
+
+  def load_game_history
+    @history = GameHistory.new ace: current_ace, game_type: params[:game_type], team: @team
+    @history_tab = @team || params[:view] == "teams" ? "teams" : "overall"
+    @pagy, @game_attempts = pagy @history.recent_attempts, limit: 20
+  end
   
   def no_scope_specified?
     params[:division_id].blank? && params[:conference_id].blank? && params[:league_id].blank? && params[:city_id].blank? && params[:state_id].blank? && params[:team_id].blank?
