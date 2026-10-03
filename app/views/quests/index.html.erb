@@ -1,28 +1,14 @@
 <% content_for :title, "Quests" %>
-
-<div class="w-full quest-container">
-  <% if notice.present? %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
-  <% end %>
-
-  <div class="flex justify-between items-center">
-    <h1 class="font-bold text-4xl">Quests</h1>
-    <%= link_to "New quest", new_quest_path, class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white block font-medium" %>
-  </div>
-
-  <div id="quests" class="min-w-full divide-y divide-gray-200 space-y-5">
+<div class="quest-browser">
+  <header class="browse-header">
+    <div><p class="eyebrow">Give your practice a purpose</p><h1 class="page-title">Quests</h1><p class="round-intro">Find a roster, a rivalry, or a whole league to get to know.</p></div>
+    <div class="page-actions"><%= link_to "Back to Play", strength_path, class: "tool-button" %><%= link_to "New quest", new_quest_path, class: "game-button" if ace_signed_in? %></div>
+  </header>
+  <div id="quests" class="quest-grid">
     <% if @quests.any? %>
-      <% @quests.each do |quest| %>
-        <div class="flex flex-col sm:flex-row justify-between items-center pb-5 sm:pb-0">
-          <%= render quest %>
-          <div class="w-full sm:w-auto flex flex-col sm:flex-row space-x-2 space-y-2">
-            <%= link_to "Show", quest, class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
-            <%= link_to "Edit", edit_quest_path(quest), class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" if admin_signed_in? %>
-          </div>
-        </div>
-      <% end %>
+      <%= render @quests %>
     <% else %>
-      <p class="text-center my-10">No quests found.</p>
+      <section class="play-panel play-empty quest-empty"><%= icon "script", size: 40 %><h2>No quests yet</h2><p>There is still plenty to practice. Pick a game and start a round.</p><%= link_to "Pick a round", new_game_round_path, class: "game-button" %></section>
     <% end %>
   </div>
 </div>

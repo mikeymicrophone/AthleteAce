@@ -1,0 +1,76 @@
+<% content_for :title, "Play" %>
+<div class="play-home">
+  <header class="browse-header">
+    <div><p class="eyebrow">A little practice. A lot more familiar.</p><h1 class="page-title">Make names stick.</h1></div>
+    <%= link_to "Game history", strength_game_attempts_path, class: "tool-button" if current_ace %>
+  </header>
+
+  <% if current_ace %>
+    <section class="play-scoreboard" aria-label="Your last seven days">
+      <div><span class="eyebrow">Accuracy · 7 days</span><strong><%= @week[:accuracy] ? "#{@week[:accuracy].round}%" : "—" %></strong><span><%= @week[:total].positive? ? "#{@week[:correct]} correct answers" : "Your first answer starts the story" %></span></div>
+      <div><span class="eyebrow">Answers · 7 days</span><strong><%= @week[:total] %></strong><span>Every attempt is a rep</span></div>
+      <div><span class="eyebrow">Days played · 7 days</span><strong><%= @history.days.last(7).count { |day| day[:total].positive? } %><small> / 7</small></strong><span>Come back and keep it going</span></div>
+    </section>
+  <% end %>
+
+  <div class="play-home-grid <%= 'play-has-round' if current_ace && @unfinished_rounds.any? %>">
+    <section class="play-launch" aria-labelledby="play-launch-title">
+      <div class="play-launch-top"><span class="eyebrow">Your next ten</span><%= icon "player-play", size: 40 %></div>
+      <h2 id="play-launch-title">Meet your<br>next lineup.</h2>
+      <p>Match players to their teams. Ten questions, one round, and a fresh chance to remember.</p>
+      <% if current_ace %>
+        <%= button_to game_rounds_path, params: { game_type: "player_team_match", length: 10 }, class: "game-button" do %>Quick round <%= icon "arrow-right", size: 20 %><% end %>
+      <% else %>
+        <%= link_to "Pick your first round", new_game_round_path, class: "game-button" %>
+        <p class="play-guest-note">Choose your game and teams, then sign in to play and save your progress.</p>
+      <% end %>
+      <%= link_to "Pick game & scope", new_game_round_path, class: "tool-link" %>
+    </section>
+
+    <section class="play-panel round-continue" aria-labelledby="play-continue-title">
+      <div class="play-section-heading"><h2 id="play-continue-title">Keep going</h2><%= icon "barbell", size: 24 %></div>
+      <% if current_ace && @unfinished_rounds.any? %>
+        <% @unfinished_rounds.each do |round| %>
+          <div class="play-list-row">
+            <div><p class="eyebrow"><%= round.paused? ? "Paused" : "In progress" %></p><h3><%= GameRound::GAMES.fetch(round.game_type) %></h3><p><%= round.scope_label %></p><p><%= round.game_attempts.size %> of <%= round.length %> answered · <%= time_ago_in_words(round.updated_at) %> ago</p></div>
+            <%= link_to "Continue", game_round_path(round), class: "tool-button", aria: { label: "Continue #{GameRound::GAMES.fetch(round.game_type)}: #{round.scope_label}" } %>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="play-empty"><%= icon "flag", size: 36 %><h3><%= current_ace ? "A clean slate." : "Your progress has a home." %></h3><p><%= current_ace ? "Start a round. If you need a break, it will be waiting right here." : "Saved rounds, your recent results, and the quests you choose—all in one place." %></p></div>
+      <% end %>
+    </section>
+  </div>
+
+  <section class="play-games" aria-labelledby="play-games-title">
+    <div class="play-section-heading"><h2 id="play-games-title">Find your game</h2><span class="eyebrow">One more rep</span></div>
+    <div class="play-game-grid">
+      <% [["Team Match", "Put a team to every player.", "shirt-sport", new_game_round_path(game_type: "player_team_match")], ["Guess the Division", "Know where each team belongs.", "tournament", new_game_round_path(game_type: "guess_the_division")], ["Name Ciphers", "Unscramble the names you know.", "bolt", strength_ciphers_path]].each do |name, description, glyph, path| %>
+        <%= link_to path, class: "play-game-card" do %><%= icon glyph, size: 28 %><h3><%= name %></h3><p><%= description %></p><span class="play-card-arrow"><%= icon "arrow-right", size: 22 %></span><% end %>
+      <% end %>
+    </div>
+  </section>
+
+  <div class="play-home-grid">
+    <section class="play-panel" aria-labelledby="play-quests-title">
+      <div class="play-section-heading"><h2 id="play-quests-title">Your quests</h2><%= link_to "All quests", quests_path, class: "tool-link" %></div>
+      <% if current_ace && @active_goals.any? %>
+        <% @active_goals.each do |goal| %>
+          <div class="play-list-row play-quest-row"><%= link_to goal.quest.name, quest_path(goal.quest), class: "play-quest-name" %><%= render "quests/progress", goal: goal %></div>
+        <% end %>
+      <% else %>
+        <div class="play-empty"><%= icon "script", size: 36 %><h3>Pick something to work toward.</h3><p>Explore quests built around the teams and players you want to know.</p><%= link_to "Explore quests", quests_path, class: "tool-button" %></div>
+      <% end %>
+    </section>
+    <section class="play-panel" aria-labelledby="play-results-title">
+      <div class="play-section-heading"><h2 id="play-results-title">Recent rounds</h2></div>
+      <% if current_ace && @recent_rounds.any? %>
+        <% @recent_rounds.each do |round| %>
+          <div class="play-list-row"><div><h3><%= GameRound::GAMES.fetch(round.game_type) %></h3><p><%= round.scope_label %></p><p>Finished <%= time_ago_in_words(round.finished_at) %> ago</p></div><%= link_to "Results", summary_game_round_path(round), class: "tool-button" %></div>
+        <% end %>
+      <% else %>
+        <div class="play-empty"><%= icon "medal", size: 36 %><h3>Your next finish starts here.</h3><p>Complete a round to see your results and practice the ones you missed.</p></div>
+      <% end %>
+    </section>
+  </div>
+</div>

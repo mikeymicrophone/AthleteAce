@@ -1,0 +1,84 @@
+.play-home, .quest-browser, .quest-detail { @apply text-ink; }
+.play-home .page-title, .quest-detail .page-title { @apply max-w-4xl; overflow-wrap: anywhere; }
+.play-scoreboard { @apply grid grid-cols-3 border border-line rounded-card bg-surface mb-6 overflow-hidden; }
+.play-scoreboard > div { @apply flex flex-col gap-2 p-6; }
+.play-scoreboard > div + div { @apply border-l border-line; }
+.play-scoreboard strong { @apply font-display text-5xl font-extrabold; }
+.play-scoreboard small { @apply text-xl text-ink-3; }
+.play-scoreboard > div > span:last-child { @apply text-sm text-ink-2; }
+.play-home-grid { @apply grid gap-6 lg:grid-cols-2 mb-8; }
+.play-launch { @apply flex flex-col items-start bg-accent text-on-accent border-2 border-ink shadow-press rounded-card p-7 sm:p-9; }
+.play-launch-top { @apply flex justify-between items-center w-full mb-6; }
+.play-launch .eyebrow { color: inherit; }
+.play-launch h2 { @apply font-display font-extrabold uppercase text-5xl sm:text-6xl leading-none tracking-tight mb-5; }
+.play-launch > p { @apply max-w-sm mb-6; }
+.play-launch .game-button { @apply bg-ink text-surface; }
+.play-launch .tool-link { @apply text-on-accent mt-2 px-0; }
+.play-launch .play-guest-note { @apply text-sm mt-4 mb-0; }
+.play-panel { @apply bg-surface border border-line rounded-card p-6 min-w-0; }
+.play-section-heading { @apply flex flex-wrap items-center justify-between gap-3 mb-5; }
+.play-section-heading h2, .quest-goal-panel h2 { @apply font-display text-3xl font-bold leading-tight; }
+.play-list-row { @apply flex items-center justify-between gap-4 py-5 border-t border-line; }
+.play-list-row h3 { @apply font-display text-xl font-bold; }
+.play-list-row p { @apply text-sm text-ink-2 mt-1; }
+.play-list-row .eyebrow { @apply text-xs text-accent-text mb-1; }
+.play-list-row > div { @apply min-w-0; overflow-wrap: anywhere; }
+.play-list-row > a.tool-button { @apply shrink-0; }
+.play-empty { @apply flex flex-col items-start justify-center gap-4 py-8 text-ink-2; }
+.play-empty h3, .play-empty h2 { @apply font-display text-2xl font-bold text-ink; }
+.play-empty p { @apply text-sm max-w-md; }
+.play-empty > .ace-icon { @apply text-accent-text; }
+.play-games { @apply mb-8; }
+.play-game-grid { @apply grid md:grid-cols-3 gap-4; }
+.play-game-card { @apply relative block p-6 pr-12 border border-line-2 bg-surface rounded-card; }
+.play-game-card:hover { @apply bg-accent-tint; }
+.play-game-card > .ace-icon { @apply text-accent-text mb-5; }
+.play-game-card h3 { @apply font-display text-2xl font-bold mb-2; }
+.play-game-card p { @apply text-sm text-ink-2; }
+.play-card-arrow { @apply absolute top-6 right-5; }
+.play-game-card:focus-visible, .quest-card h2 a:focus-visible, .play-quest-name:focus-visible, .quest-achievement a:focus-visible { @apply outline-2 outline-offset-4 outline-accent-text; }
+.play-quest-row { @apply flex-col items-stretch gap-3; }
+.play-quest-name { @apply font-display text-xl font-bold; }
+.quest-grid { @apply grid md:grid-cols-2 xl:grid-cols-3 gap-5; }
+.quest-card { @apply flex flex-col gap-5 bg-surface text-ink border border-line-2 rounded-card p-6; }
+.quest-card-top { @apply flex items-center justify-between gap-4 text-accent-text; }
+.quest-card h2 { @apply font-display text-3xl font-bold leading-tight; overflow-wrap: anywhere; }
+.quest-card h2 a:hover, .play-quest-name:hover { @apply text-accent-text; }
+.quest-card-description { @apply text-sm text-ink-2 grow; }
+.quest-card-meta { @apply text-sm text-ink-2; }
+.quest-participants-badge { @apply inline-flex items-center gap-2 text-sm text-ink-2; }
+.quest-button-content { @apply inline-flex items-center gap-2; }
+.quest-empty { @apply col-span-full; }
+.quest-progress { @apply w-full; }
+.quest-progress-label { @apply flex justify-between items-center gap-4 text-sm text-ink-2 mb-2; }
+.quest-progress-label strong { @apply text-ink font-mono; }
+.quest-progress progress { @apply block w-full h-2 rounded-full overflow-hidden bg-surface-2; appearance: none; }
+.quest-progress progress::-webkit-progress-bar { @apply bg-surface-2 rounded-full; }
+.quest-progress progress::-webkit-progress-value { @apply bg-accent-text rounded-full; }
+.quest-progress progress::-moz-progress-bar { @apply bg-accent-text rounded-full; }
+.quest-detail > .tool-link { @apply mb-6; }
+.quest-goal-panel { @apply grid gap-5 bg-accent-tint border border-line-2 rounded-card p-6 sm:p-8 mb-10; }
+.quest-goal-panel .eyebrow { @apply text-accent-text mb-2; }
+.quest-goal-panel p:not(.eyebrow) { @apply text-sm text-ink-2 mt-2; }
+.quest-achievements { @apply mb-8; }
+.quest-achievements > h3 { @apply mb-4; }
+.quest-achievements ol { @apply rounded-card border border-line bg-surface overflow-hidden; }
+.quest-achievement { @apply flex flex-wrap sm:flex-nowrap items-start gap-4 p-5; }
+.quest-achievement + .quest-achievement { @apply border-t border-line; }
+.quest-achievement-number { @apply font-mono text-sm text-ink-3 pt-1; }
+.quest-achievement-copy { @apply flex-1 min-w-0; }
+.quest-achievement h4 { @apply font-display text-xl font-bold; overflow-wrap: anywhere; }
+.quest-achievement p { @apply text-sm text-ink-2 mt-2 mb-3; }
+.quest-achievement > .page-actions { @apply shrink-0; }
+@media (max-width: 1023px) {
+  .play-has-round .round-continue { order: -1; }
+}
+@media (max-width: 640px) {
+  .play-scoreboard > div { @apply px-3 py-4; }
+  .play-scoreboard .eyebrow { @apply text-[10px] tracking-normal; }
+  .play-scoreboard strong { @apply text-3xl; }
+  .play-scoreboard > div > span:last-child { @apply text-xs; }
+  .play-panel { @apply p-5; }
+  .play-launch h2 { @apply text-5xl; }
+  .quest-achievement > .page-actions { @apply w-full pl-8; }
+}

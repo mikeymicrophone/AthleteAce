@@ -1,24 +1,8 @@
-<div id="<%= dom_id quest %>" class="w-full sm:w-auto my-5 space-y-3 quest-card p-4">
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-    <div>
-      <h3 class="text-xl font-bold text-gray-900 mb-1"><%= quest.name %></h3>
-      <div class="flex items-center space-x-2 text-sm text-gray-500">
-        <%= quest_participants_badge(quest) %>
-        <% if quest.highlights.required.any? %>
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-            <%= icon "star", size: 18, class: "mr-1" %>
-            <%= pluralize(quest.highlights.required.count, 'achievement') %> required
-          </span>
-        <% end %>
-      </div>
-    </div>
-
-    <div class="mt-3 sm:mt-0">
-      <%= begin_quest_button(quest) %>
-    </div>
-  </div>
-
-  <div class="text-gray-700">
-    <%= quest.description %>
-  </div>
-</div>
+<article id="<%= dom_id quest %>" class="quest-card">
+  <div class="quest-card-top"><%= icon "script", size: 28 %><span class="eyebrow"><%= pluralize(quest.highlights.count(&:required?), 'required achievement') %></span></div>
+  <h2><%= link_to quest.name, quest_path(quest) %></h2>
+  <p class="quest-card-description"><%= quest.description %></p>
+  <div class="quest-card-meta"><%= quest_participants_badge(quest) %></div>
+  <% if (goal = quest_goal(quest)) %><%= render "quests/progress", goal: goal %><% end %>
+  <div class="page-actions"><%= link_to "View quest", quest_path(quest), class: "tool-button" %><%= begin_quest_button quest %><%= link_to "Edit", edit_quest_path(quest), class: "tool-link" if admin_signed_in? %></div>
+</article>

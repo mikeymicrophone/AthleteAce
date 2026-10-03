@@ -1,7 +1,7 @@
 # Routes for game-related functionality
 Rails.application.routes.draw do
   # Strength training routes for learning athlete names
-  get "strength" => "game_rounds#new"
+  get "strength" => "play#index"
   resources :game_rounds, path: "play/rounds", only: [:new, :create, :show] do
     member do
       post :answer

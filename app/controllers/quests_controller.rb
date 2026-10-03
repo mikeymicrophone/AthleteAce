@@ -5,7 +5,9 @@ class QuestsController < ApplicationController
 
   # GET /quests or /quests.json
   def index
-    @quests = Quest.all
+    @quests = Quest.includes(:highlights).order(:name)
+    @quest_goals = current_ace ? current_ace.goals.where(quest: @quests).includes(quest: :highlights).index_by(&:quest_id) : {}
+    @quest_participant_counts = Goal.where(quest: @quests).group(:quest_id).distinct.count(:ace_id)
   end
 
   # GET /quests/1 or /quests/1.json

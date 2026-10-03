@@ -1,111 +1,39 @@
 <% content_for :title, @quest.name %>
-
-<div class="md:w-2/3 w-full quest-container">
-  <% if notice.present? %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
-  <% end %>
-
+<% goal = quest_goal(@quest) %>
+<% highlights = @quest.highlights.ordered.includes(achievement: :target).to_a %>
+<div class="quest-detail" id="<%= dom_id @quest %>">
+  <%= link_to "← All quests", quests_path, class: "tool-link" %>
   <% if @random_mode %>
-    <div id="quest_discovery" class="flex flex-col sm:flex-row justify-between items-center mb-6 bg-indigo-50 p-4 rounded-lg shadow-sm">
-      <div class="text-indigo-800 mb-3 sm:mb-0">
-        <h2 class="font-bold text-xl">Quest Discovery</h2>
-        <p>Explore this quest or find another one</p>
-      </div>
-      <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
-        <%= begin_quest_button(@quest, class: 'w-full sm:w-auto py-2.5') %>
-        <%= link_to random_quests_path, class: "rounded-md px-3.5 py-2.5 bg-green-600 hover:bg-green-500 text-white font-medium w-full sm:w-auto text-center" do %>
-          <span class="flex items-center justify-center">
-            <%= icon "dice", size: 18, class: "mr-2" %>
-            <span>Next Quest</span>
-          </span>
-        <% end %>
-      </div>
-    </div>
+    <section id="quest_discovery" class="play-panel play-section-heading"><div><h2>Quest Discovery</h2><p>Explore this quest or find another one.</p></div><%= link_to "Next Quest", random_quests_path, class: "tool-button" %></section>
   <% end %>
-
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="font-bold text-4xl"><%= @quest.name %></h1>
-    <div>
-      <%= begin_quest_button(@quest) %>
+  <header class="browse-header">
+    <div><p class="eyebrow">Quest · <%= pluralize(highlights.size, "achievement") %></p><h1 class="page-title"><%= @quest.name %></h1><p class="round-intro"><%= @quest.description %></p></div>
+    <div class="quest-card-meta"><%= quest_participants_badge @quest %><p><%= pluralize(highlights.count(&:required?), "achievement") %> required</p></div>
+  </header>
+  <section class="quest-goal-panel" aria-labelledby="quest-goal-title">
+    <div><p class="eyebrow">Your goal</p><h2 id="quest-goal-title"><%= goal ? "Keep your eyes on the roster." : "Make this your next quest." %></h2><p><%= goal ? "Adopted #{l(goal.created_at.to_date, format: :long)}" : "Choose this quest and keep your progress close." %></p></div>
+    <% if goal %><%= render "quests/progress", goal: goal %><% end %>
+    <div class="page-actions">
+      <% if ace_signed_in? %><%= begin_quest_button @quest %><% else %><%= link_to "Sign in to begin", new_ace_session_path, class: "game-button" %><% end %>
     </div>
-  </div>
-
-  <div class="mb-6 flex items-center space-x-4">
-    <%= quest_participants_badge(@quest) %>
-  </div>
-
-  <%= render @quest %>
-
-  <div class="mt-8">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="font-semibold text-2xl">Achievements in this Quest</h2>
-      <%= link_to "Add Achievement", new_quest_highlight_path(@quest), class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white block font-medium" %>
-    </div>
-
-    <% if @quest.achievements.any? %>
-      <div class="mb-6">
-        <h3 class="font-semibold text-xl mb-2">Required Achievements</h3>
-        <% required = @quest.highlights.required.includes(:achievement).ordered %>
-        <% if required.any? %>
-          <ul class="divide-y divide-gray-200 bg-white rounded-lg shadow">
-            <% required.each do |highlight| %>
-              <% achievement = highlight.achievement %>
-              <li class="p-4 hover:bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between">
-                <div>
-                  <div class="font-bold text-lg text-gray-900">
-                    <%= link_to achievement.name, achievement_path(achievement), class: "hover:underline" %>
-                  </div>
-                  <div class="text-gray-500 mt-1"><%= achievement.description %></div>
-                </div>
-                <div class="mt-2 sm:mt-0 flex items-center space-x-2">
-                  <span class="inline-block px-2 py-1 text-xs bg-gray-100 rounded text-gray-700">
-                    Target: <%= link_to_name achievement.target %>
-                  </span>
-                  <% if admin_signed_in? %>
-                    <%= link_to "Edit", edit_quest_highlight_path(@quest, highlight), class: "text-blue-600 hover:text-blue-800" %>
-                    <%= button_to "Remove", quest_highlight_path(@quest, highlight), method: :delete, class: "text-red-600 hover:text-red-800", data: { turbo_confirm: "Are you sure?" } %>
-                  <% end %>
-                </div>
-              </li>
-            <% end %>
-          </ul>
-        <% else %>
-          <p class="text-gray-500 italic">No required achievements added yet.</p>
+  </section>
+  <div class="play-section-heading"><h2>Achievements in this Quest</h2><%= link_to "Add Achievement", new_quest_highlight_path(@quest), class: "tool-button" if ace_signed_in? %></div>
+  <% if highlights.empty? %>
+    <div class="play-panel play-empty"><h3>No achievements added yet.</h3><p>This quest is waiting for its first challenge.</p></div>
+  <% end %>
+  <% [[true, "Required Achievements"], [false, "Optional Achievements"]].each do |required, heading| %>
+    <% entries = highlights.select { |highlight| highlight.required? == required } %>
+    <% if entries.any? %>
+      <section class="quest-achievements"><h3 class="eyebrow"><%= heading %></h3><ol>
+        <% entries.each_with_index do |highlight, index| %>
+          <% achievement = highlight.achievement %>
+          <li class="quest-achievement"><span class="quest-achievement-number"><%= format("%02d", index + 1) %></span><div class="quest-achievement-copy"><h4><%= link_to achievement.name, achievement_path(achievement) %></h4><p><%= achievement.description %></p><span class="entity-chip"><%= icon_for_resource achievement.target_type.underscore, size: 16 %><%= achievement.target ? link_to_name(achievement.target) : "Target unavailable" %></span></div>
+            <div class="page-actions"><% if (practice_path = quest_practice_path(achievement)) %><%= link_to "Practice", practice_path, class: "tool-button", aria: { label: "Practice #{achievement.name}" } %><% end %>
+              <% if admin_signed_in? %><%= link_to "Edit", edit_quest_highlight_path(@quest, highlight), class: "tool-link" %><%= button_to "Remove", quest_highlight_path(@quest, highlight), method: :delete, class: "tool-link", data: { turbo_confirm: "Remove this achievement from the quest?" } %><% end %>
+            </div>
+          </li>
         <% end %>
-      </div>
-
-      <div>
-        <h3 class="font-semibold text-xl mb-2">Optional Achievements</h3>
-        <% optional = @quest.highlights.optional.includes(:achievement).ordered %>
-        <% if optional.any? %>
-          <ul class="divide-y divide-gray-200 bg-white rounded-lg shadow">
-            <% optional.each do |highlight| %>
-              <% achievement = highlight.achievement %>
-              <li class="p-4 hover:bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between">
-                <div>
-                  <div class="font-bold text-lg text-gray-900">
-                    <%= link_to achievement.name, achievement_path(achievement), class: "hover:underline" %>
-                  </div>
-                  <div class="text-gray-500 mt-1"><%= achievement.description %></div>
-                </div>
-                <div class="mt-2 sm:mt-0 flex items-center space-x-2">
-                  <span class="inline-block px-2 py-1 text-xs bg-gray-100 rounded text-gray-700">
-                    Target: <%= link_to_name achievement.target %>
-                  </span>
-                  <% if admin_signed_in? %>
-                    <%= link_to "Edit", edit_quest_highlight_path(@quest, highlight), class: "text-blue-600 hover:text-blue-800" %>
-                    <%= button_to "Remove", quest_highlight_path(@quest, highlight), method: :delete, class: "text-red-600 hover:text-red-800", data: { turbo_confirm: "Are you sure?" } %>
-                  <% end %>
-                </div>
-              </li>
-            <% end %>
-          </ul>
-        <% else %>
-          <p class="text-gray-500 italic">No optional achievements added yet.</p>
-        <% end %>
-      </div>
-    <% else %>
-      <p class="text-gray-500">No achievements added yet.</p>
+      </ol></section>
     <% end %>
-  </div>
+  <% end %>
 </div>

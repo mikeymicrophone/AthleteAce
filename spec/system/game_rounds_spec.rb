@@ -33,6 +33,7 @@ RSpec.describe "Saved rounds", type: :system do
     other_league = create(:league, name: "Basketball League", sport: create(:sport, name: "Basketball"))
     create(:team, league: other_league)
     visit strength_path
+    click_link "Pick game & scope"
     select "Baseball", from: "Sport"
     expect(page).to have_select("League", options: ["All leagues", "Major League Baseball"])
     select "Major League Baseball", from: "League"

@@ -24,3 +24,5 @@
 @import "./components/account.css";
 @import "./components/game_history.css";
 @import "./components/game_rounds.css";
+
+@import "./components/play_home.css";
