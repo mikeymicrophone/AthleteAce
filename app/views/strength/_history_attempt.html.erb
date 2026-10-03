@@ -5,6 +5,7 @@
       <%= attempt.correct? ? "Correct" : "Incorrect" %>
     <% end %>
     <%= tag.span GameHistory::GAMES.fetch(attempt.game_type), class: "history-caption" %>
+    <%= link_to "View round", game_round_path(attempt.game_round_id), class: "tool-link" if attempt.game_round_id %>
     <%= tag.time "#{time_ago_in_words attempt.created_at} ago", datetime: attempt.created_at.iso8601,
       title: attempt.created_at.in_time_zone.strftime("%b %-d, %Y at %H:%M %Z"), class: "history-attempt-time" %>
   <% end %>

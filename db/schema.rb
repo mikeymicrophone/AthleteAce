@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_26_105551) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -204,10 +204,34 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_26_105551) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "difficulty_level"
+    t.bigint "game_round_id"
+    t.integer "round_position"
     t.index ["ace_id"], name: "index_game_attempts_on_ace_id"
     t.index ["chosen_entity_type", "chosen_entity_id"], name: "index_game_attempts_on_chosen_entity"
+    t.index ["game_round_id", "round_position"], name: "index_game_attempts_on_game_round_id_and_round_position", unique: true
+    t.index ["game_round_id"], name: "index_game_attempts_on_game_round_id"
     t.index ["subject_entity_type", "subject_entity_id"], name: "index_game_attempts_on_subject_entity"
     t.index ["target_entity_type", "target_entity_id"], name: "index_game_attempts_on_target_entity"
+    t.check_constraint "game_round_id IS NULL AND round_position IS NULL OR game_round_id IS NOT NULL AND round_position >= 0", name: "game_attempt_round_position"
+  end
+
+  create_table "game_rounds", force: :cascade do |t|
+    t.bigint "ace_id", null: false
+    t.string "game_type", null: false
+    t.integer "length", null: false
+    t.jsonb "scope", default: {}, null: false
+    t.string "scope_label", null: false
+    t.jsonb "questions", default: [], null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "started_at", null: false
+    t.datetime "finished_at"
+    t.datetime "paused_at"
+    t.datetime "question_started_at"
+    t.integer "question_elapsed_ms", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ace_id"], name: "index_game_rounds_on_ace_id"
+    t.check_constraint "length >= 1 AND length <= 30 AND \"position\" >= 0 AND \"position\" <= length", name: "game_round_progress"
   end
 
   create_table "goals", force: :cascade do |t|
@@ -495,6 +519,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_26_105551) do
   add_foreign_key "contracts", "teams"
   add_foreign_key "divisions", "conferences"
   add_foreign_key "game_attempts", "aces"
+  add_foreign_key "game_attempts", "game_rounds"
+  add_foreign_key "game_rounds", "aces"
   add_foreign_key "goals", "aces"
   add_foreign_key "goals", "quests"
   add_foreign_key "highlights", "achievements"

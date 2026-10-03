@@ -14,7 +14,7 @@
         <%= entity_link @player.league %>
       <% end %>
       <%= tag.div class: "page-actions" do %>
-        <%= link_to strength_team_match_path(team_id: @player.team_id), class: "game-button" do %>
+        <%= link_to new_game_round_path(team_id: @player.team_id), class: "game-button" do %>
           <%= icon "player-play", size: 20 %>
           <%= tag.span "Quiz: #{@player.team.name}" %>
         <% end %>

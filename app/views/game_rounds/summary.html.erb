@@ -1,0 +1,54 @@
+<% content_for :title, "Round complete" %>
+<%= tag.div class: "round-page round-summary" do %>
+  <%= turbo_frame_tag dom_id(@round), target: "_top" do %>
+  <%= tag.header class: "browse-header" do %>
+    <%= tag.div do %>
+      <%= tag.p GameRound::GAMES.fetch(@round.game_type), class: "eyebrow" %>
+      <%= tag.h1 "Round complete", class: "page-title" %>
+      <%= tag.p @round.scope_label, class: "round-intro" %>
+    <% end %>
+    <%= link_to "Game history", strength_game_attempts_path, class: "tool-button" %>
+  <% end %>
+  <%= tag.section class: "round-panel round-scorecard", aria: { label: "Round results" } do %>
+    <%= tag.div do %>
+      <%= tag.strong "#{@stats[:correct]} / #{@round.length}", class: "round-final-score" %>
+      <%= tag.p "Correct answers", class: "eyebrow" %>
+    <% end %>
+    <%= tag.dl class: "round-stats" do %>
+      <% { "Accuracy" => "#{(@stats[:correct].fdiv(@round.length) * 100).round}%", "Best streak" => @stats[:best_streak], "Answer time" => round_duration(@stats[:elapsed_ms]) }.each do |label, value| %>
+        <%= tag.div do %><%= tag.dt label %><%= tag.dd value %><% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+  <%= tag.div class: "round-summary-actions" do %>
+    <% if @stats[:correct] < @round.length %>
+      <%= button_to "Drill misses", drill_game_round_path(@round), class: "game-button" %>
+    <% end %>
+    <%= link_to "Play again", new_game_round_path(round_replay_params(@round)), class: "tool-button" %>
+    <%= link_to "Choose another game", new_game_round_path, class: "tool-link" %>
+  <% end %>
+  <%= tag.section class: "round-panel", aria: { labelledby: "round-results-title" } do %>
+    <%= tag.h2 "Every question, in order", id: "round-results-title", class: "profile-section-title" %>
+    <%= tag.p "#{pluralize(@round.length - @stats[:correct], 'miss')} · Choose a #{@round.game_type == 'player_team_match' ? 'player' : 'team'} to review and rate them.", class: "round-caption" %>
+    <%= tag.ol class: "round-results" do %>
+      <% @results.each do |attempt| %>
+        <% question = @round.questions.fetch(attempt.round_position) %>
+        <%= tag.li class: "round-result" do %>
+          <%= tag.span attempt.round_position + 1, class: "round-result-number" %>
+          <%= tag.div do %>
+            <%= link_to question.fetch("subject_name"), @round.game_type == "player_team_match" ? player_path(question.fetch("subject_id")) : team_path(question.fetch("subject_id")), class: "round-result-subject" %>
+            <%= tag.p "Answer: #{question.fetch('target_name')}", class: "round-caption" %>
+            <% unless attempt.correct? %>
+              <% chosen = question.fetch("choices").find { |choice| choice.fetch("id") == attempt.chosen_entity_id } %>
+              <%= tag.p "You chose: #{chosen ? chosen.fetch('name') : 'I don’t know'}", class: "round-caption" %>
+            <% end %>
+          <% end %>
+          <%= tag.span class: "history-result #{attempt.correct? ? 'history-correct' : 'history-incorrect'}" do %>
+            <%= icon attempt.correct? ? "check" : "x", size: 16 %><%= attempt.correct? ? "Correct" : "Miss" %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
+<% end %>

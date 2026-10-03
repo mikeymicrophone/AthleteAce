@@ -1,7 +1,7 @@
 <% content_for :title, "Teams" %>
 
 <%= browse_header "Teams" do %>
-  <%= link_to strength_team_match_path, class: "game-button" do %>
+  <%= link_to new_game_round_path, class: "game-button" do %>
     <%= icon "player-play", size: 20 %>
     <%= tag.span "Team Match" %>
   <% end %>

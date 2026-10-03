@@ -23,7 +23,7 @@ RSpec.describe "Player profiles", type: :request do
       team.sport.name, team.league.name, conference.name, division.name, team.name
     ])
     expect(document.at_css(".profile-portrait")["style"]).to include("--jersey-color: #1450BE")
-    expect(document.at_css(".player-hero .game-button")["href"]).to eq(strength_team_match_path(team_id: team.id))
+    expect(document.at_css(".player-hero .game-button")["href"]).to eq(new_game_round_path(team_id: team.id))
     expect(document.at_css(".rating-slider-input")["disabled"]).to be_present
     expect(document.at_css(".slider-value").text).to eq("Not rated")
     expect(document.at_css(".rating-summary").text).to include("No ratings yet")

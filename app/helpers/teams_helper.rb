@@ -14,7 +14,7 @@ module TeamsHelper
     }
 
     # Use a named route for team_match, dynamically setting the query parameter based on resource type
-    link_to 'Quiz Me', strength_team_match_path(:"#{resource_type}_id" => resource.id),
+    link_to 'Quiz Me', new_game_round_path(:"#{resource_type}_id" => resource.id),
            default_options.merge(options)
   end
 

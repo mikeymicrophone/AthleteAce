@@ -83,14 +83,16 @@ RSpec.describe "Account and history pages", type: :system do
     click_link "New York Yankees 1 of 1 correct 100%"
     expect(page).to have_current_path(team_strength_game_attempts_path(team, game_type: "guess_the_division"))
     expect(page).to have_css(".history-attempt", count: 1)
-    expect(page).to have_link("Practice Team Match", href: strength_team_match_path(team_id: team.id))
+    expect(page).to have_link("Practice Team Match", href: new_game_round_path(team_id: team.id))
 
     visit strength_game_attempts_path
     find("a[aria-label='Drill New York Yankees and Boston Red Sox']").click
-    expect(page).to have_css("[data-game-target=answerChoice]", count: 2)
-    expect(all("[data-game-target=answerChoice]").map { |choice| choice["data-guessable-id"].to_i }).to match_array([team.id, rival.id])
-    find("[data-game-target=answerChoice][data-correct=true]").click
-    expect(page).to have_css("[data-game-target=answerChoice]:not([disabled])", count: 2)
-    expect(all("[data-game-target=answerChoice]").map { |choice| choice["data-guessable-id"].to_i }).to match_array([team.id, rival.id])
+    click_button "Start round"
+    expect(page).to have_css(".round-choice", count: 2)
+    expect(all(".round-choice").map { |choice| choice[:value].to_i }).to match_array([team.id, rival.id])
+    first(".round-choice").click
+    click_button "Next"
+    expect(page).to have_css(".round-choice:not([disabled])", count: 2)
+    expect(all(".round-choice").map { |choice| choice[:value].to_i }).to match_array([team.id, rival.id])
   end
 end

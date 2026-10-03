@@ -1,0 +1,89 @@
+.round-page { @apply max-w-5xl mx-auto; }
+.round-intro { @apply text-ink-2 mt-4; }
+.round-panel { @apply p-5 sm:p-6 mb-6 rounded-card border border-line bg-surface min-w-0; }
+.round-caption { @apply text-xs text-ink-3 leading-relaxed; }
+.round-step { @apply font-mono text-xs uppercase tracking-wide font-semibold text-ink-2 px-2; }
+.round-panel fieldset { @apply min-w-0; }
+.round-game-options { @apply grid sm:grid-cols-2 gap-4; }
+.round-option { @apply flex items-center gap-3 p-4 rounded-tool border border-line-2 bg-surface cursor-pointer text-sm text-ink; }
+.round-option:has(input:checked) { @apply bg-accent-tint border-accent-text; box-shadow: inset 0 0 0 1px var(--color-accent-text); }
+.round-option:has(input:focus-visible) { @apply outline-2 outline-offset-2 outline-accent-text; }
+.round-option input { accent-color: var(--color-accent-text); }
+.round-game-option { @apply min-h-24; }
+.round-game-option strong { @apply block font-display text-2xl; }
+.round-game-option .round-caption { @apply block mt-1; }
+.round-scope-summary { @apply text-sm font-semibold text-ink mb-4; }
+.round-scope-selects { @apply grid sm:grid-cols-2 gap-4 mb-5; }
+.round-setup-form label:not(.round-option):not(.round-inactive) { @apply block text-sm font-semibold text-ink-2 mb-2; }
+.round-scope-selects select, .round-team-search input[type=search] { @apply block w-full min-h-11 rounded-lg border border-line-2 px-3 py-2 bg-surface text-ink; }
+.round-scope-selects select:focus-visible, .round-team-search input:focus-visible { @apply outline-2 outline-offset-2 outline-accent-text; }
+.round-team-search { @apply grid gap-2 mb-4; grid-template-columns: minmax(0, 1fr) auto; }
+.round-team-search label { @apply col-span-full; }
+.round-team-options { @apply grid sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto p-1; }
+.round-team-options .round-option { @apply min-h-16 p-3; }
+.round-team-abbreviation { @apply font-display text-xl font-bold; }
+.round-inactive { @apply flex items-center gap-3 text-sm text-ink-2 mt-5 min-h-11; }
+.round-lengths { @apply grid grid-cols-3 gap-3 mb-4; }
+.round-lengths .round-option { @apply flex-wrap justify-center gap-2; }
+.round-lengths strong { @apply font-display text-3xl; }
+.round-lengths span { @apply text-xs; }
+.round-update { @apply mt-4; }
+.round-update[hidden] { display: none; }
+.round-start-dock { @apply sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-4 p-5 mb-8 rounded-card border-2 border-ink bg-surface shadow-card; }
+.round-start-dock strong { @apply text-sm; }
+.round-start-dock .round-caption { @apply mt-1; }
+.game-button:disabled { @apply opacity-50 cursor-not-allowed; transform: none; box-shadow: none; }
+.round-other-games summary { @apply cursor-pointer font-semibold text-ink min-h-11; }
+.round-other-games .page-actions { @apply mt-4; }
+.round-continue { @apply bg-accent-tint; }
+.round-resume-row { @apply flex items-center justify-between gap-4 py-4 border-b border-line; }
+.round-resume-row:last-child { @apply border-0 pb-0; }
+.round-resume-row .round-caption { @apply mt-1; }
+.round-game-bar { @apply flex justify-between items-center gap-4; }
+.round-game-bar .round-scope-summary { @apply mt-2 mb-0; }
+.round-game-progress { @apply flex flex-col text-right gap-1 shrink-0; }
+.round-game-progress strong { @apply font-mono text-xl; }
+.round-progress { @apply block w-full h-2 rounded-full overflow-hidden mt-5 mb-8 bg-surface-2; accent-color: var(--color-accent-text); }
+.round-progress::-webkit-progress-bar { background: var(--color-surface-2); }
+.round-progress::-webkit-progress-value { background: var(--color-accent-text); }
+.round-subject { @apply grid items-center gap-x-6 p-5 sm:p-7 bg-surface-2 rounded-card border border-line mb-6; grid-template-columns: auto minmax(0, 1fr); }
+.round-question-prompt { @apply col-span-full font-mono text-xs uppercase text-ink-2 mb-5; }
+.round-subject .entity-avatar { @apply w-24 h-28 sm:w-32 sm:h-36; }
+.round-subject .page-title { @apply text-4xl sm:text-5xl; overflow-wrap: anywhere; }
+.round-subject .page-title:focus, .round-feedback:focus { outline: none; }
+.round-choices { @apply grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4; }
+.round-choice { @apply relative flex flex-col justify-center items-start gap-2 text-left min-h-32 p-4 sm:p-5 rounded-tool border-2 border-ink bg-surface text-ink shadow-press cursor-pointer; }
+.round-choice:not(:disabled):hover { @apply bg-accent-tint; }
+.round-choice:focus-visible { @apply outline-2 outline-offset-4 outline-accent-text; }
+.round-choice-key { @apply text-xs font-mono text-ink-3; }
+.round-choice-abbreviation { @apply font-display text-3xl; }
+.round-choice > span:not(.round-choice-key):not(.round-choice-status) { @apply text-sm; }
+.round-choice-status { @apply inline-flex gap-1 items-center text-xs font-semibold; }
+.round-choice-correct { @apply bg-ok-tint text-ok-ink border-ok-ink shadow-none; }
+.round-choice-wrong { @apply bg-bad-tint text-bad-ink border-bad-ink shadow-none; background-image: repeating-linear-gradient(135deg, transparent, transparent 8px, color-mix(in srgb, var(--color-bad-ink) 8%, transparent) 8px, color-mix(in srgb, var(--color-bad-ink) 8%, transparent) 10px); }
+.round-choice-muted { @apply opacity-50 shadow-none; }
+.round-skip { @apply mt-5; }
+.round-skip:disabled { @apply hidden; }
+.round-feedback { @apply rounded-card border p-5 mt-6 text-sm; }
+.round-feedback-correct { @apply bg-ok-tint border-ok text-ok-ink; }
+.round-feedback-wrong { @apply bg-bad-tint border-bad text-bad-ink; }
+.round-feedback .profile-section-title { color: inherit; }
+.round-next { @apply w-full mt-5; }
+.round-play-footer { @apply flex flex-wrap items-center gap-4 mt-6; }
+.round-play-footer .round-caption { @apply sm:ml-auto; }
+.round-paused { @apply text-center py-12; }
+.round-paused .page-title { @apply mt-6 mb-5; }
+.round-paused p { @apply text-ink-2 mb-7; }
+.round-summary-actions { @apply flex flex-wrap items-center gap-3 mb-8; }
+.round-scorecard { @apply flex flex-wrap justify-between items-center gap-8 bg-accent-tint; }
+.round-final-score { @apply font-display text-7xl font-extrabold text-ink; }
+.round-stats { @apply flex flex-wrap gap-6 sm:gap-10; }
+.round-stats dt { @apply text-xs text-ink-2; }
+.round-stats dd { @apply font-mono text-2xl font-bold mt-2; }
+.round-results { @apply mt-5; }
+.round-result { @apply flex items-center gap-3 sm:gap-5 py-4 border-b border-line; }
+.round-result:last-child { @apply border-b-0; }
+.round-result > div { @apply min-w-0 flex-1; }
+.round-result-number { @apply font-mono text-sm text-ink-3; }
+.round-result-subject { @apply inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-4; }
+.round-result .history-result { @apply shrink-0; }

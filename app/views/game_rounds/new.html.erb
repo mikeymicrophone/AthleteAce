@@ -1,0 +1,41 @@
+<% content_for :title, "New round" %>
+<%= tag.div class: "round-page" do %>
+  <%= tag.header class: "browse-header" do %>
+    <%= tag.div do %>
+      <%= tag.p "Your next rep", class: "eyebrow" %>
+      <%= tag.h1 "New round", class: "page-title" %>
+      <%= tag.p "Pick your game. Find your teams. Put names to memory.", class: "round-intro" %>
+    <% end %>
+    <%= link_to "Game history", strength_game_attempts_path, class: "tool-button" %>
+  <% end %>
+
+  <% if @unfinished_rounds.any? %>
+    <%= tag.section class: "round-panel round-continue", aria: { labelledby: "continue-round-title" } do %>
+      <%= tag.h2 "Pick up where you left off", id: "continue-round-title", class: "profile-section-title" %>
+      <% @unfinished_rounds.each do |round| %>
+        <%= tag.div class: "round-resume-row" do %>
+          <%= tag.div do %>
+            <%= tag.strong GameRound::GAMES.fetch(round.game_type) %>
+            <%= tag.p round.scope_label, class: "round-caption" %>
+            <%= tag.p "#{round.stats[:answered]} of #{round.length} answered · #{round.paused? ? 'Paused' : 'Saved'} #{time_ago_in_words(round.updated_at)} ago", class: "round-caption" %>
+          <% end %>
+          <%= link_to "Continue", game_round_path(round), class: "tool-button" %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= turbo_frame_tag "round_setup" do %>
+    <%= render "setup" %>
+  <% end %>
+
+  <%= tag.details class: "round-panel round-other-games" do %>
+    <%= tag.summary "More ways to practice" %>
+    <%= tag.p "Explore the other training modes.", class: "round-caption" %>
+    <%= tag.div class: "page-actions" do %>
+      <% [["Multiple Choice", strength_multiple_choice_path], ["Phased Repetition", strength_phased_repetition_path], ["Image Recognition", strength_images_path], ["Name Ciphers", strength_ciphers_path]].each do |title, path| %>
+        <%= link_to title, path, class: "tool-button" %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

@@ -48,7 +48,7 @@
   <% if @team %>
     <%= tag.div class: "history-team-actions" do %>
       <%= link_to "All teams", strength_game_attempts_path(view: "teams", game_type: @history.game_type), class: "tool-link" %>
-      <%= link_to "Practice Team Match", strength_team_match_path(team_id: @team.id), class: "tool-button" %>
+      <%= link_to "Practice Team Match", new_game_round_path(team_id: @team.id), class: "tool-button" %>
     <% end %>
   <% else %>
     <%= tag.div class: "history-insights" do %>
@@ -67,7 +67,7 @@
                   <% end %>
                   <%= tag.div class: "history-mixup-detail" do %>
                     <%= tag.span pluralize(pair[:count], "mix-up"), class: "history-count" %>
-                    <%= link_to "Drill", strength_team_match_path(team_ids: pair[:teams].map(&:id)), class: "tool-button",
+                    <%= link_to "Drill", new_game_round_path(team_ids: pair[:teams].map(&:id)), class: "tool-button",
                       aria: { label: "Drill #{pair[:teams].map(&:name).join(' and ')}" } %>
                   <% end %>
                   <% division = pair[:teams].first.division %>

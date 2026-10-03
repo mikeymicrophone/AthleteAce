@@ -1,5 +1,5 @@
 class GameHistory
-  GAMES = { "player_team_match" => "Team Match", "guess_the_division" => "Guess the Division" }.freeze
+  GAMES = GameRound::GAMES
   attr_reader :attempts, :game_type, :team, :today, :time_zone
 
   def initialize ace:, game_type: nil, team: nil, now: Time.current

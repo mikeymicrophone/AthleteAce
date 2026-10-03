@@ -38,8 +38,9 @@ RSpec.describe "Game pages", type: :system do
     it "links from a team to its quiz" do
       visit teams_path
       first(:link, "Quiz Me").click
-
-      expect(page).to have_css(".game-container")
+      expect(page).to have_button("Start round")
+      click_button "Start round"
+      expect(page).to have_css(".round-subject")
     end
 
     it "lists teams with attempts on the stats page" do

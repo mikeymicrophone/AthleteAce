@@ -1,0 +1,67 @@
+<% content_for :title, GameRound::GAMES.fetch(@round.game_type) %>
+<%= tag.div class: "round-page round-play-page" do %>
+  <%= turbo_frame_tag dom_id(@round), data: { controller: "round", action: "keydown->round#key" }, tabindex: -1 do %>
+    <%= tag.p flash[:alert], role: "alert", class: "flash-alert" if flash[:alert] && turbo_frame_request? %>
+    <%= tag.header class: "round-game-bar" do %>
+      <%= tag.div do %>
+        <%= tag.p GameRound::GAMES.fetch(@round.game_type), class: "eyebrow" %>
+        <%= tag.p @round.scope_label, class: "round-scope-summary" %>
+      <% end %>
+      <%= tag.div class: "round-game-progress" do %>
+        <%= tag.strong "#{@round.position + 1} / #{@round.length}" %>
+        <%= tag.span "Streak #{@stats[:streak]}", class: "round-caption" %>
+      <% end %>
+    <% end %>
+    <%= tag.progress value: @stats[:answered], max: @round.length, aria: { label: "Questions answered" }, class: "round-progress" %>
+
+    <% if @round.paused? %>
+      <%= tag.section class: "round-panel round-paused" do %>
+        <%= icon "player-pause", size: 40 %>
+        <%= tag.h1 "Take a breather", class: "page-title" %>
+        <%= tag.p "Your questions and answers are saved. Resume whenever you’re ready." %>
+        <%= button_to "Resume round", resume_game_round_path(@round), class: "game-button" %>
+        <%= link_to "Back to Play", strength_path, class: "tool-link", data: { turbo_frame: "_top" } %>
+      <% end %>
+    <% else %>
+      <%= tag.section class: "round-subject" do %>
+        <%= tag.p @round.game_type == "player_team_match" ? "Which team is this player on?" : "Which division is this team in?", class: "round-question-prompt" %>
+        <%= entity_avatar @subject, size: :large if @subject %>
+        <%= tag.h1 @round.question.fetch("subject_name"), class: "page-title", tabindex: -1, data: { round_target: "heading" } %>
+      <% end %>
+      <%= form_with url: answer_game_round_path(@round), data: { action: "turbo:submit-start->round#submitting turbo:submit-end->round#submitted" } do |form| %>
+        <%= form.hidden_field :position, value: @round.position %>
+        <%= tag.div class: "round-choices" do %>
+          <% @round.question.fetch("choices").each_with_index do |choice, index| %>
+            <%= button_tag type: "submit", name: "choice_id", value: choice.fetch("id"), disabled: @attempt.present?,
+              class: round_choice_class(choice, @attempt, @round.question), data: { round_target: "choice" } do %>
+              <%= tag.span index + 1, class: "round-choice-key", aria: { hidden: true } %>
+              <%= tag.strong choice["abbreviation"].presence || choice.fetch("name"), class: "round-choice-abbreviation" %>
+              <%= tag.span choice.fetch("name") %>
+              <% if @attempt && choice.fetch("id") == @round.question.fetch("target_id") %>
+                <%= tag.span class: "round-choice-status" do %><%= icon "check", size: 18 %>Correct<% end %>
+              <% elsif @attempt && choice.fetch("id") == @attempt.chosen_entity_id %>
+                <%= tag.span class: "round-choice-status" do %><%= icon "x", size: 18 %>Your answer<% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+        <%= button_tag "I don’t know — show me", type: "submit", name: "choice_id", value: "", class: "tool-link round-skip", disabled: @attempt.present? %>
+      <% end %>
+
+      <% if @attempt %>
+        <%= tag.section class: "round-feedback #{@attempt.correct? ? 'round-feedback-correct' : 'round-feedback-wrong'}", role: "status", tabindex: -1, data: { round_target: "feedback" } do %>
+          <%= tag.h2 "#{@attempt.correct? ? 'Correct' : 'Not quite'} — #{@round.question.fetch('target_name')}", class: "profile-section-title" %>
+          <%= tag.p @attempt.correct? ? "Streak #{@stats[:streak]} this round." : "Saved to this round’s misses. You can drill it after the round." %>
+        <% end %>
+        <%= button_to @round.position == @round.length - 1 ? "Round summary" : "Next", advance_game_round_path(@round),
+          params: { position: @round.position }, class: "game-button round-next", data: { round_target: "next" },
+          form: { data: { turbo_frame: @round.position == @round.length - 1 ? "_top" : dom_id(@round) } } %>
+      <% end %>
+      <%= tag.footer class: "round-play-footer" do %>
+        <%= button_to "Pause round", pause_game_round_path(@round), class: "tool-button" %>
+        <%= link_to "New round", new_game_round_path, class: "tool-link", data: { turbo_frame: "_top" } %>
+        <%= tag.span "Keys 1–6 to answer · Enter for next", class: "round-caption" %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

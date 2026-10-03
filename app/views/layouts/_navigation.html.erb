@@ -6,7 +6,7 @@
     <% end %>
 
     <%= tag.div class: "nav-menu" do %>
-      <%= link_to strength_path, class: "nav-play #{controller_name == 'strength' ? 'active' : ''}" do %>
+      <%= link_to strength_path, class: "nav-play #{%w[strength game_rounds division_guessing_games].include?(controller_name) ? 'active' : ''}" do %>
         <%= icon "player-play", size: 18 %>
         <%= tag.span "Play" %>
       <% end %>

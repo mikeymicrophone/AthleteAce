@@ -10,6 +10,7 @@ class Ace < ApplicationRecord
   has_many :quests, through: :goals
   has_many :ratings, dependent: :destroy
   has_many :game_attempts, dependent: :destroy
+  has_many :game_rounds, dependent: :destroy
   
   def adopt_quest(quest)
     goals.find_or_create_by(quest: quest)

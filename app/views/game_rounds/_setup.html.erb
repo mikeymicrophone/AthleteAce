@@ -1,0 +1,107 @@
+<% available = @setup.available_count %>
+<% if @setup.errors.any? %>
+  <%= tag.div class: "flash-alert", role: "alert" do %>
+    <%= safe_join @setup.errors.full_messages.map { |message| tag.p message } %>
+  <% end %>
+<% end %>
+<%= form_with url: new_game_round_path, method: :get, class: "round-setup-form", data: { controller: "round-setup" } do |form| %>
+  <% [:conference_id, :division_id, :city_id, :state_id].each do |key| %>
+    <%= form.hidden_field key, value: @setup.public_send(key) if @setup.public_send(key) %>
+  <% end %>
+  <% @setup.team_ids.each do |id| %><%= hidden_field_tag "team_ids[]", id %><% end %>
+  <%= tag.fieldset class: "round-panel" do %>
+    <%= tag.legend "01 · Pick a game", class: "round-step" %>
+    <%= tag.div class: "round-game-options" do %>
+      <% [["player_team_match", "Player → team", "shield"], ["guess_the_division", "Team → division", "target"]].each do |value, description, glyph| %>
+        <%= tag.label class: "round-option round-game-option" do %>
+          <%= form.radio_button :game_type, value, checked: @setup.game_type == value, data: { action: "change->round-setup#update" } %>
+          <%= icon glyph, size: 24 %>
+          <%= tag.span do %>
+            <%= tag.strong GameRound::GAMES.fetch(value) %>
+            <%= tag.span description, class: "round-caption" %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= tag.fieldset class: "round-panel" do %>
+    <%= tag.legend "02 · Find your scope", class: "round-step" %>
+    <%= tag.p @setup.scope_label, class: "round-scope-summary" %>
+    <%= tag.div class: "round-scope-selects" do %>
+      <%= tag.div do %>
+        <%= form.label :sport_id, "Sport" %>
+        <%= form.collection_select :sport_id, Sport.order(:name), :id, :name, { include_blank: "All sports", selected: @setup.sport_id }, data: { action: "change->round-setup#sportChanged" } %>
+      <% end %>
+      <%= tag.div do %>
+        <%= form.label :league_id, "League" %>
+        <%= form.collection_select :league_id, @setup.leagues, :id, :name, { include_blank: "All leagues", selected: @setup.league_id }, data: { action: "change->round-setup#leagueChanged" } %>
+      <% end %>
+    <% end %>
+    <% if @setup.team_ids.any? || @setup.conference_id || @setup.division_id || @setup.city_id || @setup.state_id %>
+      <%= tag.p "Focused scope · #{@setup.scope_label}", class: "round-caption" %>
+      <%= link_to "Choose a different scope", new_game_round_path(game_type: @setup.game_type, length: @setup.length), class: "tool-link" %>
+    <% else %>
+      <%= tag.div class: "round-team-search" do %>
+        <%= form.label :team_query, "Search teams" %>
+        <%= form.search_field :team_query, value: @setup.team_query, placeholder: "Team name or abbreviation" %>
+        <%= form.submit "Search", class: "tool-button" %>
+      <% end %>
+      <%= tag.div class: "round-team-options", role: "group", aria: { label: "Team" } do %>
+        <%= tag.label class: "round-option" do %>
+          <%= form.radio_button :team_id, "", checked: @setup.team_id.nil?, data: { action: "change->round-setup#update" } %>
+          <%= tag.span "Any team" %>
+        <% end %>
+        <% selectable = @setup.selectable_teams.to_a %>
+        <% selectable.unshift(@setup.team) if @setup.team && !selectable.include?(@setup.team) %>
+        <% selectable.each do |team| %>
+          <%= tag.label class: "round-option" do %>
+            <%= form.radio_button :team_id, team.id, checked: @setup.team_id == team.id, data: { action: "change->round-setup#update" } %>
+            <%= tag.span team.abbreviation, class: "round-team-abbreviation" %>
+            <%= tag.span team.name %>
+          <% end %>
+        <% end %>
+      <% end %>
+      <%= tag.p "Showing up to 100 teams. Search to narrow the list.", class: "round-caption" if @setup.teams.count > 100 %>
+    <% end %>
+    <% if @setup.game_type == "player_team_match" %>
+      <%= tag.label class: "round-inactive" do %>
+        <%= form.check_box :include_inactive, { checked: @setup.include_inactive, data: { action: "change->round-setup#update" } }, "true", "false" %>
+        <%= tag.span "Include inactive players" %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= tag.fieldset class: "round-panel" do %>
+    <%= tag.legend "03 · Set your pace", class: "round-step" %>
+    <%= tag.div class: "round-lengths" do %>
+      <% GameRound::LENGTHS.each do |length| %>
+        <%= tag.label class: "round-option" do %>
+          <%= form.radio_button :length, length, checked: @setup.length == length, data: { action: "change->round-setup#update" } %>
+          <%= tag.strong length %><%= tag.span "questions" %>
+        <% end %>
+      <% end %>
+    <% end %>
+    <%= tag.p "#{pluralize available, @setup.game_type == 'player_team_match' ? 'player' : 'team'} available.", class: "round-caption" %>
+    <% if available.positive? && available < @setup.length.to_i %>
+      <%= tag.p "This scope has fewer than #{@setup.length} questions. Names repeat to fill the round.", class: "round-caption" %>
+    <% elsif available.zero? %>
+      <%= tag.p "Try a broader scope. A playable question needs at least two answer choices.", class: "round-caption" %>
+    <% end %>
+    <%= form.submit "Update setup", class: "tool-button round-update", data: { round_setup_target: "fallback" } %>
+  <% end %>
+<% end %>
+<%= tag.div class: "round-start-dock" do %>
+  <%= tag.div do %>
+    <%= tag.strong "#{GameRound::GAMES[@setup.game_type]} · #{@setup.length} questions" %>
+    <%= tag.p @setup.scope_label, class: "round-caption" %>
+  <% end %>
+  <% if ace_signed_in? %>
+    <%= form_with url: game_rounds_path, namespace: "start_round", data: { turbo_frame: "_top" } do |form| %>
+      <%= round_scope_fields form, @setup %>
+      <%= form.submit "Start round", class: "game-button", disabled: available.zero? %>
+    <% end %>
+  <% else %>
+    <%= link_to "Sign in to start", new_ace_session_path, class: "game-button", data: { turbo_frame: "_top" } %>
+  <% end %>
+<% end %>
