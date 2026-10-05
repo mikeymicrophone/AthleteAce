@@ -173,6 +173,8 @@ For Ascent, the approved direction is one multi-party Candidacy per person/offic
 
 The NY/MA/CT/VA raw CSV captures should be converted into well-specified ASC `.yml` seeds, surfacing inconsistencies and judgment calls. Their existing location outside the repo is acceptable; universal capture preservation or copying into the repo is not required. This is later-today follow-up work, not implemented by the AthleteAce pilot. The decision record contains the ready-to-post Linear task and the unavailable Ascent connection status.
 
+The first Ascent validation pilot is New York statewide contests plus multiple Assembly, state Senate, and U.S. House races, preferably more competitive contests. The exact selection and competitiveness metric remain preparation work.
+
 The mirrored 2026 Ascent slate should deactivate withdrawn/removed candidacies by default while retaining history. Election experiments can choose other slates. Approved participation options are active, inactive, and off-ballot but approvable; the third must clearly show voters that the person is off the official ballot and supports administrative additions. Official ballot updates and experiment membership remain distinguishable. These options are future Ascent adapter/schema work, separate from AthleteAce's roster Activation model.
 
 Validation covers the shared core and focused Rails model/import/profile tests, including replay after file renaming, changed numeric IDs, edited values, transfers, loans, and league changes. Tests use the local test database; development and deployed data are unchanged.

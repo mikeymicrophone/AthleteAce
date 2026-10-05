@@ -65,7 +65,7 @@ Ready-to-post Linear task: **Convert NY/MA/CT/VA captures into Ascent YML seeds 
 - Generate well-specified `.yml` records and flag missing evidence, conflicting official values, ambiguous people/offices, unmapped fields, and policy decisions still needed.
 - Apply the approved mirrored-slate and experiment distinctions; do not silently erase experiment choices or guess the protected/updateable field policy.
 - Keep capture location/retention a separate decision. Moving raw CSVs into the repo is not an acceptance requirement.
-- Select the initial pilot slice in the remaining discussion; keep the converter suitable for the available four-state capture set.
+- Use a broader New York validation pilot: statewide contests plus multiple Assembly, state Senate, and U.S. House races, prioritizing competitive races where practical. No particular contest list or competitiveness metric has been selected yet. Keep the converter suitable for the available four-state capture set.
 
 Posting status: saved here for the handoff, **not created in Linear**. None of the five connected Linear accounts returned an Ascent team when checked on October 5; post this task when the intended Ascent account is available.
 
@@ -75,9 +75,8 @@ Jev stays in the plan for interpreting fan-constructed codes, including shorthan
 
 ## Remaining discussion, one topic at a time
 
-The naming concern, default handling of withdrawals, portable evidence links, deferral of cross-catalog work, and raw-capture conversion direction are resolved. The username decision addresses common-name identity collisions. The next topic is the first Ascent pilot slice. Remaining topics include:
+The naming concern, default handling of withdrawals, portable evidence links, deferral of cross-catalog work, raw-capture conversion direction, and broader New York pilot scope are resolved. The username decision addresses common-name identity collisions. The next topic is conflicts-file input to amendment drafts. Remaining topics include:
 
-- A small Ascent pilot with Person, Office, Election, and Candidacy; the earlier BallotLine proposal is superseded.
 - Amendment authoring and conflicts-file workflow; source precedence and update rules.
 - Required source metadata, certification status as observation metadata, and an Ascent adapter sketch.
 - Publication of the registry/usage guide and the final fan-facing person lookup details.
