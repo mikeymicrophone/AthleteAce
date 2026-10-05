@@ -21,6 +21,7 @@ Sequence choices accept a string, two integers, or a family selected first and i
 - **Clerk access:** Ascent Clerk is approved to have read access to private `micharisma_seeders`. Provisioning and verification of that access remain separate operational work.
 - **Initial sequences:** start with `10_01` for Ascent Person lookup and `10_02` for Ascent Office lookup. These are approved starting assignments, editable before launch. The installed registry remains the authority for executable recipes; these Ascent entries and their persistence adapter are not installed yet. Their exact parser slot arrays must match the adapter when added.
 - **Lookup and optional registry:** parse structured codes into components and resolve those components against scoped fields on entity models. A separate EntityCode/CatalogCode binding table is not required for the initial Ascent design; reconsider it at greater volume or when explicit alias bindings warrant it. Similarity to the legal-citation name `OfficialCode` is not a concern, and no naming change is required merely to avoid that similarity. AthleteAce's existing EntityCode table remains implemented; this decision does not request removing it. Storage for historical handle aliases remains to be designed.
+- **Naming option:** `EntityPath` is another candidate name, emphasizing the structured components followed to resolve an entity. The user has not selected a final name or requested renaming AthleteAce's existing model.
 
 ## Seed update policy
 
