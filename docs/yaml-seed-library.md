@@ -175,6 +175,8 @@ The NY/MA/CT/VA raw CSV captures should be converted into well-specified ASC `.y
 
 The first Ascent validation pilot is New York statewide contests plus multiple Assembly, state Senate, and U.S. House races, preferably competitive contests or races with multiple candidates. The exact selection and competitiveness metric remain preparation work.
 
+Ascent name discrepancies should use a Spindrift-style disambiguation layer. Disagreement about an entire candidate defaults to inclusion of all potentially valid options, with uncertainty/source distinctions visible. These are future Ascent conversion/adapter policies, not changes to AthleteAce's current ambiguity checks.
+
 The mirrored 2026 Ascent slate should deactivate withdrawn/removed candidacies by default while retaining history. Election experiments can choose other slates. Approved participation options are active, inactive, and off-ballot but approvable; the third must clearly show voters that the person is off the official ballot and supports administrative additions. Official ballot updates and experiment membership remain distinguishable. These options are future Ascent adapter/schema work, separate from AthleteAce's roster Activation model.
 
 Validation covers the shared core and focused Rails model/import/profile tests, including replay after file renaming, changed numeric IDs, edited values, transfers, loans, and league changes. Tests use the local test database; development and deployed data are unchanged.

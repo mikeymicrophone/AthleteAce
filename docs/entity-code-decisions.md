@@ -52,6 +52,14 @@ Many attributes should be filled or refreshed during seed replay, including fiel
 
 The protected-field list, clearing behavior for incoming nulls, source precedence, and stale-source handling remain to be specified. Do not infer that every field is updateable or that the last file wins. AthleteAce's current pilot still preserves differing existing values and reports conflicts; per-attribute update behavior is an approved next capability, not implemented behavior.
 
+## Discrepancies and candidate inclusion
+
+Name discrepancies should use a disambiguation layer following the pattern seen in Spindrift. Track source spellings and resolve their person associations explicitly; do not treat every spelling difference as another person or silently merge ambiguous people. The specific Ascent layer remains to be designed.
+
+When the discrepancy concerns whether an entire candidate belongs in the slate, default to adding all potentially valid options. Preserve the uncertainty/source distinctions for judgment rather than silently selecting one source's candidate list. Inclusion does not by itself establish certified official-ballot status. This is compatible with the off-ballot-but-approvable simulation option; confirmed withdrawals still follow the mirrored-slate defaults above.
+
+These decisions belong in the conversion task. They do not select an automatic `conflicts.csv` → amendment-draft workflow for every discrepancy; other attribute conflicts and source-precedence rules remain open.
+
 ## Raw captures and the Linear follow-up
 
 Preserving everything is not a universal default. Retention and update policies should follow the data's purpose. The current NY/MA/CT/VA CSV captures are acceptable where they are, outside the repository; no move into the seed repo or blanket archival requirement is approved.
@@ -63,11 +71,12 @@ Ready-to-post Linear task: **Convert NY/MA/CT/VA captures into Ascent YML seeds 
 - Map the existing captures to the shared envelope, scoped references, and approved Ascent identities; file names do not determine identity.
 - Consolidate fusion-party rows into one Candidacy with multiple parties, following the decisions above.
 - Generate well-specified `.yml` records and flag missing evidence, conflicting official values, ambiguous people/offices, unmapped fields, and policy decisions still needed.
+- Use a Spindrift-style name-disambiguation layer for source spelling discrepancies. When sources disagree on an entire candidacy, provisionally include all potentially valid options and expose their uncertainty instead of silently discarding one.
 - Apply the approved mirrored-slate and experiment distinctions; do not silently erase experiment choices or guess the protected/updateable field policy.
 - Keep capture location/retention a separate decision. Moving raw CSVs into the repo is not an acceptance requirement.
 - Use a broader New York validation pilot: statewide contests plus multiple Assembly, state Senate, and U.S. House races, prioritizing competitive races or races with multiple candidates where practical. No particular contest list or competitiveness metric has been selected yet. Keep the converter suitable for the available four-state capture set.
 
-Posting status: saved here for the handoff, **not created in Linear**. None of the five connected Linear accounts returned an Ascent team when checked on October 5; post this task when the intended Ascent account is available.
+Posting status: saved here for the handoff, **not created in Linear**. Rechecked on October 5 after the user asked about newly available Ascent access: the tool metadata still lists five accounts, and their full team inventories expose Magicbook, Athlete Ace, Spindrift, Mile Pace Tracks, and Stickers-club, with no Ascent team. Post this task when the intended Ascent connection is exposed to this chat.
 
 ## Fan lookup
 
@@ -75,7 +84,7 @@ Jev stays in the plan for interpreting fan-constructed codes, including shorthan
 
 ## Remaining discussion, one topic at a time
 
-The naming concern, default handling of withdrawals, portable evidence links, deferral of cross-catalog work, raw-capture conversion direction, and broader New York pilot scope are resolved. The username decision addresses common-name identity collisions. The next topic is conflicts-file input to amendment drafts. Remaining topics include:
+The naming concern, default handling of withdrawals, portable evidence links, deferral of cross-catalog work, raw-capture conversion direction, broader New York pilot scope, name-disambiguation direction, and inclusive handling of candidate-list discrepancies are resolved. The next topic is required source metadata. Remaining topics include:
 
 - Amendment authoring and conflicts-file workflow; source precedence and update rules.
 - Required source metadata, certification status as observation metadata, and an Ascent adapter sketch.
