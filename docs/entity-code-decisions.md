@@ -65,7 +65,7 @@ Ready-to-post Linear task: **Convert NY/MA/CT/VA captures into Ascent YML seeds 
 - Generate well-specified `.yml` records and flag missing evidence, conflicting official values, ambiguous people/offices, unmapped fields, and policy decisions still needed.
 - Apply the approved mirrored-slate and experiment distinctions; do not silently erase experiment choices or guess the protected/updateable field policy.
 - Keep capture location/retention a separate decision. Moving raw CSVs into the repo is not an acceptance requirement.
-- Use a broader New York validation pilot: statewide contests plus multiple Assembly, state Senate, and U.S. House races, prioritizing competitive races where practical. No particular contest list or competitiveness metric has been selected yet. Keep the converter suitable for the available four-state capture set.
+- Use a broader New York validation pilot: statewide contests plus multiple Assembly, state Senate, and U.S. House races, prioritizing competitive races or races with multiple candidates where practical. No particular contest list or competitiveness metric has been selected yet. Keep the converter suitable for the available four-state capture set.
 
 Posting status: saved here for the handoff, **not created in Linear**. None of the five connected Linear accounts returned an Ascent team when checked on October 5; post this task when the intended Ascent account is available.
 

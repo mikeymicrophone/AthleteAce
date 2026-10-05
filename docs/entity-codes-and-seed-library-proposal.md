@@ -656,7 +656,7 @@ Acquisition and replay are separate stages. Replaying accepted files needs no fr
 
 Preserving every source artifact is not a universal default. Retention should suit its purpose; captures need not be copied into the seed repository. The current NY/MA/CT/VA CSV captures can stay where they are, outside the repo. Their approved next step is conversion into well-specified ASC `.yml` seeds using `micharisma-seeds/v1`, with inconsistencies, uncertain mappings, and judgment calls surfaced rather than silently resolved. The conversion task is recorded for Linear later on October 5, 2026; the [decision record](entity-code-decisions.md#raw-captures-and-the-linear-follow-up) holds the ready-to-post scope and posting status.
 
-The first Ascent validation pilot covers New York statewide contests plus multiple Assembly, state Senate, and U.S. House races. Prioritize more competitive races where practical. This supersedes the earlier idea of only one Assembly district or only statewide offices; a particular contest list and competitiveness metric still need to be chosen when preparing the seeds.
+The first Ascent validation pilot covers New York statewide contests plus multiple Assembly, state Senate, and U.S. House races. Prioritize more competitive races or races with multiple candidates where practical. This supersedes the earlier idea of only one Assembly district or only statewide offices; a particular contest list and competitiveness metric still need to be chosen when preparing the seeds.
 
 Where a source supplies reliable IDs, retain them as scoped external aliases. A provider's athlete ID, event ID, accession number, or catalog number can be a numeric or alphanumeric token without being a local database primary key.
 
