@@ -52,15 +52,31 @@ Many attributes should be filled or refreshed during seed replay, including fiel
 
 The protected-field list, clearing behavior for incoming nulls, source precedence, and stale-source handling remain to be specified. Do not infer that every field is updateable or that the last file wins. AthleteAce's current pilot still preserves differing existing values and reports conflicts; per-attribute update behavior is an approved next capability, not implemented behavior.
 
+## Raw captures and the Linear follow-up
+
+Preserving everything is not a universal default. Retention and update policies should follow the data's purpose. The current NY/MA/CT/VA CSV captures are acceptable where they are, outside the repository; no move into the seed repo or blanket archival requirement is approved.
+
+Convert those captures into `.yml` seeds using `micharisma-seeds/v1` and catalog `ASC`, specified as completely as the evidence permits. Conversion should surface additional inconsistencies, ambiguous mappings, and judgments for discussion rather than silently settle them. This work is intended for later today, October 5, 2026; continue the design questions before implementing it.
+
+Ready-to-post Linear task: **Convert NY/MA/CT/VA captures into Ascent YML seeds and surface judgments**.
+
+- Map the existing captures to the shared envelope, scoped references, and approved Ascent identities; file names do not determine identity.
+- Consolidate fusion-party rows into one Candidacy with multiple parties, following the decisions above.
+- Generate well-specified `.yml` records and flag missing evidence, conflicting official values, ambiguous people/offices, unmapped fields, and policy decisions still needed.
+- Apply the approved mirrored-slate and experiment distinctions; do not silently erase experiment choices or guess the protected/updateable field policy.
+- Keep capture location/retention a separate decision. Moving raw CSVs into the repo is not an acceptance requirement.
+- Select the initial pilot slice in the remaining discussion; keep the converter suitable for the available four-state capture set.
+
+Posting status: saved here for the handoff, **not created in Linear**. None of the five connected Linear accounts returned an Ascent team when checked on October 5; post this task when the intended Ascent account is available.
+
 ## Fan lookup
 
 Jev stays in the plan for interpreting fan-constructed codes, including shorthand and flexible league spellings. Its exact integration remains to be designed. Fan interpretation must resolve to a validated entity reference; deterministic seed replay does not depend on an online interpretation service.
 
 ## Remaining discussion, one topic at a time
 
-The naming concern, default handling of withdrawals, portable evidence links, and deferral of cross-catalog work are resolved. The username decision addresses common-name identity collisions. The next topic is mapping raw captures into manifests. Remaining topics include:
+The naming concern, default handling of withdrawals, portable evidence links, deferral of cross-catalog work, and raw-capture conversion direction are resolved. The username decision addresses common-name identity collisions. The next topic is the first Ascent pilot slice. Remaining topics include:
 
-- Mapping the NY/MA/CT/VA raw captures into the manifest envelope through generators.
 - A small Ascent pilot with Person, Office, Election, and Candidacy; the earlier BallotLine proposal is superseded.
 - Amendment authoring and conflicts-file workflow; source precedence and update rules.
 - Required source metadata, certification status as observation metadata, and an Ascent adapter sketch.

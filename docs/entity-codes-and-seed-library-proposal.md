@@ -654,13 +654,15 @@ source capture
 
 Acquisition and replay are separate stages. Replaying accepted files needs no fresh scrape, network request, or model call. Raw captures, source keys, parser/extractor version, and provenance let us revise the extractor later without pretending a newly interpreted claim is already accepted.
 
+Preserving every source artifact is not a universal default. Retention should suit its purpose; captures need not be copied into the seed repository. The current NY/MA/CT/VA CSV captures can stay where they are, outside the repo. Their approved next step is conversion into well-specified ASC `.yml` seeds using `micharisma-seeds/v1`, with inconsistencies, uncertain mappings, and judgment calls surfaced rather than silently resolved. The conversion task is recorded for Linear later on October 5, 2026; the [decision record](entity-code-decisions.md#raw-captures-and-the-linear-follow-up) holds the ready-to-post scope and posting status.
+
 Where a source supplies reliable IDs, retain them as scoped external aliases. A provider's athlete ID, event ID, accession number, or catalog number can be a numeric or alphanumeric token without being a local database primary key.
 
 Partition files by source family, sport/league, season, event, subject, or a bounded batch. File paths are organizational and may change; issued identity codes do not depend on filenames.
 
 Automate uncontested matches, new definitions, and schema validation. Source conflicts, uncertain people, changed sequence numbers, unsupported entity types, and contradictory evidence are the exception queue. The default policy can be narrow without requiring a manual import ceremony for every ordinary file.
 
-The library needs manifests that declare dependency sets and external catalog versions. Cross-app replay can use exported identity registries locally rather than contacting another running app for each reference.
+Large-library dependency declarations can be designed as needed. When a concrete cross-app feature is built, external-catalog versioning and locally exported references can be evaluated against its actual primitives; no cross-app replay infrastructure is required today.
 
 ## 19. Fan experience and a public web home
 
