@@ -84,7 +84,7 @@ Citation URLs are not required on seed records. The public catalog data, includi
 
 A URL log is a possible place to retain acquisition references. As Spindrift's scrape/parse skills develop, consider persisting families of URLs in their respective buckets. This is a future workflow idea, not a selected bucket layout, storage implementation, or requirement to preserve every URL. Absence of a citation URL should not itself block conversion or import.
 
-The user answered the URL requirement, not the capture/retrieval-date requirement. Date placement and any requirement remain open for the next question.
+Capture/import timestamps belong in the replay discussion and can be recorded in run logs without repeating them on every record. The user expects timestamps may become a major factor in rerunning the full seed library. Git timestamps might be sufficient, or explicit timestamps may need to go into `.yml`; experiments will determine the storage and interpretation. There is no fixed per-record timestamp requirement or universal newest-timestamp-wins rule selected now. Timestamp-based freshness/precedence remains future design work alongside the per-attribute update policy.
 
 ## Fan lookup
 
@@ -92,10 +92,11 @@ Jev stays in the plan for interpreting fan-constructed codes, including shorthan
 
 ## Remaining discussion, one topic at a time
 
-The naming concern, default handling of withdrawals, portable evidence links, deferral of cross-catalog work, raw-capture conversion direction, broader New York pilot scope, name-disambiguation direction, inclusive handling of candidate-list discrepancies, and optional citation URLs are resolved. The next topic is capture/import dates. Remaining topics include:
+The naming concern, default handling of withdrawals, portable evidence links, deferral of cross-catalog work, raw-capture conversion direction, broader New York pilot scope, name-disambiguation direction, inclusive handling of candidate-list discrepancies, optional citation URLs, and experimental approach to timestamps are resolved. The next topic is certification status and identity. Remaining topics include:
 
 - Amendment authoring and conflicts-file workflow; source precedence and update rules.
-- Capture/import-date placement, certification status as observation metadata, and an Ascent adapter sketch.
+- Certification status as metadata and an Ascent adapter sketch.
+- Timestamp storage/interpretation during experiments, alongside source-precedence and per-attribute update rules.
 - Publication of the registry/usage guide and the final fan-facing person lookup details.
 
 See [the broader proposal](entity-codes-and-seed-library-proposal.md) and [the implemented AthleteAce contract](yaml-seed-library.md) for scope and implementation details.

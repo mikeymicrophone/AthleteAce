@@ -57,7 +57,9 @@ groups:
 
 The complete bundle must also supply Sport, League, Year, Season, Team, and Player. JSON uses the same structure. Scope merges file → nested groups → row; explicit references override scope. Configuration never enters model attributes. Database IDs and foreign-key attributes are rejected; relationships use codes.
 
-The envelope's `source` mapping is optional, and a citation URL is not required on each record. The example's URL is useful metadata rather than a mandatory field. Source metadata can be shared through file/group inheritance. Acquisition URLs may instead be kept in logs; URL-family buckets are a possible future Spindrift scrape/parse workflow. Date requirements/placement remain undecided.
+The envelope's `source` mapping is optional, and a citation URL is not required on each record. The example's URL is useful metadata rather than a mandatory field. Source metadata can be shared through file/group inheritance. Acquisition URLs may instead be kept in logs; URL-family buckets are a possible future Spindrift scrape/parse workflow.
+
+Capture/import timestamps can be kept per run in logs. Git metadata may provide the chronology needed for repeated seeding, or explicit `.yml` timestamps may be needed; experiments will settle the storage and replay rules. There is no mandatory per-record timestamp or timestamp-based overwrite behavior implemented by this pilot. The current reader can retain optional date metadata, but timestamp precedence remains future adapter work.
 
 Definition codes and aliases are local, uppercase references. `MIC-ALA` is supplied once by the envelope. References may be qualified with `MIC-ALA-...`. Each coded model stores its preferred local `entity_code`; `EntityCode` enforces catalog-wide code uniqueness and binds aliases to that preferred identity. Codes remain bound when display facts change. Cross-catalog fetching needs a future catalog adapter; the pilot rejects foreign references.
 
