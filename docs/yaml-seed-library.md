@@ -2,6 +2,8 @@
 
 October 5, 2026. The shared reader/parser and AthleteAce database adapter are implemented on `codex/yaml-seasonal-seeding`. The data branch is `codex/yaml-seasonal-rosters`.
 
+The [decision record](entity-code-decisions.md) captures the October 5 review and future Linear handoff. The broader proposal now uses this same `micharisma-seeds/v1` envelope. Approved cross-app behavior is distinguished below from the currently implemented AthleteAce adapter.
+
 ## Repositories and responsibilities
 
 - [athlete_ace_data](https://github.com/mikeymicrophone/athlete_ace_data): committed catalog facts and sources, mounted at `db/seeds/athlete_ace_data`. The new `yaml/` library is independent of the existing JSON seed layout.
@@ -92,6 +94,8 @@ Installed recipes:
 
 The last slot determines the returned entity. `01_12` does not imply Season: it returns Year. The adapter resolves parents in dependency order even when Year occurs after Team. Annual Team lookup uses the Campaign abbreviation/hierarchy, so `OAK` in 2019 can resolve the same franchise as `LV` in 2020. Player shorthand matches surname or `LAST_FIRST` within the requested roster; multiple matches fail.
 
+This installed table is the authority for executable selections. Ascent's `10_01` (Person) and `10_02` (Office) are approved starting assignments, but their exact slot arrays and Ascent adapter are not installed. `ASC`, `SPD`, and `STC` are settled catalog tokens. Tokens, assignments, and recipe scopes remain editable before launch and publication of a usage guide while consumers can be kept synchronized; numeric allocation need not wait for exhaustive scope planning.
+
 ```ruby
 registry = MICharismaSeeders::SequenceRegistry.read(sequence_path)
 adapter = Seeds::EntitySequenceResolver.new
@@ -149,6 +153,8 @@ AthleteAce's CI test job checks out the pinned private submodules using reposito
 
 `seeds:import` creates missing records, adds compatible aliases, preserves existing values/links, and reports differences. Omitted rows never remove existing memberships. Conflicting aliases, incompatible types, invalid hierarchies, ambiguous lookups, or unresolved parents abort the transaction. File order need not follow parent order. Code bindings verify both numeric ID and preferred code; stale caches cannot attach to an unrelated row that reuses an ID. Missing rows and memberships are reconstructed on subsequent runs.
 
+The approved next policy permits filling and refreshing selected attributes during replay while protecting other attributes. That configuration is not implemented in this pilot; do not add an unsupported `replay_policy` field to manifests or assume the last file wins. Attribute lists, source precedence, null handling, and stale-source behavior remain to be specified.
+
 The pilot uses one transaction and reads the selected bundle into memory. Streaming/chunking and a persistent amendment/provenance ledger are future work for very large catalogs. Source metadata is committed with the manifests and included in conflict reports.
 
 The new tasks do not invoke the legacy `db:seed` scripts. For a clean rebuild, load the new schema and use `seeds:import`; mixing both libraries requires explicit reconciliation of legacy entities that lack codes. The importer only adopts uncoded rows through strong Year/Season/Campaign/Activation keys; it does not guess that matching player names or team abbreviations identify the same entity.
@@ -158,6 +164,8 @@ The new tasks do not invoke the legacy `db:seed` scripts. For a clean rebuild, l
 The first sample supplies 89 definitions and 94 code bindings: four Sports, two Countries, five Leagues, ten Years, 41 Seasons, eight Teams, three Players, ten Campaigns, and six Activations. It covers the 2016–2025 starting-year window for NBA/NFL/NHL/EPL, plus a Championship season for Fulham. The three sampled transfers, Raiders relocation, and Fulham promotion test the contract. They are not complete rosters.
 
 Next work is sourced complete annual team snapshots and roster unions for each league, reusable source generators, coverage/completeness checks, and seasonal filters in browsing/quizzes. Existing current-team player queries do not become historical roster queries automatically. The pilot reserves stadium/logo/division fields but does not fabricate their facts. Games played, statistics, within-season team history, public fan search, and Ascent's adapter remain outside this initial implementation.
+
+For Ascent, the approved direction is one multi-party Candidacy per person/office/election, amended certifications on the same Election, and one Person identity scheme for candidates, voters, appointed officials, pundits, and foreign officials. Person usernames prefer Instagram handles, with generated names when absent; verification, encoding, and handle updates still need implementation. Ascent Clerk is approved for read access to private `micharisma_seeders`; access provisioning is not confirmed by this document. Jev remains in the fan-resolver plan, with integration still to be designed. See the decision record for the identity alternatives and unresolved topics to carry to Linear.
 
 Validation covers the shared core and focused Rails model/import/profile tests, including replay after file renaming, changed numeric IDs, edited values, transfers, loans, and league changes. Tests use the local test database; development and deployed data are unchanged.
 
