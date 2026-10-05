@@ -11,7 +11,7 @@ class Sport < ApplicationRecord
   has_many :countries, -> { distinct }, through: :leagues, source: :jurisdiction, source_type: "Country"
   has_many :campaigns, through: :teams
   has_many :contracts, through: :teams
-  has_many :activations, through: :contracts
+  has_many :activations, through: :campaigns
   has_many :positions, dependent: :destroy
   
   def create_standard_positions positions_data

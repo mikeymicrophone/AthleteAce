@@ -73,6 +73,21 @@ RSpec.describe "Player profiles", type: :request do
     expect(seasons.text).not_to include(other_season.name)
   end
 
+  it "shows a seeded player's historical seasons without requiring a current team or contract" do
+    player.update! team: nil, sport: team.sport
+    season = create(:season, league: team.league, label: "2022-23")
+    campaign = Campaign.create! team: team, season: season
+    Activation.create! player: player, campaign: campaign
+
+    get player_path(player)
+
+    expect(response).to have_http_status(:ok)
+    expect(document.at_css(".player-hero .game-button")).to be_nil
+    seasons = document.at_css("[aria-labelledby=player-seasons-title]")
+    expect(seasons.css("a").map { |link| link["href"] }).to eq([season_path(season)])
+    expect(seasons.text).to include("2022-23")
+  end
+
   it "does not treat a team color as arbitrary CSS or invent missing status" do
     team.update! primary_color: "red; background: url(https://example.com)"
     player.update! active: nil, debut_year: nil, current_position: nil

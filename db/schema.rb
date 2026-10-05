@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -52,7 +52,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
   end
 
   create_table "activations", force: :cascade do |t|
-    t.bigint "contract_id", null: false
+    t.bigint "contract_id"
     t.bigint "campaign_id", null: false
     t.date "start_date"
     t.date "end_date"
@@ -61,8 +61,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
     t.datetime "last_seeded_at", precision: nil
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "player_id", null: false
+    t.string "entity_code"
     t.index ["campaign_id"], name: "index_activations_on_campaign_id"
     t.index ["contract_id"], name: "index_activations_on_contract_id"
+    t.index ["entity_code"], name: "index_activations_on_entity_code", unique: true
+    t.index ["player_id", "campaign_id"], name: "index_activations_on_player_id_and_campaign_id", unique: true
+    t.index ["player_id"], name: "index_activations_on_player_id"
   end
 
   create_table "campaigns", force: :cascade do |t|
@@ -73,7 +78,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
     t.datetime "last_seeded_at", comment: "When this record was last seeded"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "display_name"
+    t.string "territory"
+    t.string "mascot"
+    t.string "abbreviation"
+    t.string "logo_url"
+    t.string "primary_color"
+    t.string "secondary_color"
+    t.bigint "stadium_id"
+    t.bigint "city_id"
+    t.bigint "conference_id"
+    t.bigint "division_id"
+    t.jsonb "details", default: {}, null: false
+    t.string "entity_code"
+    t.index ["city_id"], name: "index_campaigns_on_city_id"
+    t.index ["conference_id"], name: "index_campaigns_on_conference_id"
+    t.index ["division_id"], name: "index_campaigns_on_division_id"
+    t.index ["entity_code"], name: "index_campaigns_on_entity_code", unique: true
     t.index ["season_id"], name: "index_campaigns_on_season_id"
+    t.index ["stadium_id"], name: "index_campaigns_on_stadium_id"
     t.index ["team_id", "season_id"], name: "index_campaigns_on_team_id_and_season_id", unique: true
     t.index ["team_id"], name: "index_campaigns_on_team_id"
   end
@@ -85,6 +108,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
     t.datetime "updated_at", null: false
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.string "entity_code"
+    t.index ["entity_code"], name: "index_cities_on_entity_code", unique: true
     t.index ["seed_version"], name: "index_cities_on_seed_version"
     t.index ["state_id"], name: "index_cities_on_state_id"
   end
@@ -98,6 +123,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
     t.datetime "updated_at", null: false
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.string "entity_code"
+    t.index ["entity_code"], name: "index_conferences_on_entity_code", unique: true
     t.index ["league_id"], name: "index_conferences_on_league_id"
     t.index ["seed_version"], name: "index_conferences_on_seed_version"
   end
@@ -148,6 +175,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
     t.datetime "last_seeded_at", precision: nil
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "entity_code"
+    t.index ["entity_code"], name: "index_contracts_on_entity_code", unique: true
     t.index ["player_id"], name: "index_contracts_on_player_id"
     t.index ["team_id"], name: "index_contracts_on_team_id"
   end
@@ -160,6 +189,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
     t.string "flag_url"
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.string "entity_code"
+    t.index ["entity_code"], name: "index_countries_on_entity_code", unique: true
     t.index ["seed_version"], name: "index_countries_on_seed_version"
   end
 
@@ -172,8 +203,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
     t.datetime "updated_at", null: false
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.string "entity_code"
     t.index ["conference_id"], name: "index_divisions_on_conference_id"
+    t.index ["entity_code"], name: "index_divisions_on_entity_code", unique: true
     t.index ["seed_version"], name: "index_divisions_on_seed_version"
+  end
+
+  create_table "entity_codes", force: :cascade do |t|
+    t.string "namespace", null: false
+    t.string "catalog", null: false
+    t.string "code", null: false
+    t.string "canonical_code", null: false
+    t.string "record_type"
+    t.bigint "record_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["namespace", "catalog", "canonical_code"], name: "index_entity_codes_on_namespace_and_catalog_and_canonical_code"
+    t.index ["namespace", "catalog", "code"], name: "index_entity_codes_on_namespace_and_catalog_and_code", unique: true
+    t.index ["record_type", "record_id"], name: "index_entity_codes_on_record"
   end
 
   create_table "federations", force: :cascade do |t|
@@ -275,6 +322,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
     t.bigint "jurisdiction_id"
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.string "entity_code"
+    t.index ["entity_code"], name: "index_leagues_on_entity_code", unique: true
     t.index ["jurisdiction_type", "jurisdiction_id"], name: "index_leagues_on_jurisdiction"
     t.index ["seed_version"], name: "index_leagues_on_seed_version"
     t.index ["sport_id"], name: "index_leagues_on_sport_id"
@@ -337,9 +386,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
     t.datetime "updated_at", null: false
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.bigint "sport_id"
+    t.string "entity_code"
     t.index ["birth_city_id"], name: "index_players_on_birth_city_id"
     t.index ["birth_country_id"], name: "index_players_on_birth_country_id"
+    t.index ["entity_code"], name: "index_players_on_entity_code", unique: true
     t.index ["seed_version"], name: "index_players_on_seed_version"
+    t.index ["sport_id"], name: "index_players_on_sport_id"
     t.index ["team_id"], name: "index_players_on_team_id"
   end
 
@@ -414,8 +467,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
     t.datetime "updated_at", null: false
     t.bigint "champion_id"
     t.bigint "championship_contest_id"
+    t.string "label"
+    t.string "entity_code"
     t.index ["champion_id"], name: "index_seasons_on_champion_id"
     t.index ["championship_contest_id"], name: "index_seasons_on_championship_contest_id"
+    t.index ["entity_code"], name: "index_seasons_on_entity_code", unique: true
     t.index ["league_id"], name: "index_seasons_on_league_id"
     t.index ["seed_version"], name: "index_seasons_on_seed_version"
     t.index ["start_date"], name: "index_seasons_on_start_date"
@@ -444,6 +500,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
     t.string "icon_url"
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.string "entity_code"
+    t.index ["entity_code"], name: "index_sports_on_entity_code", unique: true
     t.index ["seed_version"], name: "index_sports_on_seed_version"
   end
 
@@ -459,7 +517,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
     t.string "logo_url"
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.string "entity_code"
     t.index ["city_id"], name: "index_stadiums_on_city_id"
+    t.index ["entity_code"], name: "index_stadiums_on_entity_code", unique: true
     t.index ["seed_version"], name: "index_stadiums_on_seed_version"
   end
 
@@ -472,7 +532,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
     t.string "flag_url"
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.string "entity_code"
     t.index ["country_id"], name: "index_states_on_country_id"
+    t.index ["entity_code"], name: "index_states_on_entity_code", unique: true
     t.index ["seed_version"], name: "index_states_on_seed_version"
   end
 
@@ -491,6 +553,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
     t.datetime "updated_at", null: false
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.string "entity_code"
+    t.index ["entity_code"], name: "index_teams_on_entity_code", unique: true
     t.index ["league_id"], name: "index_teams_on_league_id"
     t.index ["seed_version"], name: "index_teams_on_seed_version"
     t.index ["stadium_id"], name: "index_teams_on_stadium_id"
@@ -502,13 +566,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "entity_code"
+    t.index ["entity_code"], name: "index_years_on_entity_code", unique: true
     t.index ["number"], name: "index_years_on_number", unique: true
     t.index ["seed_version"], name: "index_years_on_seed_version"
   end
 
   add_foreign_key "activations", "campaigns"
   add_foreign_key "activations", "contracts"
+  add_foreign_key "activations", "players"
+  add_foreign_key "campaigns", "cities"
+  add_foreign_key "campaigns", "conferences"
+  add_foreign_key "campaigns", "divisions"
   add_foreign_key "campaigns", "seasons"
+  add_foreign_key "campaigns", "stadiums"
   add_foreign_key "campaigns", "teams"
   add_foreign_key "cities", "states"
   add_foreign_key "conferences", "leagues"
@@ -532,6 +603,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_030000) do
   add_foreign_key "organization_affiliations", "teams"
   add_foreign_key "players", "cities", column: "birth_city_id"
   add_foreign_key "players", "countries", column: "birth_country_id"
+  add_foreign_key "players", "sports"
   add_foreign_key "players", "teams"
   add_foreign_key "positions", "sports"
   add_foreign_key "ratings", "aces"

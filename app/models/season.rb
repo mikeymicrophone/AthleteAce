@@ -22,7 +22,7 @@ class Season < ApplicationRecord
   scope :completed, -> { where("end_date < ?", Date.current) }
   
   def name
-    "#{year.number} #{league.name}"
+    "#{label.presence || year.number} #{league.name}"
   end
   
   def to_s

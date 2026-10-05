@@ -3,17 +3,17 @@ class Player < ApplicationRecord
   
   belongs_to :birth_city, class_name: 'City', optional: true
   belongs_to :birth_country, class_name: 'Country', optional: true
-  belongs_to :team
-  delegate :sport, to: :team
-  delegate :league, to: :team
+  belongs_to :team, optional: true
+  belongs_to :sport, optional: true
+  delegate :league, to: :team, allow_nil: true
   delegate :current_organization, to: :team, allow_nil: true
   
   has_many :roles, dependent: :destroy
   has_many :positions, through: :roles
   has_many :contracts, dependent: :destroy
   has_many :contract_teams, through: :contracts, source: :team
-  has_many :activations, through: :contracts
-  has_many :campaigns, through: :activations
+  has_many :activations, dependent: :destroy
+  has_many :campaigns, -> { distinct }, through: :activations
   
   # Ransack configuration
   # Define searchable attributes and associations
@@ -51,10 +51,14 @@ class Player < ApplicationRecord
   end
   
   def self.ransackable_associations(auth_object = nil)
-    ["birth_city", "birth_country", "positions", "ratings", "roles", "team"]
+    ["birth_city", "birth_country", "positions", "ratings", "roles", "sport", "team"]
   end
   
   scope :sampled, ->(n = 50) { order(Arel.sql('RANDOM()')).limit(n) }
+
+  def sport
+    super || team&.sport
+  end
   
   def name
     "#{first_name} #{last_name}"

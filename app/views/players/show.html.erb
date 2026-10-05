@@ -10,13 +10,15 @@
       <%= tag.p player_status_line(@player), class: "player-status-line" %>
       <%= tag.div class: "profile-chips" do %>
         <%= entity_link @player.team %>
-        <%= entity_link @player.team.division %>
+        <%= entity_link @player.team&.division %>
         <%= entity_link @player.league %>
       <% end %>
-      <%= tag.div class: "page-actions" do %>
-        <%= link_to new_game_round_path(team_id: @player.team_id), class: "game-button" do %>
-          <%= icon "player-play", size: 20 %>
-          <%= tag.span "Quiz: #{@player.team.name}" %>
+      <% if @player.team %>
+        <%= tag.div class: "page-actions" do %>
+          <%= link_to new_game_round_path(team_id: @player.team_id), class: "game-button" do %>
+            <%= icon "player-play", size: 20 %>
+            <%= tag.span "Quiz: #{@player.team.name}" %>
+          <% end %>
         <% end %>
       <% end %>
     <% end %>
@@ -58,8 +60,8 @@
     <%= tag.dl class: "profile-related" do %>
       <% {
         "Plays for" => [@player.team], "Organization" => [@player.current_organization],
-        "Sport" => [@player.sport], "Stadium" => [@player.team.stadium],
-        "Location" => [@player.team.city, @player.team.state], "Positions" => @player.positions
+        "Sport" => [@player.sport], "Stadium" => [@player.team&.stadium],
+        "Location" => [@player.team&.city, @player.team&.state], "Positions" => @player.positions
       }.each do |label, records| %>
         <% if records.compact.any? %>
           <%= tag.div do %>

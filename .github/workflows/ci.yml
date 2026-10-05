@@ -55,8 +55,21 @@ jobs:
       - name: Install packages
         run: sudo apt-get update && sudo apt-get install --no-install-recommends -y google-chrome-stable libpq-dev
 
+      - name: Check private seed library access
+        env:
+          SEED_LIBRARY_READ_TOKEN: ${{ secrets.SEED_LIBRARY_READ_TOKEN }}
+        run: |
+          if [ -z "$SEED_LIBRARY_READ_TOKEN" ]; then
+            echo "::error::Set SEED_LIBRARY_READ_TOKEN with read access to AthleteAce and its private submodule repositories."
+            exit 1
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.SEED_LIBRARY_READ_TOKEN }}
+          persist-credentials: false
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -69,4 +82,3 @@ jobs:
           RAILS_ENV: test
           DATABASE_URL: postgres://postgres:postgres@localhost:5432
         run: bin/rails db:test:prepare && bundle exec rspec
-

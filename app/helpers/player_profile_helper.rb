@@ -3,7 +3,7 @@ module PlayerProfileHelper
     crumbs = if filters.present?
       filtered_breadcrumb
     else
-      [player.sport, player.league, player.team.conference, player.team.division, player.team].compact.map do |record|
+      [player.sport, player.league, player.team&.conference, player.team&.division, player.team].compact.map do |record|
         { label: record.name, path: polymorphic_path(record), type: record.model_name.singular }
       end
     end
@@ -28,7 +28,7 @@ module PlayerProfileHelper
 
   def player_hero_portrait player
     team = player.team
-    primary = team.primary_color.to_s.match?(/\A#[0-9a-f]{6}\z/i) ? team.primary_color : nil
+    primary = team&.primary_color.to_s.match?(/\A#[0-9a-f]{6}\z/i) ? team.primary_color : nil
     foreground = if primary
       red, green, blue = primary.delete_prefix("#").scan(/../).map { |part| part.to_i(16) }
       (red * 299 + green * 587 + blue * 114) / 1000 > 155 ? "#131418" : "#FFFFFF"
@@ -36,7 +36,8 @@ module PlayerProfileHelper
     style = primary ? "--jersey-color: #{primary}; --jersey-ink: #{foreground};" : nil
     tag.div class: "profile-portrait", style: style, data: { controller: "entity-image" } do
       fallback = tag.div class: "profile-jersey", data: { entity_image_target: "fallback" }, aria: { hidden: true } do
-        icon("jersey", size: 112) + tag.span(team.abbreviation.presence || team.name.split.map { |word| word[0] }.first(3).join.upcase)
+        label = team && (team.abbreviation.presence || team.name.split.map { |word| word[0] }.first(3).join.upcase)
+        icon("jersey", size: 112) + tag.span(label)
       end
       photo = if player.photo_url.present?
         tag.img src: player.photo_url, alt: "", class: "profile-photo hidden",

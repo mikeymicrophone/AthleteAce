@@ -8,10 +8,10 @@ class League < ApplicationRecord
   has_many :players, through: :teams
   has_many :stadiums, through: :teams
   has_many :seasons, dependent: :destroy
-  has_many :campaigns, through: :teams
+  has_many :campaigns, through: :seasons
   has_many :contests, through: :campaigns
   has_many :contracts, through: :teams
-  has_many :activations, through: :contracts
+  has_many :activations, through: :campaigns
   
   belongs_to :country, foreign_key: :jurisdiction_id, class_name: "Country", optional: true
   

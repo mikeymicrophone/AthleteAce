@@ -4,3 +4,6 @@
 [submodule "db/seeds/athlete_ace_ugc"]
 	path = db/seeds/athlete_ace_ugc
 	url = git@github.com:mikeymicrophone/athlete_ace_ugc.git
+[submodule "lib/micharisma_seeders"]
+	path = lib/micharisma_seeders
+	url = https://github.com/mikeymicrophone/micharisma_seeders.git

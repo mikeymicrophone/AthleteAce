@@ -1,5 +1,7 @@
 module SeasonsHelper
   def season_display_name(season)
+    return season.label if season.label.present?
+
     case season.league.sport.name.downcase
     when 'baseball'
       # MLB uses single year for season name

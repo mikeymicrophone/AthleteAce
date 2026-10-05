@@ -17,7 +17,7 @@ class Team < ApplicationRecord
   has_one :conference, through: :division
   has_many :contestants, through: :campaigns
   has_many :contests, through: :contestants
-  has_many :activations, through: :contracts
+  has_many :activations, through: :campaigns
 
   delegate :sport, to: :league
   delegate :city, :state, :country, to: :stadium, allow_nil: true
