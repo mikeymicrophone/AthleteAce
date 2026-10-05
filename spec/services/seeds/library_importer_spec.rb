@@ -190,4 +190,21 @@ RSpec.describe Seeds::LibraryImporter do
     expect(importer.call([path])[:created]).to eq(["BKT-NBA-CONTRACT-HART_JOSH-NYK"])
     expect(Contract.last.team.abbreviation).to eq("NYK")
   end
+
+  it "uses integer pairs and staged numeric or named YAML/JSON configuration interchangeably" do
+    seed_pilot
+    scope = { "sport" => "SPORT-BKT", "league" => "BKT-LEAGUE-NBA", "team" => "BKT-NBA-TEAM-NYK", "year" => "YEAR-2022" }
+    membership = definition("Activation", "BKT-NBA-SEASON_2022_2023-TEAM-NYK-PLAYER-HART_JOSH", {}, { "player" => "HART_JOSH" })
+    pair = write_document(records: [membership], scope: scope, entity_sequence: [5, 22], format: :json)
+    staged = write_document(records: [], scope: scope, entity_sequence: 5,
+      groups: [{ "entity_sequence" => 22, "records" => [membership] }])
+    named = write_document(records: [], scope: scope, entity_sequence: "athletes",
+      groups: [{ "entity_sequence" => "season_roster", "records" => [membership] }])
+
+    report = importer.call([pair, staged, named])
+    expect(report[:created]).to be_empty
+    expect(report[:conflicts]).to be_empty
+    expect(Player.count).to eq(3)
+    expect(Activation.count).to eq(6)
+  end
 end

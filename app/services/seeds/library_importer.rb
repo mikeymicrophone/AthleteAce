@@ -28,7 +28,7 @@ module Seeds
     end
 
     def read(paths)
-      reader = MICharismaSeeders::Reader.new
+      reader = MICharismaSeeders::Reader.new(registry: @registry)
       paths.flat_map { |path| reader.read(path) }
     end
 

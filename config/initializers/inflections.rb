@@ -18,4 +18,6 @@
 # Override the default pluralization of 'stadium' from 'stadia' to 'stadiums'
 ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.irregular 'stadium', 'stadiums'
+  # Brand classes use micharisma_ filenames while preserving MICharisma casing.
+  inflect.acronym "MICharisma"
 end

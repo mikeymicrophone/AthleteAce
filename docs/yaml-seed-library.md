@@ -12,6 +12,8 @@ Filenames and directory names only select input files and identify errors. Renam
 
 The shared package loads through its explicit entry point. Its complete submodule directory is excluded from Rails' application autoloader, so Rails does not interpret the package's nested `lib/` and `test/` directories as application namespaces. Custom constant spelling such as `MICharismaSeeders` is preserved by the package's own requires.
 
+Brand class filenames use `micharisma_`, including the parser's `micharisma_entity_parser.rb` entry point. AthleteAce registers `MICharisma` as an inflection acronym so brand filenames map to the intended capitalized constants.
+
 ## Seasonal data model
 
 `Team` identifies the continuing franchise/club. Its current associations remain available to existing app features. `Season` identifies a league and starting calendar `Year`, with an explicit league-specific label such as `2022_2023` or `2019`.
@@ -64,7 +66,19 @@ The standalone `yaml/entity_sequences.yaml` registry accepts the exact requested
   10: [Sport, League, Conference, Division, Year, Team]
 ```
 
-Quoted decimal keys are equally valid. Both normalize to `"01_10"`; normalized collisions fail. Sequences select slot order, not identity and not database IDs. Slots have variable widths, and underscores remain inside each supplied component.
+Quoted decimal keys are equally valid. Both normalize to `"01_10"`; normalized collisions fail. Sequences select slot order, not identity and not database IDs. Slots have variable widths, and underscores remain inside each supplied component. Optional `terminology` names the family/member numbers alongside those numeric recipes:
+
+```yaml
+terminology:
+  families:
+    hierarchy: 1
+    athletes: 5
+  sequences:
+    "01":
+      season_team: 11
+    "05":
+      season_roster: 22
+```
 
 Installed recipes:
 
@@ -91,7 +105,21 @@ context.sequence_is "01_11"
 context.resolve("NYK", scope: {Sport: "SPORT-BKT", League: "BKT-LEAGUE-NBA", Year: "YEAR-2022"})
 ```
 
-Use strings in Ruby: bare `05_22` is an octal number. A Context belongs to one caller/file; a block restores prior selection. There is no global parser state.
+Ruby accepts strings, integer pairs, or staged choices:
+
+```ruby
+parser = MICharismaEntityParser.select_entity_sequence("05_22", registry: registry)
+parser = MICharismaEntityParser.select_entity_sequence(5, 22, registry: registry)
+parser = MICharismaEntityParser.select_entity_sequence(5, registry: registry)
+parser = parser.select_entity_sequence(22)
+
+context = MICharismaSeeders::Context.new(registry: registry)
+context.sequence_is 5
+context.sequence_is 22
+context.sequence_is :athletes, :season_roster
+```
+
+The first single integer/name selects the family; later single choices select a member of that family. Use `sequence_family_is` on a Context or `select_entity_sequence_family` on a parser to switch families explicitly and clear the previous member. Parts are 0–99. A combined integer is rejected; bare `05_22` is octal 338. A Context belongs to one caller/file; blocks restore family and member. There is no global parser state. Incomplete choices cannot resolve codes.
 
 YAML can set `entity_sequence: "05_22"` once at file/group/row scope. Existing exact references resolve directly. When a string reference is unresolved and its expected type is the selected sequence's final slot, the adapter applies that recipe. To select a different recipe for one reference, use:
 
@@ -101,6 +129,8 @@ references:
     code: MIC-ALA-BKT-NBA-2022-NYK
     entity_sequence: "01_11"
 ```
+
+YAML/JSON also accepts `entity_sequence: [5, 22]` or `[athletes, season_roster]`. A file can set `entity_sequence: 5` (or `athletes`) and select `22` (or `season_roster`) in its groups. A member must be selected before defining records. Siblings inherit the file's family independently. Named choices are resolved from the supplied registry; the reader produces the same normalized `05_22` metadata for all these forms.
 
 Canonical definitions are independently issued references, not positional lookup strings. Whole scoped references such as `SPORT-BKT` remain atomic when filling omitted slots. A fully supplied positional construction supplies its own complete context.
 
@@ -131,4 +161,4 @@ Next work is sourced complete annual team snapshots and roster unions for each l
 
 Validation covers the shared core and focused Rails model/import/profile tests, including replay after file renaming, changed numeric IDs, edited values, transfers, loans, and league changes. Tests use the local test database; development and deployed data are unchanged.
 
-The complete local Rails suite passed: 346 examples, zero failures. An additional complete catalog wipe/rebuild case passed in the 15-example importer/sequence suite. The shared core passed 20 tests / 89 assertions across Ruby 3.1 / JSON 2.6 and Ruby 4.0 / JSON 2.18 and 3.0. Brakeman 8.0.6 reported zero warnings. The read-only task validated 14 manifests / 89 definitions / 94 code bindings; actual CLI import created 89 records, and its second run created zero with zero conflicts. Remote AthleteAce CI still requires the private-submodule credential described above.
+The initial pilot's complete local Rails suite passed: 346 examples, zero failures. The current importer/sequence suite passed 16 examples, including complete catalog wipe/rebuild and numeric, staged, and named YAML/JSON configuration. The shared core passed 28 tests / 146 assertions across Ruby 3.1 / JSON 2.6 and Ruby 4.0 / JSON 2.18 and 3.0. Rails' `zeitwerk:check` passed with the brand inflection. The pilot's Brakeman 8.0.6 check reported zero warnings. The read-only task validated 14 manifests / 89 definitions / 94 code bindings; actual CLI import created 89 records, and its second run created zero with zero conflicts. Remote AthleteAce CI still requires the private-submodule credential described above.
