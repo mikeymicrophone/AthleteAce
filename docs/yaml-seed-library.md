@@ -10,6 +10,8 @@ October 5, 2026. The shared reader/parser and AthleteAce database adapter are im
 
 Filenames and directory names only select input files and identify errors. Renaming or moving a manifest has no effect on fetching. A file can contain several teams, seasons, leagues, or nested groups.
 
+The shared package loads through its explicit entry point. Its complete submodule directory is excluded from Rails' application autoloader, so Rails does not interpret the package's nested `lib/` and `test/` directories as application namespaces. Custom constant spelling such as `MICharismaSeeders` is preserved by the package's own requires.
+
 ## Seasonal data model
 
 `Team` identifies the continuing franchise/club. Its current associations remain available to existing app features. `Season` identifies a league and starting calendar `Year`, with an explicit league-specific label such as `2022_2023` or `2019`.
