@@ -376,6 +376,8 @@ Potential models: Series, SeriesDefinition, and SeriesGame. A query-defined coll
 
 ## 11. Ascent: people, offices, elections, and political knowledge
 
+The [quick Ascent adapter sketch](ascent-seed-adapter-sketch.md) translates these decisions into provisional recipes and a small manifest. Refine it through real capture conversion; additional schema nuance should emerge from those experiments rather than be fixed in advance.
+
 Ascent distinguishes Person, Candidacy, Election, Office, Position, GoverningBody, Chamber, Issue, Approach, Policy, Stance, and Rule subtypes. Use Anna Kelles and New York Assembly District 125 as real examples. [Official Assembly directory](https://nyassembly.gov/mem/Anna-R-Kelles/).
 
 For approval voting, there is one Candidacy per person, office, and election with multiple parties attached. Printed fusion-party lines do not become separately coded BallotLine entities. Source captures can retain the printed rows; the Ascent generator consolidates them into that one candidacy. Amended certifications update the same Election. For the launch's mirrored 2026 slate, withdrawals and removals in a complete superseding certification deactivate the affected candidacies by default while retaining their history. Amendment storage and source precedence still require design.

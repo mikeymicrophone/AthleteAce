@@ -75,6 +75,7 @@ Ready-to-post Linear task: **Convert NY/MA/CT/VA captures into Ascent YML seeds 
 - Use a Spindrift-style name-disambiguation layer for source spelling discrepancies. When sources disagree on an entire candidacy, provisionally include all potentially valid options and expose their uncertainty instead of silently discarding one.
 - Apply the approved mirrored-slate and experiment distinctions; do not silently erase experiment choices or guess the protected/updateable field policy.
 - Treat certification status as an updateable attribute rather than an Election identity component; changing that status keeps the same EntityPath.
+- Start from the [quick Ascent adapter sketch](ascent-seed-adapter-sketch.md), then iterate on real captures to resolve additional schema nuance. Its recipes and field names are provisional, not a finalized import contract.
 - Keep capture location/retention a separate decision. Moving raw CSVs into the repo is not an acceptance requirement.
 - Use a broader New York validation pilot: statewide contests plus multiple Assembly, state Senate, and U.S. House races, prioritizing competitive races or races with multiple candidates where practical. No particular contest list or competitiveness metric has been selected yet. Keep the converter suitable for the available four-state capture set.
 
@@ -94,10 +95,10 @@ Jev stays in the plan for interpreting fan-constructed codes, including shorthan
 
 ## Remaining discussion, one topic at a time
 
-The naming concern, default handling of withdrawals, portable evidence links, deferral of cross-catalog work, raw-capture conversion direction, broader New York pilot scope, name-disambiguation direction, inclusive handling of candidate-list discrepancies, optional citation URLs, experimental approach to timestamps, and separation of certification status from identity are resolved. The next topic is whether to include an Ascent adapter sketch in the planned follow-up. Remaining topics include:
+The naming concern, default handling of withdrawals, portable evidence links, deferral of cross-catalog work, raw-capture conversion direction, broader New York pilot scope, name-disambiguation direction, inclusive handling of candidate-list discrepancies, optional citation URLs, experimental approach to timestamps, and separation of certification status from identity are resolved. A [quick Ascent adapter sketch](ascent-seed-adapter-sketch.md) is approved as a starting point; iterate on real data to work out additional schema nuance. Remaining implementation/design topics include:
 
 - Amendment authoring and conflicts-file workflow; source precedence and update rules.
-- An Ascent adapter sketch translating the approved identities and relationships into seed recipes and a sample manifest.
+- Refining the provisional Ascent adapter recipes and schema through actual capture conversion and replay.
 - Timestamp storage/interpretation during experiments, alongside source-precedence and per-attribute update rules.
 - Publication of the registry/usage guide and the final fan-facing person lookup details.
 
