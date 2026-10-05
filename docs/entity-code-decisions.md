@@ -26,6 +26,7 @@ Until support exists, importable manifests remain self-contained within their ca
 - **Handle changes:** process an update request rather than treating the changed handle as a different person. Preserve the Person binding; retaining previous code spellings as aliases is the proposed mechanism. Handle encoding, verification, reassignment, and conflicting requests still need implementation rules. Absence from captured Instagram data does not guarantee global availability.
 - **Other identity options raised:** legal address, Social Security number, and email address were mentioned for the Linear discussion. No decision was made to put these in public codes or public manifests.
 - **Election amendments:** amended certifications update the same Election and keep its identity. For the launch's mirrored 2026 slate, withdrawn candidacies or those removed by a complete superseding certification become inactive by default, retaining their records/history. Ordinary partial seed files do not imply deactivation by omission. Amendment storage and source-precedence rules remain to be designed.
+- **Certification status:** `certified`, `tentative`, or `unofficial` is an updateable attribute, excluded from the Election's EntityPath. A change in certification status does not create a new Election identity. The exact storage location and implementation remain to be designed.
 - **Clerk access:** Ascent Clerk is approved to have read access to private `micharisma_seeders`. Provisioning and verification of that access remain separate operational work.
 - **Initial sequences:** start with `10_01` for Ascent Person lookup and `10_02` for Ascent Office lookup. These are approved starting assignments, editable before launch. The installed registry remains the authority for executable recipes; these Ascent entries and their persistence adapter are not installed yet. Their exact parser slot arrays must match the adapter when added.
 - **Lookup and optional registry:** parse structured codes into components and resolve those components against scoped fields on entity models. A separate EntityCode/CatalogCode binding table is not required for the initial Ascent design; reconsider it at greater volume or when explicit alias bindings warrant it. Similarity to the legal-citation name `OfficialCode` is not a concern, and no naming change is required merely to avoid that similarity. AthleteAce's existing EntityCode table remains implemented; this decision does not request removing it. Storage for historical handle aliases remains to be designed.
@@ -73,6 +74,7 @@ Ready-to-post Linear task: **Convert NY/MA/CT/VA captures into Ascent YML seeds 
 - Generate well-specified `.yml` records and flag missing evidence, conflicting official values, ambiguous people/offices, unmapped fields, and policy decisions still needed.
 - Use a Spindrift-style name-disambiguation layer for source spelling discrepancies. When sources disagree on an entire candidacy, provisionally include all potentially valid options and expose their uncertainty instead of silently discarding one.
 - Apply the approved mirrored-slate and experiment distinctions; do not silently erase experiment choices or guess the protected/updateable field policy.
+- Treat certification status as an updateable attribute rather than an Election identity component; changing that status keeps the same EntityPath.
 - Keep capture location/retention a separate decision. Moving raw CSVs into the repo is not an acceptance requirement.
 - Use a broader New York validation pilot: statewide contests plus multiple Assembly, state Senate, and U.S. House races, prioritizing competitive races or races with multiple candidates where practical. No particular contest list or competitiveness metric has been selected yet. Keep the converter suitable for the available four-state capture set.
 
@@ -92,10 +94,10 @@ Jev stays in the plan for interpreting fan-constructed codes, including shorthan
 
 ## Remaining discussion, one topic at a time
 
-The naming concern, default handling of withdrawals, portable evidence links, deferral of cross-catalog work, raw-capture conversion direction, broader New York pilot scope, name-disambiguation direction, inclusive handling of candidate-list discrepancies, optional citation URLs, and experimental approach to timestamps are resolved. The next topic is certification status and identity. Remaining topics include:
+The naming concern, default handling of withdrawals, portable evidence links, deferral of cross-catalog work, raw-capture conversion direction, broader New York pilot scope, name-disambiguation direction, inclusive handling of candidate-list discrepancies, optional citation URLs, experimental approach to timestamps, and separation of certification status from identity are resolved. The next topic is whether to include an Ascent adapter sketch in the planned follow-up. Remaining topics include:
 
 - Amendment authoring and conflicts-file workflow; source precedence and update rules.
-- Certification status as metadata and an Ascent adapter sketch.
+- An Ascent adapter sketch translating the approved identities and relationships into seed recipes and a sample manifest.
 - Timestamp storage/interpretation during experiments, alongside source-precedence and per-attribute update rules.
 - Publication of the registry/usage guide and the final fan-facing person lookup details.
 

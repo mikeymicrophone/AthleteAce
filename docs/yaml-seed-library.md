@@ -175,6 +175,8 @@ Next work is sourced complete annual team snapshots and roster unions for each l
 
 For Ascent, the approved direction is one multi-party Candidacy per person/office/election, amended certifications on the same Election, and one Person identity scheme for candidates, voters, appointed officials, pundits, and foreign officials. Person usernames prefer Instagram handles, with generated names when absent; verification, encoding, and handle updates still need implementation. Ascent Clerk is approved for read access to private `micharisma_seeders`; access provisioning is not confirmed by this document. Jev remains in the fan-resolver plan, with integration still to be designed. See the decision record for the identity alternatives and unresolved topics to carry to Linear.
 
+Ascent certification status (`certified`, `tentative`, or `unofficial`) is an updateable attribute and does not belong in the Election's EntityPath. A status change retains the same Election identity. Storage and implementation are future Ascent work.
+
 The NY/MA/CT/VA raw CSV captures should be converted into well-specified ASC `.yml` seeds, surfacing inconsistencies and judgment calls. Their existing location outside the repo is acceptable; universal capture preservation or copying into the repo is not required. This is later-today follow-up work, not implemented by the AthleteAce pilot. The decision record contains the ready-to-post Linear task and the unavailable Ascent connection status.
 
 The first Ascent validation pilot is New York statewide contests plus multiple Assembly, state Senate, and U.S. House races, preferably competitive contests or races with multiple candidates. The exact selection and competitiveness metric remain preparation work.
