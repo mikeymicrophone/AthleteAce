@@ -12,6 +12,12 @@ Evidence links use document-relative paths within AthleteAce and GitHub branch l
 
 Sequence choices accept a string, two integers, or a family selected first and its member later. Names for those numbers live in YAML terminology and can also configure the parser. Ruby filenames use `micharisma_`; class spelling retains `MICharisma`.
 
+## Cross-catalog scope
+
+Defer cross-catalog fetching/import adapters until a concrete feature will use them. The first planned crossover is **Mile Pace Tracks ↔ Spindrift**. Its design should follow the user's actual primitives when that feature is defined; this decision does not specify those primitives or an adapter today.
+
+Until support exists, importable manifests remain self-contained within their catalog. Qualified cross-app references may appear as documentation examples only. AthleteAce ↔ Stickers Club teaching/practice claims remain future examples rather than the first crossover implementation.
+
 ## Ascent identities
 
 - **Fusion voting:** one `Candidacy` per person, office, and election, with multiple parties attached. Approval voting treats that as one candidacy. Printed party lines do not receive separate coded `BallotLine` entities in this design.
@@ -52,9 +58,8 @@ Jev stays in the plan for interpreting fan-constructed codes, including shorthan
 
 ## Remaining discussion, one topic at a time
 
-The naming concern, default handling of withdrawals, and portable evidence links are resolved. The username decision addresses common-name identity collisions. The next topic is cross-catalog references. Remaining topics include:
+The naming concern, default handling of withdrawals, portable evidence links, and deferral of cross-catalog work are resolved. The username decision addresses common-name identity collisions. The next topic is mapping raw captures into manifests. Remaining topics include:
 
-- Cross-catalog adapters and how to represent links until they exist.
 - Mapping the NY/MA/CT/VA raw captures into the manifest envelope through generators.
 - A small Ascent pilot with Person, Office, Election, and Candidacy; the earlier BallotLine proposal is superseded.
 - Amendment authoring and conflicts-file workflow; source precedence and update rules.

@@ -59,6 +59,8 @@ Put the default namespace and catalog in file metadata or app configuration. Kee
 
 Keep qualification available for cross-app relationships, shared registries, external sources, copied references, and exports that travel without their original file header. A foreign reference may use a full code or explicit `namespace`, `catalog`, and `code` fields. The importer validates the scope before interpreting a relative code.
 
+Cross-catalog adapters are deferred until a concrete feature needs them. The first planned crossover is Mile Pace Tracks ↔ Spindrift, whose actual primitives and integration will be defined with the user when used. Until such support exists, importable manifests stay self-contained in their catalog; qualified cross-app references are documentation examples only.
+
 The tables below generally show qualified codes so examples remain self-contained. Their local forms are obtained by removing the known `MIC-{catalog}` prefix; these are two renderings of one identity, not separate aliases that must be stored twice.
 
 ### Current scope
@@ -486,7 +488,7 @@ An Aim is a person's commitment in a community and cadence. AimStep preserves it
 
 ## 14. Connect athletes and coaches to goals and practices
 
-The public practice catalog can be shared across AthleteAce and Stickers Club. A local AthleteAce subject can reference a qualified Stickers Club Goal or equivalent scope fields.
+The public practice catalog could eventually be shared across AthleteAce and Stickers Club. The qualified references below illustrate that future idea and are not importable cross-catalog records. This is not the first planned crossover: Mile Pace Tracks ↔ Spindrift comes first, and no cross-catalog adapter is being implemented before its concrete feature and primitives are defined.
 
 Phil Handy provides a real teaching example:
 
@@ -705,7 +707,7 @@ Proposed stages:
 3. **Implement and prove replay:** repeated runs, overlapping files, concurrent imports, conflicting values, changed IDs, and deliberately deleted targets.
 4. **Consider games played next:** Game identities and athlete appearances can precede statistics. Uniforms, race laps, pitches, and other detailed types remain future extensions with their own recipes.
 5. **Integrate the other catalogs:** preserve each app's actual domain boundaries and extend its importer rather than mechanically replacing slugs.
-6. **Add cross-app practice claims and the fan resolver:** reuse issued identities and surface evidence and ambiguity.
+6. **Add the fan resolver and integrate cross-app features when needed:** surface issued identities, evidence, and ambiguity within supported catalogs. Defer cross-catalog adapters until a concrete feature will use them; the first planned crossover is Mile Pace Tracks ↔ Spindrift. AthleteAce/Stickers Club practice claims remain a later possibility.
 
 Settled choices include the catalog tokens, prelaunch flexibility of numeric assignments, YAML terminology, per-attribute seed updates, one multi-party Ascent candidacy, amendments on the same Election, Clerk repository access, username-based Ascent Person codes, `10_01`/`10_02` starting assignments, Jev in the fan plan, the shared envelope, optional Ascent binding registry, and active/inactive/off-ballot-approvable simulation options. Open details include registry distribution, handle encoding/verification, updateable/protected field lists and source precedence, amendment storage, experiment schema, event sources, the Jev integration, and public resolver hosting. See the [decision record and remaining discussion](entity-code-decisions.md).
 
