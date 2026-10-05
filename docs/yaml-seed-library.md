@@ -57,6 +57,8 @@ groups:
 
 The complete bundle must also supply Sport, League, Year, Season, Team, and Player. JSON uses the same structure. Scope merges file → nested groups → row; explicit references override scope. Configuration never enters model attributes. Database IDs and foreign-key attributes are rejected; relationships use codes.
 
+The envelope's `source` mapping is optional, and a citation URL is not required on each record. The example's URL is useful metadata rather than a mandatory field. Source metadata can be shared through file/group inheritance. Acquisition URLs may instead be kept in logs; URL-family buckets are a possible future Spindrift scrape/parse workflow. Date requirements/placement remain undecided.
+
 Definition codes and aliases are local, uppercase references. `MIC-ALA` is supplied once by the envelope. References may be qualified with `MIC-ALA-...`. Each coded model stores its preferred local `entity_code`; `EntityCode` enforces catalog-wide code uniqueness and binds aliases to that preferred identity. Codes remain bound when display facts change. Cross-catalog fetching needs a future catalog adapter; the pilot rejects foreign references.
 
 Cross-catalog work is explicitly deferred until a concrete feature needs it. The first planned crossover is Mile Pace Tracks ↔ Spindrift; its primitives and adapter will be defined then. Keep current importable manifests self-contained in their catalog and qualified cross-app references in documentation examples only. AthleteAce/Stickers Club practice links are a later possible use case.
@@ -159,7 +161,7 @@ AthleteAce's CI test job checks out the pinned private submodules using reposito
 
 The approved next policy permits filling and refreshing selected attributes during replay while protecting other attributes. That configuration is not implemented in this pilot; do not add an unsupported `replay_policy` field to manifests or assume the last file wins. Attribute lists, source precedence, null handling, and stale-source behavior remain to be specified.
 
-The pilot uses one transaction and reads the selected bundle into memory. Streaming/chunking and a persistent amendment/provenance ledger are future work for very large catalogs. Source metadata is committed with the manifests and included in conflict reports.
+The pilot uses one transaction and reads the selected bundle into memory. Streaming/chunking and a persistent amendment/provenance ledger are future work for very large catalogs. When supplied, source metadata is committed with the manifests and included in conflict reports; citation URLs are optional.
 
 The new tasks do not invoke the legacy `db:seed` scripts. For a clean rebuild, load the new schema and use `seeds:import`; mixing both libraries requires explicit reconciliation of legacy entities that lack codes. The importer only adopts uncoded rows through strong Year/Season/Campaign/Activation keys; it does not guess that matching player names or team abbreviations identify the same entity.
 

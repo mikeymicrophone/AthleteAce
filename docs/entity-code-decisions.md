@@ -78,16 +78,24 @@ Ready-to-post Linear task: **Convert NY/MA/CT/VA captures into Ascent YML seeds 
 
 Posting status: saved here for the handoff, **not created in Linear**. Rechecked on October 5 after the user asked about newly available Ascent access: the tool metadata still lists five accounts, and their full team inventories expose Magicbook, Athlete Ace, Spindrift, Mile Pace Tracks, and Stickers-club, with no Ascent team. Post this task when the intended Ascent connection is exposed to this chat.
 
+## Optional source URLs
+
+Citation URLs are not required on seed records. The public catalog data, including obscure clubs and DJs, does not need a mandatory per-record citation field. The optional manifest `source` mapping can still carry URLs when useful, and shared metadata can be inherited from file/group scope.
+
+A URL log is a possible place to retain acquisition references. As Spindrift's scrape/parse skills develop, consider persisting families of URLs in their respective buckets. This is a future workflow idea, not a selected bucket layout, storage implementation, or requirement to preserve every URL. Absence of a citation URL should not itself block conversion or import.
+
+The user answered the URL requirement, not the capture/retrieval-date requirement. Date placement and any requirement remain open for the next question.
+
 ## Fan lookup
 
 Jev stays in the plan for interpreting fan-constructed codes, including shorthand and flexible league spellings. Its exact integration remains to be designed. Fan interpretation must resolve to a validated entity reference; deterministic seed replay does not depend on an online interpretation service.
 
 ## Remaining discussion, one topic at a time
 
-The naming concern, default handling of withdrawals, portable evidence links, deferral of cross-catalog work, raw-capture conversion direction, broader New York pilot scope, name-disambiguation direction, and inclusive handling of candidate-list discrepancies are resolved. The next topic is required source metadata. Remaining topics include:
+The naming concern, default handling of withdrawals, portable evidence links, deferral of cross-catalog work, raw-capture conversion direction, broader New York pilot scope, name-disambiguation direction, inclusive handling of candidate-list discrepancies, and optional citation URLs are resolved. The next topic is capture/import dates. Remaining topics include:
 
 - Amendment authoring and conflicts-file workflow; source precedence and update rules.
-- Required source metadata, certification status as observation metadata, and an Ascent adapter sketch.
+- Capture/import-date placement, certification status as observation metadata, and an Ascent adapter sketch.
 - Publication of the registry/usage guide and the final fan-facing person lookup details.
 
 See [the broader proposal](entity-codes-and-seed-library-proposal.md) and [the implemented AthleteAce contract](yaml-seed-library.md) for scope and implementation details.
