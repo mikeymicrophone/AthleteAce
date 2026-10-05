@@ -59,6 +59,8 @@ The complete bundle must also supply Sport, League, Year, Season, Team, and Play
 
 Definition codes and aliases are local, uppercase references. `MIC-ALA` is supplied once by the envelope. References may be qualified with `MIC-ALA-...`. Each coded model stores its preferred local `entity_code`; `EntityCode` enforces catalog-wide code uniqueness and binds aliases to that preferred identity. Codes remain bound when display facts change. Cross-catalog fetching needs a future catalog adapter; the pilot rejects foreign references.
 
+The EntityCode binding table is part of AthleteAce's implemented adapter, rather than a requirement for every consuming app. Ascent's initial direction is parsed constructions plus scoped fields on its models, with a separate binding table optional later. The similarity between the name EntityCode and Ascent's legal-citation OfficialCode is acceptable.
+
 ## Optional lookup sequences
 
 The standalone `yaml/entity_sequences.yaml` registry accepts the exact requested layout:

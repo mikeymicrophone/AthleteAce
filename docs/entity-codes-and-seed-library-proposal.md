@@ -24,7 +24,7 @@ The system should support these three activities:
 2. **Resolve:** recognize different codes and contexts as references to the same thing.
 3. **Replay:** use those references to apply durable catalog knowledge without relying on local IDs.
 
-A meaningful code reduces the need to look up an identifier. A registry still establishes which entity an issued code identifies, resolves aliases, and handles genuine collisions. Constructibility and uniqueness are complementary requirements.
+A meaningful code reduces the need to look up an identifier. Parse structured constructions and query their components within the selected scope. For example, `NYK` is a Team abbreviation, and historical Campaign abbreviations supply year-specific lookup. An optional binding registry can also resolve issued full codes and explicit aliases, but every fan construction does not need its own stored binding. AthleteAce implements such a registry; the initial Ascent design does not require a separate binding table. Constructibility and uniqueness are complementary requirements.
 
 ## 2. Requirements and proposed defaults
 
@@ -405,6 +405,8 @@ Kelles sponsored A7389C in the 2021–2022 session, concerning proof-of-work cry
 Public district and bill numbers are meaningful identifier components, independent of database IDs. Party, email, residence, campaign status, and officeholding change over time. Offices need seat/chamber qualifiers where necessary, and reused district numbers require boundary editions.
 
 Ascent's existing OfficialCode belongs to Policy and represents an external legal reference. It is different from the proposed shared entity-code mechanism. Public reference knowledge belongs in the replayable library; voter ratings and baseline histories retain their separate persistence policy.
+
+The similar names are acceptable; no rename is needed just to avoid resemblance to `OfficialCode`. Ascent can start with parsed codes and scoped lookup fields on its entity models. A separate EntityCode/CatalogCode binding table is optional future work, to revisit at greater volume or when alias requirements justify it. This does not remove AthleteAce's implemented EntityCode table or settle how Ascent stores previous usernames after handle updates.
 
 Ascent Clerk is approved for read access to private `micharisma_seeders`; this document does not establish that access has been provisioned. `10_01` (Person) and `10_02` (Office) are approved starting lookup assignments; their registry entries and Ascent persistence adapter still need installation. Legal address, Social Security number, and email address are identity alternatives raised for the future Linear handoff, not selected public code components.
 
