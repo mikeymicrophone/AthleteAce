@@ -8,6 +8,8 @@ October 5, 2026. These decisions supersede conflicting language in the broader p
 
 The current manifest envelope is `micharisma-seeds/v1` for YAML and JSON. All current examples use that format. The former `mic-seed-proposal/1` envelope is historical, unsupported by the installed reader, and should not be used for new manifests.
 
+Evidence links use document-relative paths within AthleteAce and GitHub branch links for other repositories. Mac-only paths are removed. References not published on the linked branch are labeled as unpublished audit sources rather than given broken GitHub links.
+
 Sequence choices accept a string, two integers, or a family selected first and its member later. Names for those numbers live in YAML terminology and can also configure the parser. Ruby filenames use `micharisma_`; class spelling retains `MICharisma`.
 
 ## Ascent identities
@@ -50,9 +52,8 @@ Jev stays in the plan for interpreting fan-constructed codes, including shorthan
 
 ## Remaining discussion, one topic at a time
 
-The naming concern and default handling of withdrawals are resolved. The username decision addresses common-name identity collisions. The next topic is portable evidence links. Remaining topics include:
+The naming concern, default handling of withdrawals, and portable evidence links are resolved. The username decision addresses common-name identity collisions. The next topic is cross-catalog references. Remaining topics include:
 
-- Portable repository links in the proposal's evidence section.
 - Cross-catalog adapters and how to represent links until they exist.
 - Mapping the NY/MA/CT/VA raw captures into the manifest envelope through generators.
 - A small Ascent pilot with Person, Office, Election, and Candidacy; the earlier BallotLine proposal is superseded.
