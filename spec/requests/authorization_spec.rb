@@ -81,6 +81,55 @@ RSpec.describe "Authorization for shared content", type: :request do
     end
   end
 
+  describe "quest creators" do
+    let(:own_quest) { create(:quest, creator: ace) }
+
+    before { sign_in ace }
+
+    it "are recorded when a quest is created" do
+      post quests_path, params: { quest: { name: "My Quest" } }
+      expect(Quest.find_by!(name: "My Quest").creator).to eq(ace)
+    end
+
+    it "can't be set from params" do
+      post quests_path, params: { quest: { name: "Spoofed", creator_id: admin.id } }
+      expect(Quest.find_by!(name: "Spoofed").creator).to eq(ace)
+    end
+
+    it "can update and delete their own quests" do
+      patch quest_path(own_quest), params: { quest: { name: "Renamed" } }
+      expect(own_quest.reload.name).to eq("Renamed")
+
+      expect { delete quest_path(own_quest) }.to change(Quest, :count).by(-1)
+    end
+
+    it "can manage achievements on their own quests" do
+      highlight = create(:highlight, quest: own_quest)
+      patch quest_highlight_path(own_quest, highlight), params: { highlight: { position: 3 } }
+      expect(highlight.reload.position).to eq(3)
+
+      expect { delete quest_highlight_path(own_quest, highlight) }.to change(Highlight, :count).by(-1)
+    end
+
+    it "can't change quests someone else created" do
+      someone_elses = create(:quest, creator: create(:ace))
+
+      patch quest_path(someone_elses), params: { quest: { name: "Renamed" } }
+      expect(someone_elses.reload.name).not_to eq("Renamed")
+      expect(flash[:alert]).to eq("Only its creator or an admin can do that.")
+    end
+
+    it "see edit controls only on their own quests" do
+      someone_elses = create(:quest, creator: create(:ace))
+
+      get quest_path(own_quest)
+      expect(response.body).to include(edit_quest_path(own_quest), "You created this quest")
+
+      get quest_path(someone_elses)
+      expect(response.body).not_to include(edit_quest_path(someone_elses), "You created this quest")
+    end
+  end
+
   describe "admin-only controls" do
     let!(:highlight) { create(:highlight, quest: quest) }
 

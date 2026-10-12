@@ -1,7 +1,8 @@
 class HighlightsController < ApplicationController
   before_action :authenticate_ace!
-  before_action :require_admin!, only: [:edit, :update, :destroy]
   before_action :set_quest, except: [:new, :create]
+  # A quest's creator can manage its highlights, as can admins
+  before_action -> { require_manager! @quest }, only: [:edit, :update, :destroy]
   before_action :set_highlight, only: [:edit, :update, :destroy]
 
   # GET /highlights/new

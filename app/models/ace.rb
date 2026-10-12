@@ -10,7 +10,8 @@ class Ace < ApplicationRecord
   has_many :quests, through: :goals
   has_many :ratings, dependent: :destroy
   has_many :game_attempts, dependent: :destroy
-  
+  has_many :created_quests, class_name: "Quest", foreign_key: :creator_id, inverse_of: :creator, dependent: :nullify
+
   def adopt_quest(quest)
     goals.find_or_create_by(quest: quest)
   end
