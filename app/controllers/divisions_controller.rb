@@ -17,7 +17,7 @@ class DivisionsController < ApplicationController
     
     base_query = base_query.includes(:conference, conference: {league: :sport})
     
-    sql_order = @sort_service.to_sql_order
+    sql_order = @sort_service.to_sql_order(:divisions)
     
     if sql_order
       @divisions = base_query.order(Arel.sql(sql_order))

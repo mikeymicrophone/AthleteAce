@@ -5,7 +5,7 @@ module ActionDispatch::Routing
       
       filterable_associations.each do |association|
         resources association.to_s.pluralize, only: [] do
-          resources resource, options.dup
+          resources resource, { only: [:index, :show] }.merge(options)
         end
       end
     end

@@ -63,9 +63,8 @@ module GoalsHelper
     view_goal_button = link_to "View Goal", goal, class: "goal-action-button goal-action-primary"
     if goal.status != 'completed'
       abandon_button = link_to goal_path(goal),
-      method: :delete,
-      class: "goal-action-button goal-action-danger", 
-      confirm: "Are you sure you want to abandon this quest?",
+      data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to abandon this quest?" },
+      class: "goal-action-button goal-action-danger",
       title: "Abandon Quest",
       id: dom_id(goal, :abandon_button_for) do
         tag.i class: "fa-solid fa-trash"
@@ -109,7 +108,7 @@ module GoalsHelper
   def goals_group_section(status, goals, &block)
     tag.div class: "goals-group" do
       tag.h2(class: "goals-group-title") do
-        (status.humanize + " Goals " + tag.span("(#{goals.count})", class: "goals-group-count")).html_safe
+        safe_join [status.titleize, " Goals ", tag.span("(#{goals.count})", class: "goals-group-count")]
       end +
       tag.div(class: "goals-group-list", &block)
     end
@@ -186,9 +185,8 @@ module GoalsHelper
     
     tag.div class: "goal-page-actions justify-end" do
       link_to goal_path(goal),
-              method: :delete,
+              data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to abandon this quest? This action cannot be undone." },
               class: "goal-action-button goal-action-danger",
-              confirm: "Are you sure you want to abandon this quest? This action cannot be undone.",
               title: "Abandon Quest",
               id: dom_id(goal, :abandon_button_detail) do
 (tag.i(class: "fa-solid fa-trash mr-2") + "Abandon Quest").html_safe

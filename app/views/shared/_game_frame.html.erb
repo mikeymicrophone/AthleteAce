@@ -3,8 +3,6 @@
 
 <%= tag.div id: "#{game_type}_page_root", class: "relative", data: {
       controller: "game",
-      game_subject_id_value: subject.id,
-      game_correct_answer_id_value: correct_answer.id,
       game_game_type_value: game_type,
       game_frame_id_value: "#{game_type}_game_frame",
       game_subject_type_value: (game_type == "team_match" ? "Player" : "Team"),

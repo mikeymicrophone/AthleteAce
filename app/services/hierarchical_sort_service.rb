@@ -5,7 +5,8 @@ class HierarchicalSortService
   
   SORT_STATES = %w[asc desc inactive].freeze
   RANDOM_STATES = %w[random shuffle inactive].freeze
-  
+  SQL_DIRECTIONS = %w[asc desc].freeze
+
   attr_reader :sort_params, :max_levels
   
   def initialize(sort_params = [], max_levels = 3)
@@ -181,65 +182,47 @@ class HierarchicalSortService
   end
   
   # Generate SQL ORDER BY clause that properly handles hierarchical random
-  def to_sql_order
+  # Sort params come straight from the request, so only known columns and
+  # asc/desc directions make it into the SQL; anything else is dropped.
+  def to_sql_order(context = nil)
+    context = sortable_context(context)
     clauses = []
-    
+
     sort_params.each do |sort|
-      next if sort[:direction] == 'inactive'
-      
+      direction = sort[:direction].to_s.downcase
+      next if direction == 'inactive'
+
       if random_attribute?(sort[:attribute])
-        case sort[:direction]
+        case direction
         when 'random'
           # Use a consistent hash-based seed for reproducible results within pagination
-          table_id = primary_table_id
-          clauses << "MD5(CONCAT(#{table_id}, '#{time_based_seed}'))"
+          clauses << "MD5(CONCAT(#{primary_table_id(context)}, '#{time_based_seed}'))"
         when 'shuffle'
           # Use a different seed for shuffle to differentiate from random
-          table_id = primary_table_id
-          clauses << "MD5(CONCAT(#{table_id}, '#{time_based_seed(1)}'))"
+          clauses << "MD5(CONCAT(#{primary_table_id(context)}, '#{time_based_seed(1)}'))"
         end
       else
-        direction = sort[:direction].upcase
+        next unless SQL_DIRECTIONS.include?(direction)
         # Map sort attributes to actual database columns/table references
-        column_reference = map_sort_attribute_to_column(sort[:attribute])
-        clauses << "#{column_reference} #{direction}"
+        column_reference = map_sort_attribute_to_column(sort[:attribute], context)
+        clauses << "#{column_reference} #{direction.upcase}" if column_reference
       end
     end
-    
+
     clauses.empty? ? nil : clauses.join(', ')
   end
-  
+
   # Map sort attributes to actual database column references
-  def map_sort_attribute_to_column(attribute)
-    context = infer_table_context.to_sym
-    
-    # Try to get from dynamic configuration first
-    if defined?(HierarchicalSortConfigBuilder)
-      dynamic_config = HierarchicalSortConfigBuilder.build_config
-      if dynamic_config[context] && dynamic_config[context][:attributes]
-        column_mapping = dynamic_config[context][:attributes][attribute.to_s]
-        return column_mapping if column_mapping
-      end
-    end
-    
-    # Fallback to legacy mapping or default
-    legacy_mapping(attribute) || default_column_mapping(attribute)
+  def map_sort_attribute_to_column(attribute, context = nil)
+    context = sortable_context(context).to_sym
+
+    legacy_mapping(attribute) || default_column_mapping(attribute, context)
   end
 
   private
 
   # Get required joins for an attribute in the current context
   def get_required_joins_for_attribute(attribute, context)
-    # Try dynamic configuration first
-    if defined?(HierarchicalSortConfigBuilder)
-      dynamic_config = HierarchicalSortConfigBuilder.build_config
-      if dynamic_config[context] && dynamic_config[context][:joins]
-        joins_config = dynamic_config[context][:joins][attribute.to_s]
-        return joins_config if joins_config
-      end
-    end
-    
-    # Fallback to legacy configuration
     legacy_joins = legacy_joins_mapping[attribute.to_s]
     if legacy_joins.is_a?(Hash)
       legacy_joins[context] || []
@@ -270,15 +253,25 @@ class HierarchicalSortService
   end
 
   # Handle dynamic attributes with table prefixes
-  def default_column_mapping(attribute)
-    if attribute.match?(/^league_/)
-      "leagues.#{attribute.sub(/^league_/, '')}"
-    elsif attribute.match?(/^player_/)
-      "players.#{attribute.sub(/^player_/, '')}"
+  # Returns nil unless the attribute names a real column on a sortable table
+  def default_column_mapping(attribute, context)
+    attribute = attribute.to_s
+    table, column = if attribute.start_with?('league_')
+      ['leagues', attribute.delete_prefix('league_')]
+    elsif attribute.start_with?('player_')
+      ['players', attribute.delete_prefix('player_')]
     else
-      # Default fallback
-      "#{infer_table_context}.#{attribute}"
+      [context.to_s, attribute]
     end
+
+    model = HIERARCHICAL_SORT_MODELS[table.to_sym]&.safe_constantize
+    "#{table}.#{column}" if model&.column_names&.include?(column)
+  end
+
+  # Use the caller's table context when it's a sortable table, otherwise infer it
+  def sortable_context(context)
+    context = context.to_s
+    HIERARCHICAL_SORT_MODELS.key?(context.to_sym) ? context : infer_table_context
   end
 
   # Infer the table context based on the sort parameters
@@ -337,11 +330,7 @@ class HierarchicalSortService
     seed.to_f / 10000
   end
 
-  def primary_table_id
-    if infer_table_context == 'leagues'
-      'leagues.id'
-    else
-      'players.id'
-    end
+  def primary_table_id(context)
+    "#{context}.id"
   end
 end

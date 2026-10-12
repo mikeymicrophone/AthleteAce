@@ -10,141 +10,100 @@ RSpec.describe StrengthController, type: :controller do
     end
 
     context 'when authenticated' do
-      # Create a confirmed ace (user) for authentication
       let(:ace) { create(:ace) }
-      
-      # Create a quest with a team for testing
-      let(:sport) { create(:sport) }
-      let(:league) { create(:league, sport: sport) }
-      let(:team) { create(:team, league: league) }
-      let(:quest) { create(:quest) }
-      
-      before do
-        # Set up achievement for the quest that references the team
-        achievement = create(:achievement, target: team)
-        quest.add_achievement(achievement)
-        
-        # Sign in the user and have them adopt the quest
-        sign_in ace
-        ace.adopt_quest(quest)
+
+      before { sign_in ace }
+
+      def team_with_player(**attributes)
+        create(:team, **attributes).tap { |team| create(:player, team: team) }
       end
-      
-      it 'assigns players and teams when no scope is specified' do
+
+      def adopt_quest_for(*targets)
+        quest = create(:quest)
+        targets.each { |target| quest.add_achievement(create(:achievement, target: target)) }
+        ace.adopt_quest(quest)
+        quest
+      end
+
+      it 'redirects when there are no players at all' do
         get :team_match
-        expect(assigns(:players)).not_to be_empty
-        expect(assigns(:team_choices)).not_to be_nil
+        expect(response).to redirect_to(strength_path)
+      end
+
+      it 'includes the correct team among the choices' do
+        team_with_player
+        get :team_match
+        expect(assigns(:team_choices)).to include(assigns(:correct_team))
+        expect(assigns(:correct_team)).to eq(assigns(:current_player).team)
       end
 
       it 'defaults to quest teams when signed in and no scope' do
+        quest_team = team_with_player
+        team_with_player
+        quest = adopt_quest_for(quest_team)
+
         get :team_match
-        expect(assigns(:players).first.team).to be_in(quest.teams)
+        expect(assigns(:current_player).team).to be_in(quest.associated_teams)
       end
 
-      it 'defaults to quest teams when signed in and no scope, using associated_teams' do
-        quest = create(:quest)
-        team = create(:team)
-        achievement = create(:achievement, target: team)
-        quest.add_achievement(achievement)  # Assuming add_achievement method from Quest model
-        ace.adopt_quest(quest)
+      it 'includes teams from league achievements' do
+        league = create(:league)
+        league_team = team_with_player(league: league)
+        team_with_player
+        adopt_quest_for(league)
+
         get :team_match
-        expect(assigns(:players).first.team).to be_in(quest.associated_teams)
+        expect(assigns(:current_player).team).to eq(league_team)
       end
 
-      it 'defaults to quest teams when signed in and no scope, handling different achievement targets' do
-        quest = create(:quest)
-        team_achievement = create(:achievement, target: create(:team))
-        league_achievement = create(:achievement, target: create(:league))
-        quest.add_achievement(team_achievement)
-        quest.add_achievement(league_achievement)
-        ace.adopt_quest(quest)
-        get :team_match
-        expect(assigns(:players).map(&:team)).to include(team_achievement.target, *league_achievement.target.teams)
-      end
+      it 'keeps quest teams to one sport unless cross_sport is set' do
+        adopt_quest_for(team_with_player, team_with_player)
 
-      it 'respects cross_sport parameter' do
         get :team_match, params: { cross_sport: 'false' }
-        # Add more specific assertions based on expected behavior
+        expect(assigns(:team_choices).map { |team| team.sport.id }.uniq.size).to eq(1)
       end
 
-      it 'respects cross_sport parameter with quest teams' do
-        quest = create(:quest)
-        sport = create(:sport)
-        sport_team = create(:team, sport: sport)
-        other_sport_team = create(:team, sport: create(:sport))
-        achievement = create(:achievement, target: sport_team)
-        quest.add_achievement(achievement)
-        ace.adopt_quest(quest)
-        get :team_match, params: { cross_sport: 'false' }
-        expect(assigns(:team_choices).map(&:sport).map(&:id).uniq).to eq([sport.id])
-      end
-      
       describe 'filtering by conference' do
-        let(:sport) { create(:sport) }
-        let(:league) { create(:league, sport: sport) }
-        let(:conference) { create(:conference, league: league) }
-        let(:other_conference) { create(:conference, league: league) }
-        
-        let!(:conference_team1) { create(:team, conference: conference) }
-        let!(:conference_team2) { create(:team, conference: conference) }
-        let!(:other_conference_team) { create(:team, conference: other_conference) }
-        
-        let!(:player1) { create(:player, team: conference_team1) }
-        let!(:player2) { create(:player, team: conference_team2) }
-        let!(:other_player) { create(:player, team: other_conference_team) }
-        
-        it 'restricts players to the specified conference' do
+        let(:conference) { create(:conference) }
+        let(:division) { create(:division, conference: conference) }
+
+        before do
+          2.times { create(:membership, team: team_with_player(league: conference.league), division: division) }
+          create(:membership, team: team_with_player, division: create(:division))
+        end
+
+        it 'restricts players and choices to the conference' do
           get :team_match, params: { conference_id: conference.id }
-          
-          # The current player should be from one of the conference teams
-          expect(assigns(:current_player).team.conference_id).to eq(conference.id)
-          
-          # All team choices should be from the conference
-          expect(assigns(:team_choices).map(&:conference_id).uniq).to eq([conference.id])
-          
-          # The correct team should be from the conference
-          expect(assigns(:correct_team).conference_id).to eq(conference.id)
+
+          expect(assigns(:current_player).team.conference).to eq(conference)
+          expect(assigns(:team_choices).map(&:conference).uniq).to eq([conference])
         end
       end
-      
+
       describe 'filtering by league' do
-        let(:sport) { create(:sport) }
-        let(:league1) { create(:league, sport: sport) }
-        let(:league2) { create(:league, sport: sport) }
-        
-        let!(:league1_team1) { create(:team, league: league1) }
-        let!(:league1_team2) { create(:team, league: league1) }
-        let!(:league2_team) { create(:team, league: league2) }
-        
-        let!(:player1) { create(:player, team: league1_team1) }
-        let!(:player2) { create(:player, team: league1_team2) }
-        let!(:other_player) { create(:player, team: league2_team) }
-        
-        it 'restricts players to the specified league' do
-          get :team_match, params: { league_id: league1.id }
-          
-          # The current player should be from one of the league teams
-          expect(assigns(:current_player).team.league_id).to eq(league1.id)
-          
-          # All team choices should be from the league
-          expect(assigns(:team_choices).map(&:league_id).uniq).to eq([league1.id])
-          
-          # The correct team should be from the league
-          expect(assigns(:correct_team).league_id).to eq(league1.id)
+        let(:league) { create(:league) }
+
+        before do
+          2.times { team_with_player(league: league) }
+          team_with_player
+        end
+
+        it 'restricts players and choices to the league' do
+          get :team_match, params: { league_id: league.id }
+
+          expect(assigns(:current_player).team.league).to eq(league)
+          expect(assigns(:team_choices).map(&:league).uniq).to eq([league])
         end
       end
-      
+
       describe 'filtering by team' do
-        let(:team) { create(:team) }
-        let!(:player) { create(:player, team: team) }
-        
+        let(:team) { team_with_player }
+
         it 'restricts players to the specified team' do
           get :team_match, params: { team_id: team.id }
-          
-          # The current player should be from the specified team
-          expect(assigns(:current_player).team_id).to eq(team.id)
-          
-          # The correct team should be the specified team
-          expect(assigns(:correct_team).id).to eq(team.id)
+
+          expect(assigns(:current_player).team).to eq(team)
+          expect(assigns(:correct_team)).to eq(team)
         end
       end
     end

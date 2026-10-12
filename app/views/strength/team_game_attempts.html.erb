@@ -22,7 +22,7 @@
             <%= player_guess_attempts_stats_panel @player_stats, player %>
           <% end %>
           
-          <%= tag.div rating_slider_container(player, [Spectrum.find_by(name: 'Familiarity')]), class: "player-ratings" %>
+          <%= tag.div rating_slider_container(player, Spectrum.where(name: 'Familiarity')), class: "player-ratings" %>
           <%= result_of_recent_game_attempts_for_player player, @attempts_by_player %>
         <% end %>
       <% end %>

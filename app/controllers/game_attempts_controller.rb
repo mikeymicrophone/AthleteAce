@@ -16,7 +16,7 @@ class GameAttemptsController < ApplicationController
     @game_attempts = scope.order(created_at: :desc).limit(limit)
     
     respond_to do |format|
-      format.html # index.html.erb
+      format.html { redirect_to strength_game_attempts_path }
       format.json do
         render json: @game_attempts.as_json(include: {
           subject_entity: { methods: [:logo_url, :name] },
@@ -30,6 +30,10 @@ class GameAttemptsController < ApplicationController
   # POST /game_attempts
   def create
     @game_attempt = current_ace.game_attempts.build(game_attempt_params)
+    # The answer and correctness are worked out here, not taken from the client
+    @game_attempt.target_entity_type = GameAttempt::GAME_TYPES.dig(@game_attempt.game_type, 1)
+    @game_attempt.target_entity = @game_attempt.expected_target_entity
+    @game_attempt.is_correct = @game_attempt.chose_target?
 
     if @game_attempt.save
       # Return the saved attempt as JSON with associated entities
@@ -52,11 +56,8 @@ class GameAttemptsController < ApplicationController
       :game_type,
       :subject_entity_id,
       :subject_entity_type,
-      :target_entity_id,
-      :target_entity_type,
       :chosen_entity_id,
       :chosen_entity_type,
-      :is_correct,
       :time_elapsed_ms,
       options_presented: [] # Accept options_presented as a simple array of values
     )

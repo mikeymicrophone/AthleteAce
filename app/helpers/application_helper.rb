@@ -110,6 +110,13 @@ module ApplicationHelper
     render_collection(players, **options)
   end
 
+  # Links to an external URL only when it's http(s), so a stored "javascript:" URL can't run script
+  def external_link_to(url, **options)
+    return url unless url.to_s.match?(%r{\Ahttps?://}i)
+
+    link_to url, url, **options
+  end
+
   # Displays a record's name with a placeholder for a lazy-loaded logo.
   # The Stimulus 'lazy-logo_controller.js' will handle loading the actual image.
   #

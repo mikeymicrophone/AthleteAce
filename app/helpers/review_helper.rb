@@ -26,8 +26,8 @@ module ReviewHelper
 
   def team_attempts_filter_panel teams_by_sport, sports
     tag.div class: "teams-navigation" do
-      tag.h2 "Teams by Sport", class: "teams-navigation-title"
-      safe_join sports.map { |sport| sport_group_team_buttons(sport, teams_by_sport) }
+      tag.h2("Teams by Sport", class: "teams-navigation-title") +
+        safe_join(sports.map { |sport| sport_group_team_buttons(sport, teams_by_sport) })
     end
   end
 

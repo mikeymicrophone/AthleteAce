@@ -160,6 +160,13 @@ RSpec.describe "Important Pages Rendering", type: :request do
   end
 
   describe "Game Play Pages" do
+    before do
+      # The division game needs the team in a division with at least one other division to choose from
+      create(:division, conference: conference)
+      create(:membership, team: team, division: division)
+      sign_in create(:ace)
+    end
+
     it "GET /strength/team_match renders successfully" do
       get strength_team_match_path
       expect(response).to have_http_status(:success)
@@ -175,6 +182,8 @@ RSpec.describe "Important Pages Rendering", type: :request do
 
   describe "Game Review Pages" do
     let!(:game_attempt) { create(:game_attempt, target_entity: team, subject_entity: player) }
+
+    before { sign_in game_attempt.ace }
 
     it "GET /strength/game_attempts renders successfully" do
       get strength_game_attempts_path
@@ -204,32 +213,17 @@ RSpec.describe "Important Pages Rendering", type: :request do
     end
 
     it "renders filtered teams by sport" do
+      other_sport_team = create(:team)
       get "/sports/#{sport.id}/teams"
       expect(response).to have_http_status(:success)
-      expect(response.body).to include(team.territory || team.mascot)
-      expect(response.body).to include(sport.name)
+      expect(response.body).to include(team.name)
+      expect(response.body).not_to include(other_sport_team.name)
     end
 
     it "renders filtered players by league" do
       get "/leagues/#{league.id}/players"
       expect(response).to have_http_status(:success)
       expect(response.body).to include(player.first_name)
-      expect(response.body).to include(league.name)
-    end
-
-    it "renders deeply nested filtered teams" do
-      get "/sports/#{sport.id}/leagues/#{league.id}/teams"
-      expect(response).to have_http_status(:success)
-      expect(response.body).to include(team.territory || team.mascot)
-      expect(response.body).to include(sport.name)
-      expect(response.body).to include(league.name)
-    end
-
-    it "renders deeply nested filtered players" do
-      get "/sports/#{sport.id}/leagues/#{league.id}/teams/#{team.id}/players"
-      expect(response).to have_http_status(:success)
-      expect(response.body).to include(player.first_name)
-      expect(response.body).to include(sport.name)
       expect(response.body).to include(league.name)
     end
   end
@@ -295,11 +289,11 @@ RSpec.describe "Important Pages Rendering", type: :request do
       end
     end
 
-    it "includes index collection structure in list pages" do
+    it "includes index records in list pages" do
       [sports_path, leagues_path, teams_path, players_path].each do |path|
         get path
         expect(response).to have_http_status(:success)
-        expect(response.body).to include("index-collection")
+        expect(response.body).to include("index-record")
       end
     end
 

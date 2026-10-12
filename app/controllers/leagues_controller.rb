@@ -19,7 +19,7 @@ class LeaguesController < ApplicationController
     # Always include for display purposes
     base_query = base_query.includes(:sport, :country)
     
-    sql_order = @sort_service.to_sql_order
+    sql_order = @sort_service.to_sql_order(:leagues)
     
     if sql_order
       @leagues = base_query.order(Arel.sql(sql_order))

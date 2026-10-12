@@ -7,6 +7,10 @@ class Contest < ApplicationRecord
   has_many :contestants, dependent: :destroy
   has_many :campaigns, through: :contestants
   has_many :teams, through: :campaigns
+  has_many :leagues, -> { distinct }, through: :teams
+  has_many :conferences, -> { distinct }, through: :teams
+  has_many :divisions, -> { distinct }, through: :teams
+  has_many :countries, -> { distinct }, through: :leagues, source: :jurisdiction, source_type: "Country"
   
   serialize :comments, coder: JSON
   

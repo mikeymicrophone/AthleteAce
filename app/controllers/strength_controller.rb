@@ -31,20 +31,19 @@ class StrengthController < ApplicationController
 
   # Phased repetition for spaced learning
   def phased_repetition
-    Rails.logger.debug "PHASED REPETITION PARAMS: #{params.inspect}"
+    Rails.logger.debug { "PHASED REPETITION PARAMS: #{params.inspect}" }
     
     # Collect and process filter parameters
     id_collect
     
     # Force debug logging to ensure we can see what's happening
-    Rails.logger.debug "AFTER ID_COLLECT - Team ID: #{@team_id.inspect} (#{@team_id.class})"
+    Rails.logger.debug { "AFTER ID_COLLECT - Team ID: #{@team_id.inspect} (#{@team_id.class})" }
     
     # Double-check team_id is properly set
     if @team_id.present?
       team = Team.find_by(id: @team_id)
       if team
-        player_count = Player.where(team_id: @team_id).count
-        Rails.logger.debug "TEAM FOUND: #{team.territory} #{team.mascot} with #{player_count} players"
+        Rails.logger.debug { "TEAM FOUND: #{team.territory} #{team.mascot} with #{Player.where(team_id: @team_id).count} players" }
       else
         Rails.logger.warn "TEAM NOT FOUND for ID: #{@team_id}"
         @team_id = nil # Reset if team doesn't exist
@@ -52,20 +51,20 @@ class StrengthController < ApplicationController
     end
     
     filter_params = strength_filter_params
-    Rails.logger.debug "USING FILTER PARAMS: #{filter_params.inspect}"
+    Rails.logger.debug { "USING FILTER PARAMS: #{filter_params.inspect}" }
     
     @players = fetch_players_with_params(filter_params)
-    Rails.logger.debug "PLAYERS FOUND: #{@players.count}"
+    Rails.logger.debug { "PLAYERS FOUND: #{@players.count}" }
     
     if @players.empty?
       flash.now[:alert] = "No players found with the selected filters. Showing all players instead."
       @team_id = @sport_id = @league_id = nil
       @players = Player.limit(50).to_a
-      Rails.logger.debug "AFTER CLEARING FILTERS, players found: #{@players.count}"
+      Rails.logger.debug { "AFTER CLEARING FILTERS, players found: #{@players.count}" }
     end
     
     @current_player = @players.sample
-    Rails.logger.debug "SELECTED PLAYER: #{@current_player.inspect}"
+    Rails.logger.debug { "SELECTED PLAYER: #{@current_player.inspect}" }
     
     @phase = params[:phase].present? ? params[:phase].to_i : 1
   end
@@ -86,18 +85,18 @@ class StrengthController < ApplicationController
   def team_match
     id_collect
 
-    Rails.logger.debug "TEAM_MATCH DEBUG:"
-    Rails.logger.debug "  params[:team_id] = #{params[:team_id].inspect}"
-    Rails.logger.debug "  @team_id = #{@team_id.inspect}"
+    Rails.logger.debug { "TEAM_MATCH DEBUG:" }
+    Rails.logger.debug { "  params[:team_id] = #{params[:team_id].inspect}" }
+    Rails.logger.debug { "  @team_id = #{@team_id.inspect}" }
 
     filter_params = strength_filter_params.to_h.symbolize_keys
-    Rails.logger.debug "  filter_params = #{filter_params.inspect}"
+    Rails.logger.debug { "  filter_params = #{filter_params.inspect}" }
     
     @parent = parent_scope
 
     # If we have a specific scope (team, league, conference, etc)
     if @parent.present?
-      Rails.logger.debug "TEAM MATCH: Parent scope found: #{@parent.class.name} ##{@parent.id}"
+      Rails.logger.debug { "TEAM MATCH: Parent scope found: #{@parent.class.name} ##{@parent.id}" }
       
       # Get teams based on the parent scope
       # Convert to array immediately to avoid readonly association issues
@@ -113,7 +112,7 @@ class StrengthController < ApplicationController
       
       # Important: Restrict to ONLY these teams
       filter_params[:team_ids] = teams_pool.map(&:id)
-      Rails.logger.debug "TEAM MATCH: Restricting to teams: #{filter_params[:team_ids]}"
+      Rails.logger.debug { "TEAM MATCH: Restricting to teams: #{filter_params[:team_ids]}" }
     elsif ace_signed_in? && no_scope_specified? &&
           filter_params[:team_id].blank? && filter_params[:sport_id].blank? && filter_params[:league_id].blank?
       # No scope specified, use quest teams for logged-in users
@@ -122,22 +121,23 @@ class StrengthController < ApplicationController
         cross_sport = params[:cross_sport] == 'true'
         teams_pool  = cross_sport ? quest_teams : quest_teams.select { |t| t.sport.id == quest_teams.first.sport.id }
         filter_params[:team_ids] = teams_pool.map(&:id) if teams_pool.present?
-        Rails.logger.debug "TEAM MATCH: Using quest teams: #{filter_params[:team_ids]}"
+        Rails.logger.debug { "TEAM MATCH: Using quest teams: #{filter_params[:team_ids]}" }
       end
     end
 
     # Fetch players based on the filters
     players = PlayerSearch.new(filter_params).call
-    Rails.logger.debug "TEAM MATCH: Found #{players.size} players with filter params: #{filter_params}"
+    Rails.logger.debug { "TEAM MATCH: Found #{players.size} players with filter params: #{filter_params}" }
 
     if players.empty?
-      Rails.logger.debug "TEAM MATCH: No players found with filtered teams, using sample"
+      Rails.logger.debug { "TEAM MATCH: No players found with filtered teams, using sample" }
       players = Player.sampled(50)
     end
     
     # Select a random player for the quiz
     @current_player = players.sample
-    Rails.logger.debug "TEAM MATCH: Selected player: #{@current_player.name} (Team: #{@current_player.team.mascot})"
+    return redirect_to(strength_path, alert: "No players are available for this game yet.") unless @current_player
+    Rails.logger.debug { "TEAM MATCH: Selected player: #{@current_player.name} (Team: #{@current_player.team.mascot})" }
     
     # Double-check that the player's team is in our pool
     unless filter_params[:team_ids].present? && filter_params[:team_ids].include?(@current_player.team_id)
@@ -149,10 +149,10 @@ class StrengthController < ApplicationController
       if filtered_players.any?
         # If we have players in the filtered pool, select one of those
         @current_player = filtered_players.sample
-        Rails.logger.debug "TEAM MATCH: Re-selected player: #{@current_player.name} (Team: #{@current_player.team.mascot})"
+        Rails.logger.debug { "TEAM MATCH: Re-selected player: #{@current_player.name} (Team: #{@current_player.team.mascot})" }
       else
         # As a fallback, keep the current player but create a new teams_pool that includes their team
-        Rails.logger.debug "TEAM MATCH: No players in filtered pool, keeping current player and adjusting pool"
+        Rails.logger.debug { "TEAM MATCH: No players in filtered pool, keeping current player and adjusting pool" }
         
         # If we have a specific parent scope, respect it when building the pool
         if @parent.is_a?(Conference)
@@ -178,21 +178,21 @@ class StrengthController < ApplicationController
     # Otherwise, ensure we at least restrict to teams in the same league as the player
     if teams_pool.present? && teams_pool.map(&:id).include?(@current_player.team_id)
       pool = teams_pool
-      Rails.logger.debug "TEAM MATCH: Using existing teams_pool for choices"
+      Rails.logger.debug { "TEAM MATCH: Using existing teams_pool for choices" }
     else
       # If the player doesn't belong to our filter, make sure we at least stay in the same league/conference
       if @parent.is_a?(Conference)
         # If we're filtering by conference, ensure we only show teams from that conference
         pool = @parent.teams
-        Rails.logger.debug "TEAM MATCH: Restricting pool to conference teams: #{pool.map(&:mascot)}"
+        Rails.logger.debug { "TEAM MATCH: Restricting pool to conference teams: #{pool.map(&:mascot)}" }
       elsif @parent.is_a?(League)
         # If we're filtering by league, ensure we only show teams from that league
         pool = @parent.teams
-        Rails.logger.debug "TEAM MATCH: Restricting pool to league teams: #{pool.map(&:mascot)}"
+        Rails.logger.debug { "TEAM MATCH: Restricting pool to league teams: #{pool.map(&:mascot)}" }
       else
         # Default fallback - use teams from the player's league
         pool = @current_player.team.league.teams
-        Rails.logger.debug "TEAM MATCH: Using player's league teams for pool"
+        Rails.logger.debug { "TEAM MATCH: Using player's league teams for pool" }
       end
     end
     
@@ -201,8 +201,8 @@ class StrengthController < ApplicationController
     @correct_team = @current_player.team
     
     # Debug the final choices
-    Rails.logger.debug "TEAM MATCH: Final team choices: #{@team_choices.map(&:mascot)}"
-    Rails.logger.debug "TEAM MATCH: Correct team: #{@correct_team.mascot}"
+    Rails.logger.debug { "TEAM MATCH: Final team choices: #{@team_choices.map(&:mascot)}" }
+    Rails.logger.debug { "TEAM MATCH: Correct team: #{@correct_team.mascot}" }
     
     respond_to do |format|
       format.html
@@ -345,75 +345,6 @@ class StrengthController < ApplicationController
     value.to_i.positive? ? value.to_i : nil
   end
 
-  # Fetch players based on filters
-  def fetch_players
-    # Start with all players but eager load associations for better performance
-    players = Player.includes(:team, team: :league)
-    
-    # Apply team filter if provided - check both params and instance variables
-    team_id_value = params[:team_id].presence || @team_id.presence
-    if team_id_value.present?
-      # Convert to integer and ensure it's not zero or nil
-      team_id = team_id_value.to_i
-      if team_id > 0
-        players = players.where(team_id: team_id)
-        Rails.logger.debug "FILTERING BY TEAM_ID: #{team_id}, found #{players.count} players"
-        
-        # Verify we actually found players with this team_id
-        if players.count == 0
-          Rails.logger.warn "No players found for team_id: #{team_id}! Check if this team exists."
-          # Try to find the team to confirm it exists
-          team = Team.find_by(id: team_id)
-          Rails.logger.debug team ? "Team exists: #{team.territory} #{team.mascot}" : "Team with ID #{team_id} does not exist!"
-        end
-      else
-        Rails.logger.warn "Invalid team_id value: #{team_id_value}"
-      end
-    end
-    
-    # Apply sport filter if provided
-    sport_id_value = params[:sport_id].presence || @sport_id.presence
-    if sport_id_value.present?
-      sport_id = sport_id_value.to_i
-      if sport_id > 0
-        players = players.joins(team: :league).where(leagues: { sport_id: sport_id })
-        Rails.logger.debug "Filtering by sport_id: #{sport_id}, found #{players.count} players"
-      end
-    end
-    
-    # Apply league filter if provided
-    league_id_value = params[:league_id].presence || @league_id.presence
-    if league_id_value.present?
-      league_id = league_id_value.to_i
-      if league_id > 0
-        players = players.joins(team: :league).where(leagues: { id: league_id })
-        Rails.logger.debug "Filtering by league_id: #{league_id}, found #{players.count} players"
-      end
-    end
-    
-    # Limit to active players by default unless specifically requesting inactive
-    include_inactive_value = params[:include_inactive].presence || @include_inactive.presence
-    unless include_inactive_value == 'true'
-      players = players.where(active: true).or(players.where(active: nil))
-      Rails.logger.debug "Filtering by active status, found #{players.count} players"
-    end
-    
-    # Make sure we're getting a collection, not a relation
-    players = players.to_a
-    
-    # Return a reasonable number of players for the exercise (max 50)
-    # but ensure we return all players if there are fewer than 50
-    Rails.logger.debug "Total players after filtering: #{players.count}"
-    
-    # If we have no players after filtering, log a warning
-    if players.empty?
-      Rails.logger.warn "No players found after applying filters!"
-      return Player.limit(50).to_a
-    end
-    
-    players.sample([players.count, 50].min)
-  end
-
   def id_collect
     # Collect and normalize filter parameters
     @team_id = params[:team_id].presence
@@ -427,13 +358,13 @@ class StrengthController < ApplicationController
     @league_id = @league_id.to_i if @league_id.present? && @league_id.to_i > 0
     
     # Log the collected parameters for debugging
-    Rails.logger.debug "ID COLLECT: team_id=#{@team_id.inspect}, sport_id=#{@sport_id.inspect}, league_id=#{@league_id.inspect}"
+    Rails.logger.debug { "ID COLLECT: team_id=#{@team_id.inspect}, sport_id=#{@sport_id.inspect}, league_id=#{@league_id.inspect}" }
     
     # Verify team exists if team_id is provided
     if @team_id.present? && @team_id.to_i > 0
       team = Team.find_by(id: @team_id)
       if team
-        Rails.logger.debug "Found team: #{team.territory} #{team.mascot}"
+        Rails.logger.debug { "Found team: #{team.territory} #{team.mascot}" }
       else
         Rails.logger.warn "Team with ID #{@team_id} not found!"
         @team_id = nil # Reset if team doesn't exist
@@ -451,7 +382,7 @@ class StrengthController < ApplicationController
       team_id = filter_params[:team_id].to_i
       if team_id > 0
         players = players.where(team_id: team_id)
-        Rails.logger.debug "EXPLICIT FILTER: team_id=#{team_id}, found #{players.count} players"
+        Rails.logger.debug { "EXPLICIT FILTER: team_id=#{team_id}, found #{players.count} players" }
       end
     end
     

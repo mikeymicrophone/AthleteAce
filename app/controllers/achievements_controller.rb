@@ -1,4 +1,6 @@
 class AchievementsController < ApplicationController
+  before_action :authenticate_ace!, except: %i[ index show ]
+  before_action :require_admin!, only: %i[ edit update destroy ]
   before_action :set_achievement, only: %i[ show edit update destroy ]
 
   # GET /achievements or /achievements.json
@@ -69,8 +71,8 @@ class AchievementsController < ApplicationController
 
   # GET /achievements/target_options
   def target_options
-    model = params[:type].safe_constantize
-    if model && model.respond_to?(:all)
+    model = params[:type].presence_in(Achievement::TARGET_TYPES)&.constantize
+    if model
       options = model.all.map { |obj| { id: obj.id, name: obj.try(:name) || obj.try(:title) || obj.to_s } }
       render json: options
     else

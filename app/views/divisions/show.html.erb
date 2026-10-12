@@ -41,15 +41,9 @@
     <% else %>
       <p>No teams found in this division.</p>
     <% end %>
-    
-    <div class="actions">
-      <%= link_to "Add team to division", new_membership_path(division_id: @division.id), class: "button" %>
-    </div>
   </div>
 
   <div class="actions">
-    <%= link_to "Edit", edit_division_path(@division), class: "button" %>
     <%= link_to "Back", divisions_path, class: "button" %>
-    <%= button_to "Delete", @division, method: :delete, class: "button delete", data: { confirm: "Are you sure?" } %>
   </div>
 </div>

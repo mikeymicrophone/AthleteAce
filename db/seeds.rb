@@ -7,14 +7,17 @@ Dir[Rails.root.join('db/seeds/seed_*.rb')].each { |file| require file }
 
 # Configure seed versioning
 class SeedVersion < ActiveSupport::CurrentAttributes
-  attribute :seed_version, :string
-  attribute :last_seeded_at, :datetime
-  attribute :seeded_models, :array, default: []
+  attribute :seed_version, :last_seeded_at
+  attribute :seeded_models, default: []
 end
 
 SeedVersion.seeded_models = [Country, State, City, Stadium, Sport, League, Conference, Division, Team, Player, Membership, Position, Role, Spectrum, Quest, Achievement, Highlight, Year, Season, Contest, Contestant, Contract]
 
+# Stamp records created while seeding. SeedVersion is reset when seeding ends, so records
+# created later in the same process (e.g. by ugc:restore) aren't marked as seeded.
 ApplicationRecord.before_create do
+  next unless SeedVersion.seed_version && has_attribute?(:seed_version)
+
   self.seed_version ||= SeedVersion.seed_version
   self.last_seeded_at ||= SeedVersion.last_seeded_at
 end
@@ -84,4 +87,6 @@ rescue => e
   SeedHelpers.log_and_puts "ERROR: Seeding failed with: #{e.message}"
   SeedHelpers.log_and_puts e.backtrace.join("\n")
   raise e
+ensure
+  SeedVersion.reset
 end

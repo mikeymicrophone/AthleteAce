@@ -35,10 +35,6 @@
     <% else %>
       <p>No divisions found.</p>
     <% end %>
-    
-    <div class="actions">
-      <%= link_to "Add division", new_division_path(conference_id: @conference.id), class: "button" %>
-    </div>
   </div>
 
   <div class="teams-section">
@@ -60,8 +56,6 @@
   </div>
 
   <div class="actions">
-    <%= link_to "Edit", edit_conference_path(@conference), class: "button" %>
     <%= link_to "Back", conferences_path, class: "button" %>
-    <%= button_to "Delete", @conference, method: :delete, class: "button delete", data: { confirm: "Are you sure?" } %>
   </div>
 </div>

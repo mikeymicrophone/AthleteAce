@@ -1,18 +1,16 @@
 require 'rails_helper'
 
 RSpec.describe "Seasons", type: :request do
-  describe "GET /index" do
-    it "returns http success" do
-      get "/seasons/index"
-      expect(response).to have_http_status(:success)
-    end
+  let!(:season) { create(:season) }
+
+  it "lists seasons" do
+    get seasons_path
+    expect(response).to have_http_status(:success)
+    expect(response.body).to include(season.league.name)
   end
 
-  describe "GET /show" do
-    it "returns http success" do
-      get "/seasons/show"
-      expect(response).to have_http_status(:success)
-    end
+  it "shows a season" do
+    get season_path(season)
+    expect(response).to have_http_status(:success)
   end
-
 end

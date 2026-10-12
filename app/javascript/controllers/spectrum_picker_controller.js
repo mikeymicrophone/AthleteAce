@@ -177,9 +177,11 @@ export default class extends Controller {
     }
   }
 
-  createLoadingPlaceholder(spectrumId) {
-    const spectrumButton = this.spectrumButtonTargets.find(btn => btn.dataset.spectrumId === spectrumId)
-    const spectrumName = spectrumButton ? spectrumButton.textContent.trim() : `Spectrum ${spectrumId}`
+  createLoadingPlaceholder(rawSpectrumId) {
+    const spectrumButton = this.spectrumButtonTargets.find(btn => btn.dataset.spectrumId === rawSpectrumId)
+    // textContent is decoded text, so it must be escaped again before going back into HTML
+    const spectrumName = this.escapeHtml(spectrumButton ? spectrumButton.textContent.trim() : `Spectrum ${rawSpectrumId}`)
+    const spectrumId = this.escapeHtml(rawSpectrumId)
 
     return `
       <div class="rating-slider-instance" data-spectrum-id="${spectrumId}">
@@ -231,9 +233,12 @@ export default class extends Controller {
     }
   }
 
-  createSliderHtml(spectrumId, value) {
-    const spectrumButton = this.spectrumButtonTargets.find(btn => btn.dataset.spectrumId === spectrumId)
-    const spectrumName = spectrumButton ? spectrumButton.textContent.trim() : `Spectrum ${spectrumId}`
+  createSliderHtml(rawSpectrumId, rawValue) {
+    const spectrumButton = this.spectrumButtonTargets.find(btn => btn.dataset.spectrumId === rawSpectrumId)
+    // textContent is decoded text, so it must be escaped again before going back into HTML
+    const spectrumName = this.escapeHtml(spectrumButton ? spectrumButton.textContent.trim() : `Spectrum ${rawSpectrumId}`)
+    const spectrumId = this.escapeHtml(rawSpectrumId)
+    const value = Number(rawValue) || 0
 
     return `
       <div class="rating-slider-instance" data-spectrum-id="${spectrumId}">
@@ -258,5 +263,10 @@ export default class extends Controller {
         </div>
       </div>
     `
+  }
+
+  escapeHtml(text) {
+    const replacements = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }
+    return String(text).replace(/[&<>"']/g, char => replacements[char])
   }
 }

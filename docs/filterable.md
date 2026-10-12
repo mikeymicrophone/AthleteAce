@@ -1,153 +1,66 @@
-# Filterable Functionality Documentation
+# Filterable Resources
 
 ## Overview
 
-The filterable functionality in AthleteAce allows for dynamic filtering of resources based on their relationships. This enables users to navigate through connected resources (e.g., viewing players filtered by a specific team, league, or division) with consistent URL patterns and UI components.
+Filtering lets you browse a resource through one related record, e.g. `/teams/12/players` lists a team's players and `/teams/12/players/345` shows one of them with a breadcrumb back to the team. Each URL nests one level: a filtering record, then the resource.
 
-## Key Components
+## Configuration
 
-### 1. Filterable Concern
-
-Located in `app/controllers/concerns/filterable.rb`, this module provides the core filtering functionality:
-
-- `apply_filter`: Sets instance variables and returns filtered collections
-- `apply_filters`: Applies multiple filters to a relation with optimized joins
-- `build_filtered_query`: Intelligently builds queries with multiple filters
-- `filtered_path`: Helper to build filtered paths for links
-
-### 2. FilterLoader Concern
-
-Located in `app/controllers/concerns/filter_loader.rb`, this module helps controllers:
-
-- Load current filters from params
-- Set appropriate instance variables
-- Prepare filter options for UI components
-
-### 3. Centralized Configuration
-
-Filterable associations are defined in `config/initializers/filterable_associations.rb`:
+`config/initializers/filterable_associations.rb` lists, for each resource, the models that can filter it:
 
 ```ruby
-# Example configuration
-FilterableAssociations.config = {
-  player: [:team, :league, :sport, :division, :conference, :country, :state, :city],
-  team: [:league, :division, :conference, :sport, :country, :state, :city]
-}
-
-# Complex join paths
-FilterableAssociations.join_paths = {
-  player: {
-    division: [:team, :division],
-    conference: [:team, :division, :conference]
-  }
+FilterableAssociations::ASSOCIATIONS = {
+  players: [:sport, :league, :stadium, :team, :state, :city],
+  teams: [:sport, :league, :conference, :division, :state, :city, :stadium],
+  # ...
 }
 ```
 
-### 4. Filterable Routes
+- `FilterableAssociations.for(controller_name)` returns the filters for a controller's resource.
+- `FilterableAssociations.from(model_name)` returns the resources a model can filter.
 
-Defined in `config/routes/filterable.rb` and used in modular route files:
+Every model listed for a resource must define an association named after that resource (e.g. `Team#players`), because filtering calls it directly and `association_links` counts it for every row.
 
-- `filterable_resources`: A DSL method that generates filtered routes
-- Supports nested resources with appropriate shallow nesting
-- Used in all resource route files (players.rb, teams.rb, etc.)
+## Routes
 
-### 5. View Helpers
+`config/routes/locations.rb` calls `filterable_resources` (defined in `config/routes/filterable.rb`) for every configured resource. It generates index and show routes under each filtering model:
 
-Located in:
-- `app/helpers/filterable_helper.rb`: Core filtering UI components
-- `app/helpers/filterable_navigation_helper.rb`: Navigation components
+```
+/teams/:team_id/players
+/teams/:team_id/players/:id
+```
 
-These provide methods for:
-- Rendering filterable links
-- Creating breadcrumbs
-- Building filter panels
-- Generating filter chips
-- Producing context-aware navigation
-
-## Implementation
-
-### Controller Setup
-
-1. Include the concerns in your controller:
+## Controllers
 
 ```ruby
 class PlayersController < ApplicationController
   include Filterable
   include FilterLoader
-  
-  # Rest of controller code
-end
-```
 
-2. Use the filter loader in your actions:
+  def index
+    load_current_filters             # sets @current_filters and e.g. @team
+    base_query = apply_filter :players
+    load_filter_options
+  end
 
-```ruby
-def index
-  @players = apply_filters(Player.all)
-  load_filter_options  # Prepares options for filter selectors
-  load_current_filters # Sets @current_filters
-end
-```
-
-### Routes Setup
-
-1. Use the `filterable_resources` method in your route files:
-
-```ruby
-# config/routes/players.rb
-Rails.application.routes.draw do
-  filterable_resources :players do
-    resources :ratings, only: [:new, :create]
+  def show
+    load_current_filters
+    @filtered_breadcrumb = build_filtered_breadcrumb @player, @current_filters
   end
 end
 ```
 
-### View Implementation
+- `apply_filter :players` finds the filter param in the URL (e.g. `team_id`), sets `@team`, and returns `@team.players`. With no filter it returns `Player.all`.
+- `load_current_filters` loads each filter record from params into `@current_filters`.
+- `build_filtered_breadcrumb` builds breadcrumb items that link to each filter's own page, ending with the current resource.
 
-1. Include the filter panel in your index view:
+## Views
 
-```erb
-<%# app/views/players/index.html.erb %>
-<%= render 'filter_ui' %>
-```
+- `association_links(record)` (in `TeamsHelper`) renders a count and link for each resource the record can filter, e.g. "12 teams" linking to `/leagues/3/teams`.
+- `filtered_show_header` (in `FilteredShowHelper`) renders the breadcrumb and title on filtered show pages.
 
-2. Create a filter UI partial:
+## Adding a filter
 
-```erb
-<%# app/views/players/_filter_ui.html.erb %>
-<%= render 'shared/filter_panel', 
-           resource: :players,
-           current_filters: @current_filters,
-           filter_options: @filter_options %>
-```
-
-## Filter Navigation
-
-The filter navigation system provides two main components:
-
-1. Primary navigation bar: Shows main resource types
-2. Context navigation: Shows related resources based on current filters
-
-Example usage:
-
-```erb
-<%= filterable_navigation :players, @current_filters %>
-<%= filterable_context_nav :players, @current_filters %>
-```
-
-## URL Patterns
-
-Filterable URLs follow these patterns:
-
-- Standard index: `/players`
-- Single filter: `/teams/123/players`
-- Multiple filters: `/leagues/456/teams/123/players`
-- Filtered show: `/teams/123/players/789`
-
-## Best Practices
-
-1. **Centralize Configuration**: Add new filterable associations to the configuration file, not in controllers
-2. **Use Helper Methods**: Leverage the helper methods for consistent UI
-3. **Join Paths**: Define complex join paths for indirect associations
-4. **Reuse Components**: Use the shared partials for consistent UI
-5. **Resource Hierarchy**: Respect the resource hierarchy in URL construction
+1. Add the filtering model to the resource's list in `ASSOCIATIONS`.
+2. Make sure the filtering model has an association named after the resource, and that every model already listed for that resource still does.
+3. The routes are generated automatically; the resource's controller needs `include Filterable` and `apply_filter`.

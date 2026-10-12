@@ -137,12 +137,37 @@ RSpec.describe HierarchicalSortService do
 
     it 'integrates random into hierarchy' do
       service = HierarchicalSortService.new('team_name asc,random,position_name desc')
-      expect(service.to_sql_order).to eq('teams.mascot ASC, RANDOM(), positions.name DESC')
+      expect(service.to_sql_order).to match(/\Ateams\.mascot ASC, MD5\(CONCAT\(players\.id, '[\d.]+'\)\), positions\.name DESC\z/)
     end
 
     it 'handles shuffle in hierarchy' do
       service = HierarchicalSortService.new('team_name asc,shuffle')
-      expect(service.to_sql_order).to eq('teams.mascot ASC, RANDOM()')
+      expect(service.to_sql_order).to match(/\Ateams\.mascot ASC, MD5\(CONCAT\(players\.id, '[\d.]+'\)\)\z/)
+    end
+
+    it 'seeds random sorts from the given context table' do
+      service = HierarchicalSortService.new('random')
+      expect(service.to_sql_order(:divisions)).to start_with('MD5(CONCAT(divisions.id,')
+    end
+
+    it 'maps plain column names against the given context table' do
+      service = HierarchicalSortService.new('name asc,abbreviation desc')
+      expect(service.to_sql_order(:divisions)).to eq('divisions.name ASC, divisions.abbreviation DESC')
+    end
+
+    it 'drops attributes that are not columns' do
+      service = HierarchicalSortService.new('first_name asc,id/**/+(select/**/count(*)/**/from/**/aces) asc')
+      expect(service.to_sql_order(:players)).to eq('players.first_name ASC')
+    end
+
+    it 'drops unknown directions' do
+      service = HierarchicalSortService.new('first_name asc;select')
+      expect(service.to_sql_order(:players)).to be_nil
+    end
+
+    it 'drops unknown prefixed columns' do
+      service = HierarchicalSortService.new('league_bogus asc,player_id/**/+1 asc,league_year_of_origin desc')
+      expect(service.to_sql_order(:leagues)).to eq('leagues.year_of_origin DESC')
     end
 
     it 'maps player attributes correctly' do

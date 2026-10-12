@@ -15,12 +15,12 @@ class Team < ApplicationRecord
   has_one :active_membership, -> { where(active: true) }, class_name: 'Membership'
   has_one :division, through: :active_membership
   has_one :conference, through: :division
-  has_many :campaigns
   has_many :contestants, through: :campaigns
   has_many :contests, through: :contestants
-  
+  has_many :activations, through: :contracts
+
   delegate :sport, to: :league
-  delegate :city, :state, :country, to: :stadium
+  delegate :city, :state, :country, to: :stadium, allow_nil: true
 
   def name
     "#{territory} #{mascot}"

@@ -70,7 +70,7 @@ RSpec.describe QuestsHelper, type: :helper do
     
     it 'renders a badge with the correct count' do
       badge = helper.quest_participants_badge(quest)
-      expect(badge).to have_selector('span.inline-flex')
+      expect(badge).to have_selector('span.quest-participants-badge')
       expect(badge).to have_selector('i.fa-solid.fa-users')
       expect(badge).to have_content('2 participants')
     end
