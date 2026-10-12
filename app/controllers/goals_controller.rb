@@ -22,7 +22,7 @@ class GoalsController < ApplicationController
         format.json { render :show, status: :created, location: @goal }
       else
         format.html { redirect_to @quest, alert: "Unable to adopt this quest: #{@goal.errors.full_messages.join(', ')}" }
-        format.json { render json: @goal.errors, status: :unprocessable_entity }
+        format.json { render json: @goal.errors, status: :unprocessable_content }
       end
     end
   end
@@ -35,7 +35,7 @@ class GoalsController < ApplicationController
         format.json { render :show, status: :ok, location: @goal }
       else
         format.html { redirect_to @goal, status: :see_other, alert: "Unable to update goal: #{@goal.errors.full_messages.to_sentence}" }
-        format.json { render json: @goal.errors, status: :unprocessable_entity }
+        format.json { render json: @goal.errors, status: :unprocessable_content }
       end
     end
   end

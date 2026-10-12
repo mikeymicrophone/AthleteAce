@@ -56,10 +56,10 @@ class RatingsController < ApplicationController
       format.html do
         @spectrum = Spectrum.find_by(id: @rating.spectrum_id)
         @spectrums = @spectrum ? [@spectrum] : Spectrum.all
-        render :new, status: :unprocessable_entity
+        render :new, status: :unprocessable_content
       end
-      format.json { render json: { success: false, errors: @rating.errors.full_messages }, status: :unprocessable_entity }
-      format.js { head :unprocessable_entity }
+      format.json { render json: { success: false, errors: @rating.errors.full_messages }, status: :unprocessable_content }
+      format.js { head :unprocessable_content }
     end
   end
 
@@ -78,7 +78,7 @@ class RatingsController < ApplicationController
     @rating.assign_attributes(rating_attributes.except(:spectrum_id))
     @rating.errors.merge!(e.record.errors)
     @spectrum = @rating.spectrum
-    render :edit, status: :unprocessable_entity
+    render :edit, status: :unprocessable_content
   end
 
   # DELETE /ratings/1

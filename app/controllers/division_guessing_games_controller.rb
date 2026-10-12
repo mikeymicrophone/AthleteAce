@@ -8,14 +8,14 @@ class DivisionGuessingGamesController < ApplicationController
     respond_to do |format|
       # new.html.erb shows its own message when there's no game
       format.html { flash.now[:alert] = SETUP_FAILED_MESSAGE unless game_ready }
-      format.turbo_stream { game_ready ? render : head(:unprocessable_entity) }
+      format.turbo_stream { game_ready ? render : head(:unprocessable_content) }
     end
   end
 
   def update
     game_ready = setup_game
     respond_to do |format|
-      format.turbo_stream { game_ready ? render : head(:unprocessable_entity) }
+      format.turbo_stream { game_ready ? render : head(:unprocessable_content) }
     end
   end
 
@@ -26,7 +26,7 @@ class DivisionGuessingGamesController < ApplicationController
 
     respond_to do |format|
       format.html { redirect_to new_division_game_path }
-      format.turbo_stream { game_ready ? render : head(:unprocessable_entity) }
+      format.turbo_stream { game_ready ? render : head(:unprocessable_content) }
     end
   end
 

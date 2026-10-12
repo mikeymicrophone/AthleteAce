@@ -1,7 +1,6 @@
-require 'ostruct'
-
 class DivisionGameSetupService
   MINIMUM_VIABLE_GAME_CHOICES = 2 # Absolute minimum choices for a game to be playable
+  GameSetup = Data.define(:team, :choices, :correct_division, :sport)
   attr_reader :difficulty, :num_choices
 
   # Initializes the service with a difficulty level and number of choices.
@@ -14,7 +13,7 @@ class DivisionGameSetupService
   end
 
   # Sets up a new round for the 'Guess the Division' game.
-  # Returns an OpenStruct containing:
+  # Returns a GameSetup containing:
   #   - team: The Team object for the question.
   #   - choices: An array of Division objects to be presented as choices.
   #   - correct_division: The correct Division object for the team.
@@ -54,7 +53,7 @@ class DivisionGameSetupService
       Rails.logger.info "  - #{div.name} (Conference: #{div.conference&.name}, League: #{div.conference&.league&.name})"
     end
 
-    OpenStruct.new(
+    GameSetup.new(
       team: team, 
       choices: choices.shuffle, 
       correct_division: correct_division,

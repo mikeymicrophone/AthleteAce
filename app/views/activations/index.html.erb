@@ -1,6 +1,6 @@
 <% content_for :title, "Activations" %>
 
-<%= pagy_nav(@pagy).html_safe %>
+<%== @pagy.series_nav %>
 
 <%= index_collection("activations") do %>
   <% @activations.each do |activation| %>
@@ -16,4 +16,4 @@
   <% end %>
 <% end %>
 
-<%= pagy_nav(@pagy).html_safe %>
+<%== @pagy.series_nav %>

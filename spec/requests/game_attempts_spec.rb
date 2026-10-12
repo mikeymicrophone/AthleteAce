@@ -50,14 +50,14 @@ RSpec.describe "GameAttempts", type: :request do
         post_attempt subject_entity_type: "Ace", subject_entity_id: ace.id,
                      chosen_entity_type: "Team", chosen_entity_id: player.team_id
       }.not_to change(GameAttempt, :count)
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "rejects unknown game types" do
       expect {
         post_attempt game_type: "made_up", subject_entity_type: "Player", subject_entity_id: player.id
       }.not_to change(GameAttempt, :count)
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
   end
 end

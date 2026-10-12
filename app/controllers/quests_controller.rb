@@ -30,8 +30,8 @@ class QuestsController < ApplicationController
         format.html { redirect_to @quest, notice: "Quest was successfully created." }
         format.json { render :show, status: :created, location: @quest }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @quest.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @quest.errors, status: :unprocessable_content }
       end
     end
   end
@@ -43,8 +43,8 @@ class QuestsController < ApplicationController
         format.html { redirect_to @quest, notice: "Quest was successfully updated." }
         format.json { render :show, status: :ok, location: @quest }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @quest.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @quest.errors, status: :unprocessable_content }
       end
     end
   end

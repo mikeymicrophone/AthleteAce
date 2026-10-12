@@ -11,7 +11,7 @@ module ContestsHelper
       tag.main(class: "contests-grid") do
         @contests.map { |contest| contest_item(contest) }.join.html_safe
       end +
-      (pagy_nav(@pagy) if @pagy.pages > 1).to_s.html_safe
+      (@pagy.series_nav if @pagy.pages > 1).to_s.html_safe
     end
   end
   

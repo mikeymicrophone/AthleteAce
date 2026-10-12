@@ -40,14 +40,14 @@ RSpec.describe "Ratings", type: :request do
     it "shows validation errors instead of exception messages" do
       post player_ratings_path(player), params: { rating: { spectrum_id: spectrum.id, value: 99_999 } }, as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(response.parsed_body["errors"]).to eq(["Value must be less than or equal to 10000"])
     end
 
     it "re-renders the form when the rating is invalid" do
       post player_ratings_path(player), params: { rating: { spectrum_id: spectrum.id, value: 99_999 } }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(ace.ratings).to be_empty
     end
   end
@@ -66,7 +66,7 @@ RSpec.describe "Ratings", type: :request do
     it "keeps the original rating when the new value is invalid" do
       patch rating_path(rating), params: { rating: { spectrum_id: spectrum.id, value: 99_999 } }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(rating.reload).not_to be_archived
       expect(ace.ratings.count).to eq(1)
     end

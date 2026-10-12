@@ -1,14 +1,15 @@
+/* Pagy 43 markup: the current page is aria-current, gaps are role="separator", disabled links have no href */
 .pagy {
   @apply flex space-x-1 font-semibold text-sm text-gray-500;
-  a:not(.gap) {
+  a:not([role="separator"]) {
     @apply block rounded-lg px-3 py-1 bg-gray-200;
-    &:hover {
+    &[href]:hover {
       @apply bg-gray-300;
     }
     &:not([href]) { /* disabled links */
       @apply text-gray-300 bg-gray-100 cursor-default;
     }
-    &.current {
+    &[aria-current] { /* current page */
       @apply text-white bg-gray-400;
     }
   }

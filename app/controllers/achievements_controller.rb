@@ -40,8 +40,8 @@ class AchievementsController < ApplicationController
         format.json { render :show, status: :created, location: @achievement }
       else
         @target_type = @achievement.target_type || params[:achievement][:target_type] || 'Team'
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @achievement.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @achievement.errors, status: :unprocessable_content }
       end
     end
   end
@@ -53,8 +53,8 @@ class AchievementsController < ApplicationController
         format.html { redirect_to @achievement, notice: "Achievement was successfully updated." }
         format.json { render :show, status: :ok, location: @achievement }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @achievement.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @achievement.errors, status: :unprocessable_content }
       end
     end
   end
