@@ -1,4 +1,19 @@
 namespace :seeds do
+  desc "Export the live catalog field contract for portable schema generation (CHECK=1 verifies drift)"
+  task schema_contract: :environment do
+    require Rails.root.join("app/services/seeds/library_importer").to_s
+    path = Rails.root.join("db/seeds/athlete_ace_data/schemas/ala.contract.json")
+    contents = JSON.pretty_generate(Seeds::CatalogContract.document) + "\n"
+    if ENV["CHECK"] == "1"
+      raise "Stale catalog contract: #{path}" unless path.file? && path.read == contents
+      puts "Published catalog contract matches the live adapter."
+    else
+      FileUtils.mkdir_p(path.dirname)
+      path.write(contents)
+      puts "Exported #{path}"
+    end
+  end
+
   def library_paths
     root = Pathname.new(ENV.fetch("SEED_LIBRARY_ROOT", Rails.root.join("db/seeds/athlete_ace_data/yaml").to_s))
     sequence_path = root.join("entity_sequences.yaml")
