@@ -220,18 +220,9 @@ class StrengthController < ApplicationController
 
   # Cipher-based learning (scrambled names)
   def ciphers
-    filter_params = strength_filter_params
-    @players = fetch_players_with_params(filter_params)
-    
-    if @players.empty?
-      flash.now[:alert] = "No players found with the selected filters. Showing all players instead."
-      @players = Player.limit(50).to_a
-    end
-    
-    @current_player = @players.sample
-    
-    full_name = "#{@current_player.first_name} #{@current_player.last_name}"
-    @scrambled_name = full_name.chars.shuffle.join
+    scope = params.permit(:length, :sport_id, :league_id, :season_id, :conference_id, :division_id,
+      :city_id, :state_id, :team_id, :include_inactive, team_ids: [])
+    redirect_to new_game_round_path(scope.merge(game_type: "name_ciphers"))
   end
   
   # Method to handle quiz submissions

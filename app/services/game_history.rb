@@ -1,8 +1,9 @@
 class GameHistory
   GAMES = GameRound::GAMES
+  CIPHER_TEAM = "(game_rounds.questions -> game_attempts.round_position ->> 'team_id')::bigint".freeze
   attr_reader :attempts, :game_type, :team, :today, :time_zone
 
-  def initialize ace:, game_type: nil, team: nil, now: Time.current
+  def initialize(ace:, game_type: nil, team: nil, now: Time.current)
     @game_type = game_type if GAMES.key? game_type
     @team = team
     @time_zone = Time.zone
@@ -10,9 +11,11 @@ class GameHistory
     @attempts = ace.game_attempts.where(game_type: GAMES.keys).where(created_at: ..now)
     @attempts = attempts.where(game_type: @game_type) if @game_type
     if team
+      cipher_ids = cipher_attempts.where("#{CIPHER_TEAM} = ?", team.id).select("game_attempts.id")
       # Attribute Team Match to the recorded answer, even if the player later moves teams.
       @attempts = attempts.where(game_type: "player_team_match", target_entity_type: "Team", target_entity_id: team.id)
         .or(attempts.where(game_type: "guess_the_division", subject_entity_type: "Team", subject_entity_id: team.id))
+        .or(attempts.where(id: cipher_ids))
     end
   end
 
@@ -26,8 +29,8 @@ class GameHistory
       date = Arel.sql "DATE(created_at AT TIME ZONE 'UTC' AT TIME ZONE #{zone})"
       counts = attempts.where(created_at: (today - 13).in_time_zone..).group(date, :is_correct).count
       ((today - 13)..today).map do |day|
-        correct = counts.fetch [day, true], 0
-        total = correct + counts.fetch([day, false], 0)
+        correct = counts.fetch [ day, true ], 0
+        total = correct + counts.fetch([ day, false ], 0)
         { date: day, correct: correct, total: total, accuracy: accuracy(correct, total) }
       end
     end
@@ -51,8 +54,9 @@ class GameHistory
     @team_stats ||= begin
       counts = Hash.new { |hash, id| hash[id] = { correct: 0, total: 0 } }
       [
-        [attempts.where(game_type: "player_team_match", target_entity_type: "Team"), :target_entity_id],
-        [attempts.where(game_type: "guess_the_division", subject_entity_type: "Team"), :subject_entity_id]
+        [ attempts.where(game_type: "player_team_match", target_entity_type: "Team"), :target_entity_id ],
+        [ attempts.where(game_type: "guess_the_division", subject_entity_type: "Team"), :subject_entity_id ],
+        [ cipher_attempts, Arel.sql(CIPHER_TEAM) ]
       ].each do |scope, column|
         scope.group(column, :is_correct).count.each do |(id, correct), count|
           counts[id][:total] += count
@@ -64,7 +68,7 @@ class GameHistory
         next unless teams[id]
 
         count.merge team: teams[id], accuracy: accuracy(count[:correct], count[:total])
-      end.sort_by { |stat| [stat[:accuracy], -stat[:total], stat[:team].name] }
+      end.sort_by { |stat| [ stat[:accuracy], -stat[:total], stat[:team].name ] }
     end
   end
 
@@ -78,17 +82,21 @@ class GameHistory
       counts.filter_map do |ids, count|
         pair = ids.filter_map { |id| teams[id] }
         { teams: pair, count: count } if pair.size == 2
-      end.sort_by { |pair| [-pair[:count], pair[:teams].map(&:name).join] }.first(5)
+      end.sort_by { |pair| [ -pair[:count], pair[:teams].map(&:name).join ] }.first(5)
     end
   end
 
   private
 
-  def accuracy correct, total
+  def cipher_attempts
+    attempts.where(game_type: "name_ciphers").joins(:game_round)
+  end
+
+  def accuracy(correct, total)
     correct.fdiv(total) * 100 if total.positive?
   end
 
-  def summarize days
+  def summarize(days)
     correct = days.sum { |day| day[:correct] }
     total = days.sum { |day| day[:total] }
     { correct: correct, total: total, accuracy: accuracy(correct, total) }

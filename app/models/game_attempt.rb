@@ -1,8 +1,9 @@
 class GameAttempt < ApplicationRecord
   # game_type => [subject type, answer type]
   GAME_TYPES = {
-    "player_team_match" => ["Player", "Team"],
-    "guess_the_division" => ["Team", "Division"]
+    "player_team_match" => [ "Player", "Team" ],
+    "guess_the_division" => [ "Team", "Division" ],
+    "name_ciphers" => [ "Player", "Player" ]
   }.freeze
 
   belongs_to :ace
@@ -14,6 +15,7 @@ class GameAttempt < ApplicationRecord
 
   validates :game_type, inclusion: { in: GAME_TYPES.keys }
   validate :round_matches_attempt
+  validate { errors.add(:game_round, "is required for Name Ciphers") if game_type == "name_ciphers" && !game_round }
   validate :entity_types_match_game
   validates :subject_entity, :target_entity, presence: { message: :required }, if: :entity_types_valid?
 

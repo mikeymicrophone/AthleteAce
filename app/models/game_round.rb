@@ -1,8 +1,8 @@
 class GameRound < ApplicationRecord
   class InvalidAction < StandardError; end
 
-  GAMES = { "player_team_match" => "Team Match", "guess_the_division" => "Guess the Division" }.freeze
-  LENGTHS = [10, 20, 30].freeze
+  GAMES = { "player_team_match" => "Team Match", "guess_the_division" => "Guess the Division", "name_ciphers" => "Name Ciphers" }.freeze
+  LENGTHS = [ 10, 20, 30 ].freeze
 
   belongs_to :ace
   has_many :game_attempts, dependent: :destroy
@@ -31,7 +31,7 @@ class GameRound < ApplicationRecord
 
   # Lock the round and identify the question, so retries and stale tabs cannot
   # record twice or accidentally answer the following question.
-  def answer! at:, choice_id:
+  def answer!(at:, choice_id:)
     with_lock do
       raise InvalidAction, "This question has already moved on." unless at.to_s == position.to_s && !completed?
       return current_attempt if current_attempt
@@ -51,7 +51,7 @@ class GameRound < ApplicationRecord
     end
   end
 
-  def advance! at:
+  def advance!(at:)
     with_lock do
       return if completed? || at.to_s != position.to_s
       raise InvalidAction, "Answer this question before continuing." unless current_attempt
@@ -88,7 +88,7 @@ class GameRound < ApplicationRecord
     attempts = results
     attempts.each do |attempt|
       streak = attempt.correct? ? streak + 1 : 0
-      best = [best, streak].max
+      best = [ best, streak ].max
     end
     { correct: attempts.count(&:correct?), answered: attempts.size, streak: streak, best_streak: best,
       elapsed_ms: attempts.sum(&:time_elapsed_ms) }
@@ -98,7 +98,7 @@ class GameRound < ApplicationRecord
     raise InvalidAction, "Finish the round before drilling its misses." unless completed?
 
     missed = results.reject(&:correct?).map { |attempt| questions.fetch(attempt.round_position) }
-      .uniq { |item| [item.fetch("subject_type"), item.fetch("subject_id")] }
+      .uniq { |item| [ item.fetch("subject_type"), item.fetch("subject_id") ] }
     raise InvalidAction, "There are no misses to drill." if missed.empty?
 
     ace.game_rounds.create! game_type: game_type, length: missed.size, questions: missed,
@@ -110,6 +110,6 @@ class GameRound < ApplicationRecord
 
   def answer_time_ms
     elapsed = question_started_at ? ((Time.current - question_started_at) * 1000).round : 0
-    [question_elapsed_ms + [elapsed, 0].max, 2_147_483_647].min
+    [ question_elapsed_ms + [ elapsed, 0 ].max, 2_147_483_647 ].min
   end
 end

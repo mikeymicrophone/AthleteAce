@@ -33,7 +33,7 @@ class GameRoundSetup
   end
 
   def season_suggestion
-    return unless game_type == "player_team_match" && !season_id && valid? && available_count.zero?
+    return unless seasonal_game? && !season_id && valid? && available_count.zero?
     return if Player.where(team_id: scoped_teams.select(:id)).exists?
     return @season_suggestion if defined?(@season_suggestion)
 
@@ -50,6 +50,25 @@ class GameRoundSetup
 
   def season_pool
     @season_pool ||= SeasonTeamMatchPool.new(season: season, team_ids: scoped_teams.pluck(:id))
+  end
+
+  def seasonal_game?
+    %w[player_team_match name_ciphers].include?(game_type)
+  end
+
+  def cipher_pool
+    @cipher_pool ||= begin
+      scope = if season
+        season_pool.players
+      elsif [ sport_id, league_id, conference_id, division_id, city_id, state_id, *selected_team_ids ].any?
+        Player.where(team_id: scoped_teams.select(:id))
+      else
+        Player.all
+      end
+      scope = scope.where(active: [ true, nil ]) unless season || include_inactive
+      NameCipherRound.new(players: scope.includes(:team).order(:id).to_a, season: season,
+        team_for: season ? season_pool.method(:team_for) : nil)
+    end
   end
 
   def team
@@ -102,6 +121,7 @@ class GameRoundSetup
   end
 
   def subjects
+    return Player.where(id: cipher_pool.players.map(&:id)) if game_type == "name_ciphers"
     return season_pool.players if season && game_type == "player_team_match"
 
     if game_type == "guess_the_division"
@@ -117,7 +137,11 @@ class GameRoundSetup
   end
 
   def available_count
-    @available_count ||= valid? ? subjects.count : 0
+    @available_count ||= if valid?
+      game_type == "name_ciphers" ? cipher_pool.available_count : subjects.count
+    else
+      0
+    end
   end
 
   def scope_label
@@ -142,6 +166,8 @@ class GameRoundSetup
       errors.add :base, "No playable questions in this scope. Try another team or league."
       raise ActiveModel::ValidationError, self
     end
+
+    return save_round!(ace, cipher_pool.questions(length: length)) if game_type == "name_ciphers"
 
     candidates = subjects.reorder(Arel.sql("RANDOM()")).limit(length)
     candidates = game_type == "player_team_match" ? candidates.includes(team: :league) : candidates.includes(:division, :league)
@@ -177,6 +203,10 @@ class GameRoundSetup
     end
     label = drill ? "Recent misses · Team Match" : scope_label
     scope = drill ? scope_params.merge("drill" => true, "length" => questions.size) : scope_params
+    save_round! ace, questions, scope: scope, label: label
+  end
+
+  def save_round!(ace, questions, scope: scope_params, label: scope_label)
     ace.game_rounds.create! game_type: game_type, length: questions.size, scope: scope, scope_label: label,
       questions: questions, started_at: Time.current, question_started_at: Time.current
   end
@@ -194,8 +224,8 @@ class GameRoundSetup
     if season
       errors.add(:season, "is outside the selected league") if league_id && season.league_id != league_id
       errors.add(:season, "is outside the selected sport") if sport_id && season.league.sport_id != sport_id
-      errors.add(:season, "is supported for Team Match only") if game_type != "player_team_match"
-      errors.add(:season, "needs at least two recorded teams for answer choices") if teams.count < 2
+      errors.add(:season, "is supported for Team Match and Name Ciphers only") unless seasonal_game?
+      errors.add(:season, "needs at least two recorded teams for answer choices") if game_type == "player_team_match" && teams.count < 2
     end
     errors.add(:sport, "is no longer available") if sport_id && !sport
     errors.add(:league, "is outside the selected sport") if league_id && (!league || (sport_id && league.sport_id != sport_id))

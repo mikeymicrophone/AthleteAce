@@ -4,7 +4,7 @@
 .round-caption { @apply text-xs text-ink-3 leading-relaxed; }
 .round-step { @apply font-mono text-xs uppercase tracking-wide font-semibold text-ink-2 px-2; }
 .round-panel fieldset { @apply min-w-0; }
-.round-game-options { @apply grid sm:grid-cols-2 gap-4; }
+.round-game-options { @apply grid sm:grid-cols-2 lg:grid-cols-3 gap-4; }
 .round-option { @apply flex items-center gap-3 p-4 rounded-tool border border-line-2 bg-surface cursor-pointer text-sm text-ink; }
 .round-option:has(input:checked) { @apply bg-accent-tint border-accent-text; box-shadow: inset 0 0 0 1px var(--color-accent-text); }
 .round-option:has(input:focus-visible) { @apply outline-2 outline-offset-2 outline-accent-text; }
@@ -105,3 +105,7 @@
 .round-season-select .round-caption { @apply mt-2; }
 .round-season-select select:focus-visible { @apply outline-2 outline-offset-2 outline-accent-text; }
 .round-use-season { @apply mt-3 text-left; }
+.round-cipher-name { @apply col-span-full font-display text-5xl sm:text-7xl font-extrabold uppercase leading-tight tracking-wide text-ink; overflow-wrap: anywhere; }
+.round-cipher-name + .round-caption { @apply col-span-full mt-3; }
+.round-choice-name { @apply text-lg font-semibold leading-snug; overflow-wrap: anywhere; }
+.round-name-choices { @apply sm:grid-cols-2; }

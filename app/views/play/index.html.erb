@@ -9,7 +9,7 @@
     <section class="play-scoreboard" aria-label="Your learning progress">
       <div><span class="eyebrow">Accuracy · 7 days</span><strong><%= @week[:accuracy] ? "#{@week[:accuracy].round}%" : "—" %></strong><span><%= @week[:total].positive? ? pluralize(@week[:correct], "correct answer") : "Your first answer starts the story" %></span></div>
       <div><span class="eyebrow">Day streak</span><strong><%= @progress.streaks[:current] %></strong><span>Best <%= @progress.streaks[:best] %> · <%= @progress.time_zone.name %></span></div>
-      <div><span class="eyebrow">Names known</span><strong><%= @progress.names_known %></strong><span>Correct twice, including your latest answer</span></div>
+      <div><span class="eyebrow">Names known</span><strong><%= @progress.names_known %></strong><span>Team Match · correct twice, including your latest answer</span></div>
     </section>
   <% end %>
 
@@ -46,6 +46,7 @@
     <div class="play-home-grid">
       <section class="play-panel play-misses" aria-labelledby="play-misses-title">
         <div class="play-section-heading"><h2 id="play-misses-title">You keep missing</h2><%= link_to "History", strength_game_attempts_path, class: "tool-link" %></div>
+        <p class="round-caption">Team Match · unresolved misses</p>
         <% if @misses.any? %>
           <ul class="play-player-list">
             <% @misses.each do |miss| %>
@@ -77,7 +78,7 @@
   <section class="play-games" aria-labelledby="play-games-title">
     <div class="play-section-heading"><h2 id="play-games-title">Find your game</h2><span class="eyebrow">One more rep</span></div>
     <div class="play-game-grid">
-      <% [["Team Match", "Put a team to every player.", "shirt-sport", new_game_round_path(game_type: "player_team_match")], ["Guess the Division", "Know where each team belongs.", "tournament", new_game_round_path(game_type: "guess_the_division")], ["Name Ciphers", "Unscramble the names you know.", "bolt", strength_ciphers_path]].each do |name, description, glyph, path| %>
+      <% [["Team Match", "Put a team to every player.", "shirt-sport", new_game_round_path(game_type: "player_team_match")], ["Guess the Division", "Know where each team belongs.", "tournament", new_game_round_path(game_type: "guess_the_division")], ["Name Ciphers", "Unscramble the names you know.", "bolt", new_game_round_path(game_type: "name_ciphers")]].each do |name, description, glyph, path| %>
         <%= link_to path, class: "play-game-card" do %><%= icon glyph, size: 28 %><h3><%= name %></h3><p><%= description %></p><span class="play-card-arrow"><%= icon "arrow-right", size: 22 %></span><% end %>
       <% end %>
     </div>

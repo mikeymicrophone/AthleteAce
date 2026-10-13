@@ -52,7 +52,7 @@
     <% end %>
   <% else %>
     <%= tag.div class: "history-insights" do %>
-      <% if @history_tab == "overall" && @history.game_type != "guess_the_division" %>
+      <% if @history_tab == "overall" && [nil, "player_team_match"].include?(@history.game_type) %>
         <%= tag.section class: "history-panel", aria: { labelledby: "history-mixups-title" } do %>
           <%= tag.h2 "Teams you mix up", id: "history-mixups-title", class: "profile-section-title" %>
           <%= tag.p "All-time Team Match · both directions", class: "history-caption" %>

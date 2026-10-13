@@ -1,4 +1,12 @@
 module GameRoundsHelper
+  def round_question_prompt(round)
+    return "Unscramble this player’s name. Choose the original below." if round.game_type == "name_ciphers"
+    return "Which division is this team in?" if round.game_type == "guess_the_division"
+
+    season_name = round.question["season_name"]
+    season_name.present? ? "Which team is this player listed with for #{season_name}?" : "Which team is this player on?"
+  end
+
   def round_team_badge(team)
     color = team.primary_color.to_s
     style = if color.match?(/\A#[0-9a-f]{6}\z/i)

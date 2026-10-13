@@ -24,19 +24,28 @@
       <% end %>
     <% else %>
       <%= tag.section class: "round-subject" do %>
-        <%= tag.p @round.question["season_name"].present? ? "Which team is this player listed with for #{@round.question.fetch('season_name')}?" : (@round.game_type == "player_team_match" ? "Which team is this player on?" : "Which division is this team in?"), class: "round-question-prompt" %>
-        <%= entity_avatar @subject, size: :large if @subject %>
-        <%= tag.h1 @round.question.fetch("subject_name"), class: "page-title", tabindex: -1, data: { round_target: "heading" } %>
+        <%= tag.p round_question_prompt(@round), class: "round-question-prompt" %>
+        <% if @round.game_type == "name_ciphers" %>
+          <%= tag.h1 @round.question.fetch("scrambled_name"), class: "round-cipher-name", tabindex: -1, data: { round_target: "heading" } %>
+          <%= tag.p "Same letters. A familiar name.", class: "round-caption" %>
+        <% else %>
+          <%= entity_avatar @subject, size: :large if @subject %>
+          <%= tag.h1 @round.question.fetch("subject_name"), class: "page-title", tabindex: -1, data: { round_target: "heading" } %>
+        <% end %>
       <% end %>
       <%= form_with url: answer_game_round_path(@round), data: { action: "turbo:submit-start->round#submitting turbo:submit-end->round#submitted" } do |form| %>
         <%= form.hidden_field :position, value: @round.position %>
-        <%= tag.div class: "round-choices" do %>
+        <%= tag.div class: ["round-choices", ("round-name-choices" if @round.game_type == "name_ciphers")] do %>
           <% @round.question.fetch("choices").each_with_index do |choice, index| %>
             <%= button_tag type: "submit", name: "choice_id", value: choice.fetch("id"), disabled: @attempt.present?,
               class: round_choice_class(choice, @attempt, @round.question), data: { round_target: "choice" } do %>
               <%= tag.span index + 1, class: "round-choice-key", aria: { hidden: true } %>
-              <%= tag.strong choice["abbreviation"].presence || choice.fetch("name"), class: "round-choice-abbreviation" %>
-              <%= tag.span choice.fetch("name") %>
+              <% if @round.game_type == "name_ciphers" %>
+                <%= tag.strong choice.fetch("name"), class: "round-choice-name" %>
+              <% else %>
+                <%= tag.strong choice["abbreviation"].presence || choice.fetch("name"), class: "round-choice-abbreviation" %>
+                <%= tag.span choice.fetch("name") %>
+              <% end %>
               <% if @attempt && choice.fetch("id") == @round.question.fetch("target_id") %>
                 <%= tag.span class: "round-choice-status" do %><%= icon "check", size: 18 %>Correct<% end %>
               <% elsif @attempt && choice.fetch("id") == @attempt.chosen_entity_id %>

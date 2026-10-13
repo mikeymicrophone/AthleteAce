@@ -54,7 +54,7 @@ class PlayProgress
 
   def players_today
     since = now.in_time_zone(time_zone).beginning_of_day
-    ids = player_attempts.where(created_at: since..now).select(:subject_entity_id)
+    ids = attempts.where(subject_entity_type: "Player", created_at: since..now).select(:subject_entity_id)
     Player.where(id: ids).includes(:team).order(:last_name, :first_name, :id).limit(4)
   end
 

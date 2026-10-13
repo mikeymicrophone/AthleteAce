@@ -12,7 +12,7 @@
   <%= tag.fieldset class: "round-panel" do %>
     <%= tag.legend "01 · Pick a game", class: "round-step" %>
     <%= tag.div class: "round-game-options" do %>
-      <% [["player_team_match", "Player → team", "shield"], ["guess_the_division", "Team → division", "target"]].each do |value, description, glyph| %>
+      <% [["player_team_match", "Player → team", "shield"], ["guess_the_division", "Team → division", "target"], ["name_ciphers", "Unscramble the player’s name", "bolt"]].each do |value, description, glyph| %>
         <%= tag.label class: "round-option round-game-option" do %>
           <%= form.radio_button :game_type, value, checked: @setup.game_type == value, data: { action: "change->round-setup#gameChanged" } %>
           <%= icon glyph, size: 24 %>
@@ -50,7 +50,7 @@
         <%= form.label :league_id, "League" %>
         <%= form.collection_select :league_id, @setup.leagues, :id, :name, { include_blank: @setup.sport ? "All #{@setup.sport.name.downcase} leagues" : "All leagues", selected: @setup.league_id }, data: { action: "change->round-setup#leagueChanged" } %>
       <% end %>
-      <% if @setup.game_type == "player_team_match" %>
+      <% if @setup.seasonal_game? %>
         <%= tag.div class: "round-season-select" do %>
           <%= form.label :season_id, "Roster season" %>
           <%= form.collection_select :season_id, @setup.seasons, :id, :name, {include_blank: "Current teams", selected: @setup.season_id}, data: {action: "change->round-setup#seasonChanged"} %>
@@ -93,7 +93,7 @@
       <%= tag.p @setup.team_query.present? ? "No teams match your search. Try a team name or abbreviation." : "No teams recorded in this scope. Try another league or season.", class: "round-team-empty", role: "status" %>
     <% end %>
     <%= tag.p "Showing up to 100 matches plus your selected teams. Search to narrow the list.", class: "round-caption" if @setup.teams.count > 100 %>
-    <% if @setup.game_type == "player_team_match" && !@setup.season_id %>
+    <% if @setup.seasonal_game? && !@setup.season_id %>
       <%= tag.label class: "round-inactive" do %>
         <%= form.check_box :include_inactive, { checked: @setup.include_inactive, data: { action: "change->round-setup#update" } }, "true", "false" %>
         <%= tag.span "Include inactive players" %>
@@ -111,7 +111,8 @@
         <% end %>
       <% end %>
     <% end %>
-    <%= tag.p "#{pluralize available, @setup.game_type == 'player_team_match' ? 'player' : 'team'} available.", class: "round-caption" %>
+    <%= tag.p "#{pluralize available, @setup.game_type == 'guess_the_division' ? 'team' : 'player'} available.", class: "round-caption" %>
+    <%= tag.p "Choose the original name from up to four options. At least two distinct player names are needed.", class: "round-caption" if @setup.game_type == "name_ciphers" %>
     <% if available.positive? && available < @setup.length.to_i %>
       <%= tag.p "This scope has fewer than #{@setup.length} questions. Names repeat to fill the round.", class: "round-caption" %>
     <% elsif available.zero? %>

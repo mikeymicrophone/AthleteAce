@@ -25,7 +25,7 @@ RSpec.describe GameHistory do
         expect(history.current_week).to eq(correct: 1, total: 2, accuracy: 50.0)
         expect(history.previous_week).to eq(correct: 2, total: 2, accuracy: 100.0)
         expect(history.accuracy_change).to eq(-50)
-        expect(history.days.last(7).map { |day| day[:accuracy] }).to eq([100.0, nil, nil, nil, nil, nil, 0.0])
+        expect(history.days.last(7).map { |day| day[:accuracy] }).to eq([ 100.0, nil, nil, nil, nil, nil, 0.0 ])
       end
     end
   end
@@ -48,7 +48,7 @@ RSpec.describe GameHistory do
     create(:game_attempt, subject_entity: player, chosen_entity: other_team, is_correct: false)
 
     pair = described_class.new(ace: ace).mixups.sole
-    expect(pair[:teams].map(&:id)).to match_array([team.id, other_team.id])
+    expect(pair[:teams].map(&:id)).to match_array([ team.id, other_team.id ])
     expect(pair[:count]).to eq(3)
     expect(described_class.new(ace: ace, game_type: "guess_the_division").mixups).to be_empty
   end
@@ -63,9 +63,23 @@ RSpec.describe GameHistory do
     player.update! team: wrong_team
 
     history = described_class.new ace: ace
-    expect(history.team_stats.map { |stat| [stat[:team], stat[:accuracy], stat[:total]] }).to eq([[team, 50.0, 2], [wrong_team, 100.0, 1]])
+    expect(history.team_stats.map { |stat| [ stat[:team], stat[:accuracy], stat[:total] ] }).to eq([ [ team, 50.0, 2 ], [ wrong_team, 100.0, 1 ] ])
     expect(described_class.new(ace: ace, team: team).attempts.count).to eq(2)
-    expect(described_class.new(ace: ace, team: wrong_team).attempts.to_a).to eq([division_attempt])
-    expect(described_class.new(ace: ace, game_type: "guess_the_division").team_stats.map { |stat| stat[:team] }).to eq([wrong_team])
+    expect(described_class.new(ace: ace, team: wrong_team).attempts.to_a).to eq([ division_attempt ])
+    expect(described_class.new(ace: ace, game_type: "guess_the_division").team_stats.map { |stat| stat[:team] }).to eq([ wrong_team ])
+  end
+
+  it "attributes cipher practice to the snapshotted team and includes it in overall accuracy" do
+    player
+    create(:player, team: team)
+    round = GameRoundSetup.new(game_type: "name_ciphers", team_ids: [ team.id ]).start!(ace)
+    target = round.question.fetch("target_id")
+    round.answer!(at: 0, choice_id: target)
+    Player.find(target).update!(team: create(:team))
+    history = described_class.new(ace: ace, game_type: "name_ciphers")
+    expect(history.current_week).to include(correct: 1, total: 1)
+    expect(history.team_stats.sole).to include(team: team, accuracy: 100.0, total: 1)
+    expect(described_class.new(ace: ace, team: team).attempts.to_a).to eq([ round.current_attempt ])
+    expect(history.mixups).to be_empty
   end
 end

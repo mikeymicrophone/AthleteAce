@@ -12,7 +12,7 @@ export default class extends Controller {
   }
 
   gameChanged() {
-    if (this.element.elements.game_type.value !== "player_team_match") this.clearSeason()
+    if (!["player_team_match", "name_ciphers"].includes(this.element.elements.game_type.value)) this.clearSeason()
     this.update()
   }
 
