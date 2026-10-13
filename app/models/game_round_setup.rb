@@ -32,6 +32,22 @@ class GameRoundSetup
     scope.recent
   end
 
+  def season_suggestion
+    return unless game_type == "player_team_match" && !season_id && valid? && available_count.zero?
+    return if Player.where(team_id: scoped_teams.select(:id)).exists?
+    return @season_suggestion if defined?(@season_suggestion)
+
+    @season_suggestion = nil
+    seasons.limit(10).each do |record|
+      candidate = self.class.new(scope_params.merge("season_id" => record.id))
+      if candidate.available_count.positive?
+        @season_suggestion = candidate
+        break
+      end
+    end
+    @season_suggestion
+  end
+
   def season_pool
     @season_pool ||= SeasonTeamMatchPool.new(season: season, team_ids: scoped_teams.pluck(:id))
   end

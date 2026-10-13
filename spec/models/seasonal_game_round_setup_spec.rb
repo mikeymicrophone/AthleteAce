@@ -63,6 +63,20 @@ RSpec.describe "Seasonal round setup" do
     expect(setup.season_pool.ambiguous_count).to eq(0)
   end
 
+  it "suggests a playable recorded season without changing the selected teams or current mode" do
+    player = create(:player, team: nil)
+    membership(player, knicks)
+    Campaign.create!(team: nets, season: season)
+    current = GameRoundSetup.new(league_id: league.id, team_ids: [ knicks.id, nets.id ], length: 20)
+    suggestion = current.season_suggestion
+    expect(suggestion.season).to eq(season)
+    expect(suggestion.selected_team_ids).to match_array([ knicks.id, nets.id ])
+    expect(suggestion.length).to eq(20)
+    expect(suggestion.available_count).to eq(1)
+    expect(current.season_id).to be_nil
+    expect(current.available_count).to eq(0)
+  end
+
   it "rejects a season outside the chosen league and unsupported historical division games" do
     Campaign.create!(team: knicks, season: season)
     Campaign.create!(team: nets, season: season)

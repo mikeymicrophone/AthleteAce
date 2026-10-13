@@ -1,4 +1,5 @@
 <% available = @setup.available_count %>
+<% season_suggestion = @setup.season_suggestion %>
 <% if @setup.errors.any? %>
   <%= tag.div class: "flash-alert", role: "alert" do %>
     <%= safe_join @setup.errors.full_messages.map { |message| tag.p message } %>
@@ -94,7 +95,7 @@
     <% if available.positive? && available < @setup.length.to_i %>
       <%= tag.p "This scope has fewer than #{@setup.length} questions. Names repeat to fill the round.", class: "round-caption" %>
     <% elsif available.zero? %>
-      <%= tag.p "Try a broader scope. A playable question needs at least two answer choices.", class: "round-caption" %>
+      <%= tag.p season_suggestion ? "Choose a recorded roster season below to use the player lists for these teams." : "Try another season or a broader scope. A playable question needs at least two answer choices.", class: "round-caption" %>
     <% end %>
     <%= form.submit "Update setup", class: "tool-button round-update", data: { round_setup_target: "fallback" } %>
   <% end %>
@@ -103,11 +104,17 @@
   <%= tag.div do %>
     <%= tag.strong "#{GameRound::GAMES[@setup.game_type]} · #{@setup.length} questions" %>
     <%= tag.p @setup.scope_label, class: "round-caption" %>
+    <% if available.zero? %>
+      <%= tag.p season_suggestion ? "No current-team player data for this selection. Choose a roster season to start." : "No playable questions in this scope. Review the filters above.", id: "round-start-reason", class: "round-caption", role: "status" %>
+      <% if season_suggestion %>
+        <%= link_to "Use #{season_suggestion.season.name} · #{pluralize(season_suggestion.available_count, 'player')}", new_game_round_path(season_suggestion.scope_params), class: "tool-button round-use-season" %>
+      <% end %>
+    <% end %>
   <% end %>
   <% if ace_signed_in? %>
     <%= form_with url: game_rounds_path, namespace: "start_round", data: { turbo_frame: "_top" } do |form| %>
       <%= round_scope_fields form, @setup %>
-      <%= form.submit "Start round", class: "game-button", disabled: available.zero? %>
+      <%= form.submit "Start round", class: "game-button", disabled: available.zero?, aria: { describedby: available.zero? ? "round-start-reason" : nil } %>
     <% end %>
   <% else %>
     <%= link_to "Sign in to start", new_ace_session_path, class: "game-button", data: { turbo_frame: "_top" } %>

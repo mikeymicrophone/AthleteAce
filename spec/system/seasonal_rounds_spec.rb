@@ -16,8 +16,15 @@ RSpec.describe "Seasonal Team Match", type: :system do
     sign_in ace
     visit new_game_round_path(league_id: league.id, team_ids: [ knicks.id, nets.id ])
     expect(page).to have_content("0 players available")
-    select season.name, from: "Roster season"
+    expect(page).to have_button("Start round", disabled: true)
+    expect(page).to have_content("No current-team player data for this selection.")
+    page.driver.browser.execute_cdp "Emulation.setDeviceMetricsOverride", width: 390, height: 844, deviceScaleFactor: 1, mobile: false
+    expect(page.evaluate_script("document.documentElement.scrollWidth <= window.innerWidth")).to be(true)
+    page.execute_script("arguments[0].scrollIntoView({block: 'center'});", find(".round-start-dock"))
+    page.save_screenshot Rails.root.join("tmp/screenshots/round-season-required-mobile.png")
+    click_link "Use #{season.name} · 2 players"
     expect(page).to have_content("2 players available")
+    expect(page).to have_button("Start round", disabled: false)
     expect(page).to have_checked_field("round_team_#{knicks.id}")
     expect(page).to have_checked_field("round_team_#{nets.id}")
     expect(page).not_to have_field("Include inactive players")
