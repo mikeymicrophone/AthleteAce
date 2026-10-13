@@ -29,6 +29,10 @@ class GameRound < ApplicationRecord
     paused_at.present?
   end
 
+  def repeats_subjects?
+    questions.map { |item| [ item.fetch("subject_type"), item.fetch("subject_id") ] }.uniq.size < questions.size
+  end
+
   # Lock the round and identify the question, so retries and stale tabs cannot
   # record twice or accidentally answer the following question.
   def answer!(at:, choice_id:)

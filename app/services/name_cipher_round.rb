@@ -13,10 +13,11 @@ class NameCipherRound
     players.size > 1 ? players.size : 0
   end
 
-  def questions(length:)
-    players.sample(length).cycle.take(length).map do |player|
+  def questions(length:, balance_teams: false)
+    team_key = balance_teams ? ->(player) { team_for(player)&.id } : nil
+    RoundSubjectPicker.pick(players, length: length, &team_key).map do |player|
       choices = ((players - [ player ]).sample(3) + [ player ]).shuffle
-      team = @team_for ? @team_for.call(player) : player.team
+      team = team_for(player)
       { subject_type: "Player", subject_id: player.id, subject_name: player.name,
         target_type: "Player", target_id: player.id, target_name: player.name,
         scrambled_name: scramble(player.name), team_id: team&.id, team_name: team&.name,
@@ -26,6 +27,10 @@ class NameCipherRound
   end
 
   private
+
+  def team_for(player)
+    @team_for ? @team_for.call(player) : player.team
+  end
 
   def scramble(name)
     characters = name.upcase.chars

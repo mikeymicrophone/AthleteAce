@@ -22,7 +22,7 @@ RSpec.describe "Name Cipher rounds", type: :system do
     expect(page).to have_checked_field("round_team_#{rival.id}")
     expect(page).to have_content("4 players available")
     click_button "Start round"
-    expect(page).to have_css(".round-game-progress", text: "1 / 10")
+    expect(page).to have_css(".round-game-progress", text: "1 / 4")
     round = ace.game_rounds.last
     saved = round.questions
     expect(page).to have_css(".round-choice", count: 4)
@@ -40,15 +40,15 @@ RSpec.describe "Name Cipher rounds", type: :system do
     click_button "I don’t know — show me"
     expect(page).to have_css(".round-feedback", text: /Not quite/i)
     click_button "Next"
-    1.upto(9) do |position|
-      expect(page).to have_css(".round-game-progress", text: "#{position + 1} / 10")
+    1.upto(round.length - 1) do |position|
+      expect(page).to have_css(".round-game-progress", text: "#{position + 1} / #{round.length}")
       question = saved.fetch(position)
       key = question.fetch("choices").index { |choice| choice.fetch("id") == question.fetch("target_id") } + 1
       find(".round-cipher-name").send_keys key.to_s
       expect(page).to have_css(".round-feedback", text: /Correct/i)
-      click_button(position == 9 ? "Round summary" : "Next")
+      click_button(position == round.length - 1 ? "Round summary" : "Next")
     end
-    expect(page).to have_content("9 / 10")
+    expect(page).to have_content("3 / 4")
     expect(page).to have_link(saved.first.fetch("subject_name"), href: player_path(saved.first.fetch("subject_id")))
     click_link "Play again"
     expect(page).to have_checked_field("Name Ciphers")
@@ -58,7 +58,7 @@ RSpec.describe "Name Cipher rounds", type: :system do
     expect(page).to have_css(".round-game-progress", text: "1 / 1")
     expect(ace.game_rounds.last.questions.sole).to eq(saved.first)
     visit strength_game_attempts_path(game_type: "name_ciphers")
-    expect(page).to have_css(".history-attempt", count: 10)
+    expect(page).to have_css(".history-attempt", count: 4)
     visit strength_path
     within(".play-rate-today") { expect(page).to have_content("Jalen Brunson") }
   ensure

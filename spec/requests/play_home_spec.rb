@@ -16,6 +16,7 @@ RSpec.describe "Play home and quests", type: :request do
   end
 
   it "shows only the current ace's rounds, activity and active quest progress" do
+    create_list(:player, 9, team: team)
     own = GameRoundSetup.new(team_id: team.id).start! ace
     own.answer! at: 0, choice_id: team.id
     own.advance! at: 0

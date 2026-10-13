@@ -37,7 +37,7 @@ RSpec.describe "Round team selection", type: :system do
     page.execute_script("arguments[0].scrollIntoView({block: 'center'});", find(".round-team-selection"))
     page.save_screenshot Rails.root.join("tmp/screenshots/round-multi-team-mobile.png")
     click_button "Start round"
-    expect(page).to have_css(".round-game-progress", text: "1 / 10")
+    expect(page).to have_css(".round-game-progress", text: "1 / 2")
     round = ace.game_rounds.last
     expect(round.scope.fetch("team_ids").map(&:to_i)).to match_array([ knicks.id, nets.id ])
     expect(round.questions.map { |question| question.fetch("target_id") }.uniq).to match_array([ knicks.id, nets.id ])

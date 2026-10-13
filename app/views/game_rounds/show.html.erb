@@ -2,6 +2,12 @@
 <%= tag.div class: "round-page round-play-page" do %>
   <%= turbo_frame_tag dom_id(@round), data: { controller: "round", action: "keydown->round#key" }, tabindex: -1 do %>
     <%= tag.p flash[:alert], role: "alert", class: "flash-alert" if flash[:alert] && turbo_frame_request? %>
+    <% if @round.repeats_subjects? %>
+      <%= tag.aside class: "round-panel" do %>
+        <%= tag.p "This older saved round includes repeated names. A fresh round uses the current pool without padding repeats.", class: "round-caption" %>
+        <%= link_to "Start a fresh round", new_game_round_path(round_replay_params(@round)), class: "tool-link", data: { turbo_frame: "_top" } %>
+      <% end %>
+    <% end %>
     <%= tag.header class: "round-game-bar" do %>
       <%= tag.div do %>
         <%= tag.p GameRound::GAMES.fetch(@round.game_type), class: "eyebrow" %>

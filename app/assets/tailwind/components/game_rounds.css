@@ -109,3 +109,6 @@
 .round-cipher-name + .round-caption { @apply col-span-full mt-3; }
 .round-choice-name { @apply text-lg font-semibold leading-snug; overflow-wrap: anywhere; }
 .round-name-choices { @apply sm:grid-cols-2; }
+.round-pool-coverage { @apply mt-3 mb-4; }
+.round-pool-coverage summary { @apply cursor-pointer min-h-11 py-3 font-semibold; }
+.round-pool-coverage ul { @apply grid sm:grid-cols-2 gap-1 mb-2; }

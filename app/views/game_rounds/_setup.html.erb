@@ -113,8 +113,19 @@
     <% end %>
     <%= tag.p "#{pluralize available, @setup.game_type == 'guess_the_division' ? 'team' : 'player'} available.", class: "round-caption" %>
     <%= tag.p "Choose the original name from up to four options. At least two distinct player names are needed.", class: "round-caption" if @setup.game_type == "name_ciphers" %>
+    <% if available.positive? && @setup.seasonal_game? %>
+      <%= tag.details class: "round-pool-coverage" do %>
+        <%= tag.summary "See the player pool by team", class: "round-caption" %>
+        <%= tag.ul do %>
+          <% @setup.pool_coverage.each do |entry| %>
+            <%= tag.li "#{entry.fetch(:team)&.name || 'Unassigned players'} · #{pluralize(entry.fetch(:count), 'player')}", class: "round-caption" %>
+          <% end %>
+        <% end %>
+        <%= tag.p "Recorded players only; some rosters are samples. Multi-team rounds spread picks across these teams as far as the pool allows, without repeating a player.", class: "round-caption" %>
+      <% end %>
+    <% end %>
     <% if available.positive? && available < @setup.length.to_i %>
-      <%= tag.p "This scope has fewer than #{@setup.length} questions. Names repeat to fill the round.", class: "round-caption" %>
+      <%= tag.p "This round will have #{pluralize(@setup.question_count, 'question')}. This pool is smaller than your chosen length, so names won’t repeat to fill it. Choose more teams or another season for more variety.", class: "round-caption" %>
     <% elsif available.zero? %>
       <%= tag.p season_suggestion ? "Choose a recorded roster season below to use the player lists for these teams." : "Try another season or a broader scope. A playable question needs at least two answer choices.", class: "round-caption" %>
     <% end %>
@@ -123,7 +134,7 @@
 <% end %>
 <%= tag.div class: "round-start-dock" do %>
   <%= tag.div do %>
-    <%= tag.strong "#{GameRound::GAMES[@setup.game_type]} · #{@setup.length} questions" %>
+    <%= tag.strong "#{GameRound::GAMES[@setup.game_type]} · #{pluralize(@setup.question_count, 'question')}" %>
     <%= tag.p @setup.scope_label, class: "round-caption" %>
     <% if available.zero? %>
       <%= tag.p season_suggestion ? "No current-team player data for this selection. Choose a roster season to start." : "No playable questions in this scope. Review the filters above.", id: "round-start-reason", class: "round-caption", role: "status" %>

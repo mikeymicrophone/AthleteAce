@@ -38,13 +38,13 @@ RSpec.describe "Saved rounds", type: :system do
     expect(page).to have_select("League", options: [ "All baseball leagues", "Major League Baseball" ])
     select "Major League Baseball", from: "League"
     expect(page).to have_content("2 players available")
-    expect(page).to have_content("Names repeat to fill the round")
+    expect(page).to have_content("This round will have 2 questions")
     page.save_screenshot Rails.root.join("tmp/screenshots/round-setup-desktop.png")
     phone_viewport
     no_overflow
     page.save_screenshot Rails.root.join("tmp/screenshots/round-setup-mobile.png")
     click_button "Start round"
-    expect(page).to have_css(".round-game-progress", text: "1 / 10")
+    expect(page).to have_css(".round-game-progress", text: "1 / 2")
     round = ace.game_rounds.last
     snapshot = round.questions
     no_overflow
@@ -60,18 +60,18 @@ RSpec.describe "Saved rounds", type: :system do
     expect(round.game_attempts.count).to eq(1)
     # Enter is handled inside the focused feedback, with no document-wide key handler.
     find(".round-feedback").send_keys :enter
-    expect(page).to have_css(".round-game-progress", text: "2 / 10")
+    expect(page).to have_css(".round-game-progress", text: "2 / 2")
     click_button "Pause round"
     expect(page).to have_button("Resume round")
     visit strength_path
-    expect(page).to have_content("1 of 10 answered")
+    expect(page).to have_content("1 of 2 answered")
     within(".round-continue") { click_link "Continue" }
     click_button "Resume round"
-    expect(page).to have_css(".round-game-progress", text: "2 / 10")
+    expect(page).to have_css(".round-game-progress", text: "2 / 2")
     expect(round.reload.questions).to eq(snapshot)
 
-    1.upto(9) do |position|
-      expect(page).to have_css(".round-game-progress", text: "#{position + 1} / 10")
+    1.upto(round.length - 1) do |position|
+      expect(page).to have_css(".round-game-progress", text: "#{position + 1} / #{round.length}")
       target = snapshot[position].fetch("target_id")
       if position == 1
         choice_index = snapshot[position].fetch("choices").index { |choice| choice.fetch("id") == target }
@@ -80,11 +80,11 @@ RSpec.describe "Saved rounds", type: :system do
         find(".round-choice[value='#{target}']").click
       end
       expect(page).to have_css(".round-feedback", text: /Correct/i)
-      click_button(position == 9 ? "Round summary" : "Next")
+      click_button(position == round.length - 1 ? "Round summary" : "Next")
     end
     expect(page).to have_css("h1", text: /Round complete/i)
-    expect(page).to have_content("9 / 10")
-    expect(page).to have_css(".round-result", count: 10)
+    expect(page).to have_content("1 / 2")
+    expect(page).to have_css(".round-result", count: 2)
     no_overflow
     page.save_screenshot Rails.root.join("tmp/screenshots/round-summary-mobile.png")
     page.driver.browser.execute_cdp "Emulation.clearDeviceMetricsOverride"
@@ -95,7 +95,7 @@ RSpec.describe "Saved rounds", type: :system do
     click_button "I don’t know — show me"
     click_button "Round summary"
     expect(page).to have_content("0 / 1")
-    expect(ace.game_attempts.count).to eq(11)
+    expect(ace.game_attempts.count).to eq(3)
   end
 
   it "plays Guess the Division through the same saved round and result flow" do
@@ -105,16 +105,16 @@ RSpec.describe "Saved rounds", type: :system do
     expect(page).to have_content(/Which division is this team in\?/i)
     round = ace.game_rounds.last
     page.save_screenshot Rails.root.join("tmp/screenshots/round-division-desktop.png")
-    10.times do |position|
-      expect(page).to have_css(".round-game-progress", text: "#{position + 1} / 10")
+    round.length.times do |position|
+      expect(page).to have_css(".round-game-progress", text: "#{position + 1} / #{round.length}")
       find(".round-choice[value='#{round.questions[position].fetch('target_id')}']").click
-      click_button(position == 9 ? "Round summary" : "Next")
+      click_button(position == round.length - 1 ? "Round summary" : "Next")
     end
     expect(page).to have_css("h1", text: /Round complete/i)
-    expect(page).to have_content("10 / 10")
+    expect(page).to have_content("2 / 2")
     expect(page).not_to have_button("Drill misses")
     click_link "Game history", match: :first
-    expect(page).to have_css(".history-attempt", count: 10)
-    expect(page).to have_link("View round", count: 10)
+    expect(page).to have_css(".history-attempt", count: 2)
+    expect(page).to have_link("View round", count: 2)
   end
 end

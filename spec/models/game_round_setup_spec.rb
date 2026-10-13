@@ -7,18 +7,39 @@ RSpec.describe GameRoundSetup do
   let!(:other_team) { create(:team, league: league) }
   let!(:player) { create(:player, team: team, active: true) }
 
-  it "chooses and saves a fixed question list, repeating a small pool and keeping choices in the league" do
+  it "shortens a small pool without repeating names and keeps choices in the league" do
     create(:player, team: other_team, active: false)
     create(:player)
     setup = described_class.new game_type: "player_team_match", league_id: league.id, length: 20
     expect(setup.available_count).to eq(1)
     round = setup.start! ace
-    expect(round.questions.size).to eq(20)
+    expect(round.questions.size).to eq(1)
+    expect(round.length).to eq(1)
+    expect(setup.question_count).to eq(1)
     expect(round.questions.map { |q| q.fetch("subject_id") }.uniq).to eq([ player.id ])
     expect(round.questions.flat_map { |q| q.fetch("choices").map { |c| c.fetch("id") } }.uniq).to match_array([ team.id, other_team.id ])
     expect(round.reload.questions).to eq(round.questions)
     expect(round.scope["length"]).to eq(20)
     expect(described_class.new(league_id: league.id, include_inactive: true).available_count).to eq(2)
+  end
+
+  it "spreads questions across selected teams without repeating players when coverage is uneven" do
+    create_list(:player, 17, team: team, active: true)
+    [ other_team, create(:team, league: league), create(:team, league: league) ].each do |club|
+      create_list(:player, 2, team: club, active: true)
+    end
+    setup = described_class.new(team_ids: league.teams.pluck(:id))
+    round = setup.start!(ace)
+    expect(round.questions.map { |question| question.fetch("subject_id") }.uniq.size).to eq(10)
+    expect(round.questions.map { |question| question.fetch("target_id") }.tally.values.sort).to eq([ 2, 2, 2, 4 ])
+    expect(setup.pool_coverage.map { |entry| entry.fetch(:count) }.sort).to eq([ 2, 2, 2, 18 ])
+  end
+
+  it "gives two selected teams five questions each when both have enough players" do
+    create_list(:player, 5, team: team, active: true)
+    create_list(:player, 6, team: other_team, active: true)
+    round = described_class.new(team_ids: [ team.id, other_team.id ]).start!(ace)
+    expect(round.questions.map { |question| question.fetch("target_id") }.tally).to eq(team.id => 5, other_team.id => 5)
   end
 
   it "keeps explicit pair drills focused and allows unclassified active status" do

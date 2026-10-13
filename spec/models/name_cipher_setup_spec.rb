@@ -13,7 +13,10 @@ RSpec.describe "Name Cipher setup" do
     setup = GameRoundSetup.new(game_type: "name_ciphers", team_ids: [ team.id ], length: 20)
     expect(setup.available_count).to eq(2)
     round = setup.start!(ace)
-    expect(round.questions.size).to eq(20)
+    expect(round.questions.size).to eq(2)
+    expect(round.questions.map { |question| question.fetch("subject_id") }.uniq.size).to eq(2)
+    expect(round.scope.fetch("length")).to eq(20)
+    expect(ApplicationController.helpers.round_replay_params(round).fetch("length")).to eq(20)
     round.questions.each do |question|
       expect(question.fetch("subject_id")).to eq(question.fetch("target_id"))
       expect(question.fetch("choices").map { |choice| choice.fetch("id") }).to match_array([ first.id, second.id ])

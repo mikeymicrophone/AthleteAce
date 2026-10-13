@@ -48,8 +48,8 @@ module GameRoundsHelper
   end
 
   def round_replay_params(round)
-    # A misses drill can contain fewer than ten questions; the setup offers the
-    # usual round lengths while preserving its original sport/team scope.
-    round.scope.except("drill").merge("length" => GameRound::LENGTHS.include?(round.length) ? round.length : 10)
+    # Short pools and misses drills retain the originally requested round size.
+    requested = round.scope.fetch("length", round.length).to_i
+    round.scope.except("drill").merge("length" => GameRound::LENGTHS.include?(requested) ? requested : 10)
   end
 end

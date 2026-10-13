@@ -8,7 +8,7 @@ RSpec.describe "Play home and quest browsing", type: :system do
   before do
     driven_by :selenium_chrome_headless
     create(:team, league: team.league)
-    create(:player, team: team)
+    create_list(:player, 10, team: team)
     achievement = create(:achievement, name: "Learn the Packers roster", target: team)
     create(:highlight, quest: quest, achievement: achievement)
     create(:goal, ace: ace, quest: quest, status: "in_progress")

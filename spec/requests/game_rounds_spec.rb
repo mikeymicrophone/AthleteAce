@@ -64,7 +64,7 @@ RSpec.describe "Game rounds", type: :request do
     post game_rounds_path, params: { team_id: team.id, length: 10, questions: [], ace_id: create(:ace).id }
     expect(response).to have_http_status(:see_other)
     expect(GameRound.last.ace).to eq(ace)
-    expect(GameRound.last.questions.size).to eq(10)
+    expect(GameRound.last.questions.size).to eq(1)
   end
 
   it "serves answer feedback inside the game frame and rejects answers outside the shown choices" do
@@ -84,6 +84,7 @@ RSpec.describe "Game rounds", type: :request do
   end
 
   it "shows ordered completed results, links recorded attempts to the round, and starts a misses drill" do
+    create_list(:player, 9, team: team)
     sign_in ace
     get summary_game_round_path(round)
     expect(response).to redirect_to(game_round_path(round))

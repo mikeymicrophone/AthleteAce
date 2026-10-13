@@ -1,6 +1,9 @@
 # Name Ciphers
 
-Name Ciphers is a saved 10/20/30-question round under `/play/rounds/new?game_type=name_ciphers`.
+Name Ciphers is a saved round under `/play/rounds/new?game_type=name_ciphers`,
+with a chosen maximum of 10/20/30 questions. Small pools produce shorter rounds;
+names are never repeated to fill the chosen length. Multi-team selections spread
+questions across the represented teams as far as their unique players allow.
 Each question shows a scrambled player name and up to four original-name choices.
 Two distinct names are required. Names with no rearrangeable letters are omitted,
 and identical displayed names are deduplicated. Letter counts, spaces and punctuation

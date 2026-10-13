@@ -154,6 +154,21 @@ class GameRoundSetup
     names.compact.join " · "
   end
 
+  def question_count
+    [ length.to_i, available_count ].min
+  end
+
+  def pool_coverage
+    return [] unless seasonal_game? && valid?
+
+    players = game_type == "name_ciphers" ? cipher_pool.players : subjects.includes(:team).to_a
+    entries = players.group_by { |player| season ? season_pool.team_for(player) : player.team }
+      .map { |team, members| { team: team, count: members.size } }
+    missing = selected_team_ids - entries.filter_map { |entry| entry.fetch(:team)&.id }
+    entries += Team.where(id: missing).map { |team| { team: team, count: 0 } }
+    entries.sort_by { |entry| entry.fetch(:team)&.name || "Unassigned players" }
+  end
+
   def scope_params
     fields = attributes.except("team_query").compact
     fields = fields.except("include_inactive") if season_id
@@ -167,12 +182,18 @@ class GameRoundSetup
       raise ActiveModel::ValidationError, self
     end
 
-    return save_round!(ace, cipher_pool.questions(length: length)) if game_type == "name_ciphers"
+    if game_type == "name_ciphers"
+      return save_round!(ace, cipher_pool.questions(length: length, balance_teams: selected_team_ids.size > 1))
+    end
 
-    candidates = subjects.reorder(Arel.sql("RANDOM()")).limit(length)
+    balanced = game_type == "player_team_match" && selected_team_ids.size > 1
+    candidates = balanced ? subjects : subjects.reorder(Arel.sql("RANDOM()")).limit(length)
     candidates = game_type == "player_team_match" ? candidates.includes(team: :league) : candidates.includes(:division, :league)
     candidates = candidates.to_a
-    create_round! ace, candidates.cycle.take(length)
+    if balanced
+      candidates = RoundSubjectPicker.pick(candidates, length: length) { |player| season ? season_pool.team_for(player).id : player.team_id }
+    end
+    create_round! ace, candidates
   end
 
   def start_misses!(ace)

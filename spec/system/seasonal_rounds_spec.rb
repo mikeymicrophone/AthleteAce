@@ -33,7 +33,7 @@ RSpec.describe "Seasonal Team Match", type: :system do
     page.execute_script("arguments[0].scrollIntoView({block: 'center'});", find(".round-season-select"))
     page.save_screenshot Rails.root.join("tmp/screenshots/round-season-mobile.png")
     click_button "Start round"
-    expect(page).to have_css(".round-game-progress", text: "1 / 10")
+    expect(page).to have_css(".round-game-progress", text: "1 / 2")
     expect(page).to have_css(".round-question-prompt", text: /#{Regexp.escape(season.name)}/i)
     round = ace.game_rounds.last
     expect(round.scope.fetch("season_id")).to eq(season.id)

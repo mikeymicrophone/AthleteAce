@@ -6,7 +6,12 @@ RSpec.describe GameRound do
   let(:team) { create(:team) }
   let!(:rival) { create(:team, league: team.league) }
   let!(:player) { create(:player, team: team) }
-  let(:round) { GameRoundSetup.new(team_id: team.id).start! ace }
+  # Legacy saved rounds can still contain repeats; they must remain resumable.
+  let(:round) do
+    saved = GameRoundSetup.new(team_id: team.id).start!(ace)
+    saved.update!(length: 10, questions: Array.new(10) { saved.question.deep_dup })
+    saved
+  end
 
   it "records one server-scored answer per question, even for retries with another choice" do
     expect { round.answer! at: 0, choice_id: rival.id }.to change(GameAttempt, :count).by(1)
@@ -23,6 +28,7 @@ RSpec.describe GameRound do
   it "preserves question choices on refresh and pause, excluding paused time" do
     travel_to Time.zone.local(2026, 10, 3, 12) do
       saved_questions = round.questions
+      expect(round).to be_repeats_subjects
       travel 5.seconds
       round.pause!
       expect { round.answer! at: 0, choice_id: team.id }.to raise_error(GameRound::InvalidAction)
@@ -48,7 +54,7 @@ RSpec.describe GameRound do
 
   it "finishes only after advancing the last answer and drills each missed subject once" do
     10.times do |position|
-      round.answer! at: position, choice_id: [1, 3].include?(position) ? nil : team.id
+      round.answer! at: position, choice_id: [ 1, 3 ].include?(position) ? nil : team.id
       expect(round).not_to be_completed
       round.advance! at: position
     end
