@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_13_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -554,6 +554,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_000000) do
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
     t.string "entity_code"
+    t.string "text_color"
     t.index ["entity_code"], name: "index_teams_on_entity_code", unique: true
     t.index ["league_id"], name: "index_teams_on_league_id"
     t.index ["seed_version"], name: "index_teams_on_seed_version"

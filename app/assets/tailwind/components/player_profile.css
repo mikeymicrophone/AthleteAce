@@ -19,6 +19,7 @@
   color: var(--jersey-ink, var(--color-ink-2));
 }
 .profile-jersey { @apply flex flex-col items-center justify-center h-full gap-2; }
+.profile-jersey::after { content: ""; position: absolute; left: 0; right: 0; bottom: 8%; height: 4px; background: var(--jersey-secondary, transparent); box-shadow: 0 6px 0 var(--jersey-secondary, transparent); }
 .profile-jersey.hidden { display: none; }
 .profile-jersey span { @apply font-display font-extrabold text-2xl tracking-wide; }
 .profile-photo { @apply absolute inset-0 w-full h-full object-cover object-top; }

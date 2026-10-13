@@ -122,8 +122,8 @@ RSpec.describe "Saved rounds", type: :system do
   it "shows team blocks and a jersey fallback when a recorded player photo fails" do
     player = Player.find_by!(first_name: "Aaron", last_name: "Judge")
     player.update!(photo_urls: [ "/missing-athlete-photo.jpg" ], current_position: "Outfield")
-    team.update!(primary_color: "#003087")
-    rival.update!(primary_color: "#BD3039")
+    team.update!(primary_color: "#FFFFFF", secondary_color: "#003087")
+    rival.update!(primary_color: "#000000", secondary_color: "#BD3039")
     visit new_game_round_path(team_id: team.id)
     click_button "Start round"
     expect(page).to have_css(".round-game-progress", text: "1 / 1")
@@ -132,6 +132,8 @@ RSpec.describe "Saved rounds", type: :system do
     expect(page).to have_css(".round-team-answer", count: 2)
     expect(page).to have_css(".round-answer-territory", text: "New York")
     expect(page).to have_css(".round-answer-club", text: "Yankees")
+    expect(find(".round-athlete-portrait")[:style]).to include("--team-color: #FFFFFF", "--team-ink: #131418", "--team-secondary: #003087")
+    expect(find(".round-choice[value='#{rival.id}'] .round-team-badge")[:style]).to include("--team-color: #000000", "--team-ink: #FFFFFF")
     page.save_screenshot Rails.root.join("tmp/screenshots/round-team-cards-desktop.png")
     phone_viewport
     no_overflow

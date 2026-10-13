@@ -9,26 +9,20 @@ module GameRoundsHelper
 
   def round_team_badge(team)
     abbreviation = team.abbreviation.presence || team.name.split.filter_map { |word| word[0] }.first(3).join.upcase
-    tag.span abbreviation, class: "round-team-badge", style: round_color_style(team.primary_color), aria: { hidden: true }
-  end
-
-  def round_color_style(color)
-    color = color.to_s
-    return unless color.match?(/\A#[0-9a-f]{6}\z/i)
-
-    red, green, blue = color.delete_prefix("#").scan(/../).map { |part| part.to_i(16) }
-    ink = (red * 299 + green * 587 + blue * 114) / 1000 > 155 ? "#131418" : "#FFFFFF"
-    "--team-color: #{color}; --team-ink: #{ink};"
+    tag.span abbreviation, class: "round-team-badge",
+      style: team_palette_style(team.primary_color, team.text_color, team.secondary_color), aria: { hidden: true }
   end
 
   def round_answer_badge(choice)
     abbreviation = choice["abbreviation"].presence || choice.fetch("name").split.filter_map { |word| word[0] }.first(3).join.upcase
-    tag.span abbreviation, class: "round-team-badge", style: round_color_style(choice["primary_color"]), aria: { hidden: true }
+    tag.span abbreviation, class: "round-team-badge",
+      style: team_palette_style(choice["primary_color"], choice["text_color"], choice["secondary_color"]), aria: { hidden: true }
   end
 
   def round_player_portrait(question, player)
     photo_url = question.key?("subject_photo_url") ? question["subject_photo_url"] : player&.photo_url
-    tag.div class: "round-athlete-portrait", style: round_color_style(question["subject_primary_color"]),
+    tag.div class: "round-athlete-portrait",
+      style: team_palette_style(question["subject_primary_color"], question["subject_text_color"], question["subject_secondary_color"]),
       data: { controller: "entity-image" }, aria: { hidden: true } do
       fallback = tag.div class: "round-jersey", data: { entity_image_target: "fallback" } do
         icon("jersey", size: 112)

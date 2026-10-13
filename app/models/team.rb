@@ -1,5 +1,6 @@
 class Team < ApplicationRecord
   include Ratable
+  before_validation :assign_palette_text_color
   
   belongs_to :league
   belongs_to :stadium, optional: true
@@ -36,5 +37,13 @@ class Team < ApplicationRecord
   # Define which associations can be searched via Ransack
   def self.ransackable_associations(auth_object = nil)
     ["active_membership", "campaigns", "conference", "current_organization", "current_organization_affiliation", "division", "league", "memberships", "organization_affiliations", "organizations", "players", "ratings", "stadium"]
+  end
+
+  private
+
+  def assign_palette_text_color
+    if will_save_change_to_primary_color? || text_color.blank?
+      self.text_color = TeamPalette.text_color(primary_color)
+    end
   end
 end

@@ -28,7 +28,8 @@
 .round-team-search label { @apply col-span-full; }
 .round-team-options { @apply grid sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-80 overflow-y-auto p-1; }
 .round-team-options .round-option { @apply min-h-24 p-3; }
-.round-team-badge { @apply inline-flex items-center justify-center shrink-0 w-12 h-14 rounded-lg font-display text-lg font-bold border border-line; background: var(--team-color, var(--color-surface-2)); color: var(--team-ink, var(--color-ink-2)); }
+.round-team-badge { @apply relative overflow-hidden inline-flex items-center justify-center shrink-0 w-12 h-14 rounded-lg font-display text-lg font-bold border border-line; background: var(--team-color, var(--color-surface-2)); color: var(--team-ink, var(--color-ink-2)); }
+.round-team-badge::after { content: ""; position: absolute; top: 0; right: 0; width: 12px; height: 12px; background: var(--team-secondary, transparent); clip-path: polygon(0 0, 100% 0, 100% 100%); }
 .round-team-name { @apply flex-1 min-w-0; }
 .round-team-name strong { @apply block text-sm leading-snug; overflow-wrap: anywhere; }
 .round-team-name .round-caption { @apply block mt-1; }
@@ -67,6 +68,7 @@
 .round-subject-details .round-caption { @apply mt-3; }
 .round-athlete-portrait { @apply relative shrink-0 w-24 h-28 sm:w-32 sm:h-36 overflow-hidden rounded-tool border border-line; background: var(--team-color, var(--color-surface-3)); color: var(--team-ink, var(--color-ink-2)); }
 .round-jersey { @apply flex items-center justify-center h-full; }
+.round-jersey::after { content: ""; position: absolute; left: 0; right: 0; bottom: 8%; height: 4px; background: var(--team-secondary, transparent); box-shadow: 0 6px 0 var(--team-secondary, transparent); }
 .round-jersey .ace-icon { @apply w-20 h-20 sm:w-28 sm:h-28; }
 .round-jersey.hidden { display: none; }
 .round-athlete-photo { @apply absolute inset-0 w-full h-full object-cover object-top; }

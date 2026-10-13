@@ -42,6 +42,18 @@ RSpec.describe GameRoundSetup do
     expect(round.questions.map { |question| question.fetch("target_id") }.tally).to eq(team.id => 5, other_team.id => 5)
   end
 
+  it "snapshots stored palettes so later team edits cannot change a saved round" do
+    team.update!(primary_color: "#006BB6", secondary_color: "#F58426")
+    round = described_class.new(team_id: team.id).start!(ace)
+    question = round.questions.first
+    choice = question.fetch("choices").find { |entry| entry.fetch("id") == team.id }
+    expect(question).to include("subject_primary_color" => "#006BB6", "subject_secondary_color" => "#F58426",
+      "subject_text_color" => "#FFFFFF")
+    expect(choice).to include("primary_color" => "#006BB6", "secondary_color" => "#F58426", "text_color" => "#FFFFFF")
+    team.update!(primary_color: "#FFFFFF", secondary_color: "#000000")
+    expect(round.reload.questions.first).to eq(question)
+  end
+
   it "keeps explicit pair drills focused and allows unclassified active status" do
     third = create(:team, league: league)
     create(:player, team: third)
