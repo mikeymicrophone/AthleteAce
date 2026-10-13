@@ -6,10 +6,10 @@
   </header>
 
   <% if current_ace %>
-    <section class="play-scoreboard" aria-label="Your last seven days">
-      <div><span class="eyebrow">Accuracy · 7 days</span><strong><%= @week[:accuracy] ? "#{@week[:accuracy].round}%" : "—" %></strong><span><%= @week[:total].positive? ? "#{@week[:correct]} correct answers" : "Your first answer starts the story" %></span></div>
-      <div><span class="eyebrow">Answers · 7 days</span><strong><%= @week[:total] %></strong><span>Every attempt is a rep</span></div>
-      <div><span class="eyebrow">Days played · 7 days</span><strong><%= @history.days.last(7).count { |day| day[:total].positive? } %><small> / 7</small></strong><span>Come back and keep it going</span></div>
+    <section class="play-scoreboard" aria-label="Your learning progress">
+      <div><span class="eyebrow">Accuracy · 7 days</span><strong><%= @week[:accuracy] ? "#{@week[:accuracy].round}%" : "—" %></strong><span><%= @week[:total].positive? ? pluralize(@week[:correct], "correct answer") : "Your first answer starts the story" %></span></div>
+      <div><span class="eyebrow">Day streak</span><strong><%= @progress.streaks[:current] %></strong><span>Best <%= @progress.streaks[:best] %> · <%= @progress.time_zone.name %></span></div>
+      <div><span class="eyebrow">Names known</span><strong><%= @progress.names_known %></strong><span>Correct twice, including your latest answer</span></div>
     </section>
   <% end %>
 
@@ -41,6 +41,38 @@
       <% end %>
     </section>
   </div>
+
+  <% if current_ace %>
+    <div class="play-home-grid">
+      <section class="play-panel play-misses" aria-labelledby="play-misses-title">
+        <div class="play-section-heading"><h2 id="play-misses-title">You keep missing</h2><%= link_to "History", strength_game_attempts_path, class: "tool-link" %></div>
+        <% if @misses.any? %>
+          <ul class="play-player-list">
+            <% @misses.each do |miss| %>
+              <% player = miss.fetch(:player) %>
+              <li><%= entity_avatar player %><div><%= link_to player.name, player_path(player), class: "play-quest-name" %><p><%= player.team.name %><% if player.current_position.present? %> · <%= player.current_position %><% end %></p><span class="play-miss-count">Missed <%= miss[:misses] %>×</span></div></li>
+            <% end %>
+          </ul>
+          <%= button_to "Drill these #{@misses.size}", play_drill_misses_path, class: "game-button" %>
+          <p class="round-caption">A correct answer clears a name from this list.</p>
+        <% else %>
+          <div class="play-empty"><%= icon "check", size: 36 %><h3>No names to drill right now.</h3><p>Missed names with playable team data appear here until you get them right.</p></div>
+        <% end %>
+      </section>
+      <section class="play-panel play-rate-today" aria-labelledby="play-rate-title">
+        <div class="play-section-heading"><h2 id="play-rate-title">Rate who you met</h2><span class="eyebrow">Today’s practice</span></div>
+        <% if @players_today.any? %>
+          <ul class="play-player-list">
+            <% @players_today.each do |player| %>
+              <li><%= entity_avatar player %><div><h3><%= player.name %></h3><p><%= player.team&.name %></p></div><%= link_to "Rate", player_path(player, anchor: "player-ratings-title"), class: "tool-button", aria: { label: "Rate #{player.name}" } %></li>
+            <% end %>
+          </ul>
+        <% else %>
+          <div class="play-empty"><%= icon "shirt-sport", size: 36 %><h3>Meet a few players first.</h3><p>The players you practice today will appear here, ready to rate.</p></div>
+        <% end %>
+      </section>
+    </div>
+  <% end %>
 
   <section class="play-games" aria-labelledby="play-games-title">
     <div class="play-section-heading"><h2 id="play-games-title">Find your game</h2><span class="eyebrow">One more rep</span></div>

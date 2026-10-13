@@ -82,3 +82,15 @@
   .play-launch h2 { @apply text-5xl; }
   .quest-achievement > .page-actions { @apply w-full pl-8; }
 }
+.play-player-list { @apply mb-5; }
+.play-player-list li { @apply flex items-center gap-4 py-4 border-t border-line; }
+.play-player-list li > div { @apply flex-1 min-w-0; overflow-wrap: anywhere; }
+.play-player-list p { @apply text-sm text-ink-2 mt-1; }
+.play-player-list h3 { @apply font-display text-xl font-bold; }
+.play-miss-count { @apply inline-block font-mono text-xs text-bad-ink bg-bad-tint rounded-md px-2 py-1 mt-2; }
+.play-misses > .round-caption { @apply mt-3; }
+@media (max-width: 640px) {
+  .play-player-list .entity-avatar { @apply w-12 h-14; }
+  .play-player-list li { @apply gap-3; }
+}
+.play-misses, .play-rate-today, #player-ratings-title { scroll-margin-top: 10rem; }

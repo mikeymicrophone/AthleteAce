@@ -2,6 +2,7 @@
 Rails.application.routes.draw do
   # Strength training routes for learning athlete names
   get "strength" => "play#index"
+  post "play/drill-misses" => "play#drill", as: :play_drill_misses
   resources :game_rounds, path: "play/rounds", only: [:new, :create, :show] do
     member do
       post :answer

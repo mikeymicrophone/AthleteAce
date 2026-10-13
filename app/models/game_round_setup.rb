@@ -63,7 +63,7 @@ class GameRoundSetup
       playable_leagues = Team.group(:league_id).having("COUNT(*) >= 2").select(:league_id)
       pool = team_ids.any? ? scoped_teams : scoped_teams.where(league_id: playable_leagues)
       scope = Player.where(team_id: pool.select(:id))
-      scope = scope.where(active: [true, nil]) unless include_inactive
+      scope = scope.where(active: [ true, nil ]) unless include_inactive
       scope
     end
   end
@@ -73,7 +73,7 @@ class GameRoundSetup
   end
 
   def scope_label
-    names = [sport&.name, league&.name]
+    names = [ sport&.name, league&.name ]
     names << Conference.find_by(id: conference_id)&.name if conference_id
     names << Division.find_by(id: division_id)&.name if division_id
     names << City.find_by(id: city_id)&.name if city_id
@@ -86,7 +86,7 @@ class GameRoundSetup
     attributes.except("team_query").compact
   end
 
-  def start! ace
+  def start!(ace)
     raise ActiveModel::ValidationError, self unless valid?
     if available_count.zero?
       errors.add :base, "No playable questions in this scope. Try another team or league."
@@ -96,24 +96,39 @@ class GameRoundSetup
     candidates = subjects.reorder(Arel.sql("RANDOM()")).limit(length)
     candidates = game_type == "player_team_match" ? candidates.includes(team: :league) : candidates.includes(:division, :league)
     candidates = candidates.to_a
+    create_round! ace, candidates.cycle.take(length)
+  end
+
+  def start_misses!(ace)
+    players = PlayProgress.new(ace: ace).misses.map { |miss| miss.fetch(:player) }
+    raise GameRound::InvalidAction, "There are no playable missed names to drill right now." if players.empty?
+
+    create_round! ace, players, drill: true
+  end
+
+  private
+
+  def create_round!(ace, candidates, drill: false)
     pools = {}
-    questions = candidates.cycle.take(length).map do |subject|
+    questions = candidates.map do |subject|
       target = game_type == "player_team_match" ? subject.team : subject.division
-      pool = pools[subject.league.id] ||= if game_type == "player_team_match"
-        team_ids.any? ? Team.where(id: team_ids).to_a : subject.league.teams.to_a
-      else
-        subject.league.divisions.to_a
-      end
-      choices = ((pool - [target]).sample(5) + [target]).shuffle
+      pool = pools[subject.league.id] ||= choice_pool(subject)
+      choices = ((pool - [ target ]).sample(5) + [ target ]).shuffle
       { subject_type: subject.class.name, subject_id: subject.id, subject_name: subject.name,
         target_type: target.class.name, target_id: target.id, target_name: target.name,
         choices: choices.map { |item| { id: item.id, name: item.name, abbreviation: item.abbreviation } } }
     end
-    ace.game_rounds.create! game_type: game_type, length: length, scope: scope_params, scope_label: scope_label,
+    label = drill ? "Recent misses · Team Match" : scope_label
+    scope = drill ? scope_params.merge("drill" => true, "length" => questions.size) : scope_params
+    ace.game_rounds.create! game_type: game_type, length: questions.size, scope: scope, scope_label: label,
       questions: questions, started_at: Time.current, question_started_at: Time.current
   end
 
-  private
+  def choice_pool(subject)
+    return subject.league.divisions.to_a unless game_type == "player_team_match"
+
+    (team_ids.any? ? Team.where(id: team_ids) : subject.league.teams).to_a
+  end
 
   def valid_scope
     errors.add(:sport, "is no longer available") if sport_id && !sport

@@ -51,4 +51,29 @@ RSpec.describe "Play home and quest browsing", type: :system do
     expect(page).to have_content(team.name)
     expect(page).to have_button("Start round")
   end
+  it "drills unresolved misses, clears a corrected name and links today's player ratings" do
+    player = team.players.first
+    create(:game_attempt, ace: ace, subject_entity: player, is_correct: true)
+    3.times { create(:game_attempt, ace: ace, subject_entity: player, is_correct: false) }
+    visit strength_path
+    expect(page).to have_content(/Day streak/i)
+    expect(page).to have_content(/Names known/i)
+    within(".play-misses") { expect(page).to have_content("Missed 3×") }
+    page.driver.browser.execute_cdp "Emulation.setDeviceMetricsOverride", width: 390, height: 844, deviceScaleFactor: 1, mobile: false
+    no_overflow
+    page.execute_script("arguments[0].scrollIntoView({block: 'start'});", find(".play-misses"))
+    page.save_screenshot Rails.root.join("tmp/screenshots/play-misses-mobile.png")
+    page.execute_script("document.documentElement.dataset.theme = 'dark'")
+    page.save_screenshot Rails.root.join("tmp/screenshots/play-misses-dark.png")
+    click_button "Drill these 1"
+    expect(page).to have_css(".round-game-progress", text: "1 / 1")
+    no_overflow
+    find(".round-choice[value='#{team.id}']").click
+    expect(page).to have_css(".round-feedback", text: /Correct/i)
+    visit strength_path
+    within(".play-misses") { expect(page).to have_content("No names to drill right now.") }
+    expect(page).to have_css(".play-scoreboard > div:last-child strong", text: "1")
+    within(".play-rate-today") { click_link "Rate" }
+    expect(page).to have_css("#player-ratings-title", text: /Player Ratings/i)
+  end
 end

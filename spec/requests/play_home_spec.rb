@@ -32,7 +32,26 @@ RSpec.describe "Play home and quests", type: :request do
     expect(response.body).to include(game_round_path(own), "1 of 10 answered", "My roster challenge", "1 of 2 required achievements")
     expect(response.body).not_to include(game_round_path(foreign), "Finished challenge")
     stats = Nokogiri::HTML(response.body).css(".play-scoreboard strong").map(&:text)
-    expect(stats).to eq(["100%", "1", "1 / 7"])
+    expect(stats).to eq([ "100%", "1", "0" ])
+  end
+
+  it "requires sign-in and derives missed-name drills from the current ace instead of posted ids" do
+    post play_drill_misses_path, params: { player_ids: [ player.id ], ace_id: ace.id }
+    expect(response).to redirect_to(new_ace_session_path)
+    create(:game_attempt, ace: ace, subject_entity: player, is_correct: false)
+    intruder = create(:ace)
+    sign_in intruder
+    expect { post play_drill_misses_path, params: { ace_id: ace.id, player_ids: [ player.id ] } }.not_to change(GameRound, :count)
+    expect(response).to redirect_to(strength_path)
+    sign_out intruder
+    sign_in ace
+    get strength_path
+    expect(response.body).to include("Missed 1×", "Drill these 1", "Rate who you met")
+    post play_drill_misses_path, params: { player_ids: [ -1 ], game_type: "guess_the_division" }
+    expect(response).to redirect_to(game_round_path(ace.game_rounds.last))
+    expect(ace.game_rounds.last.questions.sole.fetch("subject_id")).to eq(player.id)
+    get strength_path
+    expect(response.body).to include(player_path(player, anchor: "player-ratings-title"))
   end
 
   it "keeps existing scoped strength links pointed at round setup" do
