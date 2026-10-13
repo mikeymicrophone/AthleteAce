@@ -34,8 +34,8 @@ RSpec.describe "Saved rounds", type: :system do
     create(:team, league: other_league)
     visit strength_path
     click_link "Pick game & scope"
-    select "Baseball", from: "Sport"
-    expect(page).to have_select("League", options: ["All leagues", "Major League Baseball"])
+    choose "Baseball"
+    expect(page).to have_select("League", options: [ "All baseball leagues", "Major League Baseball" ])
     select "Major League Baseball", from: "League"
     expect(page).to have_content("2 players available")
     expect(page).to have_content("Names repeat to fill the round")

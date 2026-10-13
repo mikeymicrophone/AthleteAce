@@ -28,24 +28,37 @@
   <%= tag.fieldset class: "round-panel" do %>
     <%= tag.legend "02 · Find your scope", class: "round-step" %>
     <%= tag.p @setup.scope_label, class: "round-scope-summary" %>
-    <%= tag.div class: "round-scope-selects" do %>
-      <%= tag.div do %>
-        <%= form.label :sport_id, "Sport" %>
-        <%= form.collection_select :sport_id, Sport.order(:name), :id, :name, { include_blank: "All sports", selected: @setup.sport_id }, data: { action: "change->round-setup#sportChanged" } %>
-      <% end %>
-      <%= tag.div do %>
-        <%= form.label :league_id, "League" %>
-        <%= form.collection_select :league_id, @setup.leagues, :id, :name, { include_blank: "All leagues", selected: @setup.league_id }, data: { action: "change->round-setup#leagueChanged" } %>
+    <%= tag.fieldset class: "round-sports" do %>
+      <%= tag.legend "Sport", class: "round-filter-label" %>
+      <%= tag.div class: "round-sport-options" do %>
+        <%= tag.label class: "round-option round-sport-option" do %>
+          <%= icon "layout-grid", size: 24 %>
+          <%= tag.span "All sports" %>
+          <%= form.radio_button :sport_id, "", checked: @setup.sport_id.nil?, data: { action: "change->round-setup#sportChanged" } %>
+        <% end %>
+        <% @sports.each do |sport| %>
+          <%= tag.label class: "round-option round-sport-option" do %>
+            <%= icon_for_sport sport, size: 24 %>
+            <%= tag.span sport.name %>
+            <%= form.radio_button :sport_id, sport.id, checked: @setup.sport_id == sport.id, data: { action: "change->round-setup#sportChanged" } %>
+          <% end %>
+        <% end %>
       <% end %>
     <% end %>
-    <% if @setup.game_type == "player_team_match" %>
-      <%= tag.div class: "round-season-select" do %>
-        <%= form.label :season_id, "Roster season" %>
-        <%= form.collection_select :season_id, @setup.seasons, :id, :name, {include_blank: "Current teams", selected: @setup.season_id}, data: {action: "change->round-setup#seasonChanged"} %>
-        <% if @setup.season %>
-          <%= tag.p "Uses recorded memberships and roster listings for this season, including players who are inactive today. Coverage may be partial.", class: "round-caption" %>
-          <% if @setup.valid? && @setup.season_pool.ambiguous_count.positive? %>
-            <%= tag.p "#{pluralize(@setup.season_pool.ambiguous_count, 'player')} listed with multiple teams this season left out to keep answers unambiguous.", class: "round-caption" %>
+    <%= tag.div class: "round-scope-selects" do %>
+      <%= tag.div do %>
+        <%= form.label :league_id, "League" %>
+        <%= form.collection_select :league_id, @setup.leagues, :id, :name, { include_blank: @setup.sport ? "All #{@setup.sport.name.downcase} leagues" : "All leagues", selected: @setup.league_id }, data: { action: "change->round-setup#leagueChanged" } %>
+      <% end %>
+      <% if @setup.game_type == "player_team_match" %>
+        <%= tag.div class: "round-season-select" do %>
+          <%= form.label :season_id, "Roster season" %>
+          <%= form.collection_select :season_id, @setup.seasons, :id, :name, {include_blank: "Current teams", selected: @setup.season_id}, data: {action: "change->round-setup#seasonChanged"} %>
+          <% if @setup.season %>
+            <%= tag.p "Uses recorded memberships and roster listings for this season, including players who are inactive today. Coverage may be partial.", class: "round-caption" %>
+            <% if @setup.valid? && @setup.season_pool.ambiguous_count.positive? %>
+              <%= tag.p "#{pluralize(@setup.season_pool.ambiguous_count, 'player')} listed with multiple teams this season left out to keep answers unambiguous.", class: "round-caption" %>
+            <% end %>
           <% end %>
         <% end %>
       <% end %>
@@ -63,14 +76,21 @@
       <%= tag.p "#{pluralize(@setup.selected_team_ids.size, 'team')} selected · Choose up to 30. Leave all unchecked for any team.", class: "round-caption" %>
       <%= tag.button "Any team", type: "button", class: "tool-button", disabled: @setup.selected_team_ids.empty?, data: { action: "round-setup#anyTeam" } %>
     <% end %>
+    <% team_options = @setup.team_options %>
     <%= tag.div class: "round-team-options", role: "group", aria: { label: "Teams" } do %>
-      <% @setup.team_options.each do |team| %>
-        <%= tag.label class: "round-option" do %>
-          <%= check_box_tag "team_ids[]", team.id, @setup.selected_team_ids.include?(team.id), id: "round_team_#{team.id}", data: { action: "change->round-setup#update" } %>
-          <%= tag.span team.abbreviation, class: "round-team-abbreviation" %>
-          <%= tag.span team.name %>
+      <% team_options.each do |team| %>
+        <%= tag.label class: "round-option round-team-option" do %>
+          <%= round_team_badge team %>
+          <%= tag.span class: "round-team-name" do %>
+            <%= tag.strong team.name %>
+            <%= tag.span @setup.selected_team_ids.include?(team.id) ? "Selected" : "Add to round", class: "round-caption" %>
+          <% end %>
+          <%= check_box_tag "team_ids[]", team.id, @setup.selected_team_ids.include?(team.id), id: "round_team_#{team.id}", aria: { label: team.name }, data: { action: "change->round-setup#update" } %>
         <% end %>
       <% end %>
+    <% end %>
+    <% if team_options.empty? %>
+      <%= tag.p @setup.team_query.present? ? "No teams match your search. Try a team name or abbreviation." : "No teams recorded in this scope. Try another league or season.", class: "round-team-empty", role: "status" %>
     <% end %>
     <%= tag.p "Showing up to 100 matches plus your selected teams. Search to narrow the list.", class: "round-caption" if @setup.teams.count > 100 %>
     <% if @setup.game_type == "player_team_match" && !@setup.season_id %>

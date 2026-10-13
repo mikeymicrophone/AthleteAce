@@ -13,15 +13,27 @@
 .round-game-option strong { @apply block font-display text-2xl; }
 .round-game-option .round-caption { @apply block mt-1; }
 .round-scope-summary { @apply text-sm font-semibold text-ink mb-4; }
+.round-sports { @apply mb-6; }
+.round-filter-label { @apply text-sm font-semibold text-ink-2 mb-3; }
+.round-sport-options { @apply grid grid-cols-2 lg:grid-cols-4 gap-2; }
+.round-sport-option { @apply relative flex-wrap gap-2 min-h-20 p-3 font-semibold; }
+.round-sport-option > span { @apply flex-1 min-w-0; overflow-wrap: anywhere; }
+.round-sport-option input { @apply shrink-0; }
+.round-option:hover { @apply border-ink-3; }
 .round-scope-selects { @apply grid sm:grid-cols-2 gap-4 mb-5; }
 .round-setup-form label:not(.round-option):not(.round-inactive) { @apply block text-sm font-semibold text-ink-2 mb-2; }
 .round-scope-selects select, .round-team-search input[type=search] { @apply block w-full min-h-11 rounded-lg border border-line-2 px-3 py-2 bg-surface text-ink; }
 .round-scope-selects select:focus-visible, .round-team-search input:focus-visible { @apply outline-2 outline-offset-2 outline-accent-text; }
 .round-team-search { @apply grid gap-2 mb-4; grid-template-columns: minmax(0, 1fr) auto; }
 .round-team-search label { @apply col-span-full; }
-.round-team-options { @apply grid sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto p-1; }
-.round-team-options .round-option { @apply min-h-16 p-3; }
-.round-team-abbreviation { @apply font-display text-xl font-bold; }
+.round-team-options { @apply grid sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-80 overflow-y-auto p-1; }
+.round-team-options .round-option { @apply min-h-24 p-3; }
+.round-team-badge { @apply inline-flex items-center justify-center shrink-0 w-12 h-14 rounded-lg font-display text-lg font-bold border border-line; background: var(--team-color, var(--color-surface-2)); color: var(--team-ink, var(--color-ink-2)); }
+.round-team-name { @apply flex-1 min-w-0; }
+.round-team-name strong { @apply block text-sm leading-snug; overflow-wrap: anywhere; }
+.round-team-name .round-caption { @apply block mt-1; }
+.round-team-option input { @apply shrink-0 w-4 h-4; }
+.round-team-empty { @apply p-5 bg-surface-2 rounded-tool text-sm text-ink-2; }
 .round-inactive { @apply flex items-center gap-3 text-sm text-ink-2 mt-5 min-h-11; }
 .round-lengths { @apply grid grid-cols-3 gap-3 mb-4; }
 .round-lengths .round-option { @apply flex-wrap justify-center gap-2; }

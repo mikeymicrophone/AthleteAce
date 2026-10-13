@@ -29,6 +29,18 @@ RSpec.describe "Game rounds", type: :request do
     expect(selection.fetch("length")).to eq("20")
   end
 
+  it "offers every seeded sport and a search empty state without losing the selected sport" do
+    cricket = create(:sport, name: "Cricket")
+    rugby = create(:sport, name: "Rugby")
+    other = create(:sport, name: "Unlisted sport")
+    get new_game_round_path, params: { sport_id: cricket.id, team_query: "Does not exist" }
+    doc = Nokogiri::HTML(response.body)
+    expect(doc.css('.round-sport-options input').map { |field| field["value"] }).to include("", cricket.id.to_s, rugby.id.to_s, other.id.to_s)
+    expect(doc.at_css('.round-sport-options input[checked]')["value"]).to eq(cricket.id.to_s)
+    expect(response.body).to include("No teams match your search")
+    expect(doc.css(".round-sport-option svg").size).to eq(Sport.count + 1)
+  end
+
   it "does not disclose or modify another ace's rounds" do
     owned_round = round
     intruder = create(:ace)

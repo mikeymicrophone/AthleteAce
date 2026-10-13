@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe "Round team selection", type: :system do
   let(:ace) { create(:ace) }
   let(:league) { create(:league, name: "NBA", sport: create(:sport, name: "Basketball")) }
-  let!(:knicks) { create(:team, territory: "New York", mascot: "Knicks", abbreviation: "NYK", league: league) }
+  let!(:knicks) { create(:team, territory: "New York", mascot: "Knicks", abbreviation: "NYK", primary_color: "#006BB6", league: league) }
   let!(:nets) { create(:team, territory: "Brooklyn", mascot: "Nets", abbreviation: "BKN", league: league) }
   let!(:third) { create(:team, territory: "Boston", mascot: "Celtics", abbreviation: "BOS", league: league) }
 
@@ -66,5 +66,30 @@ RSpec.describe "Round team selection", type: :system do
     expect(page).to have_field("Search teams", with: "")
     expect(page).not_to have_field("round_team_#{knicks.id}")
     expect(page).to have_field("round_team_#{other.id}")
+  end
+
+  it "switches sports with native radio tiles and clears the previous league and teams" do
+    cricket = create(:sport, name: "Cricket")
+    [ "Baseball", "Football", "Hockey", "Soccer", "Rugby", "Lacrosse" ].each { |name| create(:sport, name: name) }
+    other_league = create(:league, name: "Cricket league", sport: cricket)
+    other = create(:team, league: other_league)
+    visit new_game_round_path(sport_id: league.sport_id, league_id: league.id, team_ids: [ knicks.id, nets.id ])
+    expect(page).to have_checked_field("Basketball")
+    page.execute_script("arguments[0].scrollIntoView({block: 'center'});", find(".round-sports"))
+    page.save_screenshot Rails.root.join("tmp/screenshots/round-sport-tiles-desktop.png")
+    page.driver.browser.execute_cdp "Emulation.setDeviceMetricsOverride", width: 390, height: 844, deviceScaleFactor: 1, mobile: false
+    expect(page.evaluate_script("document.documentElement.scrollWidth <= window.innerWidth")).to be(true)
+    page.execute_script("arguments[0].scrollIntoView({block: 'center'});", find(".round-sports"))
+    page.save_screenshot Rails.root.join("tmp/screenshots/round-sport-tiles-mobile.png")
+    find('input[name="sport_id"][value="' + cricket.id.to_s + '"]').send_keys :space
+    expect(page).to have_checked_field("Cricket")
+    expect(page).to have_select("League", selected: "All cricket leagues")
+    expect(page).to have_content("0 teams selected")
+    expect(page).not_to have_field("round_team_#{knicks.id}")
+    expect(page).to have_field("round_team_#{other.id}")
+    choose "All sports"
+    expect(page).to have_checked_field("All sports")
+    expect(page).to have_select("League", options: [ "All leagues", "Cricket league", "NBA" ])
+    expect(page).to have_field("round_team_#{knicks.id}")
   end
 end

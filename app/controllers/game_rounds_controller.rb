@@ -5,6 +5,7 @@ class GameRoundsController < ApplicationController
 
   def new
     @setup = GameRoundSetup.new setup_params
+    @sports = Sport.order(:name)
     store_location_for :ace, new_game_round_path(@setup.scope_params) if !ace_signed_in? && @setup.valid?
     @unfinished_rounds = current_ace ? current_ace.game_rounds.unfinished.limit(5) : []
   end
@@ -14,6 +15,7 @@ class GameRoundsController < ApplicationController
     @round = @setup.start! current_ace
     redirect_to game_round_path(@round), status: :see_other
   rescue ActiveModel::ValidationError
+    @sports = Sport.order(:name)
     @unfinished_rounds = current_ace.game_rounds.unfinished.limit(5)
     render :new, status: :unprocessable_content
   end
