@@ -32,12 +32,24 @@ class PlayProgress
   def misses(limit: 3)
     ordered = memories.select { |memory| memory[:misses].positive? }
       .sort_by { |memory| [ -memory[:misses], -memory[:last_seen].to_f, memory[:player_id] ] }
-    # A drill needs a current team and at least two team choices in its league.
-    playable = GameRoundSetup.new(include_inactive: true).subjects
     ids = ordered.map { |memory| memory[:player_id] }
-    players = playable.in_order_of(:id, ids).includes(team: :league).limit(limit)
-    by_id = ordered.index_by { |memory| memory[:player_id] }
-    players.map { |player| by_id.fetch(player.id).merge(player: player) }
+    players = Player.where(id: ids).includes(team: :league).index_by(&:id)
+    latest = attempts.where(id: ordered.map { |memory| memory[:attempt_id] }).includes(:game_round).index_by(&:subject_entity_id)
+    recorded = latest.transform_values do |attempt|
+      attempt.game_round&.questions&.[](attempt.round_position)
+    end
+    recorded_teams = Team.where(id: recorded.values.compact.map { |question| question["target_id"] }).index_by(&:id)
+    playable = GameRoundSetup.new(include_inactive: true).subjects.where(id: ids).pluck(:id)
+    ordered.filter_map do |memory|
+      player = players[memory[:player_id]]
+      next unless player
+
+      question = recorded[player.id]
+      team = question ? recorded_teams[question["target_id"]] : player.team
+      next unless team && (question || playable.include?(player.id))
+
+      memory.merge(player: player, team: team, question: question, season_name: question&.dig("season_name"))
+    end.first(limit)
   end
 
   def players_today
@@ -60,7 +72,7 @@ class PlayProgress
     @memories ||= begin
       # Count wrong attempts after the last correct answer, with id breaking timestamp ties.
       ranked = player_attempts.select(<<~SQL.squish)
-        subject_entity_id, is_correct, created_at,
+        id, subject_entity_id, is_correct, created_at,
         ROW_NUMBER() OVER (PARTITION BY subject_entity_id ORDER BY created_at DESC, id DESC) AS recency,
         COUNT(*) FILTER (WHERE is_correct) OVER (PARTITION BY subject_entity_id) AS total_correct,
         COUNT(*) FILTER (WHERE is_correct) OVER (
@@ -72,9 +84,9 @@ class PlayProgress
         :subject_entity_id, Arel.sql("MAX(total_correct)"),
         Arel.sql("BOOL_OR(is_correct) FILTER (WHERE recency = 1)"),
         Arel.sql("COUNT(*) FILTER (WHERE NOT is_correct AND newer_correct = 0)"),
-        Arel.sql("MAX(created_at)")
-      ).map do |id, correct, latest_correct, misses, last_seen|
-        { player_id: id, correct: correct, latest_correct: latest_correct, misses: misses, last_seen: last_seen }
+        Arel.sql("MAX(created_at)"), Arel.sql("MAX(id) FILTER (WHERE recency = 1)")
+      ).map do |id, correct, latest_correct, misses, last_seen, attempt_id|
+        { player_id: id, correct: correct, latest_correct: latest_correct, misses: misses, last_seen: last_seen, attempt_id: attempt_id }
       end
     end
   end

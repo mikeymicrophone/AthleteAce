@@ -88,3 +88,7 @@
 .round-result-subject { @apply inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-4; }
 .round-result .history-result { @apply shrink-0; }
 .round-team-selection { @apply flex flex-wrap items-center justify-between gap-3 mb-3; }
+.round-season-select { @apply mb-5; }
+.round-season-select select { @apply w-full min-h-11 rounded-lg border border-line-2 px-3 py-2 bg-surface text-ink; }
+.round-season-select .round-caption { @apply mt-2; }
+.round-season-select select:focus-visible { @apply outline-2 outline-offset-2 outline-accent-text; }

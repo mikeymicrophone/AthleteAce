@@ -1,6 +1,6 @@
 class GameRoundsController < ApplicationController
   before_action :authenticate_ace!, except: :new
-  before_action :set_round, except: [:new, :create]
+  before_action :set_round, except: [ :new, :create ]
   rescue_from GameRound::InvalidAction, with: :invalid_action
 
   def new
@@ -69,11 +69,11 @@ class GameRoundsController < ApplicationController
   end
 
   def setup_params
-    params.permit(:game_type, :length, :sport_id, :league_id, :conference_id, :division_id, :team_id,
+    params.permit(:game_type, :length, :sport_id, :league_id, :season_id, :conference_id, :division_id, :team_id,
       :city_id, :state_id, :include_inactive, :team_query, team_ids: [])
   end
 
-  def invalid_action error
+  def invalid_action(error)
     redirect_to game_round_path(@round), alert: error.message, status: :see_other
   end
 end

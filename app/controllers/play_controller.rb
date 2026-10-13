@@ -9,7 +9,7 @@ class PlayController < ApplicationController
   end
 
   def index
-    scope = params.permit(:game_type, :length, :sport_id, :league_id, :conference_id, :division_id,
+    scope = params.permit(:game_type, :length, :sport_id, :league_id, :season_id, :conference_id, :division_id,
       :team_id, :city_id, :state_id, :include_inactive, team_ids: [])
     return redirect_to new_game_round_path(scope) if scope.present?
     return unless current_ace

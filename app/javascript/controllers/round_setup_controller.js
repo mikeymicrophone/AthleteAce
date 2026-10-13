@@ -11,6 +11,21 @@ export default class extends Controller {
     this.element.requestSubmit()
   }
 
+  gameChanged() {
+    if (this.element.elements.game_type.value !== "player_team_match") this.clearSeason()
+    this.update()
+  }
+
+  seasonChanged() {
+    this.element.elements.team_query.value = ""
+    this.update()
+  }
+
+  clearSeason() {
+    const field = this.element.elements.season_id
+    if (field) field.disabled = true
+  }
+
   anyTeam() {
     for (const field of this.element.querySelectorAll('[name="team_ids[]"]')) {
       field.checked = false
@@ -20,11 +35,13 @@ export default class extends Controller {
 
   sportChanged() {
     this.element.elements.league_id.value = ""
+    this.clearSeason()
     this.clearTeams()
     this.update()
   }
 
   leagueChanged() {
+    this.clearSeason()
     this.clearTeams()
     this.update()
   }

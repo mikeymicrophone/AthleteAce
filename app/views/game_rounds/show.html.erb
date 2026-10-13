@@ -24,7 +24,7 @@
       <% end %>
     <% else %>
       <%= tag.section class: "round-subject" do %>
-        <%= tag.p @round.game_type == "player_team_match" ? "Which team is this player on?" : "Which division is this team in?", class: "round-question-prompt" %>
+        <%= tag.p @round.question["season_name"].present? ? "Which team is this player listed with for #{@round.question.fetch('season_name')}?" : (@round.game_type == "player_team_match" ? "Which team is this player on?" : "Which division is this team in?"), class: "round-question-prompt" %>
         <%= entity_avatar @subject, size: :large if @subject %>
         <%= tag.h1 @round.question.fetch("subject_name"), class: "page-title", tabindex: -1, data: { round_target: "heading" } %>
       <% end %>

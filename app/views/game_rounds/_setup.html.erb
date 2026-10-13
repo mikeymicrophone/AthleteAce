@@ -13,7 +13,7 @@
     <%= tag.div class: "round-game-options" do %>
       <% [["player_team_match", "Player → team", "shield"], ["guess_the_division", "Team → division", "target"]].each do |value, description, glyph| %>
         <%= tag.label class: "round-option round-game-option" do %>
-          <%= form.radio_button :game_type, value, checked: @setup.game_type == value, data: { action: "change->round-setup#update" } %>
+          <%= form.radio_button :game_type, value, checked: @setup.game_type == value, data: { action: "change->round-setup#gameChanged" } %>
           <%= icon glyph, size: 24 %>
           <%= tag.span do %>
             <%= tag.strong GameRound::GAMES.fetch(value) %>
@@ -35,6 +35,18 @@
       <%= tag.div do %>
         <%= form.label :league_id, "League" %>
         <%= form.collection_select :league_id, @setup.leagues, :id, :name, { include_blank: "All leagues", selected: @setup.league_id }, data: { action: "change->round-setup#leagueChanged" } %>
+      <% end %>
+    <% end %>
+    <% if @setup.game_type == "player_team_match" %>
+      <%= tag.div class: "round-season-select" do %>
+        <%= form.label :season_id, "Roster season" %>
+        <%= form.collection_select :season_id, @setup.seasons, :id, :name, {include_blank: "Current teams", selected: @setup.season_id}, data: {action: "change->round-setup#seasonChanged"} %>
+        <% if @setup.season %>
+          <%= tag.p "Uses recorded memberships and roster listings for this season, including players who are inactive today. Coverage may be partial.", class: "round-caption" %>
+          <% if @setup.valid? && @setup.season_pool.ambiguous_count.positive? %>
+            <%= tag.p "#{pluralize(@setup.season_pool.ambiguous_count, 'player')} listed with multiple teams this season left out to keep answers unambiguous.", class: "round-caption" %>
+          <% end %>
+        <% end %>
       <% end %>
     <% end %>
     <% if @setup.conference_id || @setup.division_id || @setup.city_id || @setup.state_id %>
@@ -60,7 +72,7 @@
       <% end %>
     <% end %>
     <%= tag.p "Showing up to 100 matches plus your selected teams. Search to narrow the list.", class: "round-caption" if @setup.teams.count > 100 %>
-    <% if @setup.game_type == "player_team_match" %>
+    <% if @setup.game_type == "player_team_match" && !@setup.season_id %>
       <%= tag.label class: "round-inactive" do %>
         <%= form.check_box :include_inactive, { checked: @setup.include_inactive, data: { action: "change->round-setup#update" } }, "true", "false" %>
         <%= tag.span "Include inactive players" %>

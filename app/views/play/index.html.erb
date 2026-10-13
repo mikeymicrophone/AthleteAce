@@ -50,7 +50,7 @@
           <ul class="play-player-list">
             <% @misses.each do |miss| %>
               <% player = miss.fetch(:player) %>
-              <li><%= entity_avatar player %><div><%= link_to player.name, player_path(player), class: "play-quest-name" %><p><%= player.team.name %><% if player.current_position.present? %> · <%= player.current_position %><% end %></p><span class="play-miss-count">Missed <%= miss[:misses] %>×</span></div></li>
+              <li><%= entity_avatar player %><div><%= link_to player.name, player_path(player), class: "play-quest-name" %><p><%= miss.fetch(:team).name %><% if miss[:season_name].present? %> · <%= miss[:season_name] %><% end %><% if player.current_position.present? %> · <%= player.current_position %><% end %></p><span class="play-miss-count">Missed <%= miss[:misses] %>×</span></div></li>
             <% end %>
           </ul>
           <%= button_to "Drill these #{@misses.size}", play_drill_misses_path, class: "game-button" %>
