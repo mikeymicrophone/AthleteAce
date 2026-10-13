@@ -24,6 +24,7 @@ class GameRoundsController < ApplicationController
     return redirect_to summary_game_round_path(@round) if @round.completed?
 
     @attempt = @round.current_attempt
+    @miss_count = @round.miss_count_for(@attempt)
     @stats = @round.stats
     type = GameAttempt::GAME_TYPES.fetch(@round.game_type).first
     @subject = (type == "Player" ? Player : Team).find_by id: @round.question.fetch("subject_id")

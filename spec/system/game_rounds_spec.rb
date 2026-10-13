@@ -54,6 +54,7 @@ RSpec.describe "Saved rounds", type: :system do
     find(".round-choice[value='#{wrong.fetch('id')}']").click
     expect(page).to have_css(".round-feedback", text: /Not quite/i)
     expect(page).to have_css(".round-choice-wrong", count: 1)
+    expect(page).to have_css(".round-miss-count", text: "Missed 1×")
     page.save_screenshot Rails.root.join("tmp/screenshots/round-feedback-mobile.png")
     page.refresh
     expect(page).to have_css(".round-feedback", text: /Not quite/i)
@@ -116,5 +117,32 @@ RSpec.describe "Saved rounds", type: :system do
     click_link "Game history", match: :first
     expect(page).to have_css(".history-attempt", count: 2)
     expect(page).to have_link("View round", count: 2)
+  end
+
+  it "shows team blocks and a jersey fallback when a recorded player photo fails" do
+    player = Player.find_by!(first_name: "Aaron", last_name: "Judge")
+    player.update!(photo_urls: [ "/missing-athlete-photo.jpg" ], current_position: "Outfield")
+    team.update!(primary_color: "#003087")
+    rival.update!(primary_color: "#BD3039")
+    visit new_game_round_path(team_id: team.id)
+    click_button "Start round"
+    expect(page).to have_css(".round-game-progress", text: "1 / 1")
+    expect(page).to have_css('.round-athlete-portrait[data-image-state="fallback"] .round-jersey', visible: true)
+    expect(page).to have_css(".round-subject-details", text: "Outfield")
+    expect(page).to have_css(".round-team-answer", count: 2)
+    expect(page).to have_css(".round-answer-territory", text: "New York")
+    expect(page).to have_css(".round-answer-club", text: "Yankees")
+    page.save_screenshot Rails.root.join("tmp/screenshots/round-team-cards-desktop.png")
+    phone_viewport
+    no_overflow
+    page.save_screenshot Rails.root.join("tmp/screenshots/round-team-cards-mobile.png")
+    page.execute_script("document.documentElement.dataset.theme = 'dark'")
+    no_overflow
+    page.save_screenshot Rails.root.join("tmp/screenshots/round-team-cards-dark.png")
+    find(".round-choice[value='#{rival.id}']").click
+    expect(page).to have_css(".round-miss-count", text: "Missed 1×")
+    expect(page).to have_css(".round-choice-correct", count: 1)
+    expect(page).to have_css(".round-choice-wrong", count: 1)
+    page.save_screenshot Rails.root.join("tmp/screenshots/round-team-cards-feedback-dark.png")
   end
 end

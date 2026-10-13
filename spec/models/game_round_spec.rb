@@ -52,6 +52,22 @@ RSpec.describe GameRound do
     expect(saved_round.current_attempt).to have_attributes(target_entity: team, is_correct: true)
   end
 
+  it "counts misses for the same matchup since the last correct answer without mixing other aces or targets" do
+    2.times { create(:game_attempt, ace: ace, subject_entity: player, target_entity: team, is_correct: false) }
+    create(:game_attempt, subject_entity: player, target_entity: team, is_correct: false)
+    create(:game_attempt, ace: ace, subject_entity: player, target_entity: rival, is_correct: false)
+    round.answer!(at: 0, choice_id: rival.id)
+    first_miss = round.current_attempt
+    expect(round.miss_count_for(first_miss)).to eq(3)
+    round.advance!(at: 0)
+    round.answer!(at: 1, choice_id: team.id)
+    expect(round.miss_count_for(round.current_attempt)).to eq(0)
+    round.advance!(at: 1)
+    round.answer!(at: 2, choice_id: nil)
+    expect(round.miss_count_for(round.current_attempt)).to eq(1)
+    expect(round.miss_count_for(first_miss)).to eq(3)
+  end
+
   it "finishes only after advancing the last answer and drills each missed subject once" do
     10.times do |position|
       round.answer! at: position, choice_id: [ 1, 3 ].include?(position) ? nil : team.id

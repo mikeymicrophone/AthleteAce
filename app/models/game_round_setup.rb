@@ -218,8 +218,17 @@ class GameRoundSetup
       choices = ((pool - [ target ]).sample(5) + [ target ]).shuffle
       { subject_type: subject.class.name, subject_id: subject.id, subject_name: subject.name,
         target_type: target.class.name, target_id: target.id, target_name: target.name,
-        choices: choices.map { |item| { id: item.id, name: item.name, abbreviation: item.abbreviation } } }.tap do |question|
+        choices: choices.map { |item|
+          { id: item.id, name: item.name, abbreviation: item.abbreviation }.tap do |choice|
+            choice.merge!(territory: item.territory, mascot: item.mascot, primary_color: item.primary_color) if item.is_a?(Team)
+          end
+        } }.tap do |question|
         question[:season_name] = season.name if season
+        if subject.is_a?(Player)
+          question[:subject_photo_url] = subject.photo_url
+          question[:subject_primary_color] = target.primary_color
+          question[:subject_position] = subject.current_position unless season
+        end
       end
     end
     label = drill ? "Recent misses · Team Match" : scope_label

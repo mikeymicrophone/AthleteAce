@@ -35,8 +35,16 @@
           <%= tag.h1 @round.question.fetch("scrambled_name"), class: "round-cipher-name", tabindex: -1, data: { round_target: "heading" } %>
           <%= tag.p "Same letters. A familiar name.", class: "round-caption" %>
         <% else %>
-          <%= entity_avatar @subject, size: :large if @subject %>
-          <%= tag.h1 @round.question.fetch("subject_name"), class: "page-title", tabindex: -1, data: { round_target: "heading" } %>
+          <% if @round.game_type == "player_team_match" %>
+            <%= round_player_portrait @round.question, @subject %>
+          <% else %>
+            <%= entity_avatar @subject, size: :large if @subject %>
+          <% end %>
+          <%= tag.div class: "round-subject-details" do %>
+            <%= tag.p @round.game_type == "player_team_match" ? "Know the player. Find the team." : "Find their place in the league.", class: "eyebrow" %>
+            <%= tag.h1 @round.question.fetch("subject_name"), class: "page-title", tabindex: -1, data: { round_target: "heading" } %>
+            <%= tag.p @round.question["subject_position"], class: "round-caption" if @round.question["subject_position"].present? %>
+          <% end %>
         <% end %>
       <% end %>
       <%= form_with url: answer_game_round_path(@round), data: { action: "turbo:submit-start->round#submitting turbo:submit-end->round#submitted" } do |form| %>
@@ -48,6 +56,18 @@
               <%= tag.span index + 1, class: "round-choice-key", aria: { hidden: true } %>
               <% if @round.game_type == "name_ciphers" %>
                 <%= tag.strong choice.fetch("name"), class: "round-choice-name" %>
+              <% elsif @round.game_type == "player_team_match" %>
+                <%= tag.span class: "round-team-answer" do %>
+                  <%= round_answer_badge choice %>
+                  <%= tag.span class: "round-answer-identity" do %>
+                    <% if choice["territory"].present? && choice["mascot"].present? %>
+                      <%= tag.span choice.fetch("territory"), class: "round-answer-territory" %>
+                      <%= tag.strong choice.fetch("mascot"), class: "round-answer-club" %>
+                    <% else %>
+                      <%= tag.strong choice.fetch("name"), class: "round-answer-club" %>
+                    <% end %>
+                  <% end %>
+                <% end %>
               <% else %>
                 <%= tag.strong choice["abbreviation"].presence || choice.fetch("name"), class: "round-choice-abbreviation" %>
                 <%= tag.span choice.fetch("name") %>
@@ -66,7 +86,12 @@
       <% if @attempt %>
         <%= tag.section class: "round-feedback #{@attempt.correct? ? 'round-feedback-correct' : 'round-feedback-wrong'}", role: "status", tabindex: -1, data: { round_target: "feedback" } do %>
           <%= tag.h2 "#{@attempt.correct? ? 'Correct' : 'Not quite'} — #{@round.question.fetch('target_name')}", class: "profile-section-title" %>
-          <%= tag.p @attempt.correct? ? "Streak #{@stats[:streak]} this round." : "Saved to this round’s misses. You can drill it after the round." %>
+          <% if @attempt.correct? %>
+            <%= tag.p "Streak #{@stats[:streak]} this round." %>
+          <% else %>
+            <%= tag.p "Missed #{@miss_count}× on this matchup · Saved to this round’s misses.", class: "round-miss-count" %>
+            <%= tag.p "You can drill it after the round." %>
+          <% end %>
         <% end %>
         <%= button_to @round.position == @round.length - 1 ? "Round summary" : "Next", advance_game_round_path(@round),
           params: { position: @round.position }, class: "game-button round-next", data: { round_target: "next" },

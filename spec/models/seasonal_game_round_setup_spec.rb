@@ -19,7 +19,8 @@ RSpec.describe "Seasonal round setup" do
   end
 
   it "uses the chosen season instead of current team and inactive status" do
-    old_knick = create(:player, team: third, active: false)
+    old_knick = create(:player, team: third, active: false, current_position: "Current position")
+    knicks.update!(primary_color: "#006BB6")
     net = create(:player, team: nil, active: false)
     membership(old_knick, knicks)
     membership(net, nets)
@@ -31,6 +32,13 @@ RSpec.describe "Seasonal round setup" do
     expect(round.questions.map { |q| [ q.fetch("subject_id"), q.fetch("target_id") ] }.uniq).to match_array([ [ old_knick.id, knicks.id ], [ net.id, nets.id ] ])
     expect(round.questions.all? { |q| q.fetch("season_name") == season.name }).to be(true)
     snapshot = round.questions.deep_dup
+    old_question = snapshot.find { |question| question.fetch("subject_id") == old_knick.id }
+    expect(old_question.fetch("subject_primary_color")).to eq("#006BB6")
+    expect(old_question).not_to have_key("subject_position")
+    knicks.update!(territory: "Changed territory", primary_color: "#FFFFFF")
+    expect(old_question.fetch("choices").find { |choice| choice.fetch("id") == knicks.id }).to include(
+      "territory" => "New York", "mascot" => "Knicks", "primary_color" => "#006BB6"
+    )
     membership(old_knick, nets)
     old_knick.update!(team: nil)
     round.answer!(at: 0, choice_id: round.question.fetch("target_id"))

@@ -33,6 +33,16 @@ class GameRound < ApplicationRecord
     questions.map { |item| [ item.fetch("subject_type"), item.fetch("subject_id") ] }.uniq.size < questions.size
   end
 
+  def miss_count_for(attempt)
+    return 0 unless attempt && attempt.game_round_id == id && !attempt.correct?
+
+    history = ace.game_attempts.where(game_type: game_type, subject_entity_type: attempt.subject_entity_type,
+      subject_entity_id: attempt.subject_entity_id, target_entity_type: attempt.target_entity_type,
+      target_entity_id: attempt.target_entity_id, id: ..attempt.id)
+    last_correct = history.where(is_correct: true).maximum(:id) || 0
+    history.where(is_correct: false).where("id > ?", last_correct).count
+  end
+
   # Lock the round and identify the question, so retries and stale tabs cannot
   # record twice or accidentally answer the following question.
   def answer!(at:, choice_id:)

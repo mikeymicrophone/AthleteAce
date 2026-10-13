@@ -8,14 +8,37 @@ module GameRoundsHelper
   end
 
   def round_team_badge(team)
-    color = team.primary_color.to_s
-    style = if color.match?(/\A#[0-9a-f]{6}\z/i)
-      red, green, blue = color.delete_prefix("#").scan(/../).map { |part| part.to_i(16) }
-      ink = (red * 299 + green * 587 + blue * 114) / 1000 > 155 ? "#131418" : "#FFFFFF"
-      "--team-color: #{color}; --team-ink: #{ink};"
-    end
     abbreviation = team.abbreviation.presence || team.name.split.filter_map { |word| word[0] }.first(3).join.upcase
-    tag.span abbreviation, class: "round-team-badge", style: style, aria: { hidden: true }
+    tag.span abbreviation, class: "round-team-badge", style: round_color_style(team.primary_color), aria: { hidden: true }
+  end
+
+  def round_color_style(color)
+    color = color.to_s
+    return unless color.match?(/\A#[0-9a-f]{6}\z/i)
+
+    red, green, blue = color.delete_prefix("#").scan(/../).map { |part| part.to_i(16) }
+    ink = (red * 299 + green * 587 + blue * 114) / 1000 > 155 ? "#131418" : "#FFFFFF"
+    "--team-color: #{color}; --team-ink: #{ink};"
+  end
+
+  def round_answer_badge(choice)
+    abbreviation = choice["abbreviation"].presence || choice.fetch("name").split.filter_map { |word| word[0] }.first(3).join.upcase
+    tag.span abbreviation, class: "round-team-badge", style: round_color_style(choice["primary_color"]), aria: { hidden: true }
+  end
+
+  def round_player_portrait(question, player)
+    photo_url = question.key?("subject_photo_url") ? question["subject_photo_url"] : player&.photo_url
+    tag.div class: "round-athlete-portrait", style: round_color_style(question["subject_primary_color"]),
+      data: { controller: "entity-image" }, aria: { hidden: true } do
+      fallback = tag.div class: "round-jersey", data: { entity_image_target: "fallback" } do
+        icon("jersey", size: 112)
+      end
+      photo = if photo_url.present?
+        tag.img src: photo_url, alt: "", class: "round-athlete-photo hidden",
+          data: { entity_image_target: "image", action: "load->entity-image#loaded error->entity-image#failed" }
+      end
+      safe_join [ fallback, photo ].compact
+    end
   end
 
   def round_scope_fields(form, setup, except: [])

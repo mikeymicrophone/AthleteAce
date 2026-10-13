@@ -62,6 +62,14 @@
 .round-question-prompt { @apply col-span-full font-mono text-xs uppercase text-ink-2 mb-5; }
 .round-subject .entity-avatar { @apply w-24 h-28 sm:w-32 sm:h-36; }
 .round-subject .page-title { @apply text-4xl sm:text-5xl; overflow-wrap: anywhere; }
+.round-subject-details { @apply min-w-0; }
+.round-subject-details .eyebrow { @apply mb-3 text-xs tracking-normal; }
+.round-subject-details .round-caption { @apply mt-3; }
+.round-athlete-portrait { @apply relative shrink-0 w-24 h-28 sm:w-32 sm:h-36 overflow-hidden rounded-tool border border-line; background: var(--team-color, var(--color-surface-3)); color: var(--team-ink, var(--color-ink-2)); }
+.round-jersey { @apply flex items-center justify-center h-full; }
+.round-jersey .ace-icon { @apply w-20 h-20 sm:w-28 sm:h-28; }
+.round-jersey.hidden { display: none; }
+.round-athlete-photo { @apply absolute inset-0 w-full h-full object-cover object-top; }
 .round-subject .page-title:focus, .round-feedback:focus { outline: none; }
 .round-choices { @apply grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4; }
 .round-choice { @apply relative flex flex-col justify-center items-start gap-2 text-left min-h-32 p-4 sm:p-5 rounded-tool border-2 border-ink bg-surface text-ink shadow-press cursor-pointer; }
@@ -69,6 +77,11 @@
 .round-choice:focus-visible { @apply outline-2 outline-offset-4 outline-accent-text; }
 .round-choice-key { @apply text-xs font-mono text-ink-3; }
 .round-choice-abbreviation { @apply font-display text-3xl; }
+.round-team-answer { @apply flex flex-wrap items-center gap-3 w-full; }
+.round-team-answer .round-team-badge { @apply w-11 h-12 text-lg; }
+.round-answer-identity { @apply min-w-0 flex-1; }
+.round-answer-territory { @apply block text-xs leading-snug; }
+.round-answer-club { @apply block font-display text-2xl leading-tight mt-1; overflow-wrap: anywhere; }
 .round-choice > span:not(.round-choice-key):not(.round-choice-status) { @apply text-sm; }
 .round-choice-status { @apply inline-flex gap-1 items-center text-xs font-semibold; }
 .round-choice-correct { @apply bg-ok-tint text-ok-ink border-ok-ink shadow-none; }
@@ -79,6 +92,7 @@
 .round-feedback { @apply rounded-card border p-5 mt-6 text-sm; }
 .round-feedback-correct { @apply bg-ok-tint border-ok text-ok-ink; }
 .round-feedback-wrong { @apply bg-bad-tint border-bad text-bad-ink; }
+.round-miss-count { @apply font-semibold mb-2; }
 .round-feedback .profile-section-title { color: inherit; }
 .round-next { @apply w-full mt-5; }
 .round-play-footer { @apply flex flex-wrap items-center gap-4 mt-6; }
