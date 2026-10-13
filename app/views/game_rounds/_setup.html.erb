@@ -8,7 +8,6 @@
   <% [:conference_id, :division_id, :city_id, :state_id].each do |key| %>
     <%= form.hidden_field key, value: @setup.public_send(key) if @setup.public_send(key) %>
   <% end %>
-  <% @setup.team_ids.each do |id| %><%= hidden_field_tag "team_ids[]", id %><% end %>
   <%= tag.fieldset class: "round-panel" do %>
     <%= tag.legend "01 · Pick a game", class: "round-step" %>
     <%= tag.div class: "round-game-options" do %>
@@ -38,32 +37,29 @@
         <%= form.collection_select :league_id, @setup.leagues, :id, :name, { include_blank: "All leagues", selected: @setup.league_id }, data: { action: "change->round-setup#leagueChanged" } %>
       <% end %>
     <% end %>
-    <% if @setup.team_ids.any? || @setup.conference_id || @setup.division_id || @setup.city_id || @setup.state_id %>
+    <% if @setup.conference_id || @setup.division_id || @setup.city_id || @setup.state_id %>
       <%= tag.p "Focused scope · #{@setup.scope_label}", class: "round-caption" %>
       <%= link_to "Choose a different scope", new_game_round_path(game_type: @setup.game_type, length: @setup.length), class: "tool-link" %>
-    <% else %>
-      <%= tag.div class: "round-team-search" do %>
-        <%= form.label :team_query, "Search teams" %>
-        <%= form.search_field :team_query, value: @setup.team_query, placeholder: "Team name or abbreviation" %>
-        <%= form.submit "Search", class: "tool-button" %>
-      <% end %>
-      <%= tag.div class: "round-team-options", role: "group", aria: { label: "Team" } do %>
-        <%= tag.label class: "round-option" do %>
-          <%= form.radio_button :team_id, "", checked: @setup.team_id.nil?, data: { action: "change->round-setup#update" } %>
-          <%= tag.span "Any team" %>
-        <% end %>
-        <% selectable = @setup.selectable_teams.to_a %>
-        <% selectable.unshift(@setup.team) if @setup.team && !selectable.include?(@setup.team) %>
-        <% selectable.each do |team| %>
-          <%= tag.label class: "round-option" do %>
-            <%= form.radio_button :team_id, team.id, checked: @setup.team_id == team.id, data: { action: "change->round-setup#update" } %>
-            <%= tag.span team.abbreviation, class: "round-team-abbreviation" %>
-            <%= tag.span team.name %>
-          <% end %>
-        <% end %>
-      <% end %>
-      <%= tag.p "Showing up to 100 teams. Search to narrow the list.", class: "round-caption" if @setup.teams.count > 100 %>
     <% end %>
+    <%= tag.div class: "round-team-search" do %>
+      <%= form.label :team_query, "Search teams" %>
+      <%= form.search_field :team_query, value: @setup.team_query, placeholder: "Team name or abbreviation" %>
+      <%= form.submit "Search", class: "tool-button" %>
+    <% end %>
+    <%= tag.div class: "round-team-selection" do %>
+      <%= tag.p "#{pluralize(@setup.selected_team_ids.size, 'team')} selected · Choose up to 30. Leave all unchecked for any team.", class: "round-caption" %>
+      <%= tag.button "Any team", type: "button", class: "tool-button", disabled: @setup.selected_team_ids.empty?, data: { action: "round-setup#anyTeam" } %>
+    <% end %>
+    <%= tag.div class: "round-team-options", role: "group", aria: { label: "Teams" } do %>
+      <% @setup.team_options.each do |team| %>
+        <%= tag.label class: "round-option" do %>
+          <%= check_box_tag "team_ids[]", team.id, @setup.selected_team_ids.include?(team.id), id: "round_team_#{team.id}", data: { action: "change->round-setup#update" } %>
+          <%= tag.span team.abbreviation, class: "round-team-abbreviation" %>
+          <%= tag.span team.name %>
+        <% end %>
+      <% end %>
+    <% end %>
+    <%= tag.p "Showing up to 100 matches plus your selected teams. Search to narrow the list.", class: "round-caption" if @setup.teams.count > 100 %>
     <% if @setup.game_type == "player_team_match" %>
       <%= tag.label class: "round-inactive" do %>
         <%= form.check_box :include_inactive, { checked: @setup.include_inactive, data: { action: "change->round-setup#update" } }, "true", "false" %>

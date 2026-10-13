@@ -48,11 +48,17 @@ class GameRoundSetup
     scope.order(:territory, :mascot).limit(100)
   end
 
+  def selected_team_ids
+    team_ids.any? ? team_ids.map(&:to_i) : [ team_id ].compact
+  end
+
+  def team_options
+    selected = teams.where(id: selected_team_ids).order(:territory, :mascot).to_a
+    selected + (selectable_teams.to_a - selected)
+  end
+
   def scoped_teams
-    scope = teams
-    scope = scope.where(id: team_id) if team_id
-    scope = scope.where(id: team_ids) if team_ids.any?
-    scope
+    selected_team_ids.any? ? teams.where(id: selected_team_ids) : teams
   end
 
   def subjects
@@ -61,7 +67,7 @@ class GameRoundSetup
       Team.where(id: scoped_teams.joins(:division).where(league_id: playable_leagues).select(:id))
     else
       playable_leagues = Team.group(:league_id).having("COUNT(*) >= 2").select(:league_id)
-      pool = team_ids.any? ? scoped_teams : scoped_teams.where(league_id: playable_leagues)
+      pool = selected_team_ids.size > 1 ? scoped_teams : scoped_teams.where(league_id: playable_leagues)
       scope = Player.where(team_id: pool.select(:id))
       scope = scope.where(active: [ true, nil ]) unless include_inactive
       scope
@@ -78,12 +84,13 @@ class GameRoundSetup
     names << Division.find_by(id: division_id)&.name if division_id
     names << City.find_by(id: city_id)&.name if city_id
     names << State.find_by(id: state_id)&.name if state_id
-    names << (team&.name || (team_ids.any? ? Team.where(id: team_ids).map(&:name).join(" + ") : "Any team"))
+    names << (selected_team_ids.any? ? teams.where(id: selected_team_ids).order(:territory, :mascot).map(&:name).join(" + ") : "Any team")
     names.compact.join " · "
   end
 
   def scope_params
-    attributes.except("team_query").compact
+    fields = attributes.except("team_query").compact
+    team_ids.any? ? fields.except("team_id") : fields
   end
 
   def start!(ace)
@@ -127,7 +134,7 @@ class GameRoundSetup
   def choice_pool(subject)
     return subject.league.divisions.to_a unless game_type == "player_team_match"
 
-    (team_ids.any? ? Team.where(id: team_ids) : subject.league.teams).to_a
+    (selected_team_ids.size > 1 ? Team.where(id: selected_team_ids) : subject.league.teams).to_a
   end
 
   def valid_scope
@@ -138,8 +145,8 @@ class GameRoundSetup
     errors.add(:division, "is no longer available") if division_id && !Division.exists?(division_id)
     errors.add(:city, "is no longer available") if city_id && !City.exists?(city_id)
     errors.add(:state, "is no longer available") if state_id && !State.exists?(state_id)
-    if team_ids.any? && (team_ids.map(&:to_i).uniq.size < 2 || team_ids.size > 30 || teams.where(id: team_ids).count != team_ids.map(&:to_i).uniq.size)
-      errors.add :base, "Select between 2 and 30 available teams for a team-pair drill."
+    if team_ids.any? && (team_ids.map(&:to_i).uniq.size != team_ids.size || team_ids.size > 30 || teams.where(id: team_ids).count != team_ids.map(&:to_i).uniq.size)
+      errors.add :base, "Select between 1 and 30 different teams within the selected scope."
     end
   end
 end

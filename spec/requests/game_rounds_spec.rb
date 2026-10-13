@@ -17,13 +17,25 @@ RSpec.describe "Game rounds", type: :request do
     expect(response.location).to include("/play/rounds/new", "team_id=#{team.id}", "length=20")
   end
 
+  it "preserves multiple selected teams through sign-in" do
+    get new_game_round_path, params: { team_ids: [ team.id, rival.id ], length: 20 }
+    doc = Nokogiri::HTML(response.body)
+    expect(doc.css('.round-team-options input[type="checkbox"][checked]').size).to eq(2)
+    post game_rounds_path, params: { team_ids: [ team.id, rival.id ] }
+    expect(response).to redirect_to(new_ace_session_path)
+    post ace_session_path, params: { ace: { email: ace.email, password: "password123" } }
+    selection = Rack::Utils.parse_nested_query(URI.parse(response.location).query)
+    expect(selection.fetch("team_ids")).to match_array([ team.id.to_s, rival.id.to_s ])
+    expect(selection.fetch("length")).to eq("20")
+  end
+
   it "does not disclose or modify another ace's rounds" do
     owned_round = round
     intruder = create(:ace)
-    [[:get, game_round_path(owned_round)], [:get, summary_game_round_path(owned_round)],
-      [:post, answer_game_round_path(owned_round)], [:post, pause_game_round_path(owned_round)],
-      [:post, resume_game_round_path(owned_round)], [:post, advance_game_round_path(owned_round)],
-      [:post, drill_game_round_path(owned_round)]].each do |method, path|
+    [ [ :get, game_round_path(owned_round) ], [ :get, summary_game_round_path(owned_round) ],
+      [ :post, answer_game_round_path(owned_round) ], [ :post, pause_game_round_path(owned_round) ],
+      [ :post, resume_game_round_path(owned_round) ], [ :post, advance_game_round_path(owned_round) ],
+      [ :post, drill_game_round_path(owned_round) ] ].each do |method, path|
       sign_in intruder
       public_send method, path
       expect(response).to have_http_status(:not_found)
@@ -33,7 +45,7 @@ RSpec.describe "Game rounds", type: :request do
 
   it "renders errors for an empty scope and never accepts a forged question list" do
     sign_in ace
-    post game_rounds_path, params: { team_id: rival.id, questions: [{ target_id: team.id }] }
+    post game_rounds_path, params: { team_id: rival.id, questions: [ { target_id: team.id } ] }
     expect(response).to have_http_status(:unprocessable_content)
     expect(response.body).to include("No playable questions")
     expect(GameRound.count).to eq(0)

@@ -87,3 +87,4 @@
 .round-result-number { @apply font-mono text-sm text-ink-3; }
 .round-result-subject { @apply inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-4; }
 .round-result .history-result { @apply shrink-0; }
+.round-team-selection { @apply flex flex-wrap items-center justify-between gap-3 mb-3; }
