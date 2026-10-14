@@ -14,7 +14,7 @@
       <%= tag.div class: "goal-detail-content" do %>
         <%= tag.div class: "goal-progress-stats" do %>
           <%= tag.span "Progress" %>
-          <%= tag.span "#{goal.progress} / #{goal.quest.highlights.required.count} achievements" %>
+          <%= tag.span "#{goal.progress} / #{goal.quest.highlights.public_requirements.required.count} achievements" %>
         <% end %>
         
         <%= goal_progress_bar goal, show_percentage: false, size: :small %>

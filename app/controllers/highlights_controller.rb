@@ -9,16 +9,16 @@ class HighlightsController < ApplicationController
   def new
     if params[:achievement_id].present?
       # Coming from achievement index - select a quest
-      @achievement = Achievement.find(params[:achievement_id])
+      @achievement = Achievement.visible_to(current_ace).find(params[:achievement_id])
       @highlight = Highlight.new(achievement: @achievement)
-      @available_quests = Quest.where.not(id: @achievement.quest_ids)
+      @available_quests = Quest.visible_to(current_ace).where.not(id: @achievement.quest_ids)
       render :new_from_achievement
     else
       # Coming from quest show - select an achievement
-      @quest = Quest.find(params[:quest_id])
+      @quest = Quest.visible_to(current_ace).find(params[:quest_id])
       @highlight = @quest.highlights.new
       # Get achievements that aren't already part of this quest
-      @available_achievements = Achievement.where.not(id: @quest.achievement_ids)
+      @available_achievements = Achievement.visible_to(current_ace).where.not(id: @quest.achievement_ids)
     end
   end
   
@@ -32,30 +32,32 @@ class HighlightsController < ApplicationController
     if params[:highlight][:achievement_id].present? && params[:highlight][:quest_id].present?
       # Coming from the standalone form (achievement to quest)
       @highlight = Highlight.new(highlight_params)
-      quest = Quest.find(params[:highlight][:quest_id])
+      quest = Quest.visible_to(current_ace).find(params[:highlight][:quest_id])
       
       respond_to do |format|
+        @highlight.created_by = current_ace
         if @highlight.save
           format.html { redirect_to quest_path(quest), notice: "Achievement was successfully added to quest." }
           format.json { render json: @highlight, status: :created }
         else
-          @achievement = Achievement.find(params[:highlight][:achievement_id])
-          @available_quests = Quest.where.not(id: @achievement.quest_ids)
+          @achievement = Achievement.visible_to(current_ace).find(params[:highlight][:achievement_id])
+          @available_quests = Quest.visible_to(current_ace).where.not(id: @achievement.quest_ids)
           format.html { render :new_from_achievement, status: :unprocessable_content }
           format.json { render json: @highlight.errors, status: :unprocessable_content }
         end
       end
     else
       # Coming from the nested form (quest to achievement)
-      @quest = Quest.find(params[:quest_id])
+      @quest = Quest.visible_to(current_ace).find(params[:quest_id])
       @highlight = @quest.highlights.new(highlight_params)
       
       respond_to do |format|
+        @highlight.created_by = current_ace
         if @highlight.save
           format.html { redirect_to quest_path(@quest), notice: "Achievement was successfully added to quest." }
           format.json { render json: @highlight, status: :created }
         else
-          @available_achievements = Achievement.where.not(id: @quest.achievement_ids)
+          @available_achievements = Achievement.visible_to(current_ace).where.not(id: @quest.achievement_ids)
           format.html { render :new, status: :unprocessable_content }
           format.json { render json: @highlight.errors, status: :unprocessable_content }
         end
@@ -65,6 +67,7 @@ class HighlightsController < ApplicationController
   
   # PATCH/PUT /quests/:quest_id/highlights/:id
   def update
+    @highlight.moderation_editor = current_ace
     respond_to do |format|
       if @highlight.update(highlight_params)
         format.html { redirect_to quest_path(@quest), notice: "Highlight was successfully updated." }
@@ -89,7 +92,7 @@ class HighlightsController < ApplicationController
   private
   
   def set_quest
-    @quest = Quest.find(params[:quest_id])
+    @quest = Quest.visible_to(current_ace).find(params[:quest_id])
   end
   
   def set_highlight

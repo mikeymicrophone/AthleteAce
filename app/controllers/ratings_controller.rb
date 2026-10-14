@@ -7,9 +7,9 @@ class RatingsController < ApplicationController
   # GET /ratings
   def index
     @ratings = if params[:spectrum_id].present?
-      Spectrum.find(params[:spectrum_id]).ratings.active.includes(:target).order(created_at: :desc)
+      Spectrum.visible_to(current_ace).find(params[:spectrum_id]).ratings.active.includes(:target).order(created_at: :desc)
     else
-      current_ace.ratings.active.includes(:spectrum, :target).order(created_at: :desc)
+      current_ace.ratings.active.where(spectrum: Spectrum.visible_to(current_ace)).includes(:spectrum, :target).order(created_at: :desc)
     end
   end
 
@@ -25,11 +25,11 @@ class RatingsController < ApplicationController
     @spectrum_id = params[:spectrum_id]
     
     if @spectrum_id.present?
-      @spectrum = Spectrum.find(@spectrum_id)
+      @spectrum = Spectrum.visible_to(current_ace).find(@spectrum_id)
       @rating = current_ace.ratings.active.find_or_initialize_by(target: @target, spectrum: @spectrum)
     else
       @rating = Rating.new(target: @target)
-      @spectrums = Spectrum.all
+      @spectrums = Spectrum.visible_to(current_ace)
     end
   end
 
@@ -58,8 +58,8 @@ class RatingsController < ApplicationController
     @rating = e.record
     respond_to do |format|
       format.html do
-        @spectrum = Spectrum.find_by(id: @rating.spectrum_id)
-        @spectrums = @spectrum ? [@spectrum] : Spectrum.all
+        @spectrum = Spectrum.visible_to(current_ace).find_by(id: @rating.spectrum_id)
+        @spectrums = @spectrum ? [@spectrum] : Spectrum.visible_to(current_ace)
         render :new, status: :unprocessable_content
       end
       format.json { render json: { success: false, errors: @rating.errors.full_messages }, status: :unprocessable_content }
@@ -103,7 +103,7 @@ class RatingsController < ApplicationController
     # Find existing ratings for this ace, target, and spectrums
     ratings = current_ace ? current_ace.ratings.active
                          .where(target: @target)
-                         .where(spectrum_id: spectrum_ids)
+                         .where(spectrum_id: Spectrum.visible_to(current_ace).where(id: spectrum_ids).select(:id))
                          .includes(:spectrum) : Rating.none
     
     # Build response hash with spectrum_id as key and rating data as value
@@ -121,7 +121,7 @@ class RatingsController < ApplicationController
       format.json { render json: { ratings: ratings_hash } }
       format.turbo_stream do
         render turbo_stream: turbo_stream.update(helpers.rating_rows_id(@target),
-          partial: "ratings/slider_rows", locals: { record: @target, spectrums: Spectrum.where(id: spectrum_ids).order(:name) })
+          partial: "ratings/slider_rows", locals: { record: @target, spectrums: Spectrum.visible_to(current_ace).where(id: spectrum_ids).order(:name) })
       end
     end
   end
@@ -129,7 +129,7 @@ class RatingsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_rating
-      @rating = Rating.find(params[:id])
+      @rating = Rating.where(spectrum: Spectrum.visible_to(current_ace)).find(params[:id])
     end
     
     # Set the target for the rating based on the ratable_models configuration

@@ -5,7 +5,7 @@ class QuestsController < ApplicationController
 
   # GET /quests or /quests.json
   def index
-    @quests = Quest.includes(:highlights).order(:name)
+    @quests = Quest.visible_to(current_ace).includes(:highlights).order(:name)
     @quest_goals = current_ace ? current_ace.goals.where(quest: @quests).includes(quest: :highlights).index_by(&:quest_id) : {}
     @quest_participant_counts = Goal.where(quest: @quests).group(:quest_id).distinct.count(:ace_id)
   end
@@ -26,6 +26,7 @@ class QuestsController < ApplicationController
   # POST /quests or /quests.json
   def create
     @quest = Quest.new(quest_params)
+    @quest.created_by = current_ace
 
     respond_to do |format|
       if @quest.save
@@ -40,6 +41,7 @@ class QuestsController < ApplicationController
 
   # PATCH/PUT /quests/1 or /quests/1.json
   def update
+    @quest.moderation_editor = current_ace
     respond_to do |format|
       if @quest.update(quest_params)
         format.html { redirect_to @quest, notice: "Quest was successfully updated." }
@@ -65,7 +67,7 @@ class QuestsController < ApplicationController
   def random
     # Find quests the current ace hasn't started yet
     current_ace_quest_ids = current_ace.goals.pluck(:quest_id)
-    available_quests = Quest.where.not(id: current_ace_quest_ids)
+    available_quests = Quest.approved.where.not(id: current_ace_quest_ids)
     
     if available_quests.any?
       # Get a random quest
@@ -74,7 +76,7 @@ class QuestsController < ApplicationController
       render :show
     else
       # If the ace has started all quests, just show a random one
-      @quest = Quest.order("RANDOM()").first
+      @quest = Quest.approved.order("RANDOM()").first
       @random_mode = true
       
       if @quest
@@ -88,7 +90,7 @@ class QuestsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_quest
-      @quest = Quest.find(params.require(:id))
+      @quest = Quest.visible_to(current_ace).find(params.require(:id))
     end
 
     # Only allow a list of trusted parameters through.

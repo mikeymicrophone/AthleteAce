@@ -1,0 +1,3 @@
+<% content_for :title, "Moderation decisions" %>
+<% content_for :side, "mod" %>
+<div class="moderation-page"><%= link_to "Back to queue", moderation_path, class: "tool-link" %><header class="browse-header"><div><p class="eyebrow">Moderate</p><h1 class="page-title">Decision log</h1><p class="round-intro">The latest 100 decisions, including submissions and trusted creation.</p></div></header><%= render "decisions", decisions: @decisions %></div>

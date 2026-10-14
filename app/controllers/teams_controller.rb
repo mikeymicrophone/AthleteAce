@@ -46,7 +46,7 @@ class TeamsController < ApplicationController
     # Paginate the teams collection
     @pagy, @teams = pagy @teams, limit: per_page
 
-    @spectrums = Spectrum.all
+    @spectrums = Spectrum.visible_to(current_ace)
     
     # Set current spectrum ID if provided in params
     set_current_spectrum_id(params[:spectrum_id]) if params[:spectrum_id].present?

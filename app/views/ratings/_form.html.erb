@@ -14,7 +14,7 @@
   <% if local_assigns[:spectrum].nil? %>
     <div class="my-5">
       <%= form.label :spectrum_id, "Select Spectrum" %>
-      <%= form.collection_select :spectrum_id, Spectrum.all.order(:name), :id, :name, 
+      <%= form.collection_select :spectrum_id, Spectrum.visible_to(current_ace).order(:name), :id, :name,
           { prompt: "-- Select a Spectrum --" }, 
           { class: "block shadow-sm rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full" } %>
     </div>

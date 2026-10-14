@@ -31,7 +31,7 @@ class PlayersController < ApplicationController
       @players = base_query.order(:first_name)
     end
     
-    @spectrums = Spectrum.all
+    @spectrums = Spectrum.visible_to(current_ace)
     
     set_current_spectrum_id params[:spectrum_id] if params[:spectrum_id].present?
     
@@ -44,7 +44,7 @@ class PlayersController < ApplicationController
   def show
     load_current_filters
     @filtered_breadcrumb = build_filtered_breadcrumb @player, @current_filters
-    @spectrums = Spectrum.order :name
+    @spectrums = Spectrum.visible_to(current_ace).order :name
     @seasons = Season.where(id: @player.campaigns.select(:season_id)).includes(:year, :league).recent
 
     if ace_signed_in?

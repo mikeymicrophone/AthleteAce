@@ -1,0 +1,16 @@
+.moderation-page { @apply max-w-5xl mx-auto; }
+.moderation-page .page-title { overflow-wrap: anywhere; }
+.moderation-tabs { @apply flex flex-wrap gap-2 mb-4; }
+.moderation-tabs [aria-current=page] { @apply border-accent-text bg-accent-tint; }
+.moderation-list { @apply grid gap-3 my-5; }
+.moderation-row { @apply flex flex-wrap items-center justify-between gap-4 rounded-tool border border-line bg-surface p-5; }
+.moderation-row > div { @apply min-w-0 flex-1; }
+.moderation-row h2 { @apply font-display text-2xl my-2; overflow-wrap: anywhere; }
+.moderation-row p { overflow-wrap: anywhere; }
+.moderation-fields { @apply grid gap-2 text-sm; grid-template-columns: minmax(5rem, 1fr) minmax(0, 3fr); }
+.moderation-fields dt { @apply text-ink-2; }
+.moderation-fields dd { @apply whitespace-pre-wrap; overflow-wrap: anywhere; }
+.moderation-reason { @apply block w-full my-3 p-3 rounded-tool border border-line-2 bg-surface text-ink min-h-24; }
+.moderation-evaluation { @apply mt-5 pt-4 border-t border-line text-sm; }
+.moderation-evaluation h3 { @apply font-semibold mb-2; }
+.moderation-notice { @apply p-4 my-3 border border-dashed border-accent-text rounded-tool bg-accent-tint text-sm; }

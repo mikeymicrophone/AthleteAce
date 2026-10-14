@@ -21,6 +21,6 @@ class PlayController < ApplicationController
     @week = @history.current_week
     @unfinished_rounds = current_ace.game_rounds.unfinished.includes(:game_attempts).limit(3)
     @recent_rounds = current_ace.game_rounds.where.not(finished_at: nil).order(finished_at: :desc).limit(3)
-    @active_goals = current_ace.goals.active.includes(quest: :highlights).order(updated_at: :desc).limit(3)
+    @active_goals = current_ace.goals.active.where(quest: Quest.approved).includes(quest: :highlights).order(updated_at: :desc).limit(3)
   end
 end

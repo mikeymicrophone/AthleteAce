@@ -10,6 +10,9 @@ class ApplicationController < ActionController::Base
   after_action :store_browsing_location, unless: :devise_controller?
 
   helper_method :admin_signed_in?
+  rescue_from ActiveRecord::StaleObjectError do
+    render plain: "This content changed while you were editing. Reload and try again.", status: :conflict
+  end
 
   MAX_PER_PAGE = 100
 

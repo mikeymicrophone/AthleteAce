@@ -121,7 +121,7 @@ class StrengthController < ApplicationController
     elsif ace_signed_in? && no_scope_specified? &&
           filter_params[:team_id].blank? && filter_params[:sport_id].blank? && filter_params[:league_id].blank?
       # No scope specified, use quest teams for logged-in users
-      quest_teams = current_ace.active_goals.flat_map { |g| g.quest.associated_teams }.uniq
+      quest_teams = current_ace.active_goals.where(quest: Quest.approved).flat_map { |g| g.quest.associated_teams }.uniq
       unless quest_teams.empty?
         cross_sport = params[:cross_sport] == 'true'
         teams_pool  = cross_sport ? quest_teams : quest_teams.select { |t| t.sport.id == quest_teams.first.sport.id }

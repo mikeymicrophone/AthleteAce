@@ -1,6 +1,7 @@
 <% content_for :title, @quest.name %>
+<%= moderation_notice(@quest) %>
 <% goal = quest_goal(@quest) %>
-<% highlights = @quest.highlights.ordered.includes(achievement: :target).to_a %>
+<% highlights = @quest.highlights.visible_to(current_ace).where(achievement: Achievement.visible_to(current_ace)).ordered.includes(achievement: :target).to_a %>
 <div class="quest-detail" id="<%= dom_id @quest %>">
   <%= link_to "← All quests", quests_path, class: "tool-link" %>
   <% if @random_mode %>
@@ -27,7 +28,7 @@
       <section class="quest-achievements"><h3 class="eyebrow"><%= heading %></h3><ol>
         <% entries.each_with_index do |highlight, index| %>
           <% achievement = highlight.achievement %>
-          <li class="quest-achievement"><span class="quest-achievement-number"><%= format("%02d", index + 1) %></span><div class="quest-achievement-copy"><h4><%= link_to achievement.name, achievement_path(achievement) %></h4><p><%= achievement.description %></p><span class="entity-chip"><%= icon_for_resource achievement.target_type.underscore, size: 16 %><%= achievement.target ? link_to_name(achievement.target) : "Target unavailable" %></span></div>
+          <li class="quest-achievement"><span class="quest-achievement-number"><%= format("%02d", index + 1) %></span><div class="quest-achievement-copy"><%= moderation_notice(highlight) %><h4><%= link_to achievement.name, achievement_path(achievement) %></h4><p><%= achievement.description %></p><span class="entity-chip"><%= icon_for_resource achievement.target_type.underscore, size: 16 %><%= achievement.target ? link_to_name(achievement.target) : "Target unavailable" %></span></div>
             <div class="page-actions"><% if (practice_path = quest_practice_path(achievement)) %><%= link_to "Practice", practice_path, class: "tool-button", aria: { label: "Practice #{achievement.name}" } %><% end %>
               <% if admin_signed_in? %><%= link_to "Edit", edit_quest_highlight_path(@quest, highlight), class: "tool-link" %><%= button_to "Remove", quest_highlight_path(@quest, highlight), method: :delete, class: "tool-link", data: { turbo_confirm: "Remove this achievement from the quest?" } %><% end %>
             </div>

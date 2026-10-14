@@ -1,4 +1,5 @@
 class Achievement < ApplicationRecord
+  include Moderatable
   TARGET_TYPES = %w[Player Team Division Conference League Sport City State Country Federation].freeze
 
   has_many :highlights, dependent: :destroy

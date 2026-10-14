@@ -1,4 +1,5 @@
 class Quest < ApplicationRecord
+  include Moderatable
   has_many :highlights, dependent: :destroy
   has_many :achievements, through: :highlights
   has_many :goals, dependent: :destroy
@@ -22,18 +23,18 @@ class Quest < ApplicationRecord
   
   # Get required achievements for this quest
   def required_achievements
-    achievements.merge(Highlight.required)
+    achievements.approved.merge(Highlight.approved.required)
   end
   
   # Get optional achievements for this quest
   def optional_achievements
-    achievements.merge(Highlight.optional)
+    achievements.approved.merge(Highlight.approved.optional)
   end
   
   # Get teams associated with this quest's achievements
   def associated_teams
     teams = []
-    achievements.each do |achievement|
+    achievements.approved.merge(Highlight.approved).each do |achievement|
       case achievement.target
       when Team
         teams << achievement.target

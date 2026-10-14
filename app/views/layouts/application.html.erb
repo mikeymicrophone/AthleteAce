@@ -27,7 +27,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body data-side="play">
+  <body data-side="<%= content_for(:side).presence || "play" %>">
     <%= render "layouts/navigation" %>
     <main class="container app-main mx-auto px-4">
       <% if notice %>

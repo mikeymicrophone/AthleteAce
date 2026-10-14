@@ -10,11 +10,11 @@ module SpectrumsHelper
 
     if selected_ids.present?
       # Ensure selected IDs are valid spectrum IDs
-      Spectrum.where(id: selected_ids).pluck(:id)
+      Spectrum.visible_to(current_ace).where(id: selected_ids).pluck(:id)
     else
       # Default to Familiarity spectrum or first available spectrum
-      familiarity = Spectrum.find_by(name: 'Familiarity')
-      default_id = familiarity&.id || Spectrum.first&.id
+      familiarity = Spectrum.visible_to(current_ace).find_by(name: 'Familiarity')
+      default_id = familiarity&.id || Spectrum.visible_to(current_ace).first&.id
       default_id ? [default_id] : []
     end
   end
@@ -34,12 +34,12 @@ module SpectrumsHelper
   # @return [ActiveRecord::Relation<Spectrum>] The current selected spectrums
   def selected_spectrums
     ids = selected_spectrum_ids
-    result = Spectrum.where(id: ids).order(:name)
+    result = Spectrum.visible_to(current_ace).where(id: ids).order(:name)
     
     # If no spectrums are selected, return the first available spectrum for debugging
-    if result.empty? && Spectrum.exists?
+    if result.empty? && Spectrum.visible_to(current_ace).exists?
       Rails.logger.debug "[SpectrumsHelper] No spectrums selected, returning first spectrum"
-      Spectrum.limit(1)
+      Spectrum.visible_to(current_ace).limit(1)
     else
       result
     end
@@ -49,7 +49,7 @@ module SpectrumsHelper
   # @param limit [Integer] Maximum number of spectrums to return (currently unused but kept for consistency)
   # @return [ActiveRecord::Relation] Collection of spectrums
   def default_spectrums(limit = nil)
-    spectrums = Spectrum.all.order(:name)
+    spectrums = Spectrum.visible_to(current_ace).all.order(:name)
     limit.present? ? spectrums.limit(limit) : spectrums
   end
 
@@ -69,7 +69,7 @@ module SpectrumsHelper
           end
           buttons = tag.div class: "spectrum-buttons" do
             safe_join default_spectrums.map { |spectrum|
-              tag.button spectrum.name, type: "button", aria: { pressed: selected_ids.include?(spectrum.id) },
+              tag.button spectrum.approved? ? spectrum.name : "#{spectrum.name} · In review", type: "button", aria: { pressed: selected_ids.include?(spectrum.id) },
                 data: { action: "spectrum-picker#toggleSpectrum", spectrum_picker_target: "spectrumButton", spectrum_id: spectrum.id }
             }
           end

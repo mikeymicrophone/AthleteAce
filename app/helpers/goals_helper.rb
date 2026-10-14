@@ -162,7 +162,7 @@ module GoalsHelper
          tag.div do
            (tag.div(class: "goal-progress-stats") do
               (tag.span("Progress") +
-               tag.span("#{goal.progress} / #{goal.quest.highlights.required.count} achievements",
+               tag.span("#{goal.progress} / #{goal.quest.highlights.public_requirements.required.count} achievements",
                        class: "goal-progress-stats-value")).html_safe
             end +
             goal_progress_bar(goal)).html_safe

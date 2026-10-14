@@ -1,22 +1,20 @@
 module RatingsHelper
-  # UNUSED
   # Display ratings count for a record
   def ratings_count_display(record)
-    if record.ratings.active.any?
+    if record.ratings.active.where(spectrum: Spectrum.visible_to(current_ace)).any?
       tag.div class: "record-stats-count" do
-        tag.span pluralize(record.ratings.active.count, "rating"), class: "record-stats-count-value"
+        tag.span pluralize(record.ratings.active.where(spectrum: Spectrum.visible_to(current_ace)).count, "rating"), class: "record-stats-count-value"
       end
     end
   end
   
-  # UNUSED
   # Display ratings details (top 3 spectrums with percentages)
   def ratings_details_display(record)
-    return unless record.ratings.active.any?
+    return unless record.ratings.active.where(spectrum: Spectrum.visible_to(current_ace)).any?
     
     content = "".html_safe
-    record.ratings.active.group(:spectrum_id).count.first(3).each do |spectrum_id, count|
-      spectrum = Spectrum.find(spectrum_id)
+    record.ratings.active.where(spectrum: Spectrum.visible_to(current_ace)).group(:spectrum_id).count.first(3).each do |spectrum_id, count|
+      spectrum = Spectrum.visible_to(current_ace).find(spectrum_id)
       content += tag.div class: "record-stats-detail" do
         "#{spectrum.name}: #{record.normalized_average_rating_on(spectrum)&.*(100)&.round || 'N/A'}%"
       end
@@ -25,7 +23,6 @@ module RatingsHelper
     content
   end
   
-  # UNUSED
   # Display empty ratings message
   def empty_ratings_display
     tag.div "No ratings yet", class: "record-stats-empty"
@@ -33,7 +30,7 @@ module RatingsHelper
   
   # Combine all ratings display elements
   def ratings_stats_display(record)
-    if record.ratings.active.any?
+    if record.ratings.active.where(spectrum: Spectrum.visible_to(current_ace)).any?
       ratings_count_display(record) + ratings_details_display(record)
     else
       empty_ratings_display

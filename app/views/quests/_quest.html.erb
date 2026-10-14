@@ -1,5 +1,6 @@
 <article id="<%= dom_id quest %>" class="quest-card">
-  <div class="quest-card-top"><%= icon "script", size: 28 %><span class="eyebrow"><%= pluralize(quest.highlights.count(&:required?), 'required achievement') %></span></div>
+  <div class="quest-card-top"><%= icon "script", size: 28 %><span class="eyebrow"><%= pluralize(quest.highlights.public_requirements.count(&:required?), 'required achievement') %></span></div>
+  <%= moderation_notice(quest) %>
   <h2><%= link_to quest.name, quest_path(quest) %></h2>
   <p class="quest-card-description"><%= quest.description %></p>
   <div class="quest-card-meta"><%= quest_participants_badge(quest) %></div>

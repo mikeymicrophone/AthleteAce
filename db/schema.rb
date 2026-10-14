@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_13_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -33,6 +33,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_000001) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "admin", default: false, null: false
+    t.boolean "moderator", default: false, null: false
     t.index ["confirmation_token"], name: "index_aces_on_confirmation_token", unique: true
     t.index ["email"], name: "index_aces_on_email", unique: true
     t.index ["reset_password_token"], name: "index_aces_on_reset_password_token", unique: true
@@ -48,8 +49,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_000001) do
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
     t.json "details"
+    t.string "moderation_status", default: "approved", null: false
+    t.integer "moderation_revision", default: 1, null: false
+    t.bigint "created_by_id"
+    t.integer "lock_version", default: 0, null: false
+    t.index ["created_by_id"], name: "index_achievements_on_created_by_id"
+    t.index ["moderation_status", "created_at"], name: "index_achievements_on_moderation_status_and_created_at"
     t.index ["seed_version"], name: "index_achievements_on_seed_version"
     t.index ["target_type", "target_id"], name: "index_achievements_on_target"
+    t.check_constraint "moderation_status::text = ANY (ARRAY['pending'::character varying, 'approved'::character varying, 'rejected'::character varying, 'hidden'::character varying]::text[])", name: "achievements_moderation_status"
   end
 
   create_table "activations", force: :cascade do |t|
@@ -195,6 +203,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_000001) do
     t.index ["seed_version"], name: "index_countries_on_seed_version"
   end
 
+  create_table "decision_evaluations", force: :cascade do |t|
+    t.string "subject_type"
+    t.bigint "subject_id"
+    t.integer "revision"
+    t.string "comparison_key", null: false
+    t.string "provider", null: false
+    t.string "model", null: false
+    t.string "purpose", null: false
+    t.string "policy_version", null: false
+    t.string "status", default: "queued", null: false
+    t.string "choice"
+    t.string "error_code"
+    t.jsonb "request_snapshot", default: {}, null: false
+    t.jsonb "answer", default: {}, null: false
+    t.bigint "input_tokens"
+    t.decimal "input_usd_per_million", precision: 12, scale: 6, null: false
+    t.decimal "estimated_usd", precision: 20, scale: 10
+    t.integer "latency_ms"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["comparison_key", "provider"], name: "index_decision_evaluations_on_comparison_key_and_provider", unique: true
+    t.index ["subject_type", "subject_id"], name: "index_decision_evaluations_on_subject"
+  end
+
   create_table "divisions", force: :cascade do |t|
     t.string "name"
     t.string "abbreviation"
@@ -302,10 +334,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_000001) do
     t.datetime "updated_at", null: false
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.string "moderation_status", default: "approved", null: false
+    t.integer "moderation_revision", default: 1, null: false
+    t.bigint "created_by_id"
+    t.integer "lock_version", default: 0, null: false
     t.index ["achievement_id"], name: "index_highlights_on_achievement_id"
+    t.index ["created_by_id"], name: "index_highlights_on_created_by_id"
+    t.index ["moderation_status", "created_at"], name: "index_highlights_on_moderation_status_and_created_at"
     t.index ["quest_id", "achievement_id"], name: "index_highlights_on_quest_id_and_achievement_id", unique: true
     t.index ["quest_id"], name: "index_highlights_on_quest_id"
     t.index ["seed_version"], name: "index_highlights_on_seed_version"
+    t.check_constraint "moderation_status::text = ANY (ARRAY['pending'::character varying, 'approved'::character varying, 'rejected'::character varying, 'hidden'::character varying]::text[])", name: "highlights_moderation_status"
   end
 
   create_table "jersey_number_assignments", force: :cascade do |t|
@@ -377,6 +416,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_000001) do
     t.index ["team_id"], name: "index_organization_affiliations_on_team_id"
   end
 
+  create_table "moderation_decisions", force: :cascade do |t|
+    t.string "subject_type", null: false
+    t.bigint "subject_id", null: false
+    t.bigint "actor_id"
+    t.string "action", null: false
+    t.string "from_status"
+    t.string "to_status", null: false
+    t.integer "revision", null: false
+    t.text "reason"
+    t.jsonb "snapshot", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.index ["actor_id"], name: "index_moderation_decisions_on_actor_id"
+    t.index ["subject_type", "subject_id"], name: "index_moderation_decisions_on_subject"
+  end
+
   create_table "organizations", force: :cascade do |t|
     t.string "name", null: false
     t.string "abbreviation"
@@ -438,7 +492,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_000001) do
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
     t.json "details"
+    t.string "moderation_status", default: "approved", null: false
+    t.integer "moderation_revision", default: 1, null: false
+    t.bigint "created_by_id"
+    t.integer "lock_version", default: 0, null: false
+    t.index ["created_by_id"], name: "index_quests_on_created_by_id"
+    t.index ["moderation_status", "created_at"], name: "index_quests_on_moderation_status_and_created_at"
     t.index ["seed_version"], name: "index_quests_on_seed_version"
+    t.check_constraint "moderation_status::text = ANY (ARRAY['pending'::character varying, 'approved'::character varying, 'rejected'::character varying, 'hidden'::character varying]::text[])", name: "quests_moderation_status"
   end
 
   create_table "ratings", force: :cascade do |t|
@@ -508,8 +569,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_000001) do
     t.datetime "updated_at", null: false
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.string "moderation_status", default: "approved", null: false
+    t.integer "moderation_revision", default: 1, null: false
+    t.bigint "created_by_id"
+    t.integer "lock_version", default: 0, null: false
+    t.index ["created_by_id"], name: "index_spectrums_on_created_by_id"
+    t.index ["moderation_status", "created_at"], name: "index_spectrums_on_moderation_status_and_created_at"
     t.index ["name"], name: "index_spectrums_on_name", unique: true
     t.index ["seed_version"], name: "index_spectrums_on_seed_version"
+    t.check_constraint "moderation_status::text = ANY (ARRAY['pending'::character varying, 'approved'::character varying, 'rejected'::character varying, 'hidden'::character varying]::text[])", name: "spectrums_moderation_status"
   end
 
   create_table "sports", force: :cascade do |t|
@@ -593,6 +661,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_000001) do
     t.index ["seed_version"], name: "index_years_on_seed_version"
   end
 
+  add_foreign_key "achievements", "aces", column: "created_by_id", on_delete: :nullify
+  add_foreign_key "highlights", "aces", column: "created_by_id", on_delete: :nullify
+  add_foreign_key "moderation_decisions", "aces", column: "actor_id", on_delete: :nullify
+  add_foreign_key "quests", "aces", column: "created_by_id", on_delete: :nullify
+  add_foreign_key "spectrums", "aces", column: "created_by_id", on_delete: :nullify
   add_foreign_key "activations", "campaigns"
   add_foreign_key "activations", "contracts"
   add_foreign_key "activations", "players"

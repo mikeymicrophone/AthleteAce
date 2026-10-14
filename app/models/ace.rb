@@ -12,6 +12,10 @@ class Ace < ApplicationRecord
   has_many :game_attempts, dependent: :destroy
   has_many :game_rounds, dependent: :destroy
   
+  def can_moderate?
+    admin? || moderator?
+  end
+
   def adopt_quest(quest)
     goals.find_or_create_by(quest: quest)
   end

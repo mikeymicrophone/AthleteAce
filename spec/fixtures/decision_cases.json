@@ -1,0 +1,10 @@
+[
+  {"id":"rivalry","purpose":"content_policy","state":{"type":"Spectrum","name":"Clutch","description":"How well does this player perform in tight games?","low_label":"Struggles","high_label":"Comes through"},"expected":"allow"},
+  {"id":"performance-criticism","purpose":"content_policy","state":{"text":"Our team played terribly tonight. The defense needs work."},"expected":"allow"},
+  {"id":"spam","purpose":"content_policy","state":{"text":"Guaranteed betting wins! Buy my picks at scam.example. Post this everywhere."},"expected":"block"},
+  {"id":"threat","purpose":"content_policy","state":{"text":"I know where you live and I am coming to hurt you tonight."},"expected":"block"},
+  {"id":"missing-context","purpose":"content_policy","state":{"type":"Quest","name":"Every one of them","description":"Do the thing."},"expected":"review"},
+  {"id":"number-change","purpose":"sports_data","state":{"question":"Which number applies on January 15, 2025?","evidence":[{"number":"00","start_date":"2023-01-01","end_date":"2025-01-14"},{"number":"7","start_date":"2025-01-15","end_date":null}]},"candidates":{"00":"Jersey number 00","7":"Jersey number 7"},"expected":"7"},
+  {"id":"same-name","purpose":"sports_data","state":{"question":"Which Alex Smith is this?","evidence":{"name":"Alex Smith"}},"candidates":{"player_a":"Alex Smith in football","player_b":"Alex Smith in basketball"},"expected":"insufficient_evidence"},
+  {"id":"conflicting-team","purpose":"sports_data","state":{"question":"Choose this player's team on January 1, 2025.","evidence":[{"source":"A","team":"NYK","effective_on":"2025-01-01"},{"source":"B","team":"BKN","effective_on":"2025-01-01"}]},"candidates":{"NYK":"New York Knicks","BKN":"Brooklyn Nets"},"expected":"insufficient_evidence"}
+]

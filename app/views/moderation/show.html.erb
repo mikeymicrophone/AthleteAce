@@ -1,0 +1,33 @@
+<% content_for :title, "Review submission" %>
+<% content_for :side, "mod" %>
+<div class="moderation-page">
+  <%= link_to "Back to queue", moderation_path, class: "tool-link" %>
+  <header class="browse-header"><div><p class="eyebrow"><%= @item.class.name %> · <%= @item.moderation_status %> · revision <%= @item.moderation_revision %></p><h1 class="page-title"><%= moderation_item_name(@item) %></h1></div></header>
+  <section class="round-panel"><h2 class="profile-section-title">Submission</h2><dl class="moderation-fields"><% @item.moderation_snapshot.except("id", "type").each do |key, value| %><dt><%= key.humanize %></dt><dd><%= value %></dd><% end %></dl></section>
+  <section class="round-panel"><h2 class="profile-section-title">Your decision</h2>
+    <% if @item.created_by_id == current_ace.id %>
+      <p>Another reviewer must decide your submission.</p>
+    <% else %>
+      <%= form_with url: moderation_item_path(type: @item.class.name, id: @item.id), method: :patch do |form| %>
+        <%= form.hidden_field :revision, value: @item.moderation_revision %><%= form.hidden_field :status, value: @item.moderation_status %>
+        <%= form.label :reason, "Reason or note" %><%= form.text_area :reason, maxlength: 2000, class: "moderation-reason" %><p class="round-caption">A reason is required when rejecting or hiding content.</p>
+        <div class="page-actions">
+          <% actions = @item.moderation_status == "pending" ? %w[approve reject] : (@item.approved? ? %w[hide] : %w[reopen]) %>
+          <% actions.each do |action| %><%= form.button action.titleize, name: :decision, value: action, class: action == "approve" ? "game-button" : "tool-button" %><% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </section>
+  <section class="round-panel"><h2 class="profile-section-title">AI comparison</h2><p class="round-intro">Jev and Luna offer recommendations. Your decision controls publication.</p>
+    <%= button_to "Compare with AI", compare_moderation_item_path(type: @item.class.name, id: @item.id), params: { comparison_key: SecureRandom.uuid }, class: "tool-button" %>
+    <% @evaluations.each do |evaluation| %>
+      <article class="moderation-evaluation"><h3><%= evaluation.provider == "jev" ? "Jev" : "OpenAI Luna" %> · <%= evaluation.choice&.titleize || evaluation.status.titleize %></h3>
+        <p class="round-caption">Revision <%= evaluation.revision %><%= " · older content" if evaluation.revision != @item.moderation_revision %> · <%= evaluation.model %></p>
+        <% if evaluation.status == "completed" %>
+          <p>Confidence <%= number_to_percentage(evaluation.answer["confidence"] * 100, precision: 1) %> · <%= evaluation.input_tokens || "Unknown" %> input tokens · <%= evaluation.estimated_usd ? "$#{format('%.8f', evaluation.estimated_usd)} estimated" : "Cost unknown" %> · <%= evaluation.latency_ms %> ms</p>
+        <% else %><p><%= evaluation.error_code&.humanize || "Comparison in progress" %></p><% end %>
+      </article>
+    <% end %>
+  </section>
+  <section class="round-panel"><h2 class="profile-section-title">Decision history</h2><%= render "decisions", decisions: @decisions %></section>
+</div>

@@ -14,6 +14,12 @@ Rails.application.routes.draw do
   draw :games         # Strength training and games
   draw :design        # Design reference pages (not in production)
 
+  get "moderate", to: "moderation#index", as: :moderation
+  get "moderate/log", to: "moderation#log", as: :moderation_log
+  get "moderate/:type/:id", to: "moderation#show", as: :moderation_item
+  patch "moderate/:type/:id", to: "moderation#update"
+  post "moderate/:type/:id/compare", to: "moderation#compare", as: :compare_moderation_item
+
   # Application health check
   get "up" => "rails/health#show", as: :rails_health_check
 

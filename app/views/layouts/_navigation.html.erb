@@ -34,6 +34,9 @@
           <% end %>
         <% end %>
       <% end %>
+      <% if current_ace&.can_moderate? %>
+        <%= link_to "Moderate", moderation_path, class: "nav-quest" %>
+      <% end %>
       <% if ace_signed_in? %>
         <%= link_to random_quests_path, class: "nav-quest", aria: { label: "Begin Quest" }, title: "Begin Quest" do %>
           <%= icon "flag", size: 16 %>

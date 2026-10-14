@@ -5,10 +5,10 @@
   
   <%= quest_description_section @goal.quest %>
 
-  <%= achievements_section @goal.quest.highlights.required, "Required Achievements" %>
+  <%= achievements_section @goal.quest.highlights.public_requirements.required, "Required Achievements" %>
 
-  <% if @goal.quest.highlights.optional.any? %>
-    <%= achievements_section @goal.quest.highlights.optional, "Optional Achievements", required: false %>
+  <% if @goal.quest.highlights.public_requirements.optional.any? %>
+    <%= achievements_section @goal.quest.highlights.public_requirements.optional, "Optional Achievements", required: false %>
   <% end %>
 
   <%= abandon_quest_section @goal %>

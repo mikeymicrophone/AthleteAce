@@ -5,7 +5,7 @@ class AchievementsController < ApplicationController
 
   # GET /achievements or /achievements.json
   def index
-    @achievements = Achievement.all
+    @achievements = Achievement.visible_to(current_ace)
   end
 
   # GET /achievements/1 or /achievements/1.json
@@ -26,14 +26,15 @@ class AchievementsController < ApplicationController
   # POST /achievements or /achievements.json
   def create
     @achievement = Achievement.new(achievement_params)
+    @achievement.created_by = current_ace
     quest_id = params[:achievement][:quest_id]
+    quest = Quest.visible_to(current_ace).find(quest_id) if quest_id.present?
 
     respond_to do |format|
       if @achievement.save
         # Create a highlight if a quest was selected
         if quest_id.present?
-          quest = Quest.find(quest_id)
-          @achievement.add_to_quest(quest)
+          Highlight.create!(quest: quest, achievement: @achievement, created_by: current_ace)
         end
 
         format.html { redirect_to @achievement, notice: "Achievement was successfully created." }
@@ -48,6 +49,7 @@ class AchievementsController < ApplicationController
 
   # PATCH/PUT /achievements/1 or /achievements/1.json
   def update
+    @achievement.moderation_editor = current_ace
     respond_to do |format|
       if @achievement.update(achievement_params)
         format.html { redirect_to @achievement, notice: "Achievement was successfully updated." }
@@ -83,7 +85,7 @@ class AchievementsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_achievement
-      @achievement = Achievement.find(params.require(:id))
+      @achievement = Achievement.visible_to(current_ace).find(params.require(:id))
     end
 
     # Only allow a list of trusted parameters through.

@@ -7,7 +7,7 @@ module QuestsHelper
   end
 
   def quest_progress goal
-    required = goal.quest.highlights.count(&:required?)
+    required = goal.quest.highlights.public_requirements.count(&:required?)
     completed = [goal.progress, required].min
     { completed: completed, required: required, percent: required.positive? ? (completed.fdiv(required) * 100).round : 0 }
   end
@@ -21,7 +21,7 @@ module QuestsHelper
   # Renders a button for an ace to begin a quest
   # If the ace is already on the quest, shows a different button
   def begin_quest_button(quest, options = {})
-    return unless ace_signed_in?
+    return unless ace_signed_in? && quest.approved?
 
     existing_goal = quest_goal quest
 

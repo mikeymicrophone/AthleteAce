@@ -24,7 +24,7 @@
 
   <div class="my-5">
     <%= form.label :quest_id, "Add to Quest (optional)" %>
-    <%= form.select :quest_id, options_from_collection_for_select(Quest.all, :id, :name, params[:quest_id]), { include_blank: "-- Select a Quest --" }, class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
+    <%= form.select :quest_id, options_from_collection_for_select(Quest.visible_to(current_ace), :id, :name, params[:quest_id]), { include_blank: "-- Select a Quest --" }, class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
     <p class="text-sm text-gray-500 mt-1">If selected, this achievement will be added to the quest</p>
   </div>
 
