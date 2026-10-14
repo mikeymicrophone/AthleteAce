@@ -29,10 +29,10 @@ module PlayerProfileHelper
   def player_hero_portrait(player)
     team = player.team
     style = team_palette_style(team&.primary_color, team&.text_color, team&.secondary_color, prefix: "jersey")
+    number = JerseyNumberLookup.new(player: player, team: team).call
     tag.div class: "profile-portrait", style: style, data: { controller: "entity-image" } do
       fallback = tag.div class: "profile-jersey", data: { entity_image_target: "fallback" }, aria: { hidden: true } do
-        label = team && (team.abbreviation.presence || team.name.split.map { |word| word[0] }.first(3).join.upcase)
-        icon("jersey", size: 112) + tag.span(label)
+        jersey_portrait_fallback(player.name, number&.number)
       end
       photo = if player.photo_url.present?
         tag.img src: player.photo_url, alt: "", class: "profile-photo hidden",

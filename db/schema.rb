@@ -10,8 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_13_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_13_000001) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
 
   create_table "aces", force: :cascade do |t|
@@ -307,6 +308,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_000000) do
     t.index ["seed_version"], name: "index_highlights_on_seed_version"
   end
 
+  create_table "jersey_number_assignments", force: :cascade do |t|
+    t.bigint "player_id", null: false
+    t.bigint "team_id", null: false
+    t.string "number", null: false
+    t.date "start_date"
+    t.date "end_date"
+    t.jsonb "source", default: {}, null: false
+    t.jsonb "details", default: {}, null: false
+    t.string "entity_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["entity_code"], name: "index_jersey_number_assignments_on_entity_code", unique: true
+    t.index ["player_id"], name: "index_jersey_number_assignments_on_player_id"
+    t.index ["team_id"], name: "index_jersey_number_assignments_on_team_id"
+    t.check_constraint "number::text ~ '^[0-9]{1,3}$'::text", name: "jersey_numbers_are_numeric_strings"
+    t.check_constraint "start_date IS NULL OR end_date IS NULL OR end_date >= start_date", name: "jersey_numbers_have_ordered_dates"
+    t.exclusion_constraint "player_id WITH =, team_id WITH =, daterange(start_date, end_date, '[]'::text) WITH &&", using: :gist, name: "jersey_numbers_do_not_overlap"
+  end
+
   create_table "leagues", force: :cascade do |t|
     t.bigint "sport_id", null: false
     t.string "name"
@@ -597,6 +617,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_000000) do
   add_foreign_key "goals", "quests"
   add_foreign_key "highlights", "achievements"
   add_foreign_key "highlights", "quests"
+  add_foreign_key "jersey_number_assignments", "players"
+  add_foreign_key "jersey_number_assignments", "teams"
   add_foreign_key "leagues", "sports"
   add_foreign_key "memberships", "divisions"
   add_foreign_key "memberships", "teams"

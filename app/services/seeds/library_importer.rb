@@ -10,13 +10,14 @@ module Seeds
       "Stadium" => Stadium, "League" => League, "Conference" => Conference,
       "Division" => Division, "Team" => Team, "Year" => Year, "Season" => Season,
       "Campaign" => Campaign, "Player" => Player, "Activation" => Activation,
-      "Contract" => Contract
+      "Contract" => Contract, "JerseyNumberAssignment" => JerseyNumberAssignment
     }.freeze
     SCOPE_ASSOCIATIONS = {
       "State" => %w[country], "City" => %w[state], "Stadium" => %w[city],
       "League" => %w[sport], "Conference" => %w[league], "Division" => %w[conference],
       "Team" => %w[league], "Season" => %w[league year], "Player" => %w[sport],
-      "Contract" => %w[player team], "Campaign" => %w[team], "Activation" => %w[player]
+      "Contract" => %w[player team], "Campaign" => %w[team], "Activation" => %w[player],
+      "JerseyNumberAssignment" => %w[player team]
     }.freeze
     PROTECTED_ATTRIBUTES = %w[id entity_code created_at updated_at seed_version last_seeded_at].freeze
 

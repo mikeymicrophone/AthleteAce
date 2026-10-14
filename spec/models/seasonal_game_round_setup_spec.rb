@@ -71,6 +71,20 @@ RSpec.describe "Seasonal round setup" do
     expect(setup.season_pool.ambiguous_count).to eq(0)
   end
 
+  it "records a historical observed number while omitting same-season number ambiguity" do
+    player = create(:player, team: nil)
+    campaign = Campaign.create!(team: knicks, season: season)
+    Campaign.create!(team: nets, season: season)
+    roster = Roster.create!(campaign: campaign, kind: "roster", effective_on: "2025-01-01")
+    RosterEntry.create!(roster: roster, player: player, jersey_number: "00")
+    round = setup.start!(ace)
+    expect(round.questions.first).to include("subject_jersey_number" => "00", "subject_jersey_number_on" => "2025-01-01")
+    later = Roster.create!(campaign: campaign, kind: "roster", effective_on: "2025-02-01")
+    RosterEntry.create!(roster: later, player: player, jersey_number: "7")
+    expect(setup.start!(ace).questions.first["subject_jersey_number"]).to be_nil
+    expect(round.reload.questions.first["subject_jersey_number"]).to eq("00")
+  end
+
   it "suggests a playable recorded season without changing the selected teams or current mode" do
     player = create(:player, team: nil)
     membership(player, knicks)

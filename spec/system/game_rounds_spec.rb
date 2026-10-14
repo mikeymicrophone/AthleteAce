@@ -122,12 +122,15 @@ RSpec.describe "Saved rounds", type: :system do
   it "shows team blocks and a jersey fallback when a recorded player photo fails" do
     player = Player.find_by!(first_name: "Aaron", last_name: "Judge")
     player.update!(photo_urls: [ "/missing-athlete-photo.jpg" ], current_position: "Outfield")
+    JerseyNumberAssignment.create!(player: player, team: team, number: "99", start_date: Date.current - 1.year)
     team.update!(primary_color: "#FFFFFF", secondary_color: "#003087")
     rival.update!(primary_color: "#000000", secondary_color: "#BD3039")
     visit new_game_round_path(team_id: team.id)
     click_button "Start round"
     expect(page).to have_css(".round-game-progress", text: "1 / 1")
     expect(page).to have_css('.round-athlete-portrait[data-image-state="fallback"] .round-jersey', visible: true)
+    expect(page).to have_css(".round-jersey .jersey-number", text: "99")
+    expect(page).to have_css(".round-number-caption", text: "No. 99")
     expect(page).to have_css(".round-subject-details", text: "Outfield")
     expect(page).to have_css(".round-team-answer", count: 2)
     expect(page).to have_css(".round-answer-territory", text: "New York")

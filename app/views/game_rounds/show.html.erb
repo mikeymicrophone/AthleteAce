@@ -44,6 +44,9 @@
             <%= tag.p @round.game_type == "player_team_match" ? "Know the player. Find the team." : "Find their place in the league.", class: "eyebrow" %>
             <%= tag.h1 @round.question.fetch("subject_name"), class: "page-title", tabindex: -1, data: { round_target: "heading" } %>
             <%= tag.p @round.question["subject_position"], class: "round-caption" if @round.question["subject_position"].present? %>
+            <% if (number_caption = round_jersey_caption(@round.question)) %>
+              <%= tag.p number_caption, class: "round-caption round-number-caption" %>
+            <% end %>
           <% end %>
         <% end %>
       <% end %>

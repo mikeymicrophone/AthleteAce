@@ -25,7 +25,7 @@ module GameRoundsHelper
       style: team_palette_style(question["subject_primary_color"], question["subject_text_color"], question["subject_secondary_color"]),
       data: { controller: "entity-image" }, aria: { hidden: true } do
       fallback = tag.div class: "round-jersey", data: { entity_image_target: "fallback" } do
-        icon("jersey", size: 112)
+        jersey_portrait_fallback(question["subject_name"] || player&.name, question["subject_jersey_number"])
       end
       photo = if photo_url.present?
         tag.img src: photo_url, alt: "", class: "round-athlete-photo hidden",

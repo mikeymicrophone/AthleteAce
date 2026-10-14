@@ -5,6 +5,7 @@ class Team < ApplicationRecord
   belongs_to :league
   belongs_to :stadium, optional: true
   has_many :players
+  has_many :jersey_number_assignments, dependent: :destroy
   has_many :contracts, dependent: :destroy
   has_many :contract_players, through: :contracts, source: :player
   has_many :organization_affiliations, dependent: :destroy

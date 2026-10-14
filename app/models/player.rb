@@ -9,6 +9,7 @@ class Player < ApplicationRecord
   delegate :current_organization, to: :team, allow_nil: true
   
   has_many :roles, dependent: :destroy
+  has_many :jersey_number_assignments, dependent: :destroy
   has_many :positions, through: :roles
   has_many :contracts, dependent: :destroy
   has_many :contract_teams, through: :contracts, source: :team

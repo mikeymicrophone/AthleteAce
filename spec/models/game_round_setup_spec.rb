@@ -54,6 +54,16 @@ RSpec.describe GameRoundSetup do
     expect(round.reload.questions.first).to eq(question)
   end
 
+  it "snapshots the current number and keeps old rounds independent of later number changes" do
+    assignment = JerseyNumberAssignment.create!(player: player, team: team, number: "00", start_date: Date.current - 2.years)
+    round = described_class.new(team_id: team.id).start!(ace)
+    expect(round.questions.first["subject_jersey_number"]).to eq("00")
+    assignment.update!(end_date: Date.current - 1.day)
+    JerseyNumberAssignment.create!(player: player, team: team, number: "7", start_date: Date.current)
+    expect(round.reload.questions.first["subject_jersey_number"]).to eq("00")
+    expect(described_class.new(team_id: team.id).start!(ace).questions.first["subject_jersey_number"]).to eq("7")
+  end
+
   it "keeps explicit pair drills focused and allows unclassified active status" do
     third = create(:team, league: league)
     create(:player, team: third)

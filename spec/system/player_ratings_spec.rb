@@ -141,12 +141,19 @@ RSpec.describe "Player profiles and rating controls", type: :system do
     page.current_window.resize_to 390, 844
     visit player_path(player)
 
-    expect(page).to have_css(".profile-portrait[data-image-state=fallback] .profile-jersey", text: "ACE", visible: true)
+    initials = player.name.split.map { |word| word[0] }.first(3).join.upcase
+    expect(page).to have_css(".profile-portrait[data-image-state=fallback] .jersey-initials", text: initials, visible: true)
     expect(page).not_to have_css(".profile-photo", visible: true)
     expect(page.evaluate_script("document.documentElement.scrollWidth <= window.innerWidth")).to be(true)
     page.save_screenshot Rails.root.join("tmp/screenshots/player-profile-mobile.png")
     page.current_window.resize_to 1400, 1000
     page.save_screenshot Rails.root.join("tmp/screenshots/player-profile-desktop.png")
+
+    JerseyNumberAssignment.create!(player: player, team: player.team, number: "00", start_date: Date.current - 1.year)
+    visit player_path(player)
+    expect(page).to have_css(".profile-jersey .jersey-number", text: "00", visible: true)
+    expect(page).not_to have_css(".profile-jersey .jersey-initials", visible: true)
+    page.save_screenshot Rails.root.join("tmp/screenshots/player-profile-number-desktop.png")
 
     player.update! photo_urls: ["/icon.png"]
     visit player_path(player)

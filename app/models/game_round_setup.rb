@@ -232,6 +232,9 @@ class GameRoundSetup
           question[:subject_primary_color] = target.primary_color
           question[:subject_secondary_color] = target.secondary_color
           question[:subject_text_color] = target.text_color
+          number = JerseyNumberLookup.new(player: subject, team: target, season: season).call
+          question[:subject_jersey_number] = number&.number
+          question[:subject_jersey_number_on] = number&.observed_on&.iso8601
           question[:subject_position] = subject.current_position unless season
         end
       end

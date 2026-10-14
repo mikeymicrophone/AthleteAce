@@ -8,4 +8,4 @@ Teams save `text_color` as white or near-black, choosing whichever gives greater
 
 Team colors appear on identity blocks and portraits. Answer buttons and correctness states retain the shared interface palette. Secondary colors appear as portrait bands and badge corners, with a theme-aware border on colored blocks.
 
-The current catalog supplies palettes for 93 of 114 local teams: all NBA and NFL teams, and 31 NHL teams. The 20 EPL teams and Utah retain neutral blocks pending recorded palette data. Seasonal jersey numbers remain a separate follow-up.
+The current catalog supplies palettes for 93 of 114 local teams: all NBA and NFL teams, and 31 NHL teams. The 20 EPL teams and Utah retain neutral blocks pending recorded palette data. [Jersey-number history](jersey-numbers.md) supplies numbered portraits when the applicable number is known.

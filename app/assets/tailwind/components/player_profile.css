@@ -21,7 +21,7 @@
 .profile-jersey { @apply flex flex-col items-center justify-center h-full gap-2; }
 .profile-jersey::after { content: ""; position: absolute; left: 0; right: 0; bottom: 8%; height: 4px; background: var(--jersey-secondary, transparent); box-shadow: 0 6px 0 var(--jersey-secondary, transparent); }
 .profile-jersey.hidden { display: none; }
-.profile-jersey span { @apply font-display font-extrabold text-2xl tracking-wide; }
+.profile-jersey .jersey-initials { @apply text-4xl; }
 .profile-photo { @apply absolute inset-0 w-full h-full object-cover object-top; }
 .profile-section { @apply mb-8; }
 .profile-section-title { @apply font-display text-2xl font-extrabold uppercase tracking-wide mb-4; }
@@ -36,8 +36,8 @@
 @media (max-width: 640px) {
   .player-hero { @apply items-start gap-4 pb-6 mb-6; }
   .profile-portrait { @apply w-24 h-32; }
-  .profile-jersey .ace-icon { width: 72px; height: 72px; }
-  .profile-jersey span { @apply text-lg; }
+  .profile-jersey .jersey-mark { width: 72px; height: 72px; }
+  .profile-jersey .jersey-initials { @apply text-2xl; }
   .player-hero .page-title { @apply text-4xl; }
   .player-hero .game-button { @apply text-xs px-3 text-left; }
   .player-hero .page-actions { @apply mt-4; }
