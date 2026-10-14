@@ -64,7 +64,7 @@ end
 
 group :test do
   gem 'capybara', '~> 3.40'
-  gem 'selenium-webdriver', '~> 4.49'
+  gem 'selenium-webdriver', '~> 4.51'
   gem 'database_cleaner-active_record', '~> 2.2'
   gem 'shoulda-matchers', '~> 8.0'
   gem 'rails-controller-testing', '~> 1.0'
