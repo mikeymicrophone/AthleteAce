@@ -14,6 +14,11 @@ Rails.application.routes.draw do
   draw :games         # Strength training and games
   draw :design        # Design reference pages (not in production)
 
+  get "feed", to: "feed#index", as: :feed
+  get "browse", to: "browse#index", as: :browse
+  get "admin", to: "admin#index", as: :admin
+  resource :theme_preference, only: :update
+
   get "moderate", to: "moderation#index", as: :moderation
   get "moderate/log", to: "moderation#log", as: :moderation_log
   get "moderate/:type/:id", to: "moderation#show", as: :moderation_item
@@ -28,5 +33,5 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Root route
-  root "players#index"
+  root "home#index"
 end

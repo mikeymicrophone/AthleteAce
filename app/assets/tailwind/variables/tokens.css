@@ -2,7 +2,7 @@
  *
  * Colors are light-dark() pairs, so each one follows the nearest color-scheme:
  *   data-theme="light" or "dark" pins a theme, data-theme="system" follows the OS.
- *   Without data-theme a page stays light, until the new shell (AA-177) sets it on <html>.
+ *   The shell sets data-theme on <html> from the account or visitor preference.
  * data-side="play" | "feed" | "mod" | "admin" sets the accent for everything inside it.
  * data-entity="<model>" sets --entity-color to that model's family. */
 

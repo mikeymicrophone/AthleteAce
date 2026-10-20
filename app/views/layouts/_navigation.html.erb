@@ -1,52 +1,33 @@
-<%= tag.nav class: "navigation-container", aria: { label: "Main navigation" } do %>
-  <%= tag.div class: "navigation-inner" do %>
-    <%= link_to root_path, class: "ace-brand" do %>
-      <%= tag.span icon("bolt", size: 24), class: "ace-brand-mark" %>
-      <%= tag.span "Athlete Ace" %>
+<header class="navigation-container" data-controller="shell" data-action="turbo:before-cache@document->shell#close">
+  <div class="navigation-inner">
+    <%= link_to root_path, class: "ace-brand", aria: { label: "Athlete Ace home" } do %>
+      <span class="ace-brand-mark"><%= icon "bolt", size: 24 %></span><span>Athlete Ace</span>
     <% end %>
-
-    <%= tag.div class: "nav-menu" do %>
-      <%= link_to strength_path, class: "nav-play #{%w[play strength game_rounds division_guessing_games].include?(controller_name) ? 'active' : ''}" do %>
-        <%= icon "player-play", size: 18 %>
-        <%= tag.span "Play" %>
-      <% end %>
-      <% {
-        "Teams" => %w[sports leagues conferences divisions teams players stadiums memberships contracts activations],
-        "Locations" => %w[countries states cities],
-        "Quests" => %w[quests goals achievements strength game_history ratings spectrums],
-        "Time" => %w[years seasons contests]
-      }.each do |label, resources| %>
-        <%= tag.div class: "nav-group", data: { controller: "dropdown" } do %>
-          <%= tag.button type: "button", class: "nav-group-title", aria: { expanded: false, controls: "nav-#{label.downcase}" },
-            data: { dropdown_target: "toggle", action: "click->dropdown#toggle keydown.esc->dropdown#escape" } do %>
-            <%= tag.span label %>
-            <%= icon "chevron-down", size: 16 %>
-          <% end %>
-          <%= tag.div id: "nav-#{label.downcase}", class: "nav-dropdown", data: { dropdown_target: "menu", action: "keydown.esc->dropdown#escape" } do %>
-            <%= tag.p label, class: "nav-dropdown-heading" %>
-            <% resources.each do |resource| %>
-              <% path = resource == "game_history" ? strength_game_attempts_path : public_send("#{resource}_path") %>
-              <%= link_to path, class: "nav-dropdown-item #{current_page?(path) ? 'active' : ''}" do %>
-                <%= resource == "game_history" ? icon("history", size: 20) : icon_for_resource(resource, size: 20) %>
-                <%= tag.span resource.titleize %>
-              <% end %>
-            <% end %>
-          <% end %>
+    <nav class="shell-sides" aria-label="Switch sides">
+      <% shell_sides.each do |side, label, glyph, path| %>
+        <%= link_to path, class: "shell-side #{'active' if current_side == side}", data: { side: side }, aria: { current: current_side == side ? "page" : nil, label: label } do %>
+          <%= icon glyph, size: 20 %><span class="shell-side-label"><%= label %></span>
+          <% if side == "play" && !ace_signed_in? %><span class="shell-preview">Preview</span><% end %>
+          <% if side == "mod" && shell_pending_count.positive? %><span class="shell-badge" aria-label="<%= pluralize(shell_pending_count, 'submission') %> waiting"><%= shell_pending_count %></span><% end %>
         <% end %>
       <% end %>
-      <% if current_ace&.can_moderate? %>
-        <%= link_to "Moderate", moderation_path, class: "nav-quest" %>
-      <% end %>
-      <% if ace_signed_in? %>
-        <%= link_to random_quests_path, class: "nav-quest", aria: { label: "Begin Quest" }, title: "Begin Quest" do %>
-          <%= icon "flag", size: 16 %>
-          <%= tag.span "Begin Quest" %>
-        <% end %>
-      <% end %>
-    <% end %>
-
-    <%= tag.div class: "nav-account" do %>
-      <%= ace_auth_links %>
-    <% end %>
+    </nav>
+    <div class="nav-account">
+      <% unless ace_signed_in? %><%= link_to "Sign In", new_ace_session_path, class: "auth-link" %><% end %>
+      <button type="button" class="shell-account-toggle" aria-label="<%= ace_signed_in? ? 'Account menu' : 'Appearance' %>" aria-expanded="false" aria-controls="shell-account" data-shell-target="toggle" data-action="shell#open">
+        <%= icon ace_signed_in? ? "users" : "sun", size: 22 %>
+      </button>
+    </div>
+  </div>
+  <% if %w[play feed].include?(current_side) %>
+    <div class="shell-tab-row">
+      <%= render "layouts/side_links", location: "desktop" %>
+      <% if current_side == "play" && current_ace %>
+        <div class="shell-play-actions"><span class="shell-streak"><%= icon "bolt", size: 16 %><%= shell_streak %> day streak</span>
+          <%= button_to "Quick round", game_rounds_path, params: { game_type: "player_team_match", length: 10 }, class: "shell-quick-round" %>
+        </div>
+      <% elsif current_side == "feed" && !current_ace %><p class="shell-reading-note">Reading is open to everyone</p><% end %>
+    </div>
   <% end %>
-<% end %>
+  <%= render "layouts/account_menu" %>
+</header>

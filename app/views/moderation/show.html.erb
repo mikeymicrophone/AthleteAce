@@ -1,5 +1,4 @@
 <% content_for :title, "Review submission" %>
-<% content_for :side, "mod" %>
 <div class="moderation-page" data-controller="moderation" data-action="keydown@window->moderation#keydown">
   <%= link_to "Back to queue", moderation_path(**queue_context), class: "tool-link" %>
   <header class="browse-header"><div><p class="eyebrow"><%= @item.class.name %> · <%= @item.moderation_status %> · revision <%= @item.moderation_revision %></p><h1 class="page-title"><%= moderation_item_name(@item) %></h1></div></header>

@@ -12,7 +12,7 @@ RSpec.describe "Play home and quests", type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("Pick your first round", "sign in to play")
     expect(response.body).not_to include(game_round_path(round), "play-scoreboard")
-    expect(Nokogiri::HTML(response.body).at_css(".nav-play")[:class]).to include("active")
+    expect(Nokogiri::HTML(response.body).at_css('[aria-label="Switch sides"] [data-side="play"]')["aria-current"]).to eq("page")
   end
 
   it "shows only the current ace's rounds, activity and active quest progress" do

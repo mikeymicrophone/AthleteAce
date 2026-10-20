@@ -1,57 +1,97 @@
-.navigation-container {
-  @apply sticky top-0 z-50 bg-shell text-shell-ink border-b border-shell-line;
-}
-.navigation-inner {
-  @apply relative mx-auto max-w-7xl px-4 py-3 grid items-center gap-4;
-  grid-template-columns: auto 1fr auto;
-}
-.ace-brand {
-  @apply inline-flex items-center gap-2 text-2xl font-display font-extrabold uppercase tracking-tight whitespace-nowrap;
-}
-.ace-brand-mark {
-  @apply inline-flex items-center justify-center w-9 h-9 bg-play text-on-accent rounded-md;
-}
-.nav-menu { @apply flex items-center justify-center gap-1; }
-.nav-group { @apply relative; }
-.nav-group-title, .nav-play {
-  @apply inline-flex items-center justify-center gap-1.5 px-3 min-h-11 rounded-lg text-sm font-semibold cursor-pointer transition-colors;
-}
-.nav-group-title:hover, .nav-group-title[aria-expanded="true"] { @apply bg-shell-3; }
-.nav-play { @apply text-play; }
-.nav-play:hover, .nav-play.active { @apply bg-play text-on-accent; }
-.nav-account, .auth-links { @apply flex items-center gap-3 min-w-0; }
-.nav-account { @apply justify-end; }
-.auth-link, .nav-quest { @apply inline-flex items-center gap-2 min-h-11 text-sm font-semibold whitespace-nowrap; }
-.auth-link:hover, .nav-quest:hover { @apply text-play; }
-.auth-account { @apply truncate max-w-40; }
-.auth-button { @apply inline-flex items-center justify-center min-h-11 px-3 border border-shell-line rounded-lg text-sm font-semibold whitespace-nowrap hover:bg-shell-3; }
-.nav-dropdown {
-  @apply absolute top-full left-0 mt-2 w-60 p-2 bg-shell-2 border border-shell-line rounded-tool shadow-lg opacity-0 invisible;
-}
-.nav-dropdown.active { @apply opacity-100 visible; }
-.nav-dropdown-heading { @apply px-3 py-2 font-mono text-xs uppercase tracking-widest text-shell-ink-2; }
-.nav-dropdown-item { @apply flex items-center gap-3 px-3 py-2.5 min-h-11 rounded-lg text-sm; }
-.nav-dropdown-item .ace-icon { @apply text-shell-ink-2; }
-.nav-dropdown-item:hover, .nav-dropdown-item.active { @apply bg-shell-3 text-play; }
-.navigation-container :focus-visible { @apply outline-2 outline-offset-2 outline-play; }
-@media (max-width: 1150px) {
-  .navigation-inner { grid-template-columns: 1fr auto; }
-  .nav-menu { @apply row-start-2 col-span-2 justify-start border-t border-shell-line pt-2; }
-  .nav-account { @apply col-start-2 row-start-1; }
-}
-@media (max-width: 640px) {
+.navigation-container { @apply sticky top-0 z-50 bg-shell text-shell-ink border-b border-shell-line; }
+.navigation-inner { @apply relative mx-auto max-w-7xl px-4 py-3 grid items-center gap-4; grid-template-columns: auto 1fr auto; }
+.ace-brand { @apply inline-flex items-center gap-2 text-2xl font-display font-extrabold uppercase tracking-tight whitespace-nowrap; }
+.ace-brand-mark { @apply inline-flex items-center justify-center w-9 h-9 bg-play text-on-accent rounded-md; }
+.shell-sides { @apply flex items-center justify-center gap-1 min-w-0; }
+.shell-side { @apply inline-flex items-center justify-center gap-2 min-h-11 px-3 rounded-lg text-sm font-semibold whitespace-nowrap text-shell-ink-2; }
+.shell-side:hover { @apply bg-shell-3 text-shell-ink; }
+.shell-side.active { @apply bg-accent text-on-accent; }
+.shell-preview { @apply font-mono text-[9px] uppercase border border-current rounded px-1; }
+.shell-badge { @apply inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-shell-3 text-shell-ink font-mono text-[10px]; }
+.nav-account { @apply flex items-center justify-end gap-3; }
+.auth-link { @apply inline-flex items-center min-h-11 text-sm font-semibold whitespace-nowrap; }
+.auth-link:hover { @apply underline; }
+.shell-account-toggle, .shell-account-close { @apply inline-flex items-center justify-center w-11 h-11 shrink-0 border border-shell-line rounded-lg cursor-pointer; }
+.shell-account-toggle:hover { @apply bg-shell-3; }
+.shell-tab-row { @apply flex items-center justify-between gap-4 mx-auto max-w-7xl px-4 border-t border-shell-line; }
+.shell-tabs-desktop { @apply flex items-center gap-1; }
+.shell-tab { @apply inline-flex items-center gap-2 min-h-12 px-3 text-sm font-semibold; }
+.shell-tabs-desktop .shell-tab { @apply border-b-2 border-transparent; }
+.shell-tabs-desktop .shell-tab[aria-current=page] { @apply text-accent border-accent; }
+.shell-tab:hover { @apply bg-shell-3; }
+.shell-play-actions { @apply flex items-center gap-5 text-xs font-semibold; }
+.shell-streak { @apply inline-flex items-center gap-1.5 text-play; }
+.shell-quick-round { @apply min-h-10 px-3 my-1 bg-play text-on-accent rounded-md font-semibold cursor-pointer; }
+.shell-reading-note { @apply text-xs text-shell-ink-2; }
+.shell-layout { @apply max-w-7xl mx-auto; }
+.shell-tool-layout { display: grid; grid-template-columns: 13rem minmax(0, 1fr); }
+.shell-sidebar { @apply sticky self-start top-20 px-4 py-8; }
+.shell-tabs-sidebar { @apply flex flex-col gap-1 mt-4; }
+.shell-tabs-sidebar .shell-tab { @apply rounded-lg text-ink-2; }
+.shell-tabs-sidebar .shell-tab:hover { @apply bg-surface-2; }
+.shell-tabs-sidebar .shell-tab[aria-current=page] { @apply bg-accent-tint text-accent-text; }
+.shell-tabs-mobile { @apply hidden; }
+.shell-account-dialog { @apply border border-line rounded-panel bg-surface text-ink shadow-card p-5; inset: 5rem 1rem auto auto; margin: 0; width: 22rem; max-width: calc(100vw - 2rem); max-height: calc(100dvh - 6rem); overflow-y: auto; }
+.shell-account-dialog::backdrop { background: var(--color-scrim); }
+.shell-account-heading { @apply flex items-center justify-between gap-4 mb-3; }
+.shell-account-heading h2 { @apply font-display text-2xl font-bold uppercase; }
+.shell-account-close { @apply border-line-2; }
+.shell-account-email { @apply font-semibold; overflow-wrap: anywhere; }
+.shell-account-since { @apply text-xs text-ink-3 mt-1; }
+.shell-account-links { @apply flex flex-col mt-4; }
+.shell-account-links a, .shell-sign-out { @apply flex w-full items-center min-h-11 rounded-lg px-3 text-sm font-semibold; }
+.shell-account-links a:hover, .shell-sign-out:hover { @apply bg-surface-2; }
+.shell-sign-out { @apply cursor-pointer; }
+.shell-theme { @apply border-t border-line mt-4 pt-4; }
+.shell-theme h3 { @apply font-mono text-xs uppercase tracking-wide text-ink-3 mb-3; }
+.shell-theme-options { @apply grid grid-cols-3 gap-2; }
+.shell-theme-choice { @apply w-full min-h-11 border border-line-2 rounded-lg text-sm font-semibold cursor-pointer; }
+.shell-theme-choice[aria-pressed=true] { @apply bg-accent-tint border-accent-text text-accent-text; }
+body:has(.shell-account-dialog[open]) { overflow: hidden; }
+.navigation-container :focus-visible, .shell-tabs-mobile :focus-visible { @apply outline-2 outline-offset-2 outline-accent; }
+.shell-account-dialog :focus-visible { @apply outline-accent-text; }
+.shell-empty { @apply bg-surface border border-line rounded-panel p-8 sm:p-12 flex flex-col items-center text-center gap-4; }
+.shell-empty > .ace-icon { @apply text-accent-text; }
+.shell-empty h2 { @apply font-display text-3xl font-bold; }
+.shell-empty p { @apply text-ink-2 max-w-md; }
+.shell-empty .page-actions { @apply justify-center; }
+.feed-home { @apply max-w-4xl mx-auto; }
+.shell-overview { @apply grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6; }
+.shell-overview .round-panel { @apply mb-0; }
+.shell-overview strong { @apply block font-display text-5xl mt-3; }
+.shell-browse-groups { @apply grid gap-5 md:grid-cols-2; }
+.shell-browse-groups .round-panel { @apply mb-0; }
+.shell-browse-links { @apply grid gap-1; }
+.shell-browse-link { @apply flex items-center gap-3 min-h-12 py-2 px-3 rounded-lg text-sm font-semibold; }
+.shell-browse-link:hover { @apply bg-accent-tint; }
+.shell-browse-link > .ace-icon:last-child { @apply ml-auto; }
+body:is([data-side=play], [data-side=feed]) main > :is(.flash-notice, .flash-alert) { @apply fixed z-40 bottom-6 right-6 shadow-card; width: min(24rem, calc(100vw - 3rem)); }
+
+@media (max-width: 800px) {
+  html { scroll-padding-top: 5rem; scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
+  main :is(a, button, input, select, textarea) { scroll-margin-top: 5rem; scroll-margin-bottom: calc(5rem + env(safe-area-inset-bottom)); }
   .navigation-inner { @apply gap-2 px-3; }
-  .ace-brand { @apply text-xl; }
+  .ace-brand > span:last-child { display: none; }
   .ace-brand-mark { @apply w-8 h-8; }
-  .auth-links { @apply gap-2; }
-  .auth-link, .auth-button { @apply text-xs; }
-  .auth-account { @apply max-w-24; }
-  .nav-menu { @apply grid grid-cols-5 gap-0; }
-  .nav-menu:has(.nav-quest) { grid-template-columns: repeat(5, minmax(0, 1fr)) 44px; }
-  .nav-menu:has(.nav-quest) .nav-group-title .ace-icon { @apply hidden; }
-  .nav-quest { @apply justify-center rounded-lg; }
-  .nav-quest span { @apply hidden; }
-  .nav-group { @apply static; }
-  .nav-group-title, .nav-play { @apply w-full px-1 text-xs; }
-  .nav-dropdown { @apply left-3 right-3 w-auto mt-0; top: calc(100% - 4px); max-height: 65vh; overflow-y: auto; }
+  .shell-side { @apply px-2 text-xs gap-1.5; }
+  .shell-sides { @apply gap-0; }
+  body:has(.shell-side[data-side=mod]) .shell-side:not(.active) .shell-side-label { display: none; }
+  .nav-account { @apply gap-2; }
+  .auth-link { @apply text-xs; }
+  .shell-account-toggle { @apply w-10; }
+  .shell-tab-row, .shell-sidebar { display: none; }
+  .shell-tool-layout { display: block; }
+  .shell-layout { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
+  .shell-layout .round-start-dock { bottom: calc(5rem + env(safe-area-inset-bottom)); }
+  .shell-tabs-mobile { @apply fixed bottom-0 inset-x-0 z-40 flex items-stretch justify-around bg-shell text-shell-ink border-t border-shell-line; padding-bottom: env(safe-area-inset-bottom); }
+  .shell-tabs-mobile .shell-tab { @apply flex flex-1 flex-col items-center justify-center gap-1 px-1 min-h-16 text-[10px] relative; }
+  .shell-tabs-mobile .shell-tab[aria-current=page] { @apply text-accent bg-shell-3; }
+  .shell-tabs-mobile .shell-badge { @apply absolute top-1 right-2; }
+  .shell-account-dialog { @apply rounded-b-none; inset: auto 0 0; width: 100%; max-width: none; max-height: 85dvh; padding-bottom: calc(1.25rem + env(safe-area-inset-bottom)); }
+  body:is([data-side=play], [data-side=feed]) main > :is(.flash-notice, .flash-alert) { bottom: calc(5rem + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 360px) {
+  .shell-preview { display: none; }
+  .navigation-inner { @apply gap-1 px-2; }
+  .shell-side { @apply px-1; }
 }

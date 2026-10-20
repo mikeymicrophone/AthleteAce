@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe "Moderation queue", type: :system do
   def wait_for_shortcuts
     expect(page).to have_css('[data-controller="moderation"]') {
-      page.evaluate_script("Boolean(window.Stimulus?.getControllerForElementAndIdentifier(document.querySelector('[data-controller=moderation]'), 'moderation'))")
+      page.evaluate_script("!document.documentElement.hasAttribute('data-turbo-preview') && Boolean(window.Stimulus?.getControllerForElementAndIdentifier(document.querySelector('[data-controller=moderation]'), 'moderation'))")
     }
   end
 

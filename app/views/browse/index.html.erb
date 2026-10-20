@@ -1,0 +1,9 @@
+<% content_for :title, "Browse" %>
+<header class="browse-header"><div><p class="eyebrow">Athlete Ace</p><h1 class="page-title">Browse</h1><p class="round-intro">Explore players, teams, seasons, and quests.</p></div></header>
+<div class="shell-browse-groups">
+  <% @groups.each do |key, (title, resources)| %>
+    <section id="browse-<%= key %>" class="round-panel"><h2 class="profile-section-title"><%= title %></h2><div class="shell-browse-links">
+      <% resources.each do |resource| %><%= link_to public_send("#{resource}_path"), class: "shell-browse-link" do %><%= icon_for_resource resource, size: 24 %><%= resource.titleize %><%= icon "arrow-right", size: 16 %><% end %><% end %>
+    </div></section>
+  <% end %>
+</div>

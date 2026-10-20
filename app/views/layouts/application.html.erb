@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="<%= current_theme %>">
   <head>
     <title><%= content_for(:title) || "Athlete Ace" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -27,9 +27,13 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body data-side="<%= content_for(:side).presence || "play" %>">
+  <body data-side="<%= current_side %>" data-controller="theme" data-theme-preference-value="<%= current_theme %>">
     <%= render "layouts/navigation" %>
-    <main class="container app-main mx-auto px-4">
+    <div class="shell-layout <%= 'shell-tool-layout' if %w[mod admin].include?(current_side) %>">
+    <% if %w[mod admin].include?(current_side) %>
+      <aside class="shell-sidebar"><p class="eyebrow"><%= current_side == "mod" ? "Moderate" : "Admin" %></p><%= render "layouts/side_links", location: "sidebar" %></aside>
+    <% end %>
+    <main class="app-main min-w-0 px-4">
       <% if notice %>
         <div class="flash-notice" role="alert">
           <span class="block sm:inline"><%= notice %></span>
@@ -42,6 +46,8 @@
       <% end %>
       <%= yield %>
     </main>
+    </div>
+    <%= render "layouts/side_links", location: "mobile" %>
     <%#= browser_sync_initializer %>
   </body>
 </html>

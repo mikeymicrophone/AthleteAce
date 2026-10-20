@@ -1,0 +1,8 @@
+<% content_for :title, "Admin overview" %>
+<header class="browse-header"><div><p class="eyebrow">Admin</p><h1 class="page-title">Overview</h1></div></header>
+<section class="shell-overview" aria-label="Application totals">
+  <% [["Aces", @ace_count], ["Players", @player_count], ["Teams", @team_count], ["Waiting review", shell_pending_count]].each do |label, count| %>
+    <div class="round-panel"><p class="eyebrow"><%= label %></p><strong><%= number_with_delimiter(count) %></strong></div>
+  <% end %>
+</section>
+<div class="page-actions"><%= link_to "Sports data", browse_path(section: "sports", side: "admin"), class: "tool-button" %><%= link_to "Content catalog", browse_path(section: "content", side: "admin"), class: "tool-button" %><%= link_to "Review queue", moderation_path, class: "tool-button" %></div>

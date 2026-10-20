@@ -1,7 +1,6 @@
 <% content_for :title, "Moderation queue" %>
-<% content_for :side, "mod" %>
 <div class="moderation-page" data-controller="moderation" data-action="keydown@window->moderation#keydown">
-  <header class="browse-header"><div><p class="eyebrow">Moderate</p><h1 class="page-title">Review queue</h1><p class="round-intro"><%= pluralize(@queue.total, "submission") %> · <%= @queue.status %></p></div><%= link_to "Decision log", moderation_log_path, class: "tool-button" %></header>
+  <header class="browse-header"><div><p class="eyebrow">Moderate</p><h1 class="page-title">Review queue</h1><p class="round-intro"><%= pluralize(@queue.total, "submission") %> · <%= @queue.status %></p></div></header>
   <nav class="moderation-tabs" aria-label="Submission status">
     <% Moderation::Queue::STATUSES.each do |status| %>
       <%= link_to status.titleize, moderation_path(queue_status: status, item_type: @queue.type), class: "tool-button", aria: { current: @queue.status == status ? "page" : nil } %>

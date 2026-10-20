@@ -27,7 +27,7 @@ RSpec.describe "Play home and quest browsing", type: :system do
     expect(page).to have_content("NFC North Roll Call")
     no_overflow
     page.save_screenshot Rails.root.join("tmp/screenshots/play-home-desktop.png")
-    click_button "Quick round"
+    within(".play-launch") { click_button "Quick round" }
     expect(page).to have_css(".round-game-progress", text: "1 / 10")
     click_button "Pause round"
     visit strength_path

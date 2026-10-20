@@ -87,6 +87,8 @@ RSpec.describe "Account and history pages", type: :system do
 
     visit strength_game_attempts_path
     find("a[aria-label='Drill New York Yankees and Boston Red Sox']").click
+    page.scroll_to find_button("Start round"), align: :center
+    expect(page.evaluate_script("document.querySelector('input[value=\"Start round\"]').getBoundingClientRect().bottom <= document.querySelector('.shell-tabs-mobile').getBoundingClientRect().top")).to be(true)
     click_button "Start round"
     expect(page).to have_css(".round-choice", count: 2)
     expect(all(".round-choice").map { |choice| choice[:value].to_i }).to match_array([team.id, rival.id])
