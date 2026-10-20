@@ -1,20 +1,36 @@
 <% content_for :title, "Moderation queue" %>
 <% content_for :side, "mod" %>
-<div class="moderation-page">
-  <header class="browse-header"><div><p class="eyebrow">Moderate</p><h1 class="page-title">Review queue</h1><p class="round-intro">Review submissions and record your decision.</p></div><%= link_to "Decision log", moderation_log_path, class: "tool-button" %></header>
+<div class="moderation-page" data-controller="moderation" data-action="keydown@window->moderation#keydown">
+  <header class="browse-header"><div><p class="eyebrow">Moderate</p><h1 class="page-title">Review queue</h1><p class="round-intro"><%= pluralize(@queue.total, "submission") %> · <%= @queue.status %></p></div><%= link_to "Decision log", moderation_log_path, class: "tool-button" %></header>
   <nav class="moderation-tabs" aria-label="Submission status">
-    <% %w[pending approved rejected hidden].each do |status| %>
-      <%= link_to status.titleize, moderation_path(status: status), class: "tool-button", aria: { current: @status == status ? "page" : nil } %>
+    <% Moderation::Queue::STATUSES.each do |status| %>
+      <%= link_to status.titleize, moderation_path(queue_status: status, item_type: @queue.type), class: "tool-button", aria: { current: @queue.status == status ? "page" : nil } %>
     <% end %>
   </nav>
-  <p class="round-caption">Oldest first. Up to 100 submissions. Your own submissions are excluded.</p>
+  <nav class="moderation-tabs" aria-label="Submission type">
+    <%= link_to "All #{@queue.counts.values.sum}", moderation_path(queue_status: @queue.status), class: "tool-button", aria: { current: @queue.type.nil? ? "page" : nil } %>
+    <% @queue.counts.each do |type, count| %>
+      <%= link_to "#{type.pluralize} #{count}", moderation_path(queue_status: @queue.status, item_type: type), class: "tool-button", aria: { current: @queue.type == type ? "page" : nil } %>
+    <% end %>
+  </nav>
+  <p class="round-caption">Oldest first. Your own submissions are excluded.</p>
+  <%= render "shortcuts", review: false %>
   <div class="moderation-list">
     <% @items.each do |item| %>
       <article class="moderation-row">
-        <div><p class="eyebrow"><%= item.class.name %> · <%= item.moderation_status %></p><h2><%= link_to moderation_item_name(item), moderation_item_path(type: item.class.name, id: item.id) %></h2><p class="round-caption"><%= item.created_by&.email || "Catalog" %> · <%= time_ago_in_words(item.created_at) %> ago</p></div>
-        <%= link_to "Review", moderation_item_path(type: item.class.name, id: item.id), class: "tool-button" %>
+        <div><p class="eyebrow"><%= item.class.name %> · <%= item.moderation_status %></p><h2><%= link_to moderation_item_name(item), moderation_item_path(type: item.class.name, id: item.id, **queue_context) %></h2><p class="round-caption"><%= item.created_by&.email || "Catalog" %> · submitted <%= time_ago_in_words(item.created_at) %> ago</p></div>
+        <%= link_to "Review", moderation_item_path(type: item.class.name, id: item.id, **queue_context), class: "tool-button", data: { moderation_target: "item" }, aria: { label: "Review #{moderation_item_name(item)}" } %>
       </article>
     <% end %>
     <% if @items.empty? %><div class="round-panel"><h2>Nothing waiting here.</h2><p class="round-intro">Submissions with this status appear here when they need your attention.</p></div><% end %>
   </div>
+  <% if @queue.total.positive? %>
+    <nav class="moderation-pagination" aria-label="Queue pages">
+      <p class="round-caption">Showing <%= @queue.offset + 1 %>–<%= @queue.offset + @items.size %> of <%= @queue.total %></p>
+      <div class="page-actions">
+        <% if @queue.page > 1 %><%= link_to "Previous page", moderation_path(**queue_context.merge(page: @queue.page - 1)), class: "tool-button" %><% end %>
+        <% if @queue.page < @queue.pages %><%= link_to "Next page", moderation_path(**queue_context.merge(page: @queue.page + 1)), class: "tool-button" %><% end %>
+      </div>
+    </nav>
+  <% end %>
 </div>

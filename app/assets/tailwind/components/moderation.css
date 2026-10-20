@@ -7,6 +7,14 @@
 .moderation-row > div { @apply min-w-0 flex-1; }
 .moderation-row h2 { @apply font-display text-2xl my-2; overflow-wrap: anywhere; }
 .moderation-row p { overflow-wrap: anywhere; }
+.moderation-row:focus-within { @apply outline-2 outline-accent-text outline-offset-2; }
+.moderation-row .tool-button, .moderation-pagination .tool-button { @apply min-h-11; }
+.moderation-pagination { @apply flex flex-wrap items-center justify-between gap-3 my-4; }
+.moderation-shortcuts { @apply text-sm text-ink-2 my-4; }
+.moderation-shortcuts summary { @apply cursor-pointer; }
+.moderation-shortcuts p { @apply mt-2; }
+.moderation-shortcuts kbd { @apply font-mono text-xs border border-line-2 rounded px-1; }
+.moderation-providers { @apply flex flex-wrap gap-x-5 gap-y-2 my-3 text-sm; }
 .moderation-fields { @apply grid gap-2 text-sm; grid-template-columns: minmax(5rem, 1fr) minmax(0, 3fr); }
 .moderation-fields dt { @apply text-ink-2; }
 .moderation-fields dd { @apply whitespace-pre-wrap; overflow-wrap: anywhere; }
