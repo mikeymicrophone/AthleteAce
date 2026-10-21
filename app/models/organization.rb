@@ -1,4 +1,6 @@
 class Organization < ApplicationRecord
+  has_many :contracts, dependent: :restrict_with_error
+  has_many :contract_players, -> { distinct }, through: :contracts, source: :player
   has_many :organization_affiliations, dependent: :destroy
   has_many :teams, through: :organization_affiliations
   has_many :current_organization_affiliations, -> { current }, class_name: "OrganizationAffiliation"

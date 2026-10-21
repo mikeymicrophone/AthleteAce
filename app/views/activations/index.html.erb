@@ -1,5 +1,12 @@
 <% content_for :title, "Activations" %>
 
+<% if @campaign %>
+  <h1 class="page-title"><%= @campaign.name %> · <%= @campaign.season.label.presence || @campaign.season.year.number %></h1>
+  <p><%= pluralize(@campaign.activations.count, "known seasonal player") %></p>
+<% else %>
+  <h1 class="page-title">Seasonal memberships</h1>
+<% end %>
+
 <%== @pagy.series_nav %>
 
 <%= index_collection("activations") do %>

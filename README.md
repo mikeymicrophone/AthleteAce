@@ -6,23 +6,33 @@ In development, registration on a host ending in `.test` confirms the account im
 
 Other hosts and environments require the normal email confirmation flow.
 
+Registration asks for a handle and display name. Handles use 3–24 letters, numbers, or underscores, are stored in lowercase, and are unique without regard to case. System names such as `admin`, `moderator`, and `athleteace` are reserved. Handles stay fixed after selection. Display names can change and have a 60-character limit.
+
+Existing accounts choose a handle and display name after their next sign-in, then return to their saved destination. An already signed-in account without a handle also completes this setup before using the app. Sign-out, account security settings, and appearance controls remain accessible during setup.
+
+Open **Profile** in the account menu to view or edit your display name and initials-avatar color. Public attribution and moderation views show the name and handle, with a generic Ace label for older accounts that have not completed setup. Email remains in private account settings. Photo uploads are not included.
+
 ## Navigation and appearance
 
 The root opens Feed for visitors and Play for signed-in fans. Moderators and admins return to their last side in the current session. Their first visit opens Moderate or Admin. A saved return page takes precedence after sign-in.
 
 Switch sides in the dark top bar. Play has Home, Games, Quests, History, and Browse tabs. Moderate and Admin use a sidebar on desktop. On mobile, navigation within each side moves to the bottom of the screen. Shared player, team, place, quest, and catalog pages keep the side you arrived from. Browse replaces the old table dropdowns and retains their catalog links.
 
-The Moderate badge counts pending submissions that the reviewer can decide, excluding their own. Open the account button for My ratings, Settings, Begin Quest, Sign Out, and Light, Dark, or System appearance. Appearance is stored on the signed-in account. Visitors can use the Appearance button, which stores the choice in a cookie.
+The Moderate badge counts pending submissions that the reviewer can decide, excluding their own. Open the account button for Profile, My ratings, Settings, Begin Quest, Sign Out, and Light, Dark, or System appearance. Appearance is stored on the signed-in account. Visitors can use the Appearance button, which stores the choice in a cookie.
 
 Feed currently has an empty reading view and player/team browsing. Posting, follows, leaderboards, payments, and reports remain unfinished. Admin currently provides application totals and sports/content catalog links. Existing content editors keep their current permission rules. The shell omits navigation to unfinished workflows. Contextual search is separate work.
 
-Apply the account-theme migration before running this version:
+The committed development configuration uses `athlete_ace_development_seedtest_20261005`. Other checkouts must create that database or adjust their local database configuration.
+
+Before upgrading a database with existing Contracts, follow the [organization reconciliation requirements](docs/roster-history-proposal.md#contract-transition). The second Contract migration refuses records without a verified Organization. The development seed-test database had no legacy Contracts when this transition was applied.
+
+Apply the pending migrations, including account theme and identity, before running this version:
 
 ```sh
 mise exec -- ruby -S bundle exec rails db:migrate
 ```
 
-A nonzero exit means the migration failed. The migration adds the theme preference without changing account roles.
+A nonzero exit means a migration failed. These migrations add theme and identity fields without changing account roles. Existing handles remain unset until each ace chooses one.
 
 Build the stylesheet before browser checks:
 
@@ -35,7 +45,7 @@ A nonzero exit means the stylesheet build failed.
 Run the shell and authentication acceptance checks:
 
 ```sh
-mise exec -- ruby -S bundle exec rspec spec/requests/shell_spec.rb spec/requests/local_confirmation_spec.rb spec/system/navigation_spec.rb spec/system/account_and_history_spec.rb
+mise exec -- ruby -S bundle exec rspec spec/models/ace_identity_spec.rb spec/requests/profiles_spec.rb spec/requests/account_flow_spec.rb spec/requests/local_confirmation_spec.rb spec/requests/shell_spec.rb spec/system/ace_profiles_spec.rb spec/system/navigation_spec.rb spec/system/account_and_history_spec.rb
 ```
 
 A nonzero exit, any failed example, or zero examples means the check failed.

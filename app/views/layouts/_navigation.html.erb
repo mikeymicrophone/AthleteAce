@@ -15,7 +15,7 @@
     <div class="nav-account">
       <% unless ace_signed_in? %><%= link_to "Sign In", new_ace_session_path, class: "auth-link" %><% end %>
       <button type="button" class="shell-account-toggle" aria-label="<%= ace_signed_in? ? 'Account menu' : 'Appearance' %>" aria-expanded="false" aria-controls="shell-account" data-shell-target="toggle" data-action="shell#open">
-        <%= icon ace_signed_in? ? "users" : "sun", size: 22 %>
+        <%= ace_signed_in? ? ace_avatar(current_ace) : icon("sun", size: 22) %>
       </button>
     </div>
   </div>

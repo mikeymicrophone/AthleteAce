@@ -17,7 +17,7 @@
   <div class="moderation-list">
     <% @items.each do |item| %>
       <article class="moderation-row">
-        <div><p class="eyebrow"><%= item.class.name %> · <%= item.moderation_status %></p><h2><%= link_to moderation_item_name(item), moderation_item_path(type: item.class.name, id: item.id, **queue_context) %></h2><p class="round-caption"><%= item.created_by&.email || "Catalog" %> · submitted <%= time_ago_in_words(item.created_at) %> ago</p></div>
+        <div><p class="eyebrow"><%= item.class.name %> · <%= item.moderation_status %></p><h2><%= link_to moderation_item_name(item), moderation_item_path(type: item.class.name, id: item.id, **queue_context) %></h2><p class="round-caption"><%= item.created_by ? ace_identity(item.created_by) : "Catalog" %> · submitted <%= time_ago_in_words(item.created_at) %> ago</p></div>
         <%= link_to "Review", moderation_item_path(type: item.class.name, id: item.id, **queue_context), class: "tool-button", data: { moderation_target: "item" }, aria: { label: "Review #{moderation_item_name(item)}" } %>
       </article>
     <% end %>

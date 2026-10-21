@@ -11,7 +11,7 @@ RSpec.describe "Local account confirmation", type: :request do
   let(:email) { "local-ace@example.com" }
 
   def register
-    post ace_registration_path, params: { ace: { email: email, password: "password123", password_confirmation: "password123" } }
+    post ace_registration_path, params: { ace: { username: "courtside_sam", display_name: "Sam Carter", email: email, password: "password123", password_confirmation: "password123" } }
   end
 
   def log_in(password = "password123")

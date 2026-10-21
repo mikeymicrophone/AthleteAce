@@ -33,7 +33,11 @@ module ShellNavigation
   protected
 
   def after_sign_in_path_for(resource)
-    stored_location_for(resource) || shell_landing_path
+    destination = stored_location_for(resource) || shell_landing_path
+    return destination if resource.username.present?
+
+    session[:profile_return_to] = destination
+    edit_profile_path
   end
 
   def shell_landing_path

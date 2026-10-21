@@ -183,8 +183,11 @@ RSpec.describe Seeds::LibraryImporter do
 
   it "resolves an explicit fully qualified sequence reference" do
     seed_pilot
+    organization_path = write_document(records: [ definition("Organization", "BKT-NBA-ORG-NYK", { "name" => "New York Knicks" }) ])
+    importer.call([ organization_path ])
     path = write_document(records: [definition("Contract", "BKT-NBA-CONTRACT-HART_JOSH-NYK", {}, {
       "player" => "BKT-NBA-LAL-2017-HART_JOSH",
+      "organization" => "BKT-NBA-ORG-NYK",
       "team" => { "code" => "MIC-ALA-BKT-NBA-2022-NYK", "entity_sequence" => "01_11" }
     })])
     expect(importer.call([path])[:created]).to eq(["BKT-NBA-CONTRACT-HART_JOSH-NYK"])

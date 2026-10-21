@@ -6,6 +6,7 @@ RSpec.describe "Seasonal rosters", type: :model do
   let(:first_team) { create :team, league: league }
   let(:second_team) { create :team, league: league }
   let(:player) { create :player, team: first_team, sport: league.sport }
+  let(:organization) { create :organization }
   let(:first_campaign) { Campaign.create! team: first_team, season: season }
   let(:second_campaign) { Campaign.create! team: second_team, season: season }
 
@@ -35,7 +36,7 @@ RSpec.describe "Seasonal rosters", type: :model do
   end
 
   it "infers the player from a supplied contract for existing callers" do
-    contract = Contract.create! player: player, team: first_team
+    contract = Contract.create! player: player, organization: organization
     membership = Activation.create! contract: contract, campaign: first_campaign
 
     expect(membership.reload.player).to eq(player)
@@ -43,7 +44,7 @@ RSpec.describe "Seasonal rosters", type: :model do
   end
 
   it "rejects a contract belonging to another player" do
-    contract = Contract.create! player: player, team: first_team
+    contract = Contract.create! player: player, organization: organization
     other_player = create :player, team: first_team
     membership = Activation.new player: other_player, contract: contract, campaign: first_campaign
 
@@ -53,18 +54,18 @@ RSpec.describe "Seasonal rosters", type: :model do
   end
 
   it "uses the campaign team for a loan while retaining the parent club's contract" do
-    contract = Contract.create! player: player, team: first_team
+    contract = Contract.create! player: player, organization: organization
     membership = Activation.create! player: player, contract: contract, campaign: second_campaign
 
     expect(membership.reload.team).to eq(second_team)
-    expect(membership.contract.team).to eq(first_team)
+    expect(membership.contract.organization).to eq(organization)
     expect(second_campaign.reload.activated_players).to match_array([player])
     expect(second_team.activations).to include(membership)
     expect(first_team.activations).not_to include(membership)
   end
 
   it "preserves roster membership when an optional contract is deleted" do
-    contract = Contract.create! player: player, team: first_team
+    contract = Contract.create! player: player, organization: organization
     membership = Activation.create! player: player, contract: contract, campaign: first_campaign
     contract.destroy!
 

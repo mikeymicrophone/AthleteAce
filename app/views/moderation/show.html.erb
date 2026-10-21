@@ -14,7 +14,7 @@
     </div>
   </nav>
   <%= render "shortcuts", review: true %>
-  <section class="round-panel"><h2 class="profile-section-title">Submission</h2><dl class="moderation-fields"><% @item.moderation_snapshot.except("id", "type").each do |key, value| %><dt><%= key.humanize %></dt><dd><%= value %></dd><% end %></dl></section>
+  <section class="round-panel"><h2 class="profile-section-title">Submission</h2><%= render "aces/attribution", ace: @item.created_by %><dl class="moderation-fields"><% @item.moderation_snapshot.except("id", "type").each do |key, value| %><dt><%= key.humanize %></dt><dd><%= value %></dd><% end %></dl></section>
   <section class="round-panel"><h2 class="profile-section-title">Your decision</h2>
     <% if @item.created_by_id == current_ace.id %>
       <p>Another reviewer must decide your submission.</p>

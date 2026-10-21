@@ -70,7 +70,7 @@ RSpec.describe "Navigation", type: :system do
     end
     expect_no_overflow
     open_menu
-    expect(page).to have_css("dialog[open]", text: ace.email)
+    expect(page).to have_css("dialog[open]", text: ace.handle)
     page.save_screenshot Rails.root.join("tmp/screenshots/shell-account-mobile.png")
     page.driver.browser.action.send_keys(:escape).perform
     expect(page).not_to have_css("dialog[open]")

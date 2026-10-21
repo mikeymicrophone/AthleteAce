@@ -20,3 +20,13 @@
 .account-errors h2 { @apply font-semibold mb-2; }
 .account-errors ul { @apply list-disc pl-5 space-y-1; }
 .account-field .field_with_errors .account-input { @apply border-bad; }
+.ace-identity { @apply inline-flex items-center gap-3 min-w-0 max-w-full my-3; }
+.ace-avatar { @apply inline-flex items-center justify-center w-9 h-9 shrink-0 rounded-full text-sm font-bold; color: #fff; }
+.ace-display-name { @apply block font-semibold; overflow-wrap: anywhere; }
+.ace-handle { @apply block text-xs text-ink-3; overflow-wrap: anywhere; }
+.avatar-colors { @apply grid grid-cols-2 gap-2; }
+.avatar-colors legend { @apply text-sm font-semibold mb-2; }
+.avatar-color { @apply flex items-center gap-2 min-h-11 cursor-pointer text-sm; }
+.avatar-color input { accent-color: var(--color-accent-text); }
+.avatar-swatch { @apply inline-block w-5 h-5 rounded-full; }
+.shell-account-toggle .ace-avatar { @apply w-8 h-8; }

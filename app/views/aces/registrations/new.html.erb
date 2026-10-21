@@ -1,7 +1,9 @@
 <%= account_card "Join the Aces", "Create your account to rate players and track your practice." do %>
   <%= form_for resource, as: resource_name, url: registration_path(resource_name), html: { class: "account-form" } do |form| %>
     <%= render "aces/shared/error_messages", resource: resource %>
-    <%= account_field form, :email, type: :email, autofocus: true, autocomplete: "email", required: true %>
+    <%= account_field form, :username, type: :text, label: "Handle", autofocus: true, autocomplete: "username", required: true, minlength: 3, maxlength: 24, pattern: "[A-Za-z0-9_]{3,24}", hint: "3–24 letters, numbers, or underscores. Your handle stays fixed." %>
+    <%= account_field form, :display_name, type: :text, label: "Display name", autocomplete: "nickname", required: true, maxlength: 60 %>
+    <%= account_field form, :email, type: :email, autocomplete: "email", required: true %>
     <%= account_field form, :password, type: :password, autocomplete: "new-password", required: true, hint: account_password_hint %>
     <%= account_field form, :password_confirmation, type: :password, label: "Confirm password", autocomplete: "new-password", required: true %>
     <%= form.submit "Sign up", class: "game-button" %>

@@ -1,0 +1,5 @@
+<%= account_card "Your profile", "Your public identity across Athlete Ace." do %>
+  <%= ace_identity current_ace %>
+  <p class="account-hint">Fan since <%= current_ace.created_at.year %></p>
+  <div class="account-links"><%= link_to "Edit profile", edit_profile_path %><%= link_to "Account settings", edit_ace_registration_path %></div>
+<% end %>

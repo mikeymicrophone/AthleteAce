@@ -1,4 +1,5 @@
 <%= moderation_notice(@spectrum) %>
+<%= render "aces/attribution", ace: @spectrum.created_by %>
 <% content_for :title, @spectrum.name %>
 
 <div class="mx-auto md:w-2/3 w-full">

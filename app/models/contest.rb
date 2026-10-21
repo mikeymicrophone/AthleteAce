@@ -11,6 +11,8 @@ class Contest < ApplicationRecord
   has_many :conferences, -> { distinct }, through: :teams
   has_many :divisions, -> { distinct }, through: :teams
   has_many :countries, -> { distinct }, through: :leagues, source: :jurisdiction, source_type: "Country"
+  has_many :appearances, through: :contestants
+  validate :preserve_appearance_context
   
   serialize :comments, coder: JSON
   
@@ -24,5 +26,20 @@ class Contest < ApplicationRecord
   
   def final_standings
     contestants.by_placing
+  end
+
+  private
+
+  def preserve_appearance_context
+    return unless persisted? && (will_save_change_to_kind? || will_save_change_to_begin_date?)
+    return unless appearances.exists?
+
+    errors.add :kind, "must remain game while appearances exist" unless kind == "game"
+    appearances.includes(:stint).each do |appearance|
+      if appearance.stint && !appearance.stint.permits_date?(begin_date)
+        errors.add :begin_date, "must agree with linked appearance stints"
+        break
+      end
+    end
   end
 end

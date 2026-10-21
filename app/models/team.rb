@@ -6,8 +6,11 @@ class Team < ApplicationRecord
   belongs_to :stadium, optional: true
   has_many :players
   has_many :jersey_number_assignments, dependent: :destroy
-  has_many :contracts, dependent: :destroy
+  has_many :contracts, dependent: :nullify
   has_many :contract_players, through: :contracts, source: :player
+  has_many :stints, dependent: :restrict_with_error
+  has_many :rosters, through: :campaigns
+  has_many :appearances, through: :contestants
   has_many :organization_affiliations, dependent: :destroy
   has_many :organizations, through: :organization_affiliations
   has_one :current_organization_affiliation, -> { current.order(start_date: :desc, created_at: :desc) }, class_name: "OrganizationAffiliation"

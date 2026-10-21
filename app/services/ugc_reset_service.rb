@@ -10,13 +10,13 @@ class UgcResetService
     JerseyNumberAssignment,
     
     # Organizational structure
-    Membership, Position, Role,
+    Organization, OrganizationAffiliation, Membership, Position, Role,
     
     # Time-based models
     Year, Season, Campaign, Contest, Contestant,
     
     # Contract system  
-    Contract, Activation,
+    Contract, Activation, Transaction, TransactionPlayer, Stint, Roster, RosterEntry, Appearance,
     
     # Other seeded models
     Federation

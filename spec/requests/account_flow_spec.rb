@@ -36,7 +36,7 @@ RSpec.describe "Account flow", type: :request do
   it "keeps the player destination through registration and email confirmation" do
     get player_path(player)
     get new_ace_registration_path
-    post ace_registration_path, params: { ace: { email: "new-ace@example.com", password: "password123", password_confirmation: "password123" } }
+    post ace_registration_path, params: { ace: { username: "wrigley_wes", display_name: "Wes Rivera", email: "new-ace@example.com", password: "password123", password_confirmation: "password123" } }
     expect(response).to redirect_to(new_ace_session_path)
     follow_redirect!
     new_ace = Ace.find_by! email: "new-ace@example.com"

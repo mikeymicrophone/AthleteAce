@@ -13,6 +13,11 @@ class Player < ApplicationRecord
   has_many :positions, through: :roles
   has_many :contracts, dependent: :destroy
   has_many :contract_teams, through: :contracts, source: :team
+  has_many :contract_organizations, -> { distinct }, through: :contracts, source: :organization
+  has_many :stints, dependent: :destroy
+  has_many :roster_entries, dependent: :destroy
+  has_many :appearances, dependent: :destroy
+  has_many :transaction_players, dependent: :destroy
   has_many :activations, dependent: :destroy
   has_many :campaigns, -> { distinct }, through: :activations
   

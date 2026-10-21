@@ -1,4 +1,6 @@
 class ThemePreferencesController < ApplicationController
+  skip_before_action :require_ace_identity
+
   def update
     theme = params[:theme].presence_in(Ace::THEMES)
     return head :unprocessable_content unless theme

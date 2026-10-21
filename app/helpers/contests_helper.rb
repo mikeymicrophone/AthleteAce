@@ -58,6 +58,7 @@ module ContestsHelper
         if contest.begin_date || contest.end_date
           contest_dates_section(contest)
         end.to_s.html_safe +
+        contest_appearances_section(contest) +
         if contest.comments.present?
           contest_comments_section(contest)
         end.to_s.html_safe +
@@ -78,13 +79,13 @@ module ContestsHelper
         if contest.context.present?
           tag.div(class: "info-item") do
             tag.dt("Context") +
-            tag.dd(contest.context)
+            tag.dd(link_to_name(contest.context))
           end
         end.to_s.html_safe +
-        if contest.champion_id.present?
+        if contest.champion.present?
           tag.div(class: "info-item") do
             tag.dt("Champion") +
-            tag.dd("Champion ID: #{contest.champion_id}")
+            tag.dd(link_to_name(contest.champion))
           end
         end.to_s.html_safe +
         if contest.description.present?
@@ -119,6 +120,29 @@ module ContestsHelper
         
         dates_content.html_safe
       end
+    end
+  end
+
+  def contest_appearances_section(contest)
+    appearances = contest.appearances.includes(:player, contestant: { campaign: :team })
+    return "".html_safe if appearances.empty?
+
+    tag.section(class: "contest-info-section contest-appearances") do
+      tag.h2("Player appearances", class: "section-title") +
+      safe_join(appearances.map do |appearance|
+        tag.article(class: "appearance-record") do
+          tag.h3(link_to_name(appearance.player)) +
+          tag.p(appearance.contestant.campaign.name) +
+          tag.dl(class: "info-grid") do
+            facts = { "Jersey number" => appearance.jersey_number.presence || "Unknown",
+              "Starter" => appearance.starter.nil? ? "Unknown" : (appearance.starter ? "Yes" : "No") }
+            facts.merge!(appearance.statistics.transform_keys(&:humanize))
+            safe_join(facts.map do |label, value|
+              tag.div(class: "info-item") { tag.dt(label) + tag.dd(value.nil? ? "Unknown" : value.to_s) }
+            end)
+          end
+        end
+      end)
     end
   end
   

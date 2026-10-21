@@ -8,16 +8,29 @@ module Seeds
     MODELS = {
       "Sport" => Sport, "Country" => Country, "State" => State, "City" => City,
       "Stadium" => Stadium, "League" => League, "Conference" => Conference,
-      "Division" => Division, "Team" => Team, "Year" => Year, "Season" => Season,
-      "Campaign" => Campaign, "Player" => Player, "Activation" => Activation,
-      "Contract" => Contract, "JerseyNumberAssignment" => JerseyNumberAssignment
+      "Division" => Division, "Team" => Team, "Organization" => Organization,
+      "OrganizationAffiliation" => OrganizationAffiliation,
+      "Year" => Year, "Season" => Season, "Campaign" => Campaign, "Player" => Player,
+      "Contract" => Contract, "Activation" => Activation,
+      "JerseyNumberAssignment" => JerseyNumberAssignment,
+      "Transaction" => Transaction, "TransactionPlayer" => TransactionPlayer,
+      "Stint" => Stint, "Roster" => Roster, "RosterEntry" => RosterEntry,
+      "Contest" => Contest, "Contestant" => Contestant, "Appearance" => Appearance
     }.freeze
     SCOPE_ASSOCIATIONS = {
       "State" => %w[country], "City" => %w[state], "Stadium" => %w[city],
       "League" => %w[sport], "Conference" => %w[league], "Division" => %w[conference],
       "Team" => %w[league], "Season" => %w[league year], "Player" => %w[sport],
-      "Contract" => %w[player team], "Campaign" => %w[team], "Activation" => %w[player],
-      "JerseyNumberAssignment" => %w[player team]
+      "OrganizationAffiliation" => %w[organization team],
+      "Contract" => %w[player organization], "Campaign" => %w[team], "Activation" => %w[player],
+      "JerseyNumberAssignment" => %w[player team],
+      "Stint" => %w[player team], "Roster" => %w[campaign], "RosterEntry" => %w[roster player],
+      "Contestant" => %w[contest campaign], "Appearance" => %w[player contestant],
+      "TransactionPlayer" => %w[event player]
+    }.freeze
+    POLYMORPHIC_TYPES = {
+      [ "League", "jurisdiction" ] => %w[Country State City],
+      [ "Contest", "context" ] => %w[League Conference Division]
     }.freeze
     PROTECTED_ATTRIBUTES = %w[id entity_code created_at updated_at seed_version last_seeded_at].freeze
 
@@ -111,11 +124,12 @@ module Seeds
           parents[root.call(code)] = root.call(record.code)
         end
       end
+      @reference_types = declared.transform_values(&:type)
       records.group_by { |record| root.call(record.code) }.each_value do |definitions|
         merged_attributes = {}
         merged_references = {}
         definitions.each do |record|
-          cast_attributes(MODELS.fetch(record.type), record.attributes).each do |key, value|
+          desired_attributes(record).each do |key, value|
             if merged_attributes.key?(key) && merged_attributes[key] != value
               raise Error, "#{record.location}: contradictory #{record.code} attribute #{key} across seed definitions"
             end
@@ -153,7 +167,8 @@ module Seeds
         end
       end
       record.attributes.each_key do |key|
-        if PROTECTED_ATTRIBUTES.include?(key) || key.end_with?("_id") || !model.column_names.include?(key)
+        foreign_type = model.reflect_on_all_associations(:belongs_to).any? { |association| association.polymorphic? && association.foreign_type == key }
+        if PROTECTED_ATTRIBUTES.include?(key) || key.end_with?("_id") || foreign_type || !model.column_names.include?(key)
           raise Error, "#{record.location}: unsupported #{record.type} attribute #{key}; associations use references"
         end
       end
@@ -172,7 +187,7 @@ module Seeds
 
     def import_record(record)
       model = MODELS.fetch(record.type)
-      desired = cast_attributes(model, record.attributes)
+      desired = desired_attributes(record)
       desired.merge!(associations_for(record))
       codes = ([record.code] + record.aliases).uniq
       bindings = EntityCode.where(namespace: @namespace, catalog: @catalog, code: codes).lock.to_a
@@ -189,8 +204,8 @@ module Seeds
         report[:created] << canonical_code
       else
         differences = desired.each_with_object({}) do |(key, value), result|
-          current = association_attribute?(model, key) ? target.public_send(key)&.id : target.public_send(key)
-          incoming = association_attribute?(model, key) ? value&.id : value
+          current = comparison_value(model, key, target.public_send(key))
+          incoming = comparison_value(model, key, value)
           result[key] = { existing: current, incoming: incoming } unless current == incoming
         end
         # Adoption via a strong natural key does not change catalog fields.
@@ -220,6 +235,8 @@ module Seeds
         end
         if column.type == :date && !value.nil?
           value = Date.iso8601(value.to_s)
+        elsif column.type == :datetime && !value.nil?
+          value = Time.iso8601(value.to_s)
         elsif column.type == :integer && !value.nil? && !value.to_s.match?(/\A-?\d+\z/)
           raise Error, "#{model.name}.#{key} requires an integer"
         end
@@ -227,6 +244,15 @@ module Seeds
       end
     rescue ArgumentError => e
       raise Error, "Invalid attribute for #{model.name}: #{e.message}"
+    end
+
+    def desired_attributes(record)
+      model = MODELS.fetch(record.type)
+      attributes = record.attributes.dup
+      if model.column_names.include?("source") && record.source
+        attributes["source"] = record.source.merge(attributes.fetch("source", {}))
+      end
+      cast_attributes(model, attributes)
     end
 
     def associations_for(record)
@@ -260,7 +286,7 @@ module Seeds
 
     def resolve_reference(model, key, reference, record)
       association = model.reflect_on_association(key.to_sym)
-      type = association.polymorphic? ? "Country" : association.klass.name
+      type = association.polymorphic? ? polymorphic_reference_type(model, key, reference, record) : association.klass.name
       if reference.is_a?(Hash)
         if (reference["namespace"] && reference["namespace"] != @namespace) || (reference["catalog"] && reference["catalog"] != @catalog)
           raise Error, "#{record.location}: foreign references need an adapter for their catalog"
@@ -289,6 +315,20 @@ module Seeds
       required_code(type, reference, record)
     end
 
+    def polymorphic_reference_type(model, key, reference, record)
+      allowed = POLYMORPHIC_TYPES.fetch([ model.name, key ]) { raise Error, "Unsupported polymorphic reference #{model.name}.#{key}" }
+      code = local_code(reference.is_a?(Hash) ? reference.fetch("code") : reference)
+      type = @reference_types[code] || EntityCode.find_by(namespace: @namespace, catalog: @catalog, code: code)&.record_type
+      if !type && reference.is_a?(Hash) && reference["entity_sequence"]
+        slot = @registry.fetch(reference["entity_sequence"]).slots.last
+        type = allowed.find { |candidate| MICharismaSeeders::Scope.key(candidate) == slot }
+      end
+      type ||= "Country" if model == League && key == "jurisdiction"
+      raise MissingReference, "#{record.location}: missing typed reference #{code}" unless type
+      raise Error, "#{code} identifies #{type}, which is invalid for #{model.name}.#{key}" unless allowed.include?(type)
+      type
+    end
+
     def scoped_entity(type, key, record)
       code = record.scope[key]
       raise MissingReference, "#{record.location}: missing #{key} scope" unless code
@@ -309,13 +349,24 @@ module Seeds
     end
 
     def natural_target(model, desired)
-      keys = { Year => %w[number], Season => %w[year league], Campaign => %w[team season], Activation => %w[player campaign] }[model]
+      keys = {
+        Year => %w[number], Season => %w[year league], Campaign => %w[team season], Activation => %w[player campaign],
+        RosterEntry => %w[roster player], Contestant => %w[contest campaign],
+        Appearance => %w[contestant player], TransactionPlayer => %w[event player]
+      }[model]
       return unless keys && keys.all? { |key| desired[key].present? }
       model.find_by(desired.slice(*keys))
     end
 
     def association_attribute?(model, key)
       model.reflect_on_association(key.to_sym)&.macro == :belongs_to
+    end
+
+    def comparison_value(model, key, value)
+      return value unless association_attribute?(model, key)
+      return unless value
+      association = model.reflect_on_association(key.to_sym)
+      association.polymorphic? ? [ value.class.name, value.id ] : value.id
     end
 
     def local_code(code)

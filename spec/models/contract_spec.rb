@@ -14,7 +14,7 @@ RSpec.describe Contract, type: :model do
 
   it "allows unknown or same-day dates but rejects a reversed interval" do
     player = create :player
-    contract = described_class.new player: player, team: player.team
+    contract = described_class.new player: player, organization: create(:organization)
     expect(contract).to be_valid
 
     contract.assign_attributes start_date: Date.new(2024, 10, 1), end_date: Date.new(2024, 10, 1)

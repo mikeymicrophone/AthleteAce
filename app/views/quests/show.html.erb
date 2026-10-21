@@ -11,6 +11,7 @@
     <div><p class="eyebrow">Quest · <%= pluralize(highlights.size, "achievement") %></p><h1 class="page-title"><%= @quest.name %></h1><p class="round-intro"><%= @quest.description %></p></div>
     <div class="quest-card-meta"><%= quest_participants_badge @quest %><p><%= pluralize(highlights.count(&:required?), "achievement") %> required</p></div>
   </header>
+  <%= render "aces/attribution", ace: @quest.created_by %>
   <section class="quest-goal-panel" aria-labelledby="quest-goal-title">
     <div><p class="eyebrow">Your goal</p><h2 id="quest-goal-title"><%= goal ? "Keep your eyes on the roster." : "Make this your next quest." %></h2><p><%= goal ? "Adopted #{l(goal.created_at.to_date, format: :long)}" : "Choose this quest and keep your progress close." %></p></div>
     <% if goal %><%= render "quests/progress", goal: goal %><% end %>

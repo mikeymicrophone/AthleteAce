@@ -22,7 +22,9 @@ Brand class filenames use `micharisma_`, including the parser's `micharisma_enti
 
 `Campaign` joins a Team to a Season. Its annual snapshot stores display name, territory, mascot, abbreviation, logo URL, colors, stadium, city, conference, and division. Its league comes from its Season; changing `Team.league` does not move old Campaigns. Its optional `details` mapping allows additional annual metadata. Missing fields are unknown; legacy display fallback to the current Team is convenience, not evidence of historical attributes.
 
-`Activation` directly joins a Player to a Campaign, uniquely per player/campaign. A Contract and exact dates are optional. A traded player can have both teams' whole-season memberships. These records do not assert opening-day presence or appearances in specific games. A loan can retain the parent team's Contract while membership belongs to the borrowing team's Campaign.
+`Activation` directly joins a Player to a Campaign, uniquely per player/campaign. A Contract and exact dates are optional. A traded player can have both teams' whole-season memberships. These records do not assert opening-day presence or appearances in specific games. A loan can retain the parent Organization's Contract while membership belongs to the borrowing Team's Campaign.
+
+`Contract` requires Organization; its legacy Team link is optional. `Stint` records independently sourced Team assignments, `Roster`/`RosterEntry` record established lists, and `Appearance` records actual game participation via Contestant. Transactions and player movements are observations, not instructions to rewrite assignments. See [the implemented roster-history design](roster-history-proposal.md) for constraints, date precision, and the guarded migration transition.
 
 `Player.sport` can be known without a current Team. A player's debut-team code is an identity anchor; a later-season roster import does not assign that team as current. Profiles accept these players and show their known Seasons.
 
@@ -57,7 +59,7 @@ groups:
 
 The complete bundle must also supply Sport, League, Year, Season, Team, and Player. JSON uses the same structure. Scope merges file → nested groups → row; explicit references override scope. Configuration never enters model attributes. Database IDs and foreign-key attributes are rejected; relationships use codes.
 
-The envelope's `source` mapping is optional, and a citation URL is not required on each record. The example's URL is useful metadata rather than a mandatory field. Source metadata can be shared through file/group inheritance. Acquisition URLs may instead be kept in logs; URL-family buckets are a possible future Spindrift scrape/parse workflow.
+The envelope's `source` mapping is optional, and a citation URL is not required on each record. Source metadata can be shared through file/group inheritance. On models with a `source` column, the importer persists that mapping, merged with any explicitly supplied source attributes. Older tables can carry citations in `details.source`; acquisition URLs may also be kept in logs.
 
 Capture/import timestamps can be kept per run in logs. Git metadata may provide the chronology needed for repeated seeding, or explicit `.yml` timestamps may be needed; experiments will settle the storage and replay rules. There is no mandatory per-record timestamp or timestamp-based overwrite behavior implemented by this pilot. The current reader can retain optional date metadata, but timestamp precedence remains future adapter work.
 
@@ -150,9 +152,9 @@ Canonical definitions are independently issued references, not positional lookup
 
 ```sh
 git submodule update --init --recursive
-mise exec -- bundle exec rails db:migrate
+mise exec -- bundle exec rails db:create db:migrate
 mise exec -- bundle exec rails seeds:validate
-mise exec -- bundle exec rails seeds:import
+mise exec -- bundle exec rails db:seed
 ```
 
 Use `SEED_LIBRARY_ROOT=/absolute/library` to select another bundle with `entity_sequences.yaml`. `seeds:validate` is read-only: it checks structure, model attribute/reference names, selected sequences, duplicate identities, and contradictory definitions. Reference existence, model constraints, and preserved database differences are checked during import. It is not a complete database dry run.
@@ -163,15 +165,25 @@ AthleteAce's CI test job checks out the pinned private submodules using reposito
 
 The approved next policy permits filling and refreshing selected attributes during replay while protecting other attributes. That configuration is not implemented in this pilot; do not add an unsupported `replay_policy` field to manifests or assume the last file wins. Attribute lists, source precedence, null handling, and stale-source behavior remain to be specified.
 
-The pilot uses one transaction and reads the selected bundle into memory. Streaming/chunking and a persistent amendment/provenance ledger are future work for very large catalogs. When supplied, source metadata is committed with the manifests and included in conflict reports; citation URLs are optional.
+The library importer uses one transaction and reads the selected bundle into memory. The standard seed task then runs [team palette enrichment](team-palettes.md) in a separate transaction. That step refreshes valid recorded team colors and text contrast; it is an exception to the library importer's preservation of existing values. A later palette failure does not roll back the completed library import. Streaming/chunking and a persistent amendment/provenance ledger are future work for very large catalogs. When supplied, source metadata is committed with the manifests and included in conflict reports; citation URLs are optional.
 
-The new tasks do not invoke the legacy `db:seed` scripts. For a clean rebuild, load the new schema and use `seeds:import`; mixing both libraries requires explicit reconciliation of legacy entities that lack codes. The importer only adopts uncoded rows through strong Year/Season/Campaign/Activation keys; it does not guess that matching player names or team abbreviations identify the same entity.
+`db:seed` invokes `seeds:import`, so ordinary Rails database setup imports the new YAML library. The previous JSON orchestration is retained in `db/seeds_legacy.rb` for explicit legacy use. Mixing both libraries requires explicit reconciliation of legacy entities that lack codes. Legacy JSON Contracts require an explicit verified `organization_code`. The importer adopts uncoded rows through strong Year/Season/Campaign/Activation keys and unique parent/player keys for RosterEntry, Appearance, Contestant, and TransactionPlayer; it does not guess that matching player names or team abbreviations identify the same entity.
 
 ## Coverage and remaining launch work
 
 The first sample supplies 89 definitions and 94 code bindings: four Sports, two Countries, five Leagues, ten Years, 41 Seasons, eight Teams, three Players, ten Campaigns, and six Activations. It covers the 2016–2025 starting-year window for NBA/NFL/NHL/EPL, plus a Championship season for Fulham. The three sampled transfers, Raiders relocation, and Fulham promotion test the contract. They are not complete rosters.
 
-Next work is sourced complete annual team snapshots and roster unions for each league, reusable source generators, coverage/completeness checks, and seasonal filters in browsing/quizzes. Existing current-team player queries do not become historical roster queries automatically. The pilot reserves stadium/logo/division fields but does not fabricate their facts. Games played, statistics, within-season team history, public fan search, and Ascent's adapter remain outside this initial implementation.
+The `yaml/coverage_2025/` expansion supplies all 114 teams for the latest completed seasons (NBA/NHL/EPL `2025_2026`, NFL `2025`), at least two players per team, full captured Knicks/49ers roster listings, and all Blues regular-season participants. Its normalized official-source capture and offline/refresh generator live in the data repository's `sources/` and `scripts/` directories. Expanded-catalog tests compare imported memberships to that capture and verify replay. Campaign details label complete source listings separately from two-player samples. See the data repository's `sources/README.md` for the source-specific completeness boundaries.
+
+The [Play roster supplement](../db/seeds/athlete_ace_data/yaml/play_roster_expansion/README.md) adds the full captured NBA and NHL lists without changing the original sample metadata. The current recursive bundle validates 23 manifests, 4,534 definitions, and 4,539 code bindings, with 1,766 Players and 1,864 Activations. These additions retain NBA snapshot and NHL season-appearance meanings. The October 5 and October 6 results below describe their earlier catalog snapshots.
+
+The October 5 expansion passed 23 focused importer/sequence/code examples. Validation reported 18 manifests, 1,043 definitions, and 1,048 code bindings. Import into the fresh development pilot database created 954 records while retaining the original 89; replay created zero records with zero conflicts. All 114 latest-season team Campaigns were checked against the capture and had at least two players. Offline regeneration was byte-for-byte identical.
+
+The October 6 `yaml/participation/` extension supplied 114 sporting-club Organizations/affiliations, 83 roster observations, 281 roster entries, and a sourced Leddy example with a Contract, two Transactions/player movements, one Stint, one game, two Contestants, and one Appearance. It adds 606 records. At that snapshot, validation reported 21 manifests, 1,649 definitions, and 1,654 code bindings; replay creates zero records with zero conflicts. NBA/NFL/EPL listing categories retain their source meanings, while NHL season-statistics lists remain Activations. Unknown contract date bounds and starter status remain NULL. The original 114 Teams and 361 Players remain, with 126 Campaigns and 384 Activations.
+
+The October 6 complete Rails suite passed 373 examples, zero failures. Rails eager loading and lint on the 14 new Ruby files passed. Participation regeneration was byte-for-byte identical, and every development EntityCode binding resolved to its expected record.
+
+Remaining work includes complete annual team snapshots and roster unions for all ten seasons, affiliate coverage, seasonal filters in browsing/quizzes, and sport-specific transaction/statistics policies. Existing current-team player queries do not become historical roster queries automatically. The model supports within-season history and game statistics, but the core seed only has a historical sample. Public fan search and Ascent's adapter remain outside this implementation.
 
 For Ascent, the approved direction is one multi-party Candidacy per person/office/election, amended certifications on the same Election, and one Person identity scheme for candidates, voters, appointed officials, pundits, and foreign officials. Person usernames prefer Instagram handles, with generated names when absent; verification, encoding, and handle updates still need implementation. Ascent Clerk is approved for read access to private `micharisma_seeders`; access provisioning is not confirmed by this document. Jev remains in the fan-resolver plan, with integration still to be designed. See the decision record for the identity alternatives and unresolved topics to carry to Linear.
 
@@ -187,6 +199,6 @@ Ascent name discrepancies should use a Spindrift-style disambiguation layer. Dis
 
 The mirrored 2026 Ascent slate should deactivate withdrawn/removed candidacies by default while retaining history. Election experiments can choose other slates. Approved participation options are active, inactive, and off-ballot but approvable; the third must clearly show voters that the person is off the official ballot and supports administrative additions. Official ballot updates and experiment membership remain distinguishable. These options are future Ascent adapter/schema work, separate from AthleteAce's roster Activation model.
 
-Validation covers the shared core and focused Rails model/import/profile tests, including replay after file renaming, changed numeric IDs, edited values, transfers, loans, and league changes. Tests use the local test database; development and deployed data are unchanged.
+Validation covers the shared core and focused Rails model/import/profile tests, including replay after file renaming, changed numeric IDs, edited values, transfers, loans, and league changes. Tests use the local test database. The development seed-test database has been migrated and seeded as described above; deployed data is unchanged.
 
 The initial pilot's complete local Rails suite passed: 346 examples, zero failures. The current importer/sequence suite passed 16 examples, including complete catalog wipe/rebuild and numeric, staged, and named YAML/JSON configuration. The shared core passed 28 tests / 146 assertions across Ruby 3.1 / JSON 2.6 and Ruby 4.0 / JSON 2.18 and 3.0. Rails' `zeitwerk:check` passed with the brand inflection. The pilot's Brakeman 8.0.6 check reported zero warnings. The read-only task validated 14 manifests / 89 definitions / 94 code bindings; actual CLI import created 89 records, and its second run created zero with zero conflicts. Remote AthleteAce CI still requires the private-submodule credential described above.

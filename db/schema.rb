@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_21_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -35,6 +35,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
     t.boolean "admin", default: false, null: false
     t.boolean "moderator", default: false, null: false
     t.string "theme", default: "system", null: false
+    t.string "username"
+    t.string "display_name"
+    t.string "avatar_color", default: "#7A4B2A", null: false
+    t.index "lower((username)::text)", name: "index_aces_on_lower_username", unique: true
     t.index ["confirmation_token"], name: "index_aces_on_confirmation_token", unique: true
     t.index ["email"], name: "index_aces_on_email", unique: true
     t.index ["reset_password_token"], name: "index_aces_on_reset_password_token", unique: true
@@ -79,6 +83,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
     t.index ["entity_code"], name: "index_activations_on_entity_code", unique: true
     t.index ["player_id", "campaign_id"], name: "index_activations_on_player_id_and_campaign_id", unique: true
     t.index ["player_id"], name: "index_activations_on_player_id"
+  end
+
+  create_table "appearances", force: :cascade do |t|
+    t.bigint "player_id", null: false
+    t.bigint "contestant_id", null: false
+    t.bigint "stint_id"
+    t.boolean "starter"
+    t.string "jersey_number"
+    t.jsonb "statistics", default: {}, null: false
+    t.jsonb "source", default: {}, null: false
+    t.jsonb "details", default: {}, null: false
+    t.string "entity_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["contestant_id", "player_id"], name: "index_appearances_on_contestant_id_and_player_id", unique: true
+    t.index ["contestant_id"], name: "index_appearances_on_contestant_id"
+    t.index ["entity_code"], name: "index_appearances_on_entity_code", unique: true
+    t.index ["player_id"], name: "index_appearances_on_player_id"
+    t.index ["stint_id"], name: "index_appearances_on_stint_id"
   end
 
   create_table "campaigns", force: :cascade do |t|
@@ -151,9 +174,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
     t.datetime "last_seeded_at", precision: nil
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "entity_code"
     t.index ["campaign_id"], name: "index_contestants_on_campaign_id"
     t.index ["contest_id", "campaign_id"], name: "index_contestants_on_contest_id_and_campaign_id", unique: true
     t.index ["contest_id"], name: "index_contestants_on_contest_id"
+    t.index ["entity_code"], name: "index_contestants_on_entity_code", unique: true
   end
 
   create_table "contests", force: :cascade do |t|
@@ -171,13 +196,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
     t.datetime "last_seeded_at", precision: nil
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "entity_code"
+    t.string "kind"
     t.index ["context_type", "context_id"], name: "index_contests_on_context"
+    t.index ["entity_code"], name: "index_contests_on_entity_code", unique: true
+    t.index ["kind", "begin_date"], name: "index_contests_on_kind_and_begin_date"
     t.index ["season_id"], name: "index_contests_on_season_id"
   end
 
   create_table "contracts", force: :cascade do |t|
     t.bigint "player_id", null: false
-    t.bigint "team_id", null: false
+    t.bigint "team_id"
     t.date "start_date"
     t.date "end_date"
     t.decimal "total_dollar_value"
@@ -187,7 +216,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "entity_code"
+    t.bigint "organization_id", null: false
     t.index ["entity_code"], name: "index_contracts_on_entity_code", unique: true
+    t.index ["organization_id"], name: "index_contracts_on_organization_id"
     t.index ["player_id"], name: "index_contracts_on_player_id"
     t.index ["team_id"], name: "index_contracts_on_team_id"
   end
@@ -405,19 +436,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
     t.index ["team_id"], name: "index_memberships_on_team_id"
   end
 
-  create_table "organization_affiliations", force: :cascade do |t|
-    t.bigint "organization_id", null: false
-    t.bigint "team_id", null: false
-    t.date "start_date"
-    t.date "end_date"
-    t.json "details"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["organization_id", "team_id", "start_date"], name: "index_org_affiliations_on_org_team_start", unique: true
-    t.index ["organization_id"], name: "index_organization_affiliations_on_organization_id"
-    t.index ["team_id"], name: "index_organization_affiliations_on_team_id"
-  end
-
   create_table "moderation_decisions", force: :cascade do |t|
     t.string "subject_type", null: false
     t.bigint "subject_id", null: false
@@ -433,6 +451,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
     t.index ["subject_type", "subject_id"], name: "index_moderation_decisions_on_subject"
   end
 
+  create_table "organization_affiliations", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "team_id", null: false
+    t.date "start_date"
+    t.date "end_date"
+    t.json "details"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "entity_code"
+    t.index ["entity_code"], name: "index_organization_affiliations_on_entity_code", unique: true
+    t.index ["organization_id", "team_id", "start_date"], name: "index_org_affiliations_on_org_team_start", unique: true
+    t.index ["organization_id"], name: "index_organization_affiliations_on_organization_id"
+    t.index ["team_id"], name: "index_organization_affiliations_on_team_id"
+  end
+
   create_table "organizations", force: :cascade do |t|
     t.string "name", null: false
     t.string "abbreviation"
@@ -442,6 +475,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
     t.integer "founded_year"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "entity_code"
+    t.index ["entity_code"], name: "index_organizations_on_entity_code", unique: true
   end
 
   create_table "players", force: :cascade do |t|
@@ -536,6 +571,41 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
     t.index ["seed_version"], name: "index_roles_on_seed_version"
   end
 
+  create_table "roster_entries", force: :cascade do |t|
+    t.bigint "roster_id", null: false
+    t.bigint "player_id", null: false
+    t.bigint "stint_id"
+    t.string "status"
+    t.string "jersey_number"
+    t.jsonb "source", default: {}, null: false
+    t.jsonb "details", default: {}, null: false
+    t.string "entity_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["entity_code"], name: "index_roster_entries_on_entity_code", unique: true
+    t.index ["player_id"], name: "index_roster_entries_on_player_id"
+    t.index ["roster_id", "player_id"], name: "index_roster_entries_on_roster_id_and_player_id", unique: true
+    t.index ["roster_id"], name: "index_roster_entries_on_roster_id"
+    t.index ["stint_id"], name: "index_roster_entries_on_stint_id"
+  end
+
+  create_table "rosters", force: :cascade do |t|
+    t.bigint "campaign_id", null: false
+    t.string "kind", null: false
+    t.date "effective_on"
+    t.datetime "observed_at"
+    t.string "coverage", default: "unknown", null: false
+    t.jsonb "source", default: {}, null: false
+    t.jsonb "details", default: {}, null: false
+    t.string "entity_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["campaign_id", "kind", "effective_on"], name: "index_rosters_on_campaign_id_and_kind_and_effective_on"
+    t.index ["campaign_id"], name: "index_rosters_on_campaign_id"
+    t.index ["entity_code"], name: "index_rosters_on_entity_code", unique: true
+    t.check_constraint "coverage::text = ANY (ARRAY['unknown'::character varying, 'partial'::character varying, 'complete'::character varying]::text[])", name: "rosters_have_known_coverage_labels"
+  end
+
   create_table "seasons", force: :cascade do |t|
     t.bigint "year_id", null: false, comment: "Year when the season began"
     t.bigint "league_id", null: false, comment: "League the season belongs to"
@@ -628,6 +698,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
     t.index ["seed_version"], name: "index_states_on_seed_version"
   end
 
+  create_table "stints", force: :cascade do |t|
+    t.bigint "player_id", null: false
+    t.bigint "team_id", null: false
+    t.bigint "contract_id"
+    t.date "start_date"
+    t.date "end_date"
+    t.string "status"
+    t.bigint "start_transaction_id"
+    t.bigint "end_transaction_id"
+    t.jsonb "source", default: {}, null: false
+    t.jsonb "details", default: {}, null: false
+    t.string "entity_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["contract_id"], name: "index_stints_on_contract_id"
+    t.index ["end_transaction_id"], name: "index_stints_on_end_transaction_id"
+    t.index ["entity_code"], name: "index_stints_on_entity_code", unique: true
+    t.index ["player_id", "start_date", "end_date"], name: "index_stints_on_player_id_and_start_date_and_end_date"
+    t.index ["player_id"], name: "index_stints_on_player_id"
+    t.index ["start_transaction_id"], name: "index_stints_on_start_transaction_id"
+    t.index ["team_id", "start_date", "end_date"], name: "index_stints_on_team_id_and_start_date_and_end_date"
+    t.index ["team_id"], name: "index_stints_on_team_id"
+    t.check_constraint "start_date IS NULL OR end_date IS NULL OR end_date >= start_date", name: "stints_have_ordered_dates"
+  end
+
   create_table "teams", force: :cascade do |t|
     t.string "mascot"
     t.string "territory"
@@ -651,6 +746,39 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
     t.index ["stadium_id"], name: "index_teams_on_stadium_id"
   end
 
+  create_table "transaction_players", force: :cascade do |t|
+    t.bigint "transaction_id", null: false
+    t.bigint "player_id", null: false
+    t.bigint "from_organization_id"
+    t.bigint "to_organization_id"
+    t.bigint "from_team_id"
+    t.bigint "to_team_id"
+    t.jsonb "details", default: {}, null: false
+    t.string "entity_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["entity_code"], name: "index_transaction_players_on_entity_code", unique: true
+    t.index ["from_organization_id"], name: "index_transaction_players_on_from_organization_id"
+    t.index ["from_team_id"], name: "index_transaction_players_on_from_team_id"
+    t.index ["player_id"], name: "index_transaction_players_on_player_id"
+    t.index ["to_organization_id"], name: "index_transaction_players_on_to_organization_id"
+    t.index ["to_team_id"], name: "index_transaction_players_on_to_team_id"
+    t.index ["transaction_id", "player_id"], name: "index_transaction_players_on_transaction_id_and_player_id", unique: true
+    t.index ["transaction_id"], name: "index_transaction_players_on_transaction_id"
+  end
+
+  create_table "transactions", force: :cascade do |t|
+    t.string "kind", null: false
+    t.date "effective_on"
+    t.jsonb "source", default: {}, null: false
+    t.jsonb "details", default: {}, null: false
+    t.string "entity_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["effective_on", "kind"], name: "index_transactions_on_effective_on_and_kind"
+    t.index ["entity_code"], name: "index_transactions_on_entity_code", unique: true
+  end
+
   create_table "years", force: :cascade do |t|
     t.integer "number", null: false, comment: "The year number (e.g., 2024)"
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
@@ -664,13 +792,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
   end
 
   add_foreign_key "achievements", "aces", column: "created_by_id", on_delete: :nullify
-  add_foreign_key "highlights", "aces", column: "created_by_id", on_delete: :nullify
-  add_foreign_key "moderation_decisions", "aces", column: "actor_id", on_delete: :nullify
-  add_foreign_key "quests", "aces", column: "created_by_id", on_delete: :nullify
-  add_foreign_key "spectrums", "aces", column: "created_by_id", on_delete: :nullify
   add_foreign_key "activations", "campaigns"
   add_foreign_key "activations", "contracts"
   add_foreign_key "activations", "players"
+  add_foreign_key "appearances", "contestants"
+  add_foreign_key "appearances", "players"
+  add_foreign_key "appearances", "stints"
   add_foreign_key "campaigns", "cities"
   add_foreign_key "campaigns", "conferences"
   add_foreign_key "campaigns", "divisions"
@@ -682,6 +809,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
   add_foreign_key "contestants", "campaigns"
   add_foreign_key "contestants", "contests"
   add_foreign_key "contests", "seasons"
+  add_foreign_key "contracts", "organizations"
   add_foreign_key "contracts", "players"
   add_foreign_key "contracts", "teams"
   add_foreign_key "divisions", "conferences"
@@ -690,6 +818,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
   add_foreign_key "game_rounds", "aces"
   add_foreign_key "goals", "aces"
   add_foreign_key "goals", "quests"
+  add_foreign_key "highlights", "aces", column: "created_by_id", on_delete: :nullify
   add_foreign_key "highlights", "achievements"
   add_foreign_key "highlights", "quests"
   add_foreign_key "jersey_number_assignments", "players"
@@ -697,6 +826,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
   add_foreign_key "leagues", "sports"
   add_foreign_key "memberships", "divisions"
   add_foreign_key "memberships", "teams"
+  add_foreign_key "moderation_decisions", "aces", column: "actor_id", on_delete: :nullify
   add_foreign_key "organization_affiliations", "organizations"
   add_foreign_key "organization_affiliations", "teams"
   add_foreign_key "players", "cities", column: "birth_city_id"
@@ -704,16 +834,33 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_000000) do
   add_foreign_key "players", "sports"
   add_foreign_key "players", "teams"
   add_foreign_key "positions", "sports"
+  add_foreign_key "quests", "aces", column: "created_by_id", on_delete: :nullify
   add_foreign_key "ratings", "aces"
   add_foreign_key "ratings", "spectrums"
   add_foreign_key "roles", "players"
   add_foreign_key "roles", "positions"
+  add_foreign_key "roster_entries", "players"
+  add_foreign_key "roster_entries", "rosters"
+  add_foreign_key "roster_entries", "stints"
+  add_foreign_key "rosters", "campaigns"
   add_foreign_key "seasons", "contests", column: "championship_contest_id"
   add_foreign_key "seasons", "leagues"
   add_foreign_key "seasons", "teams", column: "champion_id"
   add_foreign_key "seasons", "years"
+  add_foreign_key "spectrums", "aces", column: "created_by_id", on_delete: :nullify
   add_foreign_key "stadiums", "cities"
   add_foreign_key "states", "countries"
+  add_foreign_key "stints", "contracts"
+  add_foreign_key "stints", "players"
+  add_foreign_key "stints", "teams"
+  add_foreign_key "stints", "transactions", column: "end_transaction_id"
+  add_foreign_key "stints", "transactions", column: "start_transaction_id"
   add_foreign_key "teams", "leagues"
   add_foreign_key "teams", "stadiums"
+  add_foreign_key "transaction_players", "organizations", column: "from_organization_id"
+  add_foreign_key "transaction_players", "organizations", column: "to_organization_id"
+  add_foreign_key "transaction_players", "players"
+  add_foreign_key "transaction_players", "teams", column: "from_team_id"
+  add_foreign_key "transaction_players", "teams", column: "to_team_id"
+  add_foreign_key "transaction_players", "transactions"
 end

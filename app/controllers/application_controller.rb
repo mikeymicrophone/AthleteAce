@@ -3,11 +3,12 @@ class ApplicationController < ActionController::Base
   include ShellNavigation
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
-  
+
   include SpectrumsHelper
-  
+
   # Configure permitted parameters for Devise
   before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :require_ace_identity, unless: :devise_controller?
   after_action :store_browsing_location, unless: :devise_controller?
 
   helper_method :admin_signed_in?
@@ -30,14 +31,21 @@ class ApplicationController < ActionController::Base
   end
 
   def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_up, keys: [])
+    devise_parameter_sanitizer.permit(:sign_up, keys: [ :username, :display_name, :avatar_color ])
     devise_parameter_sanitizer.permit(:account_update, keys: [])
+  end
+
+  def require_ace_identity
+    return unless current_ace && current_ace.username.blank?
+
+    session[:profile_return_to] ||= request.fullpath if request.get? && request.format.html? && !request.xhr? && !turbo_frame_request?
+    redirect_to edit_profile_path, status: :see_other
   end
 
   # Page size from ?per_page=, capped so one request can't load a whole table
   def per_page(default = Pagy::OPTIONS[:limit])
     requested = params[:per_page].to_i
-    requested.positive? ? [requested, MAX_PER_PAGE].min : default
+    requested.positive? ? [ requested, MAX_PER_PAGE ].min : default
   end
 
   def admin_signed_in?

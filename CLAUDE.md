@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ### Database Operations
-- `rails db:seed` - Seed database with sports data from JSON files in `db/seeds/athlete_ace_data/`
+- `rails db:seed` - Import the scoped YAML/JSON library under `db/seeds/athlete_ace_data/yaml/`
 - `rails db:reset` - Drop, create, migrate, and seed database
 - `rails db:migrate` - Run pending migrations
 
@@ -47,17 +47,18 @@ The application's core feature is a sophisticated filtering system that allows n
 Key filterable URLs: `/teams/123/players`, `/teams/123/players/456` (one level of nesting). See `docs/filterable.md`.
 
 ### Data Seeding Architecture
-- **JSON-driven**: All sports data lives in `db/seeds/athlete_ace_data/` as JSON files
-- **Dual Format Support**: Both per-team files and league-wide files for player data
-- **Versioned Seeding**: Tracks seed versions to prevent duplicate data
-- **Helper Methods**: Centralized player creation logic in `db/seeds.rb`
+- **Maintained library**: YAML and JSON manifests use the `micharisma-seeds/v1` envelope under `db/seeds/athlete_ace_data/yaml/`.
+- **Stable identity**: Scoped semantic codes and aliases resolve records through `Seeds::LibraryImporter`; file names do not define identity.
+- **Replay**: Missing records are created, existing values are preserved, and differences are reported. Team palette enrichment separately refreshes recorded colors.
+- **Entry point**: `db/seeds.rb` invokes `seeds:import`. The old JSON orchestration remains in `db/seeds_legacy.rb` for explicit legacy use.
+- **Reference**: See `docs/yaml-seed-library.md` for input contracts, migration requirements, and coverage.
 
 ### UGC Preservation System
 - **Backup Location**: `db/seeds/athlete_ace_ugc/backups/` (Git submodule for version control)
 - **Identifier-Based Remapping**: Preserves user data during core model reseeding
 - **Commands**: `rails ugc:backup`, `rails ugc:restore[timestamp]`, `rails "ugc:full_reseed[float|clear]"`
 - **Reset modes**: `float` (default) keeps ratings, achievements, and game attempts, which attach to whichever new records reuse their ids (useful as sample content); `clear` deletes them with the core data so `ugc:restore` recreates them against the right records, and requires a backup newer than the latest change to them
-- Plain `rails db:seed` is nondestructive (records are upserted), so it keeps ids and UGC intact; the reset is only for clearing out records that seeding can't remove
+- Plain `rails db:seed` keeps ids and UGC intact, preserves catalog values, reports conflicts, and separately refreshes team palettes; the reset is only for clearing out records that seeding can't remove
 - **Documentation**: See `docs/ugc_preservation_system.md` for complete implementation details
 
 ### Authentication & Games

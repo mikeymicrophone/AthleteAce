@@ -1,6 +1,7 @@
 FactoryBot.define do
   factory :contract do
-    player { nil }
+    association :player
+    association :organization
     team { nil }
     start_date { "2025-06-13" }
     end_date { "2025-06-13" }

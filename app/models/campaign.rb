@@ -13,6 +13,9 @@ class Campaign < ApplicationRecord
   has_many :activations, dependent: :destroy
   has_many :contracts, -> { distinct }, through: :activations
   has_many :activated_players, -> { distinct }, through: :activations, source: :player
+  has_many :rosters, dependent: :destroy
+  has_many :roster_entries, through: :rosters
+  has_many :appearances, through: :contestants
   
   validates :team_id, presence: true
   validates :season_id, presence: true

@@ -1,0 +1,81 @@
+
+require_relative '../lib/seed_helpers'
+Dir[Rails.root.join('db/seeds/seed_*.rb')].each { |file| require file }
+
+class SeedVersion < ActiveSupport::CurrentAttributes
+  attribute :seed_version, :last_seeded_at
+  attribute :seeded_models, default: []
+end
+
+SeedVersion.seeded_models = [Country, State, City, Stadium, Sport, League, Conference, Division, Team, Player, Membership, Position, Role, Spectrum, Quest, Achievement, Highlight, Year, Season, Contest, Contestant, Contract]
+
+ApplicationRecord.before_create do
+  next unless SeedVersion.seed_version && has_attribute?(:seed_version)
+
+  self.seed_version ||= SeedVersion.seed_version
+  self.last_seeded_at ||= SeedVersion.last_seeded_at
+end
+
+SeedHelpers.init_logging
+SeedHelpers.log_and_puts "===== Seeding AthleteAce Database ====="
+
+previous_seed_version = SeedVersion.seeded_models.map { |model| model.seeded.last&.seed_version =~ /^(\d+)\.\d+\.\d+\.\d+$/ ; $1.to_i }.max || 0
+SeedHelpers.log_and_puts "Previous seed version: #{previous_seed_version}"
+SeedVersion.seed_version = "%03d.#{Time.current.strftime('%Y.%m.%d')}" % (previous_seed_version + 1)
+SeedVersion.last_seeded_at = Time.current
+
+glob_patterns = {
+  sports: ['sports/sports.json'],
+  countries: ['locations/countries/*.json'],
+  federations: ['locations/federations/federations.json'],
+  states: ['locations/states/*.json'],
+  cities: ['locations/cities/*.json'],
+  stadiums: ['locations/stadiums/*.json'],
+  leagues: ['sports/**/leagues.json'],
+  conferences: ['sports/**/conferences.json'],
+  teams: ['sports/**/teams.json'],
+  players: ['sports/**/players/*.json'],
+  memberships: ['sports/**/memberships.json'],
+  positions: ['sports/positions/*.json'],
+  spectrums: ['ratings/spectrums.json'],
+  quests: ['quests/*.json'],
+  achievements: ['achievements/*.json'],
+  seasons: ['sports/**/seasons.json'],
+  contests: ['sports/**/contests/*.json'],
+  expansions: ['sports/**/expansions.json'],
+  transitions: ['sports/**/transitions.json'],
+  contracts: ['sports/**/contracts/*/*.json']
+}
+
+SeedHelpers.cleanup_legacy_files
+
+begin
+  SeedSports.run(glob_patterns[:sports])
+  SeedCountries.run(glob_patterns[:countries])
+  SeedFederations.run(glob_patterns[:federations])
+  SeedStates.run(glob_patterns[:states])
+  SeedCities.run(glob_patterns[:cities])
+  SeedStadiums.run(glob_patterns[:stadiums])
+  SeedLeagues.run(glob_patterns[:leagues])
+  SeedConferences.run(glob_patterns[:conferences])
+  SeedTeams.run(glob_patterns[:teams])
+  SeedPlayers.run(glob_patterns[:players])
+  SeedMemberships.run(glob_patterns[:memberships])
+  SeedPositions.run(glob_patterns[:positions])
+  SeedSpectrums.run(glob_patterns[:spectrums])
+  SeedQuests.run(glob_patterns[:quests])
+  SeedYears.run(glob_patterns[:years] || [])
+  SeedSeasons.run(glob_patterns[:seasons])
+  SeedContests.run(glob_patterns[:contests])
+  SeedSeasons.sync_references(glob_patterns[:seasons])
+  SeedCampaigns.run(glob_patterns[:expansions] + glob_patterns[:transitions])
+  SeedContracts.run(glob_patterns[:contracts])
+
+  SeedHelpers.log_and_puts "\n===== Database Seeding Complete! ====="
+rescue => e
+  SeedHelpers.log_and_puts "ERROR: Seeding failed with: #{e.message}"
+  SeedHelpers.log_and_puts e.backtrace.join("\n")
+  raise e
+ensure
+  SeedVersion.reset
+end
