@@ -12,13 +12,16 @@ module QuestsHelper
     { completed: completed, required: required, percent: required.positive? ? (completed.fdiv(required) * 100).round : 0 }
   end
 
-  def quest_practice_path(achievement, goal: nil)
+  def quest_practice_path(achievement, goal: nil, remaining: false)
     return unless achievement.practice_scope && achievement.target
 
     goal ||= quest_goal(@quest) if @quest
     entry = goal&.goal_achievements&.find_by(achievement: achievement)
     scope = entry ? entry.practice_scope : achievement.practice_scope
-    scope = scope.merge(goal_achievement_id: entry.id) if entry && achievement.target_type == "PlayerGroup"
+    if entry && achievement.target_type == "PlayerGroup"
+      scope = scope.merge(goal_achievement_id: entry.id)
+      scope = scope.merge(practice_filter: "remaining", game_type: "name_ciphers") if remaining
+    end
     new_game_round_path(scope)
   end
 

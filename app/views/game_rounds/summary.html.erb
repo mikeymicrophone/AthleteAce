@@ -20,11 +20,25 @@
       <% end %>
     <% end %>
   <% end %>
+  <% if @learning_entry %>
+    <%= render "learning_progress", entry: @learning_entry %>
+  <% elsif @group_overview %>
+    <section class="round-learning-progress" aria-labelledby="round-group-progress-title">
+      <h2 id="round-group-progress-title" class="profile-section-title">Current group progress</h2>
+      <p class="round-caption">Your latest lifetime answers for current members. The round score above remains recorded.</p>
+      <%= render "player_groups/practice_card", overview: @group_overview %>
+    </section>
+  <% end %>
+  <% if @round.scope["player_group_id"] && !@summary_group %>
+    <p class="round-caption">This group is no longer available. Your saved round results remain recorded.</p>
+  <% end %>
   <%= tag.div class: "round-summary-actions" do %>
     <% if @stats[:correct] < @round.length %>
       <%= button_to "Drill misses", drill_game_round_path(@round), class: "game-button" %>
     <% end %>
-    <%= link_to "Play again", new_game_round_path(round_replay_params(@round)), class: "tool-button" %>
+    <% unless @round.scope["player_group_id"] && !@summary_group %>
+      <%= link_to "Play again", new_game_round_path(round_replay_params(@round)), class: "tool-button" %>
+    <% end %>
     <%= link_to "Choose another game", new_game_round_path, class: "tool-link" %>
   <% end %>
   <%= tag.section class: "round-panel", aria: { labelledby: "round-results-title" } do %>

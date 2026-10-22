@@ -1,0 +1,22 @@
+<% goal = entry.goal %>
+<section class="round-panel round-learning-progress" aria-labelledby="round-quest-progress-title">
+  <h2 id="round-quest-progress-title" class="profile-section-title"><%= goal.status == "completed" ? "Quest complete" : "Your quest progress" %></h2>
+  <%= link_to goal.quest.name, quest_path(goal.quest), class: "play-quest-name" %>
+  <%= render "quests/progress", goal: goal %>
+  <h3><%= entry.achievement.name %></h3>
+  <p><%= entry.progress %> of <%= entry.required_player_ids.size %> players answered correctly since adoption.</p>
+  <p class="round-caption">Current progress for your adopted roster. Your saved round score stays recorded above.</p>
+  <% if entry.completed_at %><p class="round-caption">Achievement complete.</p><% end %>
+  <% if goal.status == "completed" %>
+    <%= link_to "Explore quests", quests_path, class: "game-button" %>
+  <% else %>
+    <% achievement = entry.completed_at ? goal.next_achievement : entry.achievement %>
+    <% path = quest_practice_path(achievement, goal: goal, remaining: true) if achievement %>
+    <% if path %>
+      <% label = achievement.id == entry.achievement_id ? "Continue achievement: #{achievement.name}" : "Next achievement: #{achievement.name}" %>
+      <%= link_to label, path, class: "game-button" %>
+    <% else %>
+      <%= link_to "View quest", quest_path(goal.quest), class: "game-button" %>
+    <% end %>
+  <% end %>
+</section>

@@ -37,6 +37,14 @@ For Name Ciphers, Image Recognition, and Multiple Choice, other eligible members
 
 An adopted quest's remaining filter uses its saved roster and answers credited since adoption, rather than lifetime coverage. Its practice link retains the owned achievement reference through setup and mode changes. Saved rounds keep their questions after progress changes. Replay recomputes a new round's eligibility, so finishing every remaining member can leave replay with no questions. Choose **All members** to keep practicing. Group-page totals always describe current membership; quest totals continue to use the adopted roster.
 
+## Round summaries and continuing practice
+
+Completed group rounds show **Current group progress** with lifetime coverage for the current members. **Practice remaining** opens the members without a correct answer; fully covered groups offer **Practice group**. These totals can change after a round ends. The saved score and question results remain unchanged.
+
+Rounds started through an adopted group achievement show that achievement's current post-adoption coverage instead. **Continue achievement** opens the remaining saved members in Name Ciphers. When the achievement is complete, **Next achievement** opens the next unfinished playable requirement. Group requirements retain their adopted roster and remaining filter; other target types keep their usual practice scope. A completed quest offers **Explore quests**. If the next requirement has no available target, the summary links to the quest instead.
+
+Quest progress appears only for the account that owns the adopted goal, while its quest, achievement, and requirement remain approved. If that progress is unavailable, an existing group can still show ordinary lifetime coverage. After a group is deleted, saved results remain readable and **Play again** is omitted because the group cannot start a new round.
+
 ## Review timing
 
 Each saved answer updates a `PracticeReview` for that account, original game, subject, and target. A miss returns in 10 minutes. Successive correct answers schedule review after 1, 3, 7, 14, and then 30 days. Another miss resets that sequence. Repeated submissions of the same question do not add attempts or change the schedule twice.
@@ -87,7 +95,7 @@ Build styles and run the Play acceptance checks:
 
 ```sh
 mise exec -- ruby -S bundle exec rails tailwindcss:build
-mise exec -- ruby -S bundle exec rspec spec/models/play_learning_spec.rb spec/requests/play_learning_spec.rb spec/system/play_learning_spec.rb spec/models/player_groups_spec.rb spec/requests/player_groups_spec.rb spec/system/player_groups_spec.rb spec/services/history_mixups_spec.rb spec/models/player_pair_practice_spec.rb spec/requests/history_mixups_spec.rb spec/system/history_mixups_spec.rb spec/models/group_learning_spec.rb spec/requests/group_learning_spec.rb spec/system/group_learning_spec.rb spec/services/group_practice_overview_spec.rb spec/requests/group_overviews_spec.rb spec/system/group_overviews_spec.rb
+mise exec -- ruby -S bundle exec rspec spec/models/play_learning_spec.rb spec/requests/play_learning_spec.rb spec/system/play_learning_spec.rb spec/models/player_groups_spec.rb spec/requests/player_groups_spec.rb spec/system/player_groups_spec.rb spec/services/history_mixups_spec.rb spec/models/player_pair_practice_spec.rb spec/requests/history_mixups_spec.rb spec/system/history_mixups_spec.rb spec/models/group_learning_spec.rb spec/requests/group_learning_spec.rb spec/system/group_learning_spec.rb spec/services/group_practice_overview_spec.rb spec/requests/group_overviews_spec.rb spec/system/group_overviews_spec.rb spec/requests/round_learning_summary_spec.rb spec/system/round_learning_summary_spec.rb
 ```
 
 A nonzero build exit means CSS generation failed. A nonzero RSpec exit, any failed example, or zero examples means acceptance failed. Browser checks require local PostgreSQL and Chrome.
