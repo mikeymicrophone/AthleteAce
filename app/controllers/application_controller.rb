@@ -15,10 +15,22 @@ class ApplicationController < ActionController::Base
   rescue_from ActiveRecord::StaleObjectError do
     render plain: "This content changed while you were editing. Reload and try again.", status: :conflict
   end
+  rescue_from Ace::PostingMuted do |error|
+    response.headers["Cache-Control"] = "private, no-store"
+    @posting_mute = error.mute
+    respond_to do |format|
+      format.html { render "posting_statuses/blocked", status: :forbidden }
+      format.json { render json: { error: error.message, ends_at: error.mute.ends_at.utc.iso8601 }, status: :forbidden }
+    end
+  end
 
   MAX_PER_PAGE = 100
 
   protected
+
+  def require_posting_access!
+    current_ace.ensure_posting_access!
+  end
 
   # Remember a page the visitor actually viewed, not a background request or an auth form.
   # Devise consumes this local path after a successful sign-in or password reset.

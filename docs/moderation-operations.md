@@ -67,6 +67,10 @@ Totals cover every matching event, not just the current page. Approved events in
 
 HTML and CSV require moderator or admin access and send private, no-store cache headers. Reading or exporting does not change moderation, content or credit. Report **Keep live** resolutions remain in the reports inbox, outside this global event log. AI comparisons remain on each submission. Escalation and specialized admin-overturn workflows remain separate work.
 
+## Warn or mute an ace
+
+Open the ace from search or submission attribution. The [posting moderation guide](posting-moderation.md) covers warnings, timed mutes, private notes, early ending and an optional atomic hide with a full credit refund. These actions do not suspend sign-in or remove Play access.
+
 ## Compare a submission
 
 Click **Compare with AI** on the review page. The app sends the captured content and policy question to Jev and OpenAI Luna. It records their recommendations independently. The comparison never changes the submission's approval state.

@@ -1,5 +1,6 @@
 class SpectrumsController < ApplicationController
   before_action :authenticate_ace!, except: [:index, :show]
+  before_action :require_posting_access!, only: %i[new create]
   before_action :require_admin!, only: [:edit, :update, :destroy]
   before_action :set_spectrum, only: [:show, :edit, :update, :destroy]
 

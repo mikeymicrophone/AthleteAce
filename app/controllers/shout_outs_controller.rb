@@ -1,5 +1,6 @@
 class ShoutOutsController < ApplicationController
   before_action :authenticate_ace!
+  before_action :require_posting_access!, only: :create
   before_action { response.headers["Cache-Control"] = "private, no-store" }
 
   def index

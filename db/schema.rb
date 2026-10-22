@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_22_080000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_22_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -505,6 +505,42 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_080000) do
     t.index ["subject_type", "subject_id"], name: "index_moderation_decisions_on_subject"
   end
 
+  create_table "moderator_notes", force: :cascade do |t|
+    t.bigint "ace_id", null: false
+    t.bigint "moderator_id"
+    t.text "body", null: false
+    t.string "request_key", limit: 128, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ace_id", "request_key"], name: "index_moderator_notes_on_ace_id_and_request_key", unique: true
+    t.index ["ace_id"], name: "index_moderator_notes_on_ace_id"
+    t.index ["moderator_id"], name: "index_moderator_notes_on_moderator_id"
+  end
+
+  create_table "mutes", force: :cascade do |t|
+    t.bigint "ace_id", null: false
+    t.bigint "moderator_id"
+    t.string "reason", limit: 2000, null: false
+    t.text "note"
+    t.integer "duration_hours", null: false
+    t.datetime "starts_at", null: false
+    t.datetime "ends_at", null: false
+    t.bigint "hidden_shout_out_id"
+    t.string "request_key", limit: 128, null: false
+    t.datetime "ended_at"
+    t.bigint "ended_by_id"
+    t.string "end_reason", limit: 2000
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ace_id", "ends_at"], name: "index_mutes_on_ace_id_and_ends_at"
+    t.index ["ace_id", "request_key"], name: "index_mutes_on_ace_id_and_request_key", unique: true
+    t.index ["ace_id"], name: "index_mutes_on_ace_id"
+    t.index ["ended_by_id"], name: "index_mutes_on_ended_by_id"
+    t.index ["hidden_shout_out_id"], name: "index_mutes_on_hidden_shout_out_id"
+    t.index ["moderator_id"], name: "index_mutes_on_moderator_id"
+    t.check_constraint "(duration_hours = ANY (ARRAY[24, 168, 720])) AND ends_at > starts_at", name: "valid_posting_mute_duration"
+  end
+
   create_table "organization_affiliations", force: :cascade do |t|
     t.bigint "organization_id", null: false
     t.bigint "team_id", null: false
@@ -967,6 +1003,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_080000) do
     t.index ["entity_code"], name: "index_transactions_on_entity_code", unique: true
   end
 
+  create_table "warnings", force: :cascade do |t|
+    t.bigint "ace_id", null: false
+    t.bigint "moderator_id"
+    t.string "reason", limit: 2000, null: false
+    t.string "subject_type"
+    t.bigint "subject_id"
+    t.string "subject_name"
+    t.string "request_key", limit: 128, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ace_id", "request_key"], name: "index_warnings_on_ace_id_and_request_key", unique: true
+    t.index ["ace_id"], name: "index_warnings_on_ace_id"
+    t.index ["moderator_id"], name: "index_warnings_on_moderator_id"
+    t.index ["subject_type", "subject_id"], name: "index_warnings_on_subject"
+  end
+
   create_table "years", force: :cascade do |t|
     t.integer "number", null: false, comment: "The year number (e.g., 2024)"
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
@@ -1020,6 +1072,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_080000) do
   add_foreign_key "memberships", "divisions"
   add_foreign_key "memberships", "teams"
   add_foreign_key "moderation_decisions", "aces", column: "actor_id", on_delete: :nullify
+  add_foreign_key "moderator_notes", "aces", column: "moderator_id", on_delete: :nullify
+  add_foreign_key "moderator_notes", "aces", on_delete: :cascade
+  add_foreign_key "mutes", "aces", column: "ended_by_id", on_delete: :nullify
+  add_foreign_key "mutes", "aces", column: "moderator_id", on_delete: :nullify
+  add_foreign_key "mutes", "aces", on_delete: :cascade
+  add_foreign_key "mutes", "shout_outs", column: "hidden_shout_out_id"
   add_foreign_key "organization_affiliations", "organizations"
   add_foreign_key "organization_affiliations", "teams"
   add_foreign_key "player_group_memberships", "player_groups"
@@ -1072,4 +1130,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_080000) do
   add_foreign_key "transaction_players", "teams", column: "from_team_id"
   add_foreign_key "transaction_players", "teams", column: "to_team_id"
   add_foreign_key "transaction_players", "transactions"
+  add_foreign_key "warnings", "aces", column: "moderator_id", on_delete: :nullify
+  add_foreign_key "warnings", "aces", on_delete: :cascade
 end

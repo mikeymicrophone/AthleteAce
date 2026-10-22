@@ -4,6 +4,7 @@
     <%= ace_identity current_ace %><p class="shell-account-since">Fan since <%= current_ace.created_at.year %></p>
     <nav class="shell-account-links" aria-label="Your account">
       <%= link_to "Profile", profile_path %><%= link_to "My ratings", ratings_path %><%= link_to "Settings", edit_ace_registration_path %>
+      <%= link_to "Posting status", posting_status_path %>
       <%= link_to "Begin Quest", random_quests_path %>
       <%= button_to "Sign Out", destroy_ace_session_path, method: :delete, class: "shell-sign-out" %>
     </nav>

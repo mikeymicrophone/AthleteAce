@@ -10,6 +10,7 @@ module Moderatable
     has_many :decision_evaluations, as: :subject
     validates :moderation_status, inclusion: { in: %w[pending approved rejected hidden] }
     before_validation :set_submission_status, on: :create
+    around_create :check_posting_access
     before_update :resubmit_changed_content
     after_create :record_submission
     after_update :record_resubmission
@@ -34,6 +35,10 @@ module Moderatable
   end
 
   private
+
+  def check_posting_access(&block)
+    created_by ? created_by.with_posting_access(&block) : block.call
+  end
 
   def set_submission_status
     self.moderation_status = "pending" if moderation_status == "approved" && created_by && !created_by.admin?

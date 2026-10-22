@@ -1,0 +1,12 @@
+<% content_for :title, "Posting status" %>
+<div class="moderation-page">
+  <header class="browse-header"><div><p class="eyebrow">Your account</p><h1 class="page-title">Posting status</h1><p class="round-intro"><%= @posting_mute ? "Posting is paused. You can still play and read." : "You can post." %></p></div></header>
+  <h2 class="profile-section-title">Warnings</h2>
+  <% if @warnings.empty? %><p>No posting warnings.</p><% end %>
+  <ol class="moderation-list"><% @warnings.each do |warning| %><li class="moderation-row"><div><p><%= warning.reason %></p><p class="round-caption"><%= warning.subject_name %> · <%= l warning.created_at, format: :long %></p></div></li><% end %></ol>
+  <%== @warnings_pagy.series_nav if @warnings_pagy.pages > 1 %>
+  <h2 class="profile-section-title">Posting mutes</h2>
+  <% if @mutes.empty? %><p>No posting mutes.</p><% end %>
+  <ol class="moderation-list"><% @mutes.each do |mute| %><li class="moderation-row"><div><p class="eyebrow"><%= mute.active? ? "Active" : mute.ended_at? ? "Ended early" : "Expired" %></p><p><%= mute.reason %></p><p class="round-caption">From <%= l mute.starts_at, format: :long %> until <%= l mute.ends_at, format: :long %> UTC</p><% if mute.ended_at? %><p>Ended <%= l mute.ended_at, format: :long %> UTC · <%= mute.end_reason %></p><% end %></div></li><% end %></ol>
+  <%== @mutes_pagy.series_nav if @mutes_pagy.pages > 1 %>
+</div>

@@ -28,3 +28,9 @@
 .decision-log-totals { @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-4; }
 .decision-log-totals > div { @apply rounded-tool border border-line bg-surface p-4 min-w-0; }
 .decision-log-totals strong { @apply font-display text-3xl; overflow-wrap: anywhere; }
+.posting-action-forms { @apply grid gap-4 my-5; }
+.posting-action-forms summary { @apply cursor-pointer; }
+.posting-action-form { @apply grid gap-3 mt-4; }
+.posting-action-form .account-input { @apply w-full min-w-0; }
+
+.ace-moderation-tabs { @apply flex flex-wrap my-5; }

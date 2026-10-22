@@ -1,0 +1,8 @@
+<% mute = current_ace.active_posting_mute %>
+<% warning_count = current_ace.warnings.count %>
+<% if mute || warning_count.positive? %>
+  <aside class="moderation-notice" role="status">
+    <% if mute %><p>Posting is paused until <%= mute.ends_at.utc.strftime("%b %-d, %Y at %H:%M UTC") %>. You can still play and read.</p><% else %><p>You have <%= pluralize warning_count, "posting warning" %>.</p><% end %>
+    <%= link_to "View posting status", posting_status_path, class: "tool-link" %>
+  </aside>
+<% end %>

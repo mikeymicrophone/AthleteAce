@@ -44,6 +44,7 @@
           <span class="block sm:inline"><%= alert %></span>
         </div>
       <% end %>
+      <%= render "posting_statuses/banner" if current_ace %>
       <%= yield %>
     </main>
     </div>

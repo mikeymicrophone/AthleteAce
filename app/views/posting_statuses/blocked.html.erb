@@ -1,0 +1,8 @@
+<% content_for :title, "Posting paused" %>
+<section class="round-panel">
+  <h1 class="page-title">Posting paused</h1>
+  <p>You can still play and read. New shout-outs and proposals are blocked until <%= @posting_mute.ends_at.utc.strftime("%b %-d, %Y at %H:%M UTC") %>.</p>
+  <p><%= @posting_mute.reason %></p>
+  <%= link_to "View posting status", posting_status_path, class: "tool-button" %>
+  <%= link_to "Continue playing", strength_path, class: "game-button" %>
+</section>

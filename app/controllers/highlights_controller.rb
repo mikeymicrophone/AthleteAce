@@ -1,5 +1,6 @@
 class HighlightsController < ApplicationController
   before_action :authenticate_ace!
+  before_action :require_posting_access!, only: %i[new create]
   before_action :require_admin!, only: [:edit, :update, :destroy]
   before_action :set_quest, except: [:new, :create]
   before_action :set_highlight, only: [:edit, :update, :destroy]

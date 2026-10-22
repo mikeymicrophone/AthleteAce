@@ -1,4 +1,12 @@
 class Ace < ApplicationRecord
+  class PostingMuted < StandardError
+    attr_reader :mute
+
+    def initialize(mute)
+      @mute = mute
+      super("Posting is paused until #{mute.ends_at.utc.iso8601}. #{mute.reason}")
+    end
+  end
   THEMES = %w[light dark system].freeze
   AVATAR_COLORS = { "Umber" => "#7A4B2A", "Harbor" => "#365A78", "Forest" => "#32634A",
     "Plum" => "#704267", "Slate" => "#485569", "Rust" => "#93452F" }.freeze
@@ -33,6 +41,9 @@ class Ace < ApplicationRecord
   has_many :game_attempts, dependent: :destroy
   has_many :game_rounds, dependent: :destroy
   has_many :practice_reviews, dependent: :destroy
+  has_many :warnings, class_name: "PostingWarning"
+  has_many :mutes
+  has_many :moderator_notes
   validates :time_zone, inclusion: { in: ActiveSupport::TimeZone.all.map(&:name) }, allow_nil: true
 
   def play_time_zone
@@ -41,6 +52,22 @@ class Ace < ApplicationRecord
 
   def can_moderate?
     admin? || moderator?
+  end
+
+  def active_posting_mute
+    mutes.active.order(ends_at: :desc, id: :desc).first
+  end
+
+  def ensure_posting_access!
+    mute = active_posting_mute
+    raise PostingMuted, mute if mute
+  end
+
+  def with_posting_access(&block)
+    with_lock(requires_new: true) do
+      ensure_posting_access!
+      block.call
+    end
   end
 
   def handle

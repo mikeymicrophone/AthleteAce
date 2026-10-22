@@ -1,5 +1,6 @@
 class AchievementsController < ApplicationController
   before_action :authenticate_ace!, except: %i[ index show ]
+  before_action :require_posting_access!, only: %i[new create]
   before_action :require_admin!, only: %i[ edit update destroy ]
   before_action :set_achievement, only: %i[ show edit update destroy ]
 

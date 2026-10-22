@@ -37,7 +37,10 @@ Rails.application.routes.draw do
   resource :shout_out_revenue, path: "admin/revenue", only: :show
   resource :theme_preference, only: :update
   get "search", to: "searches#index", as: :search
-  resources :ace_profiles, only: :show, path: "moderate/aces"
+  resource :posting_status, only: :show, path: "account/posting"
+  resources :ace_profiles, only: :show, path: "moderate/aces" do
+    resources :posting_actions, only: :create
+  end
 
   get "moderate", to: "moderation#index", as: :moderation
   get "moderate/log", to: "moderation#log", as: :moderation_log

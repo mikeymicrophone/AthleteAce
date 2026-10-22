@@ -1,6 +1,7 @@
 class ShoutOutDraftsController < ApplicationController
   before_action :remember_entry, only: :new
   before_action :authenticate_ace!
+  before_action :require_posting_access!, only: %i[new edit create update]
   before_action :private_response
   before_action :set_draft, only: [ :edit, :update, :destroy ]
 

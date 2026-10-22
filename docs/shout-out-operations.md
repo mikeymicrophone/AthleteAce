@@ -29,7 +29,7 @@ Enter a decision reason, then choose:
 
 The post row lock serializes reports and decisions. A new report since the review form loaded, an already resolved set, or a changed post returns HTTP 409 and requires a reload. Concurrent hides can refund only once. Reviewers cannot bypass the own-report restriction through the ordinary hide action. Refunded posts cannot reopen for free.
 
-Keep-live decisions are retained on each report, rather than added to the global `ModerationDecision` log. Warning/mute enforcement, escalation and automatic hiding remain separate work. There is no optional refund checkbox or automatic report threshold.
+Keep-live decisions are retained on each report, rather than added to the global `ModerationDecision` log. [Warnings and posting mutes](posting-moderation.md) are available on moderator profiles, including an optional atomic hide/refund. Escalation and automatic hiding remain separate work. There is no optional refund checkbox or automatic report threshold.
 
 ## Read revenue
 
