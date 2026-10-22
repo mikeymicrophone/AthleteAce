@@ -7,6 +7,7 @@ class ShoutOut < ApplicationRecord
   has_many :shout_out_reports, dependent: :restrict_with_error
   has_many :shout_out_reactions, dependent: :delete_all
   scope :live, -> { approved.where(funding_status: "spent") }
+  after_update_commit :refresh_public_feed, if: -> { saved_change_to_moderation_status? && saved_change_to_moderation_status.include?("approved") }
   scope :matching_text, ->(query) {
     joins(:created_by).where("shout_outs.target_name ILIKE :term OR shout_outs.message ILIKE :term OR CONCAT_WS(' ', '@' || aces.username, aces.display_name) ILIKE :term",
       term: "%#{sanitize_sql_like(query)}%")
@@ -53,6 +54,10 @@ class ShoutOut < ApplicationRecord
   end
 
   private
+
+  def refresh_public_feed
+    Turbo::StreamsChannel.broadcast_refresh_to "public_shout_outs", request_id: nil
+  end
 
   def record_submission
     super unless funding_status == "unfunded"

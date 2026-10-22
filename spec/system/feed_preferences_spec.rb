@@ -19,7 +19,7 @@ RSpec.describe "My teams on Feed", type: :system do
     expect(page).to have_content("High Affinity")
     page.driver.browser.execute_cdp "Emulation.setDeviceMetricsOverride", width: 390, height: 844, deviceScaleFactor: 1, mobile: false
     select "NBA", from: "League"
-    click_button "Apply filters"
+    click_button "Search posts"
     expect(page).to have_css(".feed-team-card", count: 1)
     expect(page).to have_css(".feed-team-card", text: team.name)
     expect(page).not_to have_css(".feed-team-card", text: other.name)

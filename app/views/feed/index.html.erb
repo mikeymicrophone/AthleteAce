@@ -1,17 +1,21 @@
 <% content_for :title, @view == "my_teams" ? "My teams" : "Feed" %>
+<% turbo_refreshes_with method: :morph, scroll: :preserve %>
+<%= turbo_stream_from "public_shout_outs" %>
 <div class="feed-home">
   <header class="browse-header"><div><p class="eyebrow">Feed</p><h1 class="page-title"><%= @view == "my_teams" ? "My teams" : "Latest" %></h1><p class="round-intro">For the players and teams worth talking about.</p></div></header>
   <nav class="history-tabs" aria-label="Feed views">
-    <%= link_to "All", feed_path(q: @query.presence), aria: { current: @view == "all" ? "page" : nil } %>
-    <%= link_to "My teams", feed_path(view: "my_teams", q: @query.presence), aria: { current: @view == "my_teams" ? "page" : nil } %>
+    <%= link_to "All", feed_path(q: @query.presence, sport_id: @sport&.id, league_id: @league&.id), aria: { current: @view == "all" ? "page" : nil } %>
+    <%= link_to "My teams", feed_path(view: "my_teams", q: @query.presence, sport_id: @sport&.id, league_id: @league&.id), aria: { current: @view == "my_teams" ? "page" : nil } %>
     <%= link_to "Leaders", shout_out_leaderboard_path %>
   </nav>
-  <%= form_with url: feed_path, method: :get, class: "feed-team-filters", role: "search" do |form| %>
+  <%= form_with url: feed_path, method: :get, class: "feed-team-filters", role: "search", id: "feed-filters", data: { controller: "feed-filters", action: "turbo:before-morph-element->feed-filters#preserve" } do |form| %>
     <%= form.hidden_field :view, value: @view %>
-    <%= form.hidden_field :league_id, value: params[:league_id] if params[:league_id].present? %>
+    <div><%= form.label :sport_id, "Sport" %><%= form.collection_select :sport_id, @sports, :id, :name, { include_blank: "All sports", selected: @sport&.id } %></div>
+    <div><%= form.label :league_id, "League" %><%= form.collection_select :league_id, @leagues, :id, :name, { include_blank: "All leagues", selected: @league&.id } %></div>
     <div><%= form.label :q, "Search live shout-outs" %><%= form.search_field :q, value: @query, minlength: 2, maxlength: 80, class: "account-input" %></div>
     <%= form.submit "Search posts", class: "tool-button" %>
-    <% if @query.present? %><%= link_to "Clear search", feed_path(view: @view, league_id: params[:league_id]), class: "tool-link" %><% end %>
+    <% if @query.present? %><%= link_to "Clear search", feed_path(view: @view, sport_id: @sport&.id, league_id: @league&.id), class: "tool-link" %><% end %>
+    <%= link_to "Clear filters", feed_path(view: @view, q: @query.presence), class: "tool-link" if @sport || @league %>
   <% end %>
 
   <div class="page-actions"><%= link_to "Write a draft", new_shout_out_draft_path, class: "game-button" %><% if current_ace %><%= link_to "My drafts", shout_out_drafts_path, class: "tool-button" %><%= link_to "My shout-outs", shout_outs_path, class: "tool-button" %><%= link_to "Credit wallet", wallet_path, class: "tool-button" %><% end %></div>
@@ -21,13 +25,6 @@
       <section class="round-panel" aria-labelledby="feed-teams-title">
         <h2 id="feed-teams-title" class="profile-section-title">Your teams</h2>
         <p class="round-caption">Teams you follow or rate at least +5,000 on Affinity.</p>
-        <%= form_with url: feed_path, method: :get, class: "feed-team-filters" do |form| %>
-          <%= form.hidden_field :view, value: "my_teams" %>
-          <%= form.hidden_field :q, value: @query if @query.present? %>
-          <div><%= form.label :league_id, "League", class: "eyebrow" %><%= form.collection_select :league_id, @leagues, :id, :name, { include_blank: "All leagues", selected: @league&.id } %></div>
-          <%= form.submit "Apply filters", class: "tool-button" %>
-          <%= link_to "Clear filters", feed_path(view: "my_teams"), class: "tool-link" if @league %>
-        <% end %>
         <% if @teams.any? %>
           <div class="feed-team-grid">
             <% @teams.each do |team| %>

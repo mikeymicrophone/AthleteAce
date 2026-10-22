@@ -14,7 +14,9 @@ Each saved draft version can create one submitted post. Retrying the same submis
 
 ## Feed
 
-Public Feed and [team walls](shout-out-operations.md) include approved, spent posts. Signed-in aces also see their own funded pending posts, labeled **in review**. Other accounts cannot see pending posts. **My teams** intersects posts with the recorded team context and chosen league; its personal team cards remain separate from the stream. Target names remain recorded after catalog deletion. A pending post with a deleted target must be rejected, releasing its reservation, rather than approved.
+Public Feed and [team walls](shout-out-operations.md) include approved, spent posts. Signed-in aces also see their own funded pending posts, labeled **in review**. Other accounts cannot see pending posts. **My teams** intersects posts with the recorded team context and chosen sport/league; its personal team cards remain separate from the stream. Target names remain recorded after catalog deletion. A pending post with a deleted target must be rejected, releasing its reservation, rather than approved.
+
+Both Feed views support sport/league filters and live approval/removal updates. See [Feed filters and live updates](feed-engagement.md#filter-and-follow-the-live-feed) for session privacy, filter persistence and Cable behavior.
 
 For each visitor, ranking uses:
 
