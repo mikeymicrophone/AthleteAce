@@ -39,7 +39,20 @@ class ModerationController < ApplicationController
   end
 
   def log
-    @decisions = ModerationDecision.includes(:actor).order(created_at: :desc, id: :desc).limit(100)
+    response.headers["Cache-Control"] = "private, no-store"
+    @log = Moderation::DecisionLog.new(from: params[:from], through: params[:through], type: params[:item_type],
+      actor_id: params[:actor_id], action: params[:decision_action])
+    respond_to do |format|
+      format.html do
+        @actors = Ace.where(id: ModerationDecision.select(:actor_id)).order(:username, :id)
+        @pagy, @decisions = pagy(@log.records, limit: 25)
+      end
+      format.csv do
+        send_data @log.csv, type: "text/csv", filename: "athleteace-decisions-#{@log.from}-#{@log.through}.csv"
+      end
+    end
+  rescue ArgumentError => error
+    render plain: error.message, status: :bad_request
   end
 
   private

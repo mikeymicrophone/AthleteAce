@@ -22,3 +22,9 @@
 .moderation-evaluation { @apply mt-5 pt-4 border-t border-line text-sm; }
 .moderation-evaluation h3 { @apply font-semibold mb-2; }
 .moderation-notice { @apply p-4 my-3 border border-dashed border-accent-text rounded-tool bg-accent-tint text-sm; }
+.decision-log-filters { @apply grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5; }
+.decision-log-filters > div { @apply flex flex-col gap-2 min-w-0; }
+.decision-log-filters .page-actions { @apply flex-row items-end flex-wrap; }
+.decision-log-totals { @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-4; }
+.decision-log-totals > div { @apply rounded-tool border border-line bg-surface p-4 min-w-0; }
+.decision-log-totals strong { @apply font-display text-3xl; overflow-wrap: anywhere; }

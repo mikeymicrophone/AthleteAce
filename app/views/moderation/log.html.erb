@@ -1,2 +1,23 @@
 <% content_for :title, "Moderation decisions" %>
-<div class="moderation-page"><%= link_to "Back to queue", moderation_path, class: "tool-link" %><header class="browse-header"><div><p class="eyebrow">Moderate</p><h1 class="page-title">Decision log</h1><p class="round-intro">The latest 100 decisions, including submissions and trusted creation.</p></div></header><%= render "decisions", decisions: @decisions %></div>
+<div class="moderation-page">
+  <%= link_to "Back to queue", moderation_path, class: "tool-link" %>
+  <header class="browse-header"><div><p class="eyebrow">Moderate</p><h1 class="page-title">Decision log</h1><p class="round-intro">Recorded moderation events, including submissions and trusted creation.</p></div></header>
+  <%= form_with url: moderation_log_path, method: :get, class: "decision-log-filters" do |form| %>
+    <div><%= form.label :from, "From (UTC)" %><%= form.date_field :from, value: @log.from.iso8601, required: true, max: @log.as_of.to_date.iso8601, class: "account-input" %></div>
+    <div><%= form.label :through, "Through (UTC)" %><%= form.date_field :through, value: @log.through.iso8601, required: true, max: @log.as_of.to_date.iso8601, class: "account-input" %></div>
+    <div><%= form.label :item_type, "Content type" %><%= form.select :item_type, Moderation::Queue::TYPES.keys.map { |type| [type.titleize, type] }, { include_blank: "All types", selected: @log.type }, class: "account-input" %></div>
+    <div><%= form.label :decision_action, "Action" %><%= form.select :decision_action, Moderation::DecisionLog::ACTIONS.map { |action| [action.titleize, action] }, { include_blank: "All actions", selected: @log.action }, class: "account-input" %></div>
+    <div><%= form.label :actor_id, "Recorded actor" %><%= form.select :actor_id, [["System or deleted account", "unattributed"], *@actors.map { |actor| [actor.handle || "Ace ##{actor.id}", actor.id.to_s] }], { include_blank: "All actors", selected: @log.actor_id }, class: "account-input" %></div>
+    <div class="page-actions"><%= form.submit "Apply filters", class: "tool-button" %><%= link_to "Clear filters", moderation_log_path, class: "tool-link" %></div>
+  <% end %>
+  <section aria-label="Decision totals" class="decision-log-totals">
+    <div><p class="eyebrow">Recorded events</p> <strong><%= @log.counts.values.sum %></strong> </div>
+    <% Moderation::DecisionLog::ACTIONS.each do |action| %><div><p class="eyebrow"><%= action.titleize %></p> <strong><%= @log.counts.fetch(action, 0) %></strong> </div><% end %>
+  </section>
+  <p class="round-caption">Totals cover all matching events, not just this page. They include trusted creation and resubmissions, not unique posts or reviewer performance.</p>
+  <div class="page-actions"><%= link_to "Export CSV", moderation_log_path(**@log.filters, format: :csv), class: "tool-button", data: { turbo: false } %><p class="round-caption">All matches, up to <%= number_with_delimiter Moderation::DecisionLog::EXPORT_LIMIT %> events. Narrow the filters for larger logs.</p></div>
+  <% if @decisions.any? %>
+    <%= render "decisions", decisions: @decisions %>
+    <%== @pagy.series_nav if @pagy.pages > 1 %>
+  <% else %><section class="round-panel"><h2>No decisions match.</h2><p>Choose different dates or filters to see recorded events.</p></section><% end %>
+</div>

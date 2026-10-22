@@ -10,7 +10,7 @@ Apply the migrations with the repository's Ruby version:
 mise exec -- ruby -S bundle exec rails db:migrate
 ```
 
-A nonzero exit means the migration failed. The migrations add approval states, creator references, reviewer roles, decision records, evaluation records, and optimistic locking. Existing content stays approved. New fan submissions enter review.
+A nonzero exit means the migration failed. The migrations add approval states, creator references, reviewer roles, decision records, evaluation records, optimistic locking, and the timestamp/ID index for decision history. Existing content stays approved. New fan submissions enter review.
 
 The Doppler project is `athleteace`, and the development config is `dev`. Add `TYPESAFE_API_KEY` and `OPENAI_API_KEY` there. Keep the values in Doppler, not this repository.
 
@@ -53,6 +53,20 @@ Use **Keyboard shortcuts ?** to show the available keys. On the queue, J and K f
 
 The queue covers quests, achievements, highlights, spectrums, and funded shout-outs. Private shout-out drafts and unfunded posts stay outside the queue. Approving a shout-out spends its reserved credit, rejecting releases it, and hiding an approved post refunds its full bid as credit. See [shout-out payments](shout-out-payments.md) for the funding rules. Approve a highlight's quest and achievement before approving the highlight. Public goal requirements exclude unapproved highlights and achievements.
 
+## Read and export decision history
+
+Open **Decision log** from Moderate. **From (UTC)** and **Through (UTC)** select inclusive calendar dates. The default is the last 30 days through today. If you supply only the end date, the start defaults to 29 days earlier. Blank dates use these defaults. Future end dates, reversed ranges, invalid calendar dates and dates outside YYYY-MM-DD format return HTTP 400.
+
+**Content type**, **Action** and **Recorded actor** intersect the date range. Actors include submitters as well as reviewers. **System or deleted account** selects records with no actor reference; it does not claim that every unattributed action was automated. Unsupported types, actions or account IDs return HTTP 400. **Apply filters** starts at the first page; **Clear filters** resets the default dates and removes the other selections.
+
+The log shows 25 events per page, newest timestamp first, with descending event ID breaking ties. Pagination keeps every filter. It replaces the old latest-100 cutoff. Recorded names and reasons remain readable after content edits or deletion. Actor handles use the account's current identity while that account exists.
+
+Totals cover every matching event, not just the current page. Approved events include trusted creation. Submitted events include resubmissions, and a post can have several events. These are event counts, not unique submissions, reviewer performance or approval percentages. The page and export exclude events dated later than the time the log is built. A later request can include newer events.
+
+**Export CSV** downloads all matching events regardless of the current page. The limit is 10,000 events. An oversized export returns HTTP 400 with a request to narrow the filters, rather than dropping rows. An empty export contains its header only. The fields are event ID, UTC timestamp, subject type and ID, action, revision, previous and next status, actor ID and handle, recorded name and decision reason. It excludes account emails, report notes, provider evaluations, financial details and arbitrary snapshot fields. Spreadsheet-sensitive text receives a leading apostrophe, including handles beginning with @ and cells beginning with formula characters after whitespace. CSV quoting preserves commas and line breaks.
+
+HTML and CSV require moderator or admin access and send private, no-store cache headers. Reading or exporting does not change moderation, content or credit. Report **Keep live** resolutions remain in the reports inbox, outside this global event log. AI comparisons remain on each submission. Escalation and specialized admin-overturn workflows remain separate work.
+
 ## Compare a submission
 
 Click **Compare with AI** on the review page. The app sends the captured content and policy question to Jev and OpenAI Luna. It records their recommendations independently. The comparison never changes the submission's approval state.
@@ -90,7 +104,7 @@ A nonzero exit means the stylesheet build failed.
 Run the focused acceptance tests:
 
 ```sh
-mise exec -- ruby -S bundle exec rspec spec/models/moderation_spec.rb spec/requests/moderation_spec.rb spec/services/decision_models_spec.rb spec/system/moderation_spec.rb
+mise exec -- ruby -S bundle exec rspec spec/models/moderation_spec.rb spec/requests/moderation_spec.rb spec/requests/moderation_log_spec.rb spec/system/moderation_log_spec.rb spec/services/decision_models_spec.rb spec/system/moderation_spec.rb
 ```
 
 A nonzero exit, any failed example, or zero examples means the check failed. These tests cover privacy, attribution, stale decisions, provider failures, repeated comparison keys, and review on a 390-pixel viewport.

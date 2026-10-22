@@ -19,3 +19,16 @@ This implementation holds new fan-created quests, achievements, highlights, spec
 | Coverage | A small sample can be mistaken for measured production accuracy. | Judgment: label the bundled cases as smoke examples. Report completed, failed, and skipped evaluations separately. |
 
 Spec probes covered 11 applicable items. Nine have explicit acceptance behavior and two require judgment. Provider availability and live cost measurements depend on credentials.
+
+## Decision-log acceptance decisions
+
+| Requirement | Edge or prohibition | Resolution |
+| --- | --- | --- |
+| Date range | Midnight boundaries, invalid dates, missing inputs and future end dates. | Explicit: inclusive UTC dates, 30-day defaults, requests through the current instant and HTTP 400 for invalid ranges. |
+| Filters | Unknown values, malformed inputs, deleted actors and empty matches. | Explicit: intersect validated filters, distinguish unattributed events, retain empty states and allow header-only exports. |
+| Ordering | Equal timestamps, more than 100 records and page links. | Explicit: descending timestamp then ID, 25 events per page, matching totals across all pages and retained filters. |
+| Export | The current page, oversized results and spreadsheet-sensitive text can change the apparent evidence. | Explicit: export all matches up to 10,000, reject larger exports and prefix sensitive text with an apostrophe. Preserve commas and line breaks through CSV quoting. |
+| Privacy | An audit export can silently include unrelated account, report or provider data. | Explicit: moderator or admin access, no-store responses and fixed export fields. No emails, original report notes, financial records or provider input. |
+| Interpretation | Event counts can silently become reviewer rankings or unique-post totals. | Explicit: label counts as events, include trusted creation and resubmissions, and exclude performance claims. Read/export actions never change content, funding or immutable history. |
+
+The decision-log probes cover six applicable items, all explicitly resolved. No backstop or judgment items remain in this increment. Escalations, specialized admin overturns and broader reviewer analytics remain outside this log build.
