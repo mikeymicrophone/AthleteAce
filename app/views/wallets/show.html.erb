@@ -1,0 +1,29 @@
+<% content_for :title, "Credit wallet" %>
+<%= browse_header "Credit wallet" do %><%= link_to "My shout-outs", shout_outs_path, class: "tool-button" %><% end %>
+<section class="round-panel" aria-labelledby="wallet-balance-title">
+  <h2 id="wallet-balance-title" class="profile-section-title">Your credit</h2>
+  <p class="wallet-available">Available: <%= number_to_currency @account.available_cents / 100.to_d %></p>
+  <p class="wallet-reserved">Reserved for review: <%= number_to_currency @account.reserved_cents / 100.to_d %></p>
+  <p class="round-caption">Every dollar you pay buys one dollar of credit. Processing fees do not reduce your balance. Rejected or removed shout-outs return their full bid here.</p>
+</section>
+<section class="round-panel" aria-labelledby="wallet-purchase-title">
+  <h2 id="wallet-purchase-title" class="profile-section-title">Buy credit</h2>
+  <%= form_with url: wallet_path, method: :post, class: "payment-form", data: { turbo: false } do |form| %>
+    <%= form.hidden_field :request_key, value: SecureRandom.uuid %>
+    <div><%= form.label :amount, "Credit to buy (USD)" %><%= form.number_field :amount, min: "0.50", max: "999999.99", step: "0.01", required: true, class: "account-input" %></div>
+    <p class="round-caption">Stripe charges must be at least $0.50. You can spend credit in smaller amounts.</p>
+    <%= form.submit "Buy credit with Stripe", class: "game-button", disabled: !StripeCheckout.configured? %>
+    <% unless StripeCheckout.configured? %><p class="round-caption">Stripe payments are not configured yet.</p><% end %>
+  <% end %>
+</section>
+<section class="round-panel" aria-labelledby="wallet-history-title">
+  <h2 id="wallet-history-title" class="profile-section-title">Credit history</h2>
+  <% if @entries.any? %>
+    <ul class="wallet-history">
+      <% @entries.each do |entry| %>
+        <li><strong><%= entry.kind.humanize %></strong><p>Available change: <%= number_to_currency entry.available_delta / 100.to_d %> · Reserved change: <%= number_to_currency entry.reserved_delta / 100.to_d %></p><p class="round-caption"><%= time_ago_in_words(entry.created_at) %> ago</p></li>
+      <% end %>
+    </ul>
+    <%== @pagy.series_nav if @pagy.pages > 1 %>
+  <% else %><p>No credit activity yet.</p><% end %>
+</section>

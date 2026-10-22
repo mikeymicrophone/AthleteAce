@@ -1,6 +1,6 @@
 <% content_for :title, "My shout-out drafts" %>
 <%= browse_header "My shout-out drafts" do %><%= link_to "Write a draft", new_shout_out_draft_path, class: "game-button" %><% end %>
-<p class="round-caption">Private drafts. Checkout and publication are not available yet.</p>
+<p class="round-caption">Private drafts. Open a saved draft to submit it with your chosen bid.</p>
 <% if @drafts.any? %>
   <div class="draft-grid">
     <% @drafts.each do |draft| %>

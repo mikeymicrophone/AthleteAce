@@ -1,5 +1,5 @@
 <div class="draft-composer" data-controller="draft-composer">
-  <p class="round-caption">Save a private draft. Checkout and publication are not available yet.</p>
+  <p class="round-caption">Save a private draft. Saved drafts can be submitted with your chosen bid.</p>
   <% if @draft.errors.any? %><div role="alert"><%= safe_join @draft.errors.full_messages.map { |message| tag.p(message) } %></div><% end %>
   <div class="draft-grid">
     <section class="round-panel">

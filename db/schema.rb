@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_22_040000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_22_050000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -235,6 +235,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_040000) do
     t.string "entity_code"
     t.index ["entity_code"], name: "index_countries_on_entity_code", unique: true
     t.index ["seed_version"], name: "index_countries_on_seed_version"
+  end
+
+  create_table "credit_accounts", force: :cascade do |t|
+    t.bigint "ace_id", null: false
+    t.bigint "available_cents", default: 0, null: false
+    t.bigint "reserved_cents", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ace_id"], name: "index_credit_accounts_on_ace_id", unique: true
+    t.check_constraint "available_cents >= 0 AND reserved_cents >= 0", name: "credit_nonnegative"
+  end
+
+  create_table "credit_entries", force: :cascade do |t|
+    t.bigint "credit_account_id", null: false
+    t.string "source_type", null: false
+    t.bigint "source_id", null: false
+    t.string "operation_key", null: false
+    t.string "kind", null: false
+    t.bigint "available_delta", null: false
+    t.bigint "reserved_delta", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["credit_account_id"], name: "index_credit_entries_on_credit_account_id"
+    t.index ["operation_key"], name: "index_credit_entries_on_operation_key", unique: true
+    t.index ["source_type", "source_id"], name: "index_credit_entries_on_source"
   end
 
   create_table "decision_evaluations", force: :cascade do |t|
@@ -717,6 +742,33 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_040000) do
     t.check_constraint "target_type IS NULL OR (target_type::text = ANY (ARRAY['Team'::character varying, 'Player'::character varying]::text[]))", name: "drafts_supported_target"
   end
 
+  create_table "shout_outs", force: :cascade do |t|
+    t.bigint "created_by_id", null: false
+    t.string "target_type"
+    t.bigint "target_id"
+    t.bigint "team_id"
+    t.bigint "league_id"
+    t.bigint "shout_out_draft_id"
+    t.integer "draft_revision", null: false
+    t.string "target_name", null: false
+    t.text "message", null: false
+    t.bigint "bid_cents", null: false
+    t.string "payment_method", null: false
+    t.string "funding_status", default: "unfunded", null: false
+    t.string "moderation_status", default: "pending", null: false
+    t.integer "moderation_revision", default: 1, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_shout_outs_on_created_by_id"
+    t.index ["league_id"], name: "index_shout_outs_on_league_id"
+    t.index ["shout_out_draft_id", "draft_revision"], name: "index_shout_outs_on_shout_out_draft_id_and_draft_revision", unique: true
+    t.index ["shout_out_draft_id"], name: "index_shout_outs_on_shout_out_draft_id"
+    t.index ["target_type", "target_id"], name: "index_shout_outs_on_target"
+    t.index ["team_id"], name: "index_shout_outs_on_team_id"
+    t.check_constraint "(payment_method::text = ANY (ARRAY['credit'::character varying, 'stripe'::character varying]::text[])) AND (funding_status::text = ANY (ARRAY['unfunded'::character varying, 'reserved'::character varying, 'spent'::character varying, 'refunded'::character varying]::text[]))", name: "shout_out_funding_states"
+    t.check_constraint "bid_cents > 0", name: "positive_shout_out_bid"
+  end
+
   create_table "spectrums", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -808,6 +860,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_040000) do
     t.check_constraint "start_date IS NULL OR end_date IS NULL OR end_date >= start_date", name: "stints_have_ordered_dates"
   end
 
+  create_table "stripe_purchases", force: :cascade do |t|
+    t.bigint "ace_id", null: false
+    t.bigint "shout_out_id"
+    t.bigint "amount_cents", null: false
+    t.string "request_key", null: false
+    t.string "status", default: "pending", null: false
+    t.string "stripe_session_id"
+    t.string "stripe_payment_intent_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ace_id", "request_key"], name: "index_stripe_purchases_on_ace_id_and_request_key", unique: true
+    t.index ["ace_id"], name: "index_stripe_purchases_on_ace_id"
+    t.index ["shout_out_id"], name: "index_stripe_purchases_on_shout_out_id"
+    t.index ["stripe_payment_intent_id"], name: "index_stripe_purchases_on_stripe_payment_intent_id", unique: true
+    t.index ["stripe_session_id"], name: "index_stripe_purchases_on_stripe_session_id", unique: true
+    t.check_constraint "amount_cents >= 50 AND amount_cents <= 99999999 AND (status::text = ANY (ARRAY['pending'::character varying, 'paid'::character varying, 'expired'::character varying]::text[]))", name: "stripe_purchase_amount_and_status"
+  end
+
   create_table "teams", force: :cascade do |t|
     t.string "mascot"
     t.string "territory"
@@ -897,6 +967,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_040000) do
   add_foreign_key "contracts", "organizations"
   add_foreign_key "contracts", "players"
   add_foreign_key "contracts", "teams"
+  add_foreign_key "credit_accounts", "aces"
+  add_foreign_key "credit_entries", "credit_accounts"
   add_foreign_key "divisions", "conferences"
   add_foreign_key "follows", "aces"
   add_foreign_key "game_attempts", "aces"
@@ -940,6 +1012,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_040000) do
   add_foreign_key "seasons", "teams", column: "champion_id"
   add_foreign_key "seasons", "years"
   add_foreign_key "shout_out_drafts", "aces"
+  add_foreign_key "shout_outs", "aces", column: "created_by_id"
+  add_foreign_key "shout_outs", "leagues", on_delete: :nullify
+  add_foreign_key "shout_outs", "shout_out_drafts", on_delete: :nullify
+  add_foreign_key "shout_outs", "teams", on_delete: :nullify
   add_foreign_key "spectrums", "aces", column: "created_by_id", on_delete: :nullify
   add_foreign_key "stadiums", "cities"
   add_foreign_key "states", "countries"
@@ -948,6 +1024,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_040000) do
   add_foreign_key "stints", "teams"
   add_foreign_key "stints", "transactions", column: "end_transaction_id"
   add_foreign_key "stints", "transactions", column: "start_transaction_id"
+  add_foreign_key "stripe_purchases", "aces"
+  add_foreign_key "stripe_purchases", "shout_outs"
   add_foreign_key "teams", "leagues"
   add_foreign_key "teams", "stadiums"
   add_foreign_key "transaction_players", "organizations", column: "from_organization_id"

@@ -52,8 +52,11 @@ class ShellSearch
   def queue
     Moderation::Queue::TYPES.values.flat_map do |model|
       scope = model.where(moderation_status: "pending").where("#{model.table_name}.created_by_id IS NULL OR #{model.table_name}.created_by_id != ?", @ace.id)
+      scope = scope.where(funding_status: "reserved") if model == ShoutOut
       scope = if model == Highlight
         scope.joins(:quest, :achievement).where("quests.name ILIKE :term OR achievements.name ILIKE :term", term: pattern)
+      elsif model == ShoutOut
+        scope.where("target_name ILIKE :term OR message ILIKE :term", term: pattern)
       else
         scope.where("#{model.table_name}.name ILIKE ?", pattern)
       end

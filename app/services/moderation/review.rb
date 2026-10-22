@@ -24,6 +24,7 @@ module Moderation
         if action == "approve" && record.is_a?(Highlight) && (!record.quest.approved? || !record.achievement.approved?)
           raise Conflict, "Approve the linked quest and achievement first."
         end
+        record.settle_review!(action) if record.is_a?(ShoutOut)
         previous = record.moderation_status
         record.update!(moderation_status: destination)
         record.moderation_decisions.create!(actor: actor, action: action == "reopen" ? "reopened" : destination,

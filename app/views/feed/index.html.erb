@@ -6,7 +6,7 @@
     <%= link_to "My teams", feed_path(view: "my_teams"), aria: { current: @view == "my_teams" ? "page" : nil } %>
   </nav>
 
-  <div class="page-actions"><%= link_to "Write a draft", new_shout_out_draft_path, class: "game-button" %><%= link_to "My drafts", shout_out_drafts_path, class: "tool-button" if current_ace %></div>
+  <div class="page-actions"><%= link_to "Write a draft", new_shout_out_draft_path, class: "game-button" %><% if current_ace %><%= link_to "My drafts", shout_out_drafts_path, class: "tool-button" %><%= link_to "My shout-outs", shout_outs_path, class: "tool-button" %><%= link_to "Credit wallet", wallet_path, class: "tool-button" %><% end %></div>
 
   <% if @view == "my_teams" %>
     <% if current_ace %>
@@ -45,7 +45,23 @@
   <% unless current_ace %>
     <section class="round-panel"><p class="eyebrow">From Play</p><h2 class="profile-section-title">Know every name</h2><p>Try one Team Match question, no account needed.</p><%= link_to "Try", play_preview_path, class: "game-button" %></section>
   <% end %>
-  <section class="shell-empty"><%= icon "star", size: 40 %><h2>No shout-outs yet.</h2><p>Get to know the players and teams around the leagues.</p>
-    <div class="page-actions"><%= link_to "Browse players", players_path(side: "feed"), class: "tool-button" %><%= link_to "Browse teams", teams_path(side: "feed"), class: "tool-button" %></div>
-  </section>
+  <% if @posts&.any? %>
+    <section aria-label="Shout-outs" class="shout-out-stream">
+      <p class="round-caption">Bid-weighted order with a random boost for each visitor.</p>
+      <% @posts.each do |post| %>
+        <article class="round-panel shout-out-card" id="<%= dom_id(post) %>">
+          <p class="eyebrow"><%= post.moderation_status == "pending" ? "Your shout-out · in review" : "Shout-out" %></p>
+          <h2 class="profile-section-title"><%= post.target ? link_to(post.target_name, post.target) : post.target_name %></h2>
+          <%= render "aces/attribution", ace: post.created_by %>
+          <p class="draft-message"><%= post.message %></p>
+          <p class="round-caption"><%= time_ago_in_words(post.created_at) %> ago</p>
+        </article>
+      <% end %>
+      <%== @posts_pagy.series_nav if @posts_pagy.pages > 1 %>
+    </section>
+  <% else %>
+    <section class="shell-empty"><%= icon "star", size: 40 %><h2>No shout-outs yet.</h2><p>Get to know the players and teams around the leagues.</p>
+      <div class="page-actions"><%= link_to "Browse players", players_path(side: "feed"), class: "tool-button" %><%= link_to "Browse teams", teams_path(side: "feed"), class: "tool-button" %></div>
+    </section>
+  <% end %>
 </div>

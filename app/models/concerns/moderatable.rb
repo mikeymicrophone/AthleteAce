@@ -2,7 +2,7 @@ module Moderatable
   extend ActiveSupport::Concern
   attr_accessor :moderation_editor
 
-  CONTENT_FIELDS = %w[name description low_label high_label target_type target_id quest_id achievement_id position required].freeze
+  CONTENT_FIELDS = %w[name description message bid_cents target_name low_label high_label target_type target_id quest_id achievement_id position required].freeze
 
   included do
     belongs_to :created_by, class_name: "Ace", optional: true

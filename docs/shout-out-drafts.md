@@ -6,9 +6,9 @@ Search for a player or team using at least two characters. Results use the same 
 
 Messages require 1–200 Unicode code points after trimming surrounding Unicode whitespace. Compound emoji can count as several code points. Browser and server counts use the same rule. Links and web addresses are rejected on save; the form keeps your selected target and text when validation fails. Preview and saved text are escaped plain text.
 
-**Save draft** stores private text. Drafts do not enter the moderation queue or the public Feed. Checkout, prices, tiers, payment holds, pins, and publication are not available. Banned-word configuration and publication rules remain part of the later submission flow. A saved draft does not establish that its message can be published.
+**Save draft** stores private text. Drafts do not enter the moderation queue or the public Feed. After saving, a draft can be submitted with a custom bid using credit or Stripe. The [payment and ranking guide](shout-out-payments.md) describes reservations, review, credit refunds, and publication. Banned-word configuration remains unavailable. A saved draft does not establish that its message can be published.
 
-If a player or team is deleted, its draft message remains available to its owner. Select a replacement target before saving changes. Deleting an account removes its drafts. A stale edit returns HTTP 409 and preserves the newer saved version; reload before editing again. Draft responses use `Cache-Control: private, no-store`.
+If a player or team is deleted, its draft message remains available to its owner. Select a replacement target before saving changes. Deleting an account without financial records removes its drafts; accounts with financial records require a separate closure process. A stale edit returns HTTP 409 and preserves the newer saved version; reload before editing again. Draft responses use `Cache-Control: private, no-store`.
 
 ## Apply and verify
 

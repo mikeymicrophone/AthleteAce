@@ -1,6 +1,6 @@
 # Moderation decisions
 
-This implementation holds new fan-created quests, achievements, highlights, and spectrums for review. Existing records and trusted catalog imports stay approved. Admin-created records are approved on creation. AI results remain recommendations until application-specific evaluations justify automatic clearance.
+This implementation holds new fan-created quests, achievements, highlights, spectrums, and funded shout-outs for review. Existing records and trusted catalog imports stay approved. Admin-created records are approved on creation, except shout-outs, which always require funding and another reviewer. AI results remain recommendations until application-specific evaluations justify automatic clearance.
 
 ## Acceptance decisions
 
@@ -10,7 +10,7 @@ This implementation holds new fan-created quests, achievements, highlights, and 
 | Related content | An approved highlight can point at an unapproved achievement. | Public quest requirements include only approved highlights and approved achievements. Pending content cannot change another ace's goal requirements. |
 | Attribution | Request parameters can forge authorship or approval. | Controllers assign the signed-in author. Strong parameters exclude moderation fields. |
 | Review | Two reviewers act on the same revision. | A row lock, expected status, and revision check reject stale decisions without a second action. Reviewers cannot decide their own submissions. |
-| Edits | An approval can silently survive changed content. | Content edits increment the revision and return authored content to pending. Each submission and decision retains its snapshot. |
+| Edits | An approval can silently survive changed content. | Content edits increment the revision and return authored content to pending. Submitted shout-out messages, bids, and targets are immutable; authors edit their private draft and submit a new funded version. Each submission and decision retains its snapshot. |
 | AI evaluation | Missing credentials, refusals, malformed responses, timeouts, or edits during a request. | Failures remain visible as failed evaluations. Evaluations retain the captured revision and cannot publish or modify content. |
 | Cost | Missing usage can masquerade as a free decision. | Missing usage yields an unknown cost. Estimates use the provider's reported input tokens and a stored rate. |
 | Sports data | A model can invent a team, date, identity, or number. | The comparison supplies candidates and evidence with an insufficient-evidence outcome. Evaluations never mutate the sports catalog. |

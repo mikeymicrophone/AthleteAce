@@ -1,0 +1,9 @@
+<% content_for :title, "Payment status" %>
+<%= browse_header "Payment status" do %><%= link_to "Credit wallet", wallet_path, class: "tool-button" %><% end %>
+<section class="round-panel">
+  <h2 class="profile-section-title"><%= @purchase.status == "paid" ? "Payment received" : (@purchase.status == "expired" ? "Checkout expired" : "Awaiting payment confirmation") %></h2>
+  <p><%= number_to_currency @purchase.amount_cents / 100.to_d %></p>
+  <% if @purchase.status == "paid" %><p>The full amount has been credited<%= " and reserved for your shout-out" if @purchase.shout_out %>.</p>
+  <% elsif @purchase.status == "pending" %><p>Credit appears after Stripe confirms payment. Returning here does not confirm a charge.</p><%= button_to "Resume Stripe checkout", pay_stripe_purchase_path(@purchase), class: "tool-button", disabled: !StripeCheckout.configured?, data: { turbo: false } %><%= link_to "Refresh status", stripe_purchase_path(@purchase), class: "tool-button" %><% end %>
+  <% if @purchase.shout_out %><%= link_to "Your shout-out", shout_out_path(@purchase.shout_out), class: "tool-button" %><% end %>
+</section>

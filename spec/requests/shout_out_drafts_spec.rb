@@ -27,7 +27,7 @@ RSpec.describe "Private shout-out drafts", type: :request do
     expect(response).to redirect_to(edit_shout_out_draft_path(draft))
     get edit_shout_out_draft_path(draft)
     expect(response.headers["Cache-Control"]).to include("private", "no-store")
-    expect(response.body).to include("Checkout and publication are not available yet", draft.message)
+    expect(response.body).to include("Saved drafts can be submitted", draft.message)
     expect(Nokogiri::HTML(response.body).at_css("body")["data-side"]).to eq("feed")
     sign_out ace
     get feed_path

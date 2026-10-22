@@ -24,6 +24,7 @@
         <%= form.label :reason, "Reason or note" %><%= form.text_area :reason, maxlength: 2000, class: "moderation-reason", data: { moderation_target: "reason" } %><p class="round-caption">A reason is required when rejecting or hiding content.</p>
         <div class="page-actions">
           <% actions = @item.moderation_status == "pending" ? %w[approve reject] : (@item.approved? ? %w[hide] : %w[reopen]) %>
+          <% actions = [] if @item.is_a?(ShoutOut) && @item.funding_status == "refunded" %>
           <% actions.each do |action| %><%= form.button action.titleize, name: :decision, value: action, class: action == "approve" ? "game-button" : "tool-button", data: { moderation_target: action }, aria: { keyshortcuts: { "approve" => "a", "reject" => "r" }[action] } %><% end %>
         </div>
       <% end %>

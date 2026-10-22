@@ -114,3 +114,9 @@ body:is([data-side=play], [data-side=feed]) main > :is(.flash-notice, .flash-ale
 .draft-card { @apply min-w-0; }
 .draft-card .profile-section-title, .draft-selected { overflow-wrap: anywhere; }
 .draft-message { white-space: pre-wrap; overflow-wrap: anywhere; }
+.payment-form { @apply flex flex-col items-start gap-4 my-5; }
+.payment-form > div { @apply w-full; max-width: 28rem; }
+.payment-form label { @apply block mb-2 font-semibold; }
+.payment-form .account-input { @apply w-full; }
+.shout-out-card .profile-section-title { overflow-wrap: anywhere; }
+.shout-out-stream { @apply mt-6; }

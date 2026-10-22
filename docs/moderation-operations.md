@@ -47,11 +47,11 @@ Puma-dev sources `.env` before starting Puma. See [Puma-dev's environment config
 3. Open a submission. Inspect its current content and decision history. **Previous (K)** and **Next (J)** keep the status and type filters, including across queue pages.
 4. Approve or reject a pending submission. Enter a reason when rejecting.
 
-To hide approved content, open the **Approved** tab and give a reason. To reconsider rejected or hidden content, reopen the item before approving it. Each action adds a decision record. Reviewers cannot decide their submissions. Concurrent or stale decisions return HTTP 409.
+To hide approved content, open the **Approved** tab and give a reason. To reconsider rejected or hidden content, reopen the item before approving it. Refunded shout-outs cannot reopen. Their author must submit a newly funded draft version. Each action adds a decision record. Reviewers cannot decide their submissions. Concurrent or stale decisions return HTTP 409.
 
 Use **Keyboard shortcuts ?** to show the available keys. On the queue, J and K focus rows, and Enter opens the focused review. On a review, J and K open the next and previous submissions. A approves a pending submission. R focuses the reason field without submitting a rejection. Shortcuts pause while you type in a field. After a decision, inspect the updated status and history, then choose **Next (J)** to continue.
 
-The first version covers quests, achievements, highlights, and spectrums. Approve a highlight's quest and achievement before approving the highlight. Public goal requirements exclude unapproved highlights and achievements.
+The queue covers quests, achievements, highlights, spectrums, and funded shout-outs. Private shout-out drafts and unfunded posts stay outside the queue. Approving a shout-out spends its reserved credit, rejecting releases it, and hiding an approved post refunds its full bid as credit. See [shout-out payments](shout-out-payments.md) for the funding rules. Approve a highlight's quest and achievement before approving the highlight. Public goal requirements exclude unapproved highlights and achievements.
 
 ## Compare a submission
 

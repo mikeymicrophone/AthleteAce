@@ -15,6 +15,14 @@ Rails.application.routes.draw do
   draw :design        # Design reference pages (not in production)
 
   get "feed", to: "feed#index", as: :feed
+  resource :wallet, only: [ :show, :create ]
+  resources :stripe_purchases, only: :show do
+    post :pay, on: :member
+  end
+  post "stripe/webhook", to: "stripe_webhooks#create"
+  resources :shout_outs, only: [ :index, :show, :create ] do
+    post :pay, on: :member
+  end
   resources :shout_out_drafts, path: "feed/drafts", except: :show do
     collection { get :targets }
   end

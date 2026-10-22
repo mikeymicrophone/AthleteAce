@@ -21,6 +21,9 @@ class Ace < ApplicationRecord
          :recoverable, :rememberable, :validatable,
          :trackable, :confirmable
 
+  has_one :credit_account, dependent: :restrict_with_error
+  has_many :stripe_purchases, dependent: :restrict_with_error
+  has_many :shout_outs, foreign_key: :created_by_id, dependent: :restrict_with_error
   has_many :shout_out_drafts, dependent: :destroy
   has_many :follows, dependent: :destroy
   has_many :goals, dependent: :destroy

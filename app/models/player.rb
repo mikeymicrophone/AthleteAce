@@ -1,4 +1,5 @@
 class Player < ApplicationRecord
+  has_many :shout_outs, as: :target, dependent: :nullify
   has_many :shout_out_drafts, as: :target, dependent: :nullify
   has_many :follows, as: :followable, dependent: :destroy
   include Ratable

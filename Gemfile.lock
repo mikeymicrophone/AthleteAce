@@ -387,6 +387,9 @@ GEM
       ostruct
     stimulus-rails (1.3.4)
       railties (>= 6.0.0)
+    stripe (20.0.0)
+      bigdecimal
+      logger
     tailwindcss-rails (4.6.0)
       railties (>= 7.0.0)
       tailwindcss-ruby (~> 4.0)
@@ -472,6 +475,7 @@ DEPENDENCIES
   solid_cache
   solid_queue
   stimulus-rails
+  stripe
   tailwindcss-rails (~> 4.6)
   thruster
   turbo-rails

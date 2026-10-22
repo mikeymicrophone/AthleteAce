@@ -1,4 +1,16 @@
 class Aces::RegistrationsController < Devise::RegistrationsController
+  def destroy
+    unless resource.destroy
+      redirect_to edit_ace_registration_path, status: :see_other,
+        alert: "Your account has financial records and cannot be deleted here. Contact support to arrange account closure."
+      return
+    end
+
+    Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name)
+    set_flash_message! :notice, :destroyed
+    redirect_to after_sign_out_path_for(resource_name), status: :see_other
+  end
+
   protected
 
   def build_resource(attributes = {})

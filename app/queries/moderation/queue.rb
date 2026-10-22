@@ -1,6 +1,6 @@
 module Moderation
   class Queue
-    TYPES = { "Quest" => Quest, "Achievement" => Achievement, "Highlight" => Highlight, "Spectrum" => Spectrum }.freeze
+    TYPES = { "Quest" => Quest, "Achievement" => Achievement, "Highlight" => Highlight, "Spectrum" => Spectrum, "ShoutOut" => ShoutOut }.freeze
     STATUSES = %w[pending approved rejected hidden].freeze
     PAGE_SIZE = 25
 
@@ -50,6 +50,7 @@ module Moderation
     private
 
     def scope(model)
+      model = model.where.not(funding_status: "unfunded") if model == ShoutOut
       model.where(moderation_status: status).where.not(created_by_id: @reviewer.id).or(
         model.where(moderation_status: status, created_by_id: nil)
       )

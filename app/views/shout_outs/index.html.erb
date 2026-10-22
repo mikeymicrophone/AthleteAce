@@ -1,0 +1,8 @@
+<% content_for :title, "My shout-outs" %>
+<%= browse_header "My shout-outs" do %><%= link_to "Write a draft", new_shout_out_draft_path, class: "game-button" %><%= link_to "Credit wallet", wallet_path, class: "tool-button" %><% end %>
+<% if @shout_outs.any? %>
+  <% @shout_outs.each do |post| %>
+    <article class="round-panel"><h2 class="profile-section-title"><%= post.target_name %></h2><p class="draft-message"><%= post.message %></p><p><%= post.moderation_status.humanize %> · <%= post.funding_status.humanize %> · <%= number_to_currency(post.bid_cents / 100.to_d) %></p><%= link_to "Details", shout_out_path(post), class: "tool-button" %></article>
+  <% end %>
+  <%== @pagy.series_nav if @pagy.pages > 1 %>
+<% else %><section class="round-panel"><h2>No shout-outs yet.</h2><p>Write a draft and choose your bid to submit one.</p></section><% end %>
