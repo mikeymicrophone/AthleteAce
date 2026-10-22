@@ -5,6 +5,10 @@ class PlayerGroupsController < ApplicationController
 
   def index
     @pagy, @player_groups = pagy(PlayerGroup.order(:name))
+    if current_ace
+      progress = PlayProgress.new(ace: current_ace)
+      @group_overviews = GroupPracticeOverview.new(groups: @player_groups, progress: progress).rows
+    end
   end
 
   def show

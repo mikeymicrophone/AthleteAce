@@ -25,6 +25,10 @@ Groups currently contain explicit player memberships. They do not evaluate datab
 
 ## Group learning progress
 
+Play home shows up to three groups from your most recently updated group rounds, with one card per group. Deleted groups and rounds dated in the future do not contribute to this selection. Another account's rounds cannot place a group on your home page. **All groups** opens the paginated group browser, which shows personal progress for every group on the page. Before you have any group rounds, the home panel links to group discovery.
+
+Each signed-in card shows current membership, lifetime coverage, and latest-answer misses. **Practice remaining** and **Practice misses** use the same personalized filters as the group detail page. Fully covered groups retain **Practice group**; empty groups show no practice actions. Visitors can browse group names without seeing another account's progress. The same player can contribute to coverage in several groups; you do not have to relearn a shared member in each group. Quest completion still uses its own adopted roster and post-adoption answers.
+
 Signed-in group pages show how many current members you have answered correctly at least once across player games. This is lifetime coverage, including answers before the group existed. Later wrong answers do not remove that coverage. Your names-known count still requires two correct answers and a correct latest answer. Per-member labels distinguish **Not practiced**, **Answered correctly**, **Known**, and **Needs practice**. Needs practice means the latest player answer was wrong or skipped. Team-only questions do not establish player coverage. Visitors cannot see another account's progress.
 
 **Practice remaining** selects members with no correct player answer. **Practice misses** selects members whose latest player answer was wrong or skipped. In setup, **Members to practice** switches between these filters and **All members**. Personalized filters require sign-in and a group. They select practice questions without changing the group's explicit membership. Group, team, season, and explicit-player filters still intersect.
@@ -83,7 +87,7 @@ Build styles and run the Play acceptance checks:
 
 ```sh
 mise exec -- ruby -S bundle exec rails tailwindcss:build
-mise exec -- ruby -S bundle exec rspec spec/models/play_learning_spec.rb spec/requests/play_learning_spec.rb spec/system/play_learning_spec.rb spec/models/player_groups_spec.rb spec/requests/player_groups_spec.rb spec/system/player_groups_spec.rb spec/services/history_mixups_spec.rb spec/models/player_pair_practice_spec.rb spec/requests/history_mixups_spec.rb spec/system/history_mixups_spec.rb spec/models/group_learning_spec.rb spec/requests/group_learning_spec.rb spec/system/group_learning_spec.rb
+mise exec -- ruby -S bundle exec rspec spec/models/play_learning_spec.rb spec/requests/play_learning_spec.rb spec/system/play_learning_spec.rb spec/models/player_groups_spec.rb spec/requests/player_groups_spec.rb spec/system/player_groups_spec.rb spec/services/history_mixups_spec.rb spec/models/player_pair_practice_spec.rb spec/requests/history_mixups_spec.rb spec/system/history_mixups_spec.rb spec/models/group_learning_spec.rb spec/requests/group_learning_spec.rb spec/system/group_learning_spec.rb spec/services/group_practice_overview_spec.rb spec/requests/group_overviews_spec.rb spec/system/group_overviews_spec.rb
 ```
 
 A nonzero build exit means CSS generation failed. A nonzero RSpec exit, any failed example, or zero examples means acceptance failed. Browser checks require local PostgreSQL and Chrome.

@@ -35,6 +35,11 @@ class PlayController < ApplicationController
     @due_count = ReviewQueue.new(ace: current_ace).entries.size
     @misses = @progress.misses
     @players_today = @progress.players_today
+    group_key = Arel.sql("(scope ->> 'player_group_id')::bigint")
+    group_ids = current_ace.game_rounds.where(created_at: ..Time.current, updated_at: ..Time.current)
+      .where("(scope ->> 'player_group_id')::bigint IN (?)", PlayerGroup.select(:id))
+      .group(group_key).order(Arel.sql("MAX(updated_at) DESC"), group_key).limit(3).pluck(group_key)
+    @group_overviews = GroupPracticeOverview.new(groups: PlayerGroup.in_order_of(:id, group_ids), progress: @progress).rows
     @history = GameHistory.new ace: current_ace
     @week = @history.current_week
     @unfinished_rounds = current_ace.game_rounds.unfinished.includes(:game_attempts).limit(3)

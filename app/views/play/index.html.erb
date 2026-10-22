@@ -81,6 +81,20 @@
     </div>
   <% end %>
 
+  <% if current_ace %>
+    <section class="play-groups" aria-labelledby="play-groups-title">
+      <div class="play-section-heading"><h2 id="play-groups-title">Your groups</h2><%= link_to "All groups", player_groups_path, class: "tool-link" %></div>
+      <p class="round-caption">Recent group rounds · your lifetime answers for current members.</p>
+      <% if @group_overviews.any? %>
+        <div class="play-home-grid">
+          <%= render partial: "player_groups/practice_card", collection: @group_overviews, as: :overview %>
+        </div>
+      <% else %>
+        <div class="play-panel play-empty"><h3>Choose a group to learn.</h3><p>Groups you practice will appear here with your progress.</p><%= link_to "Browse groups", player_groups_path, class: "tool-button" %></div>
+      <% end %>
+    </section>
+  <% end %>
+
   <section class="play-games" aria-labelledby="play-games-title">
     <div class="play-section-heading"><h2 id="play-games-title">Find your game</h2><span class="eyebrow">One more rep</span></div>
     <div class="play-game-grid">
