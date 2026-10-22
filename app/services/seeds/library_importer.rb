@@ -15,7 +15,8 @@ module Seeds
       "JerseyNumberAssignment" => JerseyNumberAssignment,
       "Transaction" => Transaction, "TransactionPlayer" => TransactionPlayer,
       "Stint" => Stint, "Roster" => Roster, "RosterEntry" => RosterEntry,
-      "Contest" => Contest, "Contestant" => Contestant, "Appearance" => Appearance
+      "Contest" => Contest, "Contestant" => Contestant, "Appearance" => Appearance,
+      "PlayerGroup" => PlayerGroup, "PlayerGroupMembership" => PlayerGroupMembership
     }.freeze
     SCOPE_ASSOCIATIONS = {
       "State" => %w[country], "City" => %w[state], "Stadium" => %w[city],
@@ -26,7 +27,7 @@ module Seeds
       "JerseyNumberAssignment" => %w[player team],
       "Stint" => %w[player team], "Roster" => %w[campaign], "RosterEntry" => %w[roster player],
       "Contestant" => %w[contest campaign], "Appearance" => %w[player contestant],
-      "TransactionPlayer" => %w[event player]
+      "TransactionPlayer" => %w[event player], "PlayerGroupMembership" => %w[player_group player]
     }.freeze
     POLYMORPHIC_TYPES = {
       [ "League", "jurisdiction" ] => %w[Country State City],
@@ -351,7 +352,7 @@ module Seeds
     def natural_target(model, desired)
       keys = {
         Year => %w[number], Season => %w[year league], Campaign => %w[team season], Activation => %w[player campaign],
-        RosterEntry => %w[roster player], Contestant => %w[contest campaign],
+        PlayerGroupMembership => %w[player_group player], RosterEntry => %w[roster player], Contestant => %w[contest campaign],
         Appearance => %w[contestant player], TransactionPlayer => %w[event player]
       }[model]
       return unless keys && keys.all? { |key| desired[key].present? }

@@ -38,13 +38,13 @@ The committed development configuration uses `athlete_ace_development_seedtest_2
 
 Before upgrading a database with existing Contracts, follow the [organization reconciliation requirements](docs/roster-history-proposal.md#contract-transition). The second Contract migration refuses records without a verified Organization. The development seed-test database had no legacy Contracts when this transition was applied.
 
-Apply the pending migrations, including account theme, identity, Play reviews, and quest roster progress, before running this version:
+Apply the pending migrations, including account theme, identity, Play reviews, quest roster progress, and player groups, before running this version:
 
 ```sh
 mise exec -- ruby -S bundle exec rails db:migrate
 ```
 
-A nonzero exit means a migration failed. These migrations add account preferences, identity, review schedules, round learning results, and quest roster snapshots without changing account roles. Existing handles remain unset until each ace chooses one.
+A nonzero exit means a migration failed. These migrations add account preferences, identity, review schedules, round learning results, quest roster snapshots, and curated player groups without changing account roles. Existing handles remain unset until each ace chooses one.
 
 Build the stylesheet before browser checks:
 

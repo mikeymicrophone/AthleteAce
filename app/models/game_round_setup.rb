@@ -8,6 +8,8 @@ class GameRoundSetup
   %i[sport_id league_id season_id conference_id division_id city_id state_id team_id].each { |key| attribute key, :integer }
   attribute :team_ids, default: -> { [] }
   attribute :team_query, :string
+  attribute :goal_achievement_id, :integer
+  attribute :player_group_id, :integer
   attribute :player_id, :integer
   attribute :fact_type, :string, default: "team"
   attr_accessor :ace
@@ -40,12 +42,12 @@ class GameRoundSetup
 
   def season_suggestion
     return unless seasonal_game? && !season_id && valid? && available_count.zero?
-    return if Player.where(team_id: scoped_teams.select(:id)).exists?
+    return if scoped_players.where.not(team_id: nil).exists?
     return @season_suggestion if defined?(@season_suggestion)
 
     @season_suggestion = nil
     seasons.limit(10).each do |record|
-      candidate = self.class.new(scope_params.merge("season_id" => record.id))
+      candidate = self.class.new(scope_params.merge("season_id" => record.id, "ace" => ace))
       if candidate.available_count.positive?
         @season_suggestion = candidate
         break
@@ -71,10 +73,22 @@ class GameRoundSetup
       else
         Player.all
       end
-      scope = scope.where(active: [ true, nil ]) unless season || include_inactive
+      scope = filter_players(scope)
       NameCipherRound.new(players: scope.includes(:team).order(:id).to_a, season: season,
         team_for: season ? season_pool.method(:team_for) : nil)
     end
+  end
+
+  def player_group
+    @player_group ||= PlayerGroup.find_by(id: player_group_id) if player_group_id
+  end
+
+  def goal_achievement
+    @goal_achievement ||= GoalAchievement.joins(:goal).where(goals: { ace_id: ace.id }).find_by(id: goal_achievement_id) if ace && goal_achievement_id
+  end
+
+  def group_players
+    goal_achievement ? Player.where(id: goal_achievement.required_player_ids) : player_group.players
   end
 
   def team
@@ -129,35 +143,33 @@ class GameRoundSetup
   def subjects
     return Player.where(id: fact_pool.players.map(&:id)) if %w[multiple_choice image_recognition].include?(game_type)
     return Player.where(id: cipher_pool.players.map(&:id)) if game_type == "name_ciphers"
-    return player_id ? season_pool.players.where(id: player_id) : season_pool.players if season && game_type == "player_team_match"
+    return filter_players(season_pool.players) if season && game_type == "player_team_match"
 
     if game_type == "guess_the_division"
       playable_leagues = Division.joins(:conference).group("conferences.league_id").having("COUNT(DISTINCT divisions.id) >= 2").select("conferences.league_id")
-      Team.where(id: scoped_teams.joins(:division).where(league_id: playable_leagues).select(:id))
+      scope = scoped_teams.joins(:division).where(league_id: playable_leagues)
+      scope = scope.where(id: group_players.select(:team_id)) if player_group
+      Team.where(id: scope.select(:id))
     else
       playable_leagues = Team.group(:league_id).having("COUNT(*) >= 2").select(:league_id)
       pool = selected_team_ids.size > 1 ? scoped_teams : scoped_teams.where(league_id: playable_leagues)
       scope = Player.where(team_id: pool.select(:id))
-      scope = scope.where(active: [ true, nil ]) unless include_inactive
-      scope = scope.where(id: player_id) if player_id
-      scope
+      filter_players(scope)
     end
   end
 
   def fact_pool
-    @fact_pool ||= PlayerFactRound.new(players: (season ? season_pool.players : scoped_players).includes(:team, :birth_city, :birth_country).to_a,
+    @fact_pool ||= PlayerFactRound.new(players: (season ? filter_players(season_pool.players) : scoped_players).includes(:team, :birth_city, :birth_country).to_a,
       game_type: game_type, fact_type: fact_type, season: season, team_for: season ? season_pool.method(:team_for) : nil)
   end
 
   def scoped_players
-    scope = Player.where(team_id: scoped_teams.select(:id))
-    scope = scope.where(id: player_id) if player_id
-    scope = scope.where(active: [ true, nil ]) unless include_inactive
-    scope
+    scope = player_group && !team_scope? ? Player.all : Player.where(team_id: scoped_teams.select(:id))
+    filter_players(scope)
   end
 
   def review_queue
-    @review_queue ||= ReviewQueue.new(ace: ace, teams: [ sport_id, league_id, conference_id, division_id, city_id, state_id, *selected_team_ids ].any? ? scoped_teams : nil, player_id: player_id)
+    @review_queue ||= ReviewQueue.new(ace: ace, teams: [ sport_id, league_id, conference_id, division_id, city_id, state_id, *selected_team_ids ].any? ? scoped_teams : nil, player_id: player_id, players: player_group ? group_players : nil)
   end
 
   def available_count
@@ -174,7 +186,7 @@ class GameRoundSetup
   end
 
   def scope_label
-    names = [ sport&.name, season ? season.name : league&.name ]
+    names = [ player_group&.name, sport&.name, season ? season.name : league&.name ]
     names << Conference.find_by(id: conference_id)&.name if conference_id
     names << Division.find_by(id: division_id)&.name if division_id
     names << City.find_by(id: city_id)&.name if city_id
@@ -309,7 +321,22 @@ class GameRoundSetup
     pool.to_a
   end
 
+  def team_scope?
+    [ sport_id, league_id, conference_id, division_id, city_id, state_id, *selected_team_ids ].any?
+  end
+
+  def filter_players(scope)
+    scope = scope.where(id: group_players.select(:id)) if player_group
+    scope = scope.where(id: player_id) if player_id
+    scope = scope.where(active: [ true, nil ]) unless season || include_inactive || player_group
+    scope
+  end
+
   def valid_scope
+    if goal_achievement_id && (!goal_achievement || goal_achievement.achievement.target_type != "PlayerGroup" || goal_achievement.achievement.target_id != player_group_id)
+      errors.add(:goal_achievement, "is not an adopted achievement for this group")
+    end
+    errors.add(:player_group, "is no longer available") if player_group_id && !player_group
     errors.add(:player, "is no longer available") if player_id && !Player.exists?(player_id)
     errors.add(:season, "is no longer available") if season_id && !season
     if season

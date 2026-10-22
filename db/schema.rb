@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_21_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_21_030000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -495,6 +495,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_020000) do
     t.index ["entity_code"], name: "index_organizations_on_entity_code", unique: true
   end
 
+  create_table "player_group_memberships", force: :cascade do |t|
+    t.bigint "player_group_id", null: false
+    t.bigint "player_id", null: false
+    t.string "entity_code"
+    t.jsonb "source", default: {}, null: false
+    t.jsonb "details", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["entity_code"], name: "index_player_group_memberships_on_entity_code", unique: true
+    t.index ["player_group_id", "player_id"], name: "idx_on_player_group_id_player_id_f1ff3bc069", unique: true
+    t.index ["player_group_id"], name: "index_player_group_memberships_on_player_group_id"
+    t.index ["player_id"], name: "index_player_group_memberships_on_player_id"
+  end
+
+  create_table "player_groups", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.string "entity_code"
+    t.jsonb "source", default: {}, null: false
+    t.jsonb "details", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["entity_code"], name: "index_player_groups_on_entity_code", unique: true
+  end
+
   create_table "players", force: :cascade do |t|
     t.string "first_name"
     t.string "last_name"
@@ -866,6 +891,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_020000) do
   add_foreign_key "moderation_decisions", "aces", column: "actor_id", on_delete: :nullify
   add_foreign_key "organization_affiliations", "organizations"
   add_foreign_key "organization_affiliations", "teams"
+  add_foreign_key "player_group_memberships", "player_groups"
+  add_foreign_key "player_group_memberships", "players"
   add_foreign_key "players", "cities", column: "birth_city_id"
   add_foreign_key "players", "countries", column: "birth_country_id"
   add_foreign_key "players", "sports"

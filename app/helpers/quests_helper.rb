@@ -17,7 +17,9 @@ module QuestsHelper
 
     goal ||= quest_goal(@quest) if @quest
     entry = goal&.goal_achievements&.find_by(achievement: achievement)
-    new_game_round_path(entry ? entry.practice_scope : achievement.practice_scope)
+    scope = entry ? entry.practice_scope : achievement.practice_scope
+    scope = scope.merge(goal_achievement_id: entry.id) if entry && achievement.target_type == "PlayerGroup"
+    new_game_round_path(scope)
   end
 
   # Renders a button for an ace to begin a quest

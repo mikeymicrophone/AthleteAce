@@ -30,7 +30,7 @@ RSpec.describe "Seasonal Team Match", type: :system do
     expect(page).not_to have_field("Include inactive players")
     page.driver.browser.execute_cdp "Emulation.setDeviceMetricsOverride", width: 390, height: 844, deviceScaleFactor: 1, mobile: false
     expect(page.evaluate_script("document.documentElement.scrollWidth <= window.innerWidth")).to be(true)
-    page.execute_script("arguments[0].scrollIntoView({block: 'center'});", find(".round-season-select"))
+    page.execute_script("arguments[0].scrollIntoView({block: 'center'});", find_field("Roster season"))
     page.save_screenshot Rails.root.join("tmp/screenshots/round-season-mobile.png")
     click_button "Start round"
     expect(page).to have_css(".round-game-progress", text: "1 / 2")

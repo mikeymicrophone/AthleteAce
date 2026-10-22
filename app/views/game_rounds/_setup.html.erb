@@ -6,7 +6,7 @@
   <% end %>
 <% end %>
 <%= form_with url: new_game_round_path, method: :get, class: "round-setup-form", data: { controller: "round-setup" } do |form| %>
-  <% [:conference_id, :division_id, :city_id, :state_id].each do |key| %>
+  <% [:conference_id, :division_id, :city_id, :state_id, :player_id, :goal_achievement_id].each do |key| %>
     <%= form.hidden_field key, value: @setup.public_send(key) if @setup.public_send(key) %>
   <% end %>
   <%= tag.fieldset class: "round-panel" do %>
@@ -34,6 +34,15 @@
   <% end %>
   <%= tag.fieldset class: "round-panel" do %>
     <%= tag.legend "02 · Find your scope", class: "round-step" %>
+    <div class="round-season-select">
+      <%= form.label :player_group_id, "Player group" %>
+      <%= form.collection_select :player_group_id, PlayerGroup.order(:name), :id, :name, { include_blank: "Any players", selected: @setup.player_group_id }, data: { action: "change->round-setup#groupChanged" } %>
+      <% if @setup.goal_achievement %>
+        <p class="round-caption">Practicing the members saved when you adopted this quest.</p>
+      <% end %>
+      <p class="round-caption">Groups include their inactive members. Other filters narrow the group. Team → division uses the members' current teams.</p>
+      <%= link_to "Browse player groups", player_groups_path, class: "tool-link", data: { turbo_frame: "_top" } %>
+    </div>
     <%= tag.p @setup.scope_label, class: "round-scope-summary" %>
     <%= tag.fieldset class: "round-sports" do %>
       <%= tag.legend "Sport", class: "round-filter-label" %>
@@ -100,7 +109,7 @@
       <%= tag.p @setup.team_query.present? ? "No teams match your search. Try a team name or abbreviation." : "No teams recorded in this scope. Try another league or season.", class: "round-team-empty", role: "status" %>
     <% end %>
     <%= tag.p "Showing up to 100 matches plus your selected teams. Search to narrow the list.", class: "round-caption" if @setup.teams.count > 100 %>
-    <% if @setup.seasonal_game? && !@setup.season_id %>
+    <% if @setup.seasonal_game? && !@setup.season_id && !@setup.player_group_id %>
       <%= tag.label class: "round-inactive" do %>
         <%= form.check_box :include_inactive, { checked: @setup.include_inactive, data: { action: "change->round-setup#update" } }, "true", "false" %>
         <%= tag.span "Include inactive players" %>

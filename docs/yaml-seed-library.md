@@ -171,13 +171,21 @@ The library importer uses one transaction and reads the selected bundle into mem
 
 `db:seed` invokes `seeds:import`, so ordinary Rails database setup imports the new YAML library. The previous JSON orchestration is retained in `db/seeds_legacy.rb` for explicit legacy use. Mixing both libraries requires explicit reconciliation of legacy entities that lack codes. Legacy JSON Contracts require an explicit verified `organization_code`. The importer adopts uncoded rows through strong Year/Season/Campaign/Activation keys and unique parent/player keys for RosterEntry, Appearance, Contestant, and TransactionPlayer; it does not guess that matching player names or team abbreviations identify the same entity.
 
+## Curated player groups
+
+`PlayerGroup` stores a public name, description, and optional source/details mappings. `PlayerGroupMembership` references a group and a player, with one membership per pair. Both accept stable entity codes through the standard importer. The [Brunson/Hart example](../db/seeds/athlete_ace_data/yaml/player_groups/knicks_names.yaml) defines a manually selected practice list using existing player codes. Membership can span teams, sports, and seasons; no current roster or starter claim is implied.
+
+An admin can edit groups in Browse. Seed replay preserves edited group fields and reports conflicts through the existing importer. It adds omitted memberships back and never removes members merely because a manifest omits them. To remove a seeded membership permanently, update the manifest and explicitly remove the stored membership. Importing the same pair does not create a duplicate, including when an uncoded membership already exists. A group created separately in the UI needs its stable code bound explicitly before a seed can refer to that same record.
+
+Player groups and memberships belong to the reset service's core catalog. Ordinary seeding remains additive. Apply the player-group migration before importing the expanded catalog or generating its schema contract.
+
 ## Coverage and remaining launch work
 
 The first sample supplies 89 definitions and 94 code bindings: four Sports, two Countries, five Leagues, ten Years, 41 Seasons, eight Teams, three Players, ten Campaigns, and six Activations. It covers the 2016–2025 starting-year window for NBA/NFL/NHL/EPL, plus a Championship season for Fulham. The three sampled transfers, Raiders relocation, and Fulham promotion test the contract. They are not complete rosters.
 
 The `yaml/coverage_2025/` expansion supplies all 114 teams for the latest completed seasons (NBA/NHL/EPL `2025_2026`, NFL `2025`), at least two players per team, full captured Knicks/49ers roster listings, and all Blues regular-season participants. Its normalized official-source capture and offline/refresh generator live in the data repository's `sources/` and `scripts/` directories. Expanded-catalog tests compare imported memberships to that capture and verify replay. Campaign details label complete source listings separately from two-player samples. See the data repository's `sources/README.md` for the source-specific completeness boundaries.
 
-The [Play roster supplement](../db/seeds/athlete_ace_data/yaml/play_roster_expansion/README.md) adds the full captured NBA and NHL lists without changing the original sample metadata. The current recursive bundle validates 23 manifests, 4,534 definitions, and 4,539 code bindings, with 1,766 Players and 1,864 Activations. These additions retain NBA snapshot and NHL season-appearance meanings. The October 5 and October 6 results below describe their earlier catalog snapshots.
+The [Play roster supplement](../db/seeds/athlete_ace_data/yaml/play_roster_expansion/README.md) adds the full captured NBA and NHL lists without changing the original sample metadata. The current recursive bundle validates 24 manifests, 4,537 definitions, and 4,542 code bindings, with 1,766 Players and 1,864 Activations. These additions retain NBA snapshot and NHL season-appearance meanings. The October 5 and October 6 results below describe their earlier catalog snapshots.
 
 The October 5 expansion passed 23 focused importer/sequence/code examples. Validation reported 18 manifests, 1,043 definitions, and 1,048 code bindings. Import into the fresh development pilot database created 954 records while retaining the original 89; replay created zero records with zero conflicts. All 114 latest-season team Campaigns were checked against the capture and had at least two players. Offline regeneration was byte-for-byte identical.
 

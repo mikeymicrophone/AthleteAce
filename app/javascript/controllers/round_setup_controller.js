@@ -16,6 +16,12 @@ export default class extends Controller {
     this.update()
   }
 
+  groupChanged() {
+    const snapshot = this.element.elements.goal_achievement_id
+    if (snapshot) snapshot.disabled = true
+    this.update()
+  }
+
   seasonChanged() {
     this.element.elements.team_query.value = ""
     this.update()

@@ -1,0 +1,13 @@
+<%= form_with model: @player_group, class: "round-panel" do |form| %>
+  <% if @player_group.errors.any? %>
+    <div role="alert"><%= safe_join @player_group.errors.full_messages.map { |message| tag.p(message) } %></div>
+  <% end %>
+  <div class="my-5"><%= form.label :name %><%= form.text_field :name, required: true, class: "account-input" %></div>
+  <div class="my-5"><%= form.label :description %><%= form.text_area :description, rows: 3, class: "account-input" %></div>
+  <div class="my-5">
+    <%= form.label :player_ids, "Players" %>
+    <%= form.collection_select :player_ids, Player.order(:last_name, :first_name), :id, :name, {}, multiple: true, size: 14, class: "account-input" %>
+    <p class="round-caption">Select the members of this group. Inactive players may be included.</p>
+  </div>
+  <%= form.submit class: "game-button" %>
+<% end %>

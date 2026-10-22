@@ -8,6 +8,8 @@ class Player < ApplicationRecord
   delegate :league, to: :team, allow_nil: true
   delegate :current_organization, to: :team, allow_nil: true
   
+  has_many :player_group_memberships, dependent: :destroy
+  has_many :player_groups, through: :player_group_memberships
   has_many :roles, dependent: :destroy
   has_many :jersey_number_assignments, dependent: :destroy
   has_many :positions, through: :roles

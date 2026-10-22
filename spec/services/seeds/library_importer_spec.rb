@@ -210,4 +210,22 @@ RSpec.describe Seeds::LibraryImporter do
     expect(Player.count).to eq(3)
     expect(Activation.count).to eq(6)
   end
+  it "imports manually curated groups and restores missing members without duplicating players" do
+    seed_pilot
+    player = importer.resolve_code("Player", "BKT-NBA-LAL-2017-HART_JOSH")
+    group = PlayerGroup.create!(name: "Knicks names")
+    PlayerGroupMembership.create!(player_group: group, player: player)
+    file = write_document(records: [
+      definition("PlayerGroupMembership", "GROUP-KNICKS-PLAYER-HART", {}, { "player_group" => "GROUP-KNICKS", "player" => player.entity_code }),
+      definition("PlayerGroup", "GROUP-KNICKS", { "name" => group.name })
+    ])
+    EntityCode.create!(namespace: "MIC", catalog: "ALA", code: "GROUP-KNICKS", canonical_code: "GROUP-KNICKS", record: group)
+    group.update!(entity_code: "GROUP-KNICKS")
+    expect { importer.call([ file ]) }.not_to change(Player, :count)
+    expect(group.reload.players).to eq([ player ])
+    expect(importer.call([ file ])[:created]).to be_empty
+    group.player_group_memberships.destroy_all
+    expect(importer.call([ file ])[:created].size).to eq(1)
+    expect(group.reload.players).to eq([ player ])
+  end
 end

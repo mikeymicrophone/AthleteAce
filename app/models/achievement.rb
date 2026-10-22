@@ -1,9 +1,9 @@
 class Achievement < ApplicationRecord
   include Moderatable
-  TARGET_TYPES = %w[Player Team Division Conference League Sport City State Country Federation].freeze
+  TARGET_TYPES = %w[Player Team Division Conference League Sport City State Country Federation PlayerGroup].freeze
 
   has_many :goal_achievements, dependent: :destroy
-  PRACTICE_SCOPES = { "Team" => :team_id, "Division" => :division_id, "Conference" => :conference_id,
+  PRACTICE_SCOPES = { "PlayerGroup" => :player_group_id, "Team" => :team_id, "Division" => :division_id, "Conference" => :conference_id,
     "League" => :league_id, "Sport" => :sport_id, "City" => :city_id, "State" => :state_id }.freeze
 
   def practice_scope
@@ -16,6 +16,8 @@ class Achievement < ApplicationRecord
   def roster_snapshot
     return unless practice_scope && target
     return { ids: [ target_id ], scope: practice_scope } if target_type == "Player"
+
+    return { ids: target.players.pluck(:id), scope: practice_scope } if target_type == "PlayerGroup"
 
     setup = GameRoundSetup.new(practice_scope)
     players = setup.scoped_players

@@ -13,6 +13,16 @@ All six games use saved rounds under `/play/rounds/new`. The selected 10, 20, or
 
 Empty selections never expand to unrelated players. Multiple Choice and Image Recognition support current-team scope and recorded roster seasons. Image Recognition needs photo URLs in the catalog; the app does not generate or obtain photos at runtime. The catalog includes 17 verified official NBA headshot references from the captured Knicks roster. Standard seeding fills empty photo arrays for those coded players and preserves existing photos. These remote latest headshots can change; they are not historical jersey evidence.
 
+## Player groups
+
+Browse **Player groups** for curated player lists. Admins can create groups, edit their names and descriptions, and select members. Groups are shared public catalog records. Other accounts can browse and practice them but cannot edit membership. Seed imports can also populate groups and memberships using stable codes; see [the seed example](../db/seeds/athlete_ace_data/yaml/player_groups/knicks_names.yaml).
+
+Choose **Player group** in round setup, then choose a game. Inactive members are included. Team, league, location, and roster-season filters further narrow the group; an empty group never expands to unrelated players. Name Ciphers and Image Recognition can use members without current teams. Multiple Choice can use their recorded birth facts. Team Match still requires a recorded team, and seasonal facts require an unambiguous recorded membership in the selected season. Guess the Division uses the current teams of group members. Group reviews include due player questions for members and team questions for their current teams. Normal rules for distinct answers, photos, and due dates still apply.
+
+Saved rounds retain their questions and group label after membership changes or group deletion. Ordinary group replay starts a new round using current membership. Rounds started through an adopted quest achievement retain that achievement's saved member list on replay. A deleted group cannot start a new round.
+
+Groups currently contain explicit player memberships. They do not evaluate database queries or infer membership from starter status, positions, or dates. The seeded Brunson/Hart example is a curated practice list, not a claim about starter status or a complete historical roster.
+
 ## Review timing
 
 Each saved answer updates a `PracticeReview` for that account, original game, subject, and target. A miss returns in 10 minutes. Successive correct answers schedule review after 1, 3, 7, 14, and then 30 days. Another miss resets that sequence. Repeated submissions of the same question do not add attempts or change the schedule twice.
@@ -33,9 +43,9 @@ Set your time zone in **Edit profile**. Daily streaks, today's players, and hist
 
 Adopting a quest saves the recorded player roster for each supported achievement. Answer every player in that saved roster correctly at least once after adoption to complete the achievement. Repeated answers for one player do not advance roster coverage. A later wrong answer does not remove earned quest progress. Required achievements determine quest completion; optional achievements do not block it.
 
-A player target requires that player. Team, division, conference, league, sport, city, and state targets use their recorded player scope, including inactive players. When current assignments are empty, the snapshot uses the first playable recorded season, checking up to ten recent seasons. Country and federation targets remain manual. Empty rosters do not complete automatically.
+A player target requires that player. A player-group target snapshots every explicit member, including inactive players, without inferring a season. Team, division, conference, league, sport, city, and state targets use their recorded player scope, including inactive players. When current assignments are empty, the snapshot uses the first playable recorded season, checking up to ten recent seasons. Country and federation targets remain manual. Empty rosters do not complete automatically.
 
-The roster and its practice scope stay fixed after adoption. Catalog additions do not change an existing goal's denominator. The UI identifies this as recorded coverage because source lists can be partial. Completion does not certify knowledge of players missing from the catalog. Achievement progress shows completed dates and the next unfinished practice link.
+The required player IDs and saved practice filters stay fixed after adoption. An adopted group achievement's practice link uses its saved member IDs, even after an admin changes the group. The link is scoped to the signed-in account that adopted the quest. Catalog additions do not change an existing goal's denominator. The UI identifies this as recorded coverage because source lists can be partial. Completion does not certify knowledge of players missing from the catalog. Achievement progress shows completed dates and the next unfinished practice link.
 
 Existing goals prepare missing roster snapshots on their next correct saved answer. Their roster snapshot therefore reflects that upgrade-time catalog, rather than their original adoption date. Existing answers are not replayed into the new per-achievement coverage.
 
@@ -59,7 +69,7 @@ Build styles and run the Play acceptance checks:
 
 ```sh
 mise exec -- ruby -S bundle exec rails tailwindcss:build
-mise exec -- ruby -S bundle exec rspec spec/models/play_learning_spec.rb spec/requests/play_learning_spec.rb spec/system/play_learning_spec.rb
+mise exec -- ruby -S bundle exec rspec spec/models/play_learning_spec.rb spec/requests/play_learning_spec.rb spec/system/play_learning_spec.rb spec/models/player_groups_spec.rb spec/requests/player_groups_spec.rb spec/system/player_groups_spec.rb
 ```
 
 A nonzero build exit means CSS generation failed. A nonzero RSpec exit, any failed example, or zero examples means acceptance failed. Browser checks require local PostgreSQL and Chrome.

@@ -1,0 +1,18 @@
+<% content_for :title, @player_group.name %>
+<%= browse_header @player_group.name do %>
+  <%= link_to "Practice group", new_game_round_path(player_group_id: @player_group.id, game_type: "name_ciphers"), class: "game-button" %>
+  <%= link_to "Edit group", edit_player_group_path(@player_group), class: "tool-button" if admin_signed_in? %>
+<% end %>
+<p class="round-intro"><%= @player_group.description %></p>
+<p class="round-caption"><%= pluralize @player_group.players.count, "player" %> · A group quest requires one correct answer for every member recorded when you adopt it.</p>
+<%= link_to "Propose group achievement", new_achievement_path(target_type: "PlayerGroup", target_id: @player_group.id), class: "tool-button" if ace_signed_in? %>
+<%== @pagy.series_nav %>
+<% if @players.empty? %>
+  <section class="round-panel"><h2>No players in this group</h2><p>An admin or seed import can add members.</p></section>
+<% else %>
+  <ul class="round-panel">
+    <% @players.each do |player| %>
+      <li><%= link_to player.name, player_path(player), class: "tool-link" %></li>
+    <% end %>
+  </ul>
+<% end %>

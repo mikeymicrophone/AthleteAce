@@ -14,7 +14,7 @@ class AchievementsController < ApplicationController
 
   # GET /achievements/new
   def new
-    @achievement = Achievement.new
+    @achievement = Achievement.new(target_type: params[:target_type].presence_in(Achievement::TARGET_TYPES), target_id: params[:target_id])
     @target_type = params[:target_type] || 'Team'
   end
 
