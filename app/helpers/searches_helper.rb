@@ -6,12 +6,15 @@ module SearchesHelper
 
   def shell_search_name(record)
     return record.public_name if record.is_a?(Ace)
+    return "#{record.target_name}: #{record.message.truncate(100)}" if record.is_a?(ShoutOut) && current_side == "feed"
     return moderation_item_name(record) if record.is_a?(Highlight)
     record.name
   end
 
   def shell_search_path(record)
-    if record.is_a?(Ace)
+    if record.is_a?(ShoutOut) && current_side == "feed"
+      feed_post_path(record)
+    elsif record.is_a?(Ace)
       ace_profile_path(record, side: current_side)
     elsif Moderation::Queue::TYPES.value?(record.class)
       moderation_item_path(type: record.class.name, id: record.id)

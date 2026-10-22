@@ -5,6 +5,20 @@
   <p class="draft-message"><%= post.message %></p>
   <p class="round-caption"><%= time_ago_in_words(post.created_at) %> ago</p>
   <% if post.approved? && post.funding_status == "spent" %>
+    <% reactions = local_assigns.fetch(:reactions) { ShoutOutReactionSummary.new(posts: [ post ], ace: current_ace) } %>
+    <div class="shout-out-reactions" role="group" aria-label="Shout-out reactions">
+      <% ShoutOutReaction::KINDS.each do |kind, label| %>
+        <% count = reactions.count(post, kind) %>
+        <% if current_ace %>
+          <% selected = reactions.selected?(post, kind) %>
+          <%= button_to "#{label} #{count}", shout_out_shout_out_reaction_path(post, kind), method: selected ? :delete : :put,
+            class: "tool-button", aria: { pressed: selected, label: "#{label}, #{count}" } %>
+        <% else %>
+          <%= link_to "#{label} #{count}", new_ace_session_path, class: "tool-button", aria: { label: "Sign in to react #{label}, #{count}" } %>
+        <% end %>
+      <% end %>
+    </div>
+    <%= link_to "Permalink", feed_post_path(post), class: "tool-link" %>
     <%= link_to "Report", new_shout_out_shout_out_report_path(post), class: "tool-link", aria: { label: "Report shout-out for #{post.target_name}" } %>
   <% end %>
 </article>

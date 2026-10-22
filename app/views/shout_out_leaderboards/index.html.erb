@@ -1,0 +1,33 @@
+<% content_for :title, "Most shouted" %>
+<%= browse_header "Most shouted" do %><%= link_to "Back to Feed", feed_path, class: "tool-button" %><% end %>
+<p class="round-intro"><%= @leaderboard.week %> to <%= @leaderboard.week + 6 %> · Monday to Sunday · UTC</p>
+<p>Live shout-outs approved during this week. Each post counts once; bids and reactions do not affect these standings.</p>
+<nav class="history-tabs" aria-label="Leaderboard targets">
+  <% %w[players teams].each do |kind| %><%= link_to kind.titleize, url_for(kind: kind, page: nil), aria: { current: @leaderboard.kind == kind ? "page" : nil } %><% end %>
+</nav>
+<%= form_with url: shout_out_leaderboard_path, method: :get, class: "feed-team-filters leaderboard-filters" do |form| %>
+  <%= form.hidden_field :kind, value: @leaderboard.kind %>
+  <div><%= form.label :week, "Week containing" %><%= form.date_field :week, value: @leaderboard.week.iso8601, class: "account-input" %></div>
+  <div><%= form.label :sport_id, "Sport" %><%= form.collection_select :sport_id, @sports, :id, :name, { include_blank: "All sports", selected: @sport&.id } %></div>
+  <div><%= form.label :league_id, "League" %><%= form.collection_select :league_id, @leagues, :id, :name, { include_blank: "All leagues", selected: @league&.id } %></div>
+  <%= form.submit "Apply filters", class: "tool-button" %>
+<% end %>
+<div class="page-actions">
+  <%= link_to "Previous week", url_for(week: (@leaderboard.week - 7).iso8601, page: nil), class: "tool-button" %>
+  <% if @leaderboard.next_week %><%= link_to "Next week", url_for(week: @leaderboard.next_week.iso8601, page: nil), class: "tool-button" %><% end %>
+  <%= link_to "This week", url_for(week: nil, page: nil), class: "tool-link" %>
+</div>
+<section class="round-panel" aria-label="Weekly standings">
+  <% if @rows.empty? %><h2>No live shout-outs for this week.</h2><p>Try another week or clear the filters.</p><% end %>
+  <ol class="leaderboard-rows" start="<%= @rows.first&.fetch(:rank) || 1 %>">
+    <% @rows.each do |row| %>
+      <% target = @targets[row.fetch(:id)] %>
+      <% next unless target %>
+      <li><span class="leaderboard-rank"><%= row.fetch(:rank) %></span><%= record_identity target %><div><strong><%= pluralize row.fetch(:count), "shout-out" %></strong><p class="round-caption"><%= row[:movement].nil? ? "New" : (row[:movement].zero? ? "Same rank" : "#{row[:movement].positive? ? 'Up' : 'Down'} #{row[:movement].abs}") %></p></div></li>
+    <% end %>
+  </ol>
+  <%== @pagy.series_nav if @pagy.pages > 1 %>
+</section>
+<% if @top_post %>
+  <details class="round-panel"><summary>Top shout-out for <%= @top_post.target_name %></summary><p class="round-caption">Selected using the Feed's weighted bid order.</p><%= render "shout_outs/card", post: @top_post %></details>
+<% end %>

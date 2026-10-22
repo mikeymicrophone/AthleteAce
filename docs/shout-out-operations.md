@@ -8,6 +8,8 @@ The wall shows approved, spent shout-outs recorded for that team. **All**, **Tea
 
 Wall ordering uses the same randomized-bid formula and session seed as Feed. Refreshes and pagination keep the order stable. Tab, filter, side and page are in the URL. Invalid section/filter names return HTTP 400. Weekly counts include currently live posts whose approval occurred since Monday in the app's time zone, UTC. The player summary breaks equal counts by recorded name and target ID. There are no pins or paid card tiers.
 
+The [Feed engagement guide](feed-engagement.md) covers free reactions, public post search and the weekly leaderboard.
+
 ## Report a live shout-out
 
 **Report** appears on live Feed and wall cards. Sign in, choose Harassment, Spam, Off-topic or Other, add an optional note, and select **Send report**. Notes are limited to 2000 Unicode code points. Each ace can report a post once; retries reuse the existing report, including a previously resolved report. Pending or hidden posts cannot receive new reports. A report alone does not hide a post or change anyone's credit.

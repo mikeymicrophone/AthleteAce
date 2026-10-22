@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_22_060000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_22_070000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -742,6 +742,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_060000) do
     t.check_constraint "target_type IS NULL OR (target_type::text = ANY (ARRAY['Team'::character varying, 'Player'::character varying]::text[]))", name: "drafts_supported_target"
   end
 
+  create_table "shout_out_reactions", force: :cascade do |t|
+    t.bigint "shout_out_id", null: false
+    t.bigint "ace_id", null: false
+    t.string "kind", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ace_id"], name: "index_shout_out_reactions_on_ace_id"
+    t.index ["shout_out_id", "ace_id", "kind"], name: "index_shout_out_reactions_on_shout_out_id_and_ace_id_and_kind", unique: true
+    t.index ["shout_out_id"], name: "index_shout_out_reactions_on_shout_out_id"
+    t.check_constraint "kind::text = ANY (ARRAY['fire'::character varying, 'love'::character varying, 'legend'::character varying]::text[])", name: "supported_shout_out_reaction"
+  end
+
   create_table "shout_out_reports", force: :cascade do |t|
     t.bigint "shout_out_id", null: false
     t.bigint "reporter_id"
@@ -1032,6 +1044,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_060000) do
   add_foreign_key "seasons", "teams", column: "champion_id"
   add_foreign_key "seasons", "years"
   add_foreign_key "shout_out_drafts", "aces"
+  add_foreign_key "shout_out_reactions", "aces", on_delete: :cascade
+  add_foreign_key "shout_out_reactions", "shout_outs"
   add_foreign_key "shout_out_reports", "aces", column: "reporter_id", on_delete: :nullify
   add_foreign_key "shout_out_reports", "aces", column: "resolved_by_id", on_delete: :nullify
   add_foreign_key "shout_out_reports", "shout_outs"

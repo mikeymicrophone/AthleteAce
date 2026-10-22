@@ -4,9 +4,10 @@ class ShellSearch
 
   attr_reader :query
 
-  def initialize(query:, side:, ace:)
+  def initialize(query:, side:, ace:, seed: SecureRandom.hex(16))
     @query = query.to_s.strip.first(80)
     @ace = ace
+    @seed = seed
     @side = case side
     when "admin" then ace&.admin? ? "admin" : "play"
     when "mod" then ace&.can_moderate? ? "mod" : "play"
@@ -25,6 +26,7 @@ class ShellSearch
           .order(:last_name, :first_name, :id).limit(LIMIT).to_a,
         "Teams" => Team.matching_name(query).order(:territory, :mascot, :id).limit(LIMIT).to_a
       }
+      groups["Shout-outs"] = ShoutOutFeed.ranked(ShoutOut.live.matching_text(query), seed: @seed).limit(LIMIT).to_a if @side == "feed"
       unless @side == "feed"
         NAMED_MODELS.each do |model|
           expression = [ League, Conference, Division ].include?(model) ? "CONCAT_WS(' ', name, abbreviation)" : "name"

@@ -17,7 +17,7 @@ module ShellNavigation
     @current_side ||= begin
       owned = case controller_name
       when "play", "play_previews", "strength", "game_rounds", "division_guessing_games", "game_attempts" then "play"
-      when "feed", "shout_out_drafts", "shout_outs", "wallets", "stripe_purchases", "shout_out_reports" then "feed"
+      when "feed", "feed_posts", "shout_out_leaderboards", "shout_out_reactions", "shout_out_drafts", "shout_outs", "wallets", "stripe_purchases", "shout_out_reports" then "feed"
       when "moderation", "reports" then "mod"
       when "admin", "shout_out_revenues" then "admin"
       end

@@ -15,6 +15,8 @@ Rails.application.routes.draw do
   draw :design        # Design reference pages (not in production)
 
   get "feed", to: "feed#index", as: :feed
+  get "feed/leaders", to: "shout_out_leaderboards#index", as: :shout_out_leaderboard
+  resources :feed_posts, path: "feed/posts", only: :show
   resource :wallet, only: [ :show, :create ]
   resources :stripe_purchases, only: :show do
     post :pay, on: :member
@@ -23,6 +25,7 @@ Rails.application.routes.draw do
   resources :shout_outs, only: [ :index, :show, :create ] do
     post :pay, on: :member
     resources :shout_out_reports, path: "reports", only: [ :new, :create ]
+    resources :shout_out_reactions, path: "reactions", param: :kind, only: [ :update, :destroy ]
   end
   resources :shout_out_drafts, path: "feed/drafts", except: :show do
     collection { get :targets }

@@ -1,7 +1,9 @@
 class FeedController < ApplicationController
   def index
     @view = params[:view].presence || "all"
+    @query = params[:q].to_s.strip.first(80)
     raise ActionController::BadRequest unless %w[all my_teams].include?(@view)
+    raise ActionController::BadRequest if @query.present? && @query.length < 2
     load_posts unless @view == "my_teams" && !current_ace
     return unless @view == "my_teams" && current_ace
 
@@ -21,10 +23,11 @@ class FeedController < ApplicationController
   private
 
   def load_posts
-    posts = ShoutOut.approved.where(funding_status: "spent")
-    if current_ace
+    posts = ShoutOut.live
+    if current_ace && @query.blank?
       posts = posts.or(ShoutOut.where(created_by: current_ace, moderation_status: "pending", funding_status: "reserved"))
     end
+    posts = posts.matching_text(@query) if @query.present?
     if @view == "my_teams"
       followed = current_ace.follows.where(followable_type: "Team").select(:followable_id)
       affinity = current_ace.ratings.active.where(target_type: "Team", spectrum: Spectrum.approved.where(name: "Affinity"))
@@ -33,6 +36,6 @@ class FeedController < ApplicationController
       posts = posts.where(league_id: params[:league_id]) if params[:league_id].present?
     end
     seed = session[:shout_out_feed_seed] ||= SecureRandom.hex(16)
-    @posts_pagy, @posts = pagy(ShoutOutFeed.ranked(posts.includes(:created_by, :target), seed: seed), page_key: "posts_page")
+    @posts_pagy, @posts = pagy(ShoutOutFeed.ranked(posts.preload(:created_by, :target), seed: seed), page_key: "posts_page")
   end
 end

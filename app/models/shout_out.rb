@@ -5,6 +5,12 @@ class ShoutOut < ApplicationRecord
   belongs_to :shout_out_draft, optional: true
   has_many :stripe_purchases, dependent: :restrict_with_error
   has_many :shout_out_reports, dependent: :restrict_with_error
+  has_many :shout_out_reactions, dependent: :delete_all
+  scope :live, -> { approved.where(funding_status: "spent") }
+  scope :matching_text, ->(query) {
+    joins(:created_by).where("shout_outs.target_name ILIKE :term OR shout_outs.message ILIKE :term OR CONCAT_WS(' ', '@' || aces.username, aces.display_name) ILIKE :term",
+      term: "%#{sanitize_sql_like(query)}%")
+  }
   attr_readonly :message, :bid_cents, :target_type, :target_id, :target_name, :created_by_id, :payment_method
   validates :bid_cents, numericality: { only_integer: true, greater_than: 0 }
   validates :payment_method, inclusion: { in: %w[credit stripe] }

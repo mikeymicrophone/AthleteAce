@@ -1,0 +1,3 @@
+<% content_for :title, "Shout-out for #{@post.target_name}" %>
+<%= browse_header "Shout-out" do %><%= link_to "Back to Feed", feed_path, class: "tool-button" %><% end %>
+<%= render "shout_outs/card", post: @post %>

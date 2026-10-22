@@ -26,7 +26,7 @@
       </nav>
       <p class="round-caption">Bid-weighted order with a random boost for each visitor.</p>
       <% if @posts.any? %>
-        <%= render partial: "shout_outs/card", collection: @posts, as: :post %>
+        <%= render partial: "shout_outs/card", collection: @posts, as: :post, locals: { reactions: ShoutOutReactionSummary.new(posts: @posts, ace: current_ace) } %>
         <%== @pagy.series_nav if @pagy.pages > 1 %>
       <% else %><section class="round-panel"><h2>No shout-outs here yet.</h2><p>Approved shout-outs for this team and its players appear here.</p></section><% end %>
     </section>

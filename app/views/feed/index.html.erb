@@ -2,9 +2,17 @@
 <div class="feed-home">
   <header class="browse-header"><div><p class="eyebrow">Feed</p><h1 class="page-title"><%= @view == "my_teams" ? "My teams" : "Latest" %></h1><p class="round-intro">For the players and teams worth talking about.</p></div></header>
   <nav class="history-tabs" aria-label="Feed views">
-    <%= link_to "All", feed_path, aria: { current: @view == "all" ? "page" : nil } %>
-    <%= link_to "My teams", feed_path(view: "my_teams"), aria: { current: @view == "my_teams" ? "page" : nil } %>
+    <%= link_to "All", feed_path(q: @query.presence), aria: { current: @view == "all" ? "page" : nil } %>
+    <%= link_to "My teams", feed_path(view: "my_teams", q: @query.presence), aria: { current: @view == "my_teams" ? "page" : nil } %>
+    <%= link_to "Leaders", shout_out_leaderboard_path %>
   </nav>
+  <%= form_with url: feed_path, method: :get, class: "feed-team-filters", role: "search" do |form| %>
+    <%= form.hidden_field :view, value: @view %>
+    <%= form.hidden_field :league_id, value: params[:league_id] if params[:league_id].present? %>
+    <div><%= form.label :q, "Search live shout-outs" %><%= form.search_field :q, value: @query, minlength: 2, maxlength: 80, class: "account-input" %></div>
+    <%= form.submit "Search posts", class: "tool-button" %>
+    <% if @query.present? %><%= link_to "Clear search", feed_path(view: @view, league_id: params[:league_id]), class: "tool-link" %><% end %>
+  <% end %>
 
   <div class="page-actions"><%= link_to "Write a draft", new_shout_out_draft_path, class: "game-button" %><% if current_ace %><%= link_to "My drafts", shout_out_drafts_path, class: "tool-button" %><%= link_to "My shout-outs", shout_outs_path, class: "tool-button" %><%= link_to "Credit wallet", wallet_path, class: "tool-button" %><% end %></div>
 
@@ -15,6 +23,7 @@
         <p class="round-caption">Teams you follow or rate at least +5,000 on Affinity.</p>
         <%= form_with url: feed_path, method: :get, class: "feed-team-filters" do |form| %>
           <%= form.hidden_field :view, value: "my_teams" %>
+          <%= form.hidden_field :q, value: @query if @query.present? %>
           <div><%= form.label :league_id, "League", class: "eyebrow" %><%= form.collection_select :league_id, @leagues, :id, :name, { include_blank: "All leagues", selected: @league&.id } %></div>
           <%= form.submit "Apply filters", class: "tool-button" %>
           <%= link_to "Clear filters", feed_path(view: "my_teams"), class: "tool-link" if @league %>
@@ -48,8 +57,9 @@
   <% if @posts&.any? %>
     <section aria-label="Shout-outs" class="shout-out-stream">
       <p class="round-caption">Bid-weighted order with a random boost for each visitor.</p>
+      <% reactions = ShoutOutReactionSummary.new(posts: @posts, ace: current_ace) %>
       <% @posts.each do |post| %>
-        <%= render "shout_outs/card", post: post %>
+        <%= render "shout_outs/card", post: post, reactions: reactions %>
       <% end %>
       <%== @posts_pagy.series_nav if @posts_pagy.pages > 1 %>
     </section>

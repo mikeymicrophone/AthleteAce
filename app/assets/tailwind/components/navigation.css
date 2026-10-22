@@ -129,3 +129,12 @@ body:is([data-side=play], [data-side=feed]) main > :is(.flash-notice, .flash-ale
 .revenue-table-wrap { @apply overflow-x-auto max-w-full; }
 .revenue-table { @apply w-full text-left text-sm; }
 .revenue-table :is(th, td) { @apply p-3 border-b border-line whitespace-nowrap; }
+.shout-out-reactions { @apply flex flex-wrap gap-2 my-4; }
+.shout-out-reactions .tool-button[aria-pressed=true] { @apply bg-accent text-shell border-accent-text; }
+.leaderboard-rows { @apply list-none p-0 m-0; }
+.leaderboard-rows > li { @apply flex flex-wrap items-center gap-4 py-5 border-b border-line; }
+.leaderboard-rows .record-identity { @apply flex-1 min-w-0; }
+.leaderboard-rows .identity-name { overflow-wrap: anywhere; }
+.leaderboard-rank { @apply font-display text-3xl; }
+.leaderboard-filters { @apply grid grid-cols-2 lg:grid-cols-4 items-end; }
+.leaderboard-filters input { @apply min-w-0 w-full; }

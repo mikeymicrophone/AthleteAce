@@ -22,7 +22,7 @@ For each visitor, ranking uses:
 score = (bid_in_dollars + uniform_random(0.5, 2.5)) ** 1.6
 ```
 
-Higher scores appear first. Each post has its own draw, derived from a random visitor-session seed and the post ID. The draw is stable across refreshes and pagination within that session; separate visitors get separate seeds. Score ties use descending post ID. This affects display order only, never bid or ledger amounts. No placement, number of views, tier, pin, or duration is guaranteed. Post pagination uses `posts_page`, independently of the My teams cards' `page` parameter.
+Higher scores appear first. Each post has its own draw, derived from a random visitor-session seed and the post ID. The draw is stable across refreshes and pagination within that session; separate visitors get separate seeds. Score ties use descending post ID. This affects Feed, live-post search and featured-card display order only, never bid or ledger amounts. Free reactions do not change the score; the weekly leaderboard ranks by post count instead. No placement, number of views, tier, pin, or duration is guaranteed. Post pagination uses `posts_page`, independently of the My teams cards' `page` parameter.
 
 ## Stripe setup and verification
 

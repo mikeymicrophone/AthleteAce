@@ -109,4 +109,25 @@ RSpec.describe "Concurrent credit operations" do
     expect(results.tally).to eq(created: 1, duplicate: 1)
     expect(ShoutOutReport.where(shout_out_id: post_id, reporter_id: reporter_id).count).to eq(1)
   end
+
+  it "accepts simultaneous duplicate reaction requests as one free membership" do
+    post_id, email = committed do
+      author = create(:ace)
+      fan = create(:ace)
+      buy_credit(author)
+      post = submit_credit(ace: author, target: create(:player), bid: 125)
+      review_post(post, action: "approve")
+      [ post.id, fan.email ]
+    end
+    results = race do
+      client = ActionDispatch::Integration::Session.new(Rails.application)
+      client.post "/aces/sign_in", params: { ace: { email: email, password: "password123" } }
+      client.put "/shout_outs/#{post_id}/reactions/fire"
+      client.response.status
+    end
+    expect(results).to eq([ 303, 303 ])
+    post = ShoutOut.find(post_id)
+    expect(post.shout_out_reactions.count).to eq(1)
+    expect(CreditAccount.for(post.created_by).available_cents).to eq(875)
+  end
 end

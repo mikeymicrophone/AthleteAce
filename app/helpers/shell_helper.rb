@@ -12,7 +12,7 @@ module ShellHelper
         [ "Quests", "script", quests_path(side: "play") ], [ "History", "history", strength_game_attempts_path ],
         [ "Browse", "layout-grid", browse_path(side: "play") ] ]
     when "feed"
-      [ [ "Latest", "star", feed_path ], [ "Players", "shirt-sport", players_path(side: "feed") ],
+      [ [ "Latest", "star", feed_path ], [ "Leaders", "tournament", shout_out_leaderboard_path ], [ "Players", "shirt-sport", players_path(side: "feed") ],
         [ "Teams", "shield", teams_path(side: "feed") ] ]
     when "mod"
       [ [ "Queue", "shield-check", moderation_path ], [ "Reports", "flag", reports_path ], [ "Decision log", "history", moderation_log_path ] ]
@@ -29,6 +29,7 @@ module ShellHelper
       return "Revenue" if controller_name == "shout_out_revenues"
       controller_name == "admin" ? "Overview" : (params[:section] == "content" ? "Content catalog" : "Sports data")
     when "feed"
+      return "Leaders" if controller_name == "shout_out_leaderboards"
       { "players" => "Players", "teams" => "Teams" }.fetch(controller_name, "Latest")
     else
       return "History" if controller_name == "game_attempts" || (controller_name == "strength" && action_name.include?("game_attempts"))
