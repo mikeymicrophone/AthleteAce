@@ -95,3 +95,13 @@ body:is([data-side=play], [data-side=feed]) main > :is(.flash-notice, .flash-ale
   .navigation-inner { @apply gap-1 px-2; }
   .shell-side { @apply px-1; }
 }
+.feed-home > .history-tabs { @apply mb-6; }
+.feed-team-filters { @apply flex flex-wrap items-end gap-3 mb-6; }
+.feed-team-filters > div { @apply flex flex-col gap-2 min-w-0 flex-1; }
+.feed-team-grid { @apply grid gap-5 sm:grid-cols-2; }
+.feed-team-card { @apply flex flex-col items-start gap-3 min-w-0 border border-line rounded-card p-4; }
+.feed-team-card .profile-chips { @apply flex-wrap; }
+.feed-team-filters select { @apply w-full min-h-11 border border-line-2 rounded-lg px-3 py-2 bg-surface text-ink; }
+.feed-team-filters select:focus-visible { @apply outline-2 outline-offset-2 outline-accent-text; }
+.feed-team-card .record-identity > div { min-width: 0; }
+.feed-team-card .identity-name { overflow-wrap: anywhere; }
