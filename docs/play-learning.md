@@ -51,13 +51,17 @@ Each saved answer updates a `PracticeReview` for that account, original game, su
 
 Only due questions with existing subjects and answer choices appear. A review round takes the oldest due question for each subject, up to the chosen round size. Other due facts about that subject remain available for later rounds. Older attempts created before this feature do not receive review dates retroactively; unresolved player misses remain available through the home-page drill.
 
-**Quick round** prioritizes due reviews, then unresolved player misses, then followed teams and teams rated at least +5,000 on the approved Affinity spectrum. It tries recorded seasonal data for the preferred teams when current-team questions are unavailable, then falls back to the general pool. A Quick round uses up to 30 preferred teams, with recent follows before Affinity ratings.
+**Quick round** prioritizes due reviews, then unresolved player misses, then followed players, followed teams and teams rated at least +5,000 on the approved Affinity spectrum. It tries recorded seasonal data for the preferred teams when current-team questions are unavailable, then falls back to the general pool.
+
+For followed players, Quick round considers your 30 most recent player follows, including inactive players. It starts Team Match with playable current-team questions, or tries a recorded season if current-team data is absent. If neither works, it offers Name Ciphers when at least two distinct followed names can form puzzles. It never fills a followed-player round with unrelated subjects. When no followed-player round is playable, it moves on to preferred teams and then the general pool.
+
+A Quick round uses up to 30 preferred teams, with recent team follows before Affinity ratings.
 
 ## Following teams and players
 
 Use **Follow** on a team or player page while signed in. The button becomes **Following** and updates in place; selecting it again unfollows. Guests see **Sign in to follow**. Your profile has a paginated **Following** list for your account. Each team or player can be followed once, and deleting that entity removes its follows.
 
-Followed teams help choose Quick rounds after due reviews and unresolved misses. Player follows are saved on your profile; they do not yet personalize Quick rounds. The Feed's My teams filter is not connected to follows yet. Following and Affinity ratings are separate preferences, so unfollowing a team does not remove its high Affinity rating.
+Followed players and teams help choose Quick rounds after due reviews and unresolved misses. Existing saved rounds retain their selected players and questions when your follows change; replay uses their recorded scope. The Feed's My teams filter is not connected to follows yet. Following and Affinity ratings are separate preferences, so unfollowing a team does not remove its high Affinity rating.
 
 ## Knowledge and history
 
@@ -101,7 +105,7 @@ Build styles and run the Play acceptance checks:
 
 ```sh
 mise exec -- ruby -S bundle exec rails tailwindcss:build
-mise exec -- ruby -S bundle exec rspec spec/models/play_learning_spec.rb spec/requests/play_learning_spec.rb spec/system/play_learning_spec.rb spec/models/player_groups_spec.rb spec/requests/player_groups_spec.rb spec/system/player_groups_spec.rb spec/services/history_mixups_spec.rb spec/models/player_pair_practice_spec.rb spec/requests/history_mixups_spec.rb spec/system/history_mixups_spec.rb spec/models/group_learning_spec.rb spec/requests/group_learning_spec.rb spec/system/group_learning_spec.rb spec/services/group_practice_overview_spec.rb spec/requests/group_overviews_spec.rb spec/system/group_overviews_spec.rb spec/requests/round_learning_summary_spec.rb spec/system/round_learning_summary_spec.rb spec/requests/follows_spec.rb spec/requests/quick_round_preferences_spec.rb spec/system/follows_spec.rb
+mise exec -- ruby -S bundle exec rspec spec/models/play_learning_spec.rb spec/requests/play_learning_spec.rb spec/system/play_learning_spec.rb spec/models/player_groups_spec.rb spec/requests/player_groups_spec.rb spec/system/player_groups_spec.rb spec/services/history_mixups_spec.rb spec/models/player_pair_practice_spec.rb spec/requests/history_mixups_spec.rb spec/system/history_mixups_spec.rb spec/models/group_learning_spec.rb spec/requests/group_learning_spec.rb spec/system/group_learning_spec.rb spec/services/group_practice_overview_spec.rb spec/requests/group_overviews_spec.rb spec/system/group_overviews_spec.rb spec/requests/round_learning_summary_spec.rb spec/system/round_learning_summary_spec.rb spec/requests/follows_spec.rb spec/requests/quick_round_preferences_spec.rb spec/system/follows_spec.rb spec/requests/quick_round_players_spec.rb spec/system/quick_round_players_spec.rb
 ```
 
 A nonzero build exit means CSS generation failed. A nonzero RSpec exit, any failed example, or zero examples means acceptance failed. Browser checks require local PostgreSQL and Chrome.

@@ -9,18 +9,7 @@ class PlayController < ApplicationController
   end
 
   def quick
-    if ReviewQueue.new(ace: current_ace).entries.any?
-      round = GameRoundSetup.new(game_type: "phased_repetition", include_inactive: true).start!(current_ace)
-    elsif PlayProgress.new(ace: current_ace).misses.any?
-      round = GameRoundSetup.new(include_inactive: true).start_misses!(current_ace, limit: 10)
-    else
-      affinity = current_ace.ratings.active.where(target_type: "Team", spectrum: Spectrum.approved.where(name: "Affinity")).where("value >= 5000").order(value: :desc).limit(30).pluck(:target_id)
-      following = current_ace.follows.where(followable_type: "Team").order(created_at: :desc, id: :desc).limit(30).pluck(:followable_id)
-      setup = GameRoundSetup.new(team_ids: (following + affinity).uniq.first(30))
-      setup = setup.season_suggestion || GameRoundSetup.new if setup.available_count.zero?
-      setup = setup.season_suggestion if setup.available_count.zero? && setup.season_suggestion
-      round = setup.start!(current_ace)
-    end
+    round = QuickRound.new(ace: current_ace).start!
     redirect_to game_round_path(round), status: :see_other
   rescue ActiveModel::ValidationError, GameRound::InvalidAction => error
     redirect_to new_game_round_path, alert: error.message, status: :see_other
