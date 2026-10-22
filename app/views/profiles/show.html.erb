@@ -3,3 +3,18 @@
   <p class="account-hint">Fan since <%= current_ace.created_at.year %></p>
   <div class="account-links"><%= link_to "Edit profile", edit_profile_path %><%= link_to "Account settings", edit_ace_registration_path %></div>
 <% end %>
+<section class="round-panel" aria-labelledby="profile-following-title">
+  <h2 id="profile-following-title" class="profile-section-title">Following</h2>
+  <p class="round-caption">Followed teams help choose your Quick rounds. Your followed players are saved here.</p>
+  <% if @follows.any? %>
+    <ul class="play-player-list">
+      <% @follows.each do |follow| %>
+        <li id="<%= dom_id(follow) %>"><div><%= record_identity follow.followable %><p class="round-caption"><%= follow.followable_type %></p></div><%= render "follows/button", record: follow.followable %></li>
+      <% end %>
+    </ul>
+    <%== @pagy.series_nav if @pagy.pages > 1 %>
+  <% else %>
+    <p>Follow a team or player from their page to find them here.</p>
+    <%= link_to "Browse teams and players", browse_path, class: "tool-link" %>
+  <% end %>
+</section>

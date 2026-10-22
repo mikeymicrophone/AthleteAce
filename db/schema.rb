@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_21_030000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_22_031000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -301,6 +301,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_030000) do
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
     t.index ["seed_version"], name: "index_federations_on_seed_version"
+  end
+
+  create_table "follows", force: :cascade do |t|
+    t.bigint "ace_id", null: false
+    t.string "followable_type", null: false
+    t.bigint "followable_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ace_id", "followable_type", "followable_id"], name: "index_follows_on_ace_id_and_followable_type_and_followable_id", unique: true
+    t.index ["ace_id"], name: "index_follows_on_ace_id"
+    t.index ["followable_type", "followable_id"], name: "index_follows_on_followable"
+    t.check_constraint "followable_type::text = ANY (ARRAY['Team'::character varying, 'Player'::character varying]::text[])", name: "follows_supported_type"
   end
 
   create_table "game_attempts", force: :cascade do |t|
@@ -873,6 +885,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_030000) do
   add_foreign_key "contracts", "players"
   add_foreign_key "contracts", "teams"
   add_foreign_key "divisions", "conferences"
+  add_foreign_key "follows", "aces"
   add_foreign_key "game_attempts", "aces"
   add_foreign_key "game_attempts", "game_rounds"
   add_foreign_key "game_rounds", "aces"

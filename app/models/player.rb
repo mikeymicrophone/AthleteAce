@@ -1,4 +1,5 @@
 class Player < ApplicationRecord
+  has_many :follows, as: :followable, dependent: :destroy
   include Ratable
   
   belongs_to :birth_city, class_name: 'City', optional: true

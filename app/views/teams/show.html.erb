@@ -1,6 +1,7 @@
 <% content_for :title, @team.name %>
 <%= render 'filtered_show' if @filtered_breadcrumb.present? %>
 <%= browse_header @team.name do %>
+  <%= render "follows/button", record: @team %>
   <%= link_to "Practice this team", new_game_round_path(team_id: @team.id), class: "game-button" %>
 <% end %>
 <section class="round-panel">

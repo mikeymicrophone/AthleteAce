@@ -1,0 +1,12 @@
+<%= tag.div id: dom_id(record, :follow) do %>
+  <% if current_ace %>
+    <% follow = current_ace.follows.find_by(followable: record) %>
+    <% if follow %>
+      <%= button_to "Following", follow_path(follow), method: :delete, class: "tool-button", aria: { label: "Unfollow #{record.name}", pressed: true } %>
+    <% else %>
+      <%= button_to "Follow", follows_path, params: { followable_type: record.class.name, followable_id: record.id }, class: "tool-button", aria: { label: "Follow #{record.name}", pressed: false } %>
+    <% end %>
+  <% else %>
+    <%= link_to "Sign in to follow", new_ace_session_path, class: "tool-button" %>
+  <% end %>
+<% end %>

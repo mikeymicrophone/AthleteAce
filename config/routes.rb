@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   draw :design        # Design reference pages (not in production)
 
   get "feed", to: "feed#index", as: :feed
+  resources :follows, only: [ :create, :destroy ]
   resources :player_groups
   get "browse", to: "browse#index", as: :browse
   get "admin", to: "admin#index", as: :admin

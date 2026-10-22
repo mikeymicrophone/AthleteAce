@@ -3,7 +3,9 @@ class ProfilesController < ApplicationController
   before_action :authenticate_ace!
 
   def show
-    redirect_to edit_profile_path if current_ace.username.blank?
+    return redirect_to edit_profile_path if current_ace.username.blank?
+
+    @pagy, @follows = pagy(current_ace.follows.includes(:followable).order(created_at: :desc, id: :desc))
   end
 
   def edit
