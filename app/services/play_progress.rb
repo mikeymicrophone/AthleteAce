@@ -2,8 +2,9 @@
 class PlayProgress
   attr_reader :ace, :now, :time_zone
 
-  def initialize(ace:, now: Time.current)
+  def initialize(ace:, players: nil, now: Time.current)
     @ace = ace
+    @players = players
     @now = now
     @time_zone = ace.play_time_zone
   end
@@ -31,6 +32,28 @@ class PlayProgress
 
   def known_player_ids
     memories.select { |memory| memory[:latest_correct] && memory[:correct] >= 2 }.map { |memory| memory[:player_id] }
+  end
+
+  def correct_player_ids
+    memories.select { |memory| memory[:correct].positive? }.map { |memory| memory[:player_id] }
+  end
+
+  def missed_player_ids
+    memories.select { |memory| !memory[:latest_correct] }.map { |memory| memory[:player_id] }
+  end
+
+  def player_status(player_id)
+    @player_statuses ||= memories.to_h do |memory|
+      status = if !memory[:latest_correct]
+        :missed
+      elsif memory[:correct] >= 2
+        :known
+      else
+        :correct
+      end
+      [ memory[:player_id], status ]
+    end
+    @player_statuses.fetch(player_id, :unpracticed)
   end
 
   def misses(limit: 3)
@@ -66,7 +89,9 @@ class PlayProgress
   private
 
   def attempts
-    ace.game_attempts.where(game_type: GameRound::GAMES.keys, created_at: ..now)
+    scope = ace.game_attempts.where(game_type: GameRound::GAMES.keys, created_at: ..now)
+    scope = scope.where(subject_entity_type: "Player", subject_entity_id: @players.select(:id)) if @players
+    scope
   end
 
   def player_attempts

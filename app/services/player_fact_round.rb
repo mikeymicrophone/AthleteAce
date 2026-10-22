@@ -1,13 +1,14 @@
 class PlayerFactRound
   attr_reader :players
 
-  def initialize(players:, game_type:, fact_type:, season: nil, team_for: nil)
+  def initialize(players:, game_type:, fact_type:, season: nil, team_for: nil, subject_ids: nil)
     @season, @team_for = season, team_for
     @game_type = game_type
     @fact_type = fact_type
     @players = players.select { |player| target_for(player) && (game_type != "image_recognition" || player.photo_url.present?) }
     @players = @players.uniq { |player| player.name.squish.downcase } if game_type == "image_recognition"
     @targets = @players.map { |player| target_for(player) }.uniq(&:id)
+    @players = @players.select { |player| subject_ids.include?(player.id) } if subject_ids
   end
 
   def available_count

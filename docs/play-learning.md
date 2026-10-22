@@ -23,6 +23,16 @@ Saved rounds retain their questions and group label after membership changes or 
 
 Groups currently contain explicit player memberships. They do not evaluate database queries or infer membership from starter status, positions, or dates. The seeded Brunson/Hart example is a curated practice list, not a claim about starter status or a complete historical roster.
 
+## Group learning progress
+
+Signed-in group pages show how many current members you have answered correctly at least once across player games. This is lifetime coverage, including answers before the group existed. Later wrong answers do not remove that coverage. Your names-known count still requires two correct answers and a correct latest answer. Per-member labels distinguish **Not practiced**, **Answered correctly**, **Known**, and **Needs practice**. Needs practice means the latest player answer was wrong or skipped. Team-only questions do not establish player coverage. Visitors cannot see another account's progress.
+
+**Practice remaining** selects members with no correct player answer. **Practice misses** selects members whose latest player answer was wrong or skipped. In setup, **Members to practice** switches between these filters and **All members**. Personalized filters require sign-in and a group. They select practice questions without changing the group's explicit membership. Group, team, season, and explicit-player filters still intersect.
+
+For Name Ciphers, Image Recognition, and Multiple Choice, other eligible members in the selected scope can supply answer choices without becoming questions. One remaining member can therefore produce a one-question round when the full scope supplies at least two distinct valid answers. Existing name, photo, and fact requirements still apply; the app does not add outside players to fill choices. Team Match and division choices retain their existing league/team rules. Due reviews retain their saved choices and normal schedule.
+
+An adopted quest's remaining filter uses its saved roster and answers credited since adoption, rather than lifetime coverage. Its practice link retains the owned achievement reference through setup and mode changes. Saved rounds keep their questions after progress changes. Replay recomputes a new round's eligibility, so finishing every remaining member can leave replay with no questions. Choose **All members** to keep practicing. Group-page totals always describe current membership; quest totals continue to use the adopted roster.
+
 ## Review timing
 
 Each saved answer updates a `PracticeReview` for that account, original game, subject, and target. A miss returns in 10 minutes. Successive correct answers schedule review after 1, 3, 7, 14, and then 30 days. Another miss resets that sequence. Repeated submissions of the same question do not add attempts or change the schedule twice.
@@ -73,7 +83,7 @@ Build styles and run the Play acceptance checks:
 
 ```sh
 mise exec -- ruby -S bundle exec rails tailwindcss:build
-mise exec -- ruby -S bundle exec rspec spec/models/play_learning_spec.rb spec/requests/play_learning_spec.rb spec/system/play_learning_spec.rb spec/models/player_groups_spec.rb spec/requests/player_groups_spec.rb spec/system/player_groups_spec.rb spec/services/history_mixups_spec.rb spec/models/player_pair_practice_spec.rb spec/requests/history_mixups_spec.rb spec/system/history_mixups_spec.rb
+mise exec -- ruby -S bundle exec rspec spec/models/play_learning_spec.rb spec/requests/play_learning_spec.rb spec/system/play_learning_spec.rb spec/models/player_groups_spec.rb spec/requests/player_groups_spec.rb spec/system/player_groups_spec.rb spec/services/history_mixups_spec.rb spec/models/player_pair_practice_spec.rb spec/requests/history_mixups_spec.rb spec/system/history_mixups_spec.rb spec/models/group_learning_spec.rb spec/requests/group_learning_spec.rb spec/system/group_learning_spec.rb
 ```
 
 A nonzero build exit means CSS generation failed. A nonzero RSpec exit, any failed example, or zero examples means acceptance failed. Browser checks require local PostgreSQL and Chrome.

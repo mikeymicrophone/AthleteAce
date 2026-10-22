@@ -6,13 +6,40 @@
 <p class="round-intro"><%= @player_group.description %></p>
 <p class="round-caption"><%= pluralize @player_group.players.count, "player" %> · A group quest requires one correct answer for every member recorded when you adopt it.</p>
 <%= link_to "Propose group achievement", new_achievement_path(target_type: "PlayerGroup", target_id: @player_group.id), class: "tool-button" if ace_signed_in? %>
+<% if @progress %>
+  <% total = @player_group.players.count %>
+  <% correct = @progress.correct_player_ids.size %>
+  <% remaining = total - correct %>
+  <section class="round-panel group-learning" aria-labelledby="group-learning-title">
+    <h2 id="group-learning-title" class="profile-section-title">Your group practice</h2>
+    <p><strong><%= correct %> of <%= total %></strong> answered correctly at least once</p>
+    <% if total.positive? %><progress class="round-progress" value="<%= correct %>" max="<%= total %>" aria-label="Group members answered correctly"></progress><% end %>
+    <p class="round-caption">Current members · your all-time player answers. Quests track their adopted roster separately.</p>
+    <p class="round-caption"><%= @progress.names_known %> names known · Correct twice, including your latest answer.</p>
+    <% if remaining.positive? %>
+      <%= link_to "Practice remaining #{remaining}", new_game_round_path(player_group_id: @player_group.id, game_type: "name_ciphers", practice_filter: "remaining"), class: "game-button" %>
+    <% elsif total.positive? %>
+      <p>Every current member has been answered correctly.</p>
+    <% end %>
+    <% if @progress.missed_player_ids.any? %>
+      <%= link_to "Practice misses", new_game_round_path(player_group_id: @player_group.id, game_type: "name_ciphers", practice_filter: "missed"), class: "tool-button" %>
+    <% end %>
+  </section>
+<% else %>
+  <p class="round-caption"><%= link_to "Sign in", new_ace_session_path, class: "tool-link" %> to see your group practice progress.</p>
+<% end %>
 <%== @pagy.series_nav %>
 <% if @players.empty? %>
   <section class="round-panel"><h2>No players in this group</h2><p>An admin or seed import can add members.</p></section>
 <% else %>
   <ul class="round-panel">
     <% @players.each do |player| %>
-      <li><%= link_to player.name, player_path(player), class: "tool-link" %></li>
+      <li>
+        <%= link_to player.name, player_path(player), class: "tool-link" %>
+        <% if @progress %>
+          <%= tag.span({unpracticed: "Not practiced", missed: "Needs practice", correct: "Answered correctly", known: "Known"}.fetch(@progress.player_status(player.id)), class: "round-caption") %>
+        <% end %>
+      </li>
     <% end %>
   </ul>
 <% end %>

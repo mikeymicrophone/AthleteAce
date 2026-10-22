@@ -19,6 +19,8 @@ export default class extends Controller {
   groupChanged() {
     const snapshot = this.element.elements.goal_achievement_id
     if (snapshot) snapshot.disabled = true
+    const filter = this.element.elements.practice_filter
+    if (filter && !this.element.elements.player_group_id.value) filter.disabled = true
     this.update()
   }
 

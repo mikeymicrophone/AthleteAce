@@ -44,8 +44,14 @@
     <div class="round-season-select">
       <%= form.label :player_group_id, "Player group" %>
       <%= form.collection_select :player_group_id, PlayerGroup.order(:name), :id, :name, { include_blank: "Any players", selected: @setup.player_group_id }, data: { action: "change->round-setup#groupChanged" } %>
+      <% if @setup.player_group %>
+        <%= form.label :practice_filter, "Members to practice" %>
+        <%= form.select :practice_filter, GameRoundSetup::PRACTICE_FILTERS.map { |value, label| [label, value] }, { selected: @setup.practice_filter }, data: { action: "change->round-setup#update" } %>
+        <p class="round-caption">Progress filters choose the questions. Other members in this scope may appear as answer choices.</p>
+      <% end %>
       <% if @setup.goal_achievement %>
         <p class="round-caption">Practicing the members saved when you adopted this quest.</p>
+        <p class="round-caption">Remaining members use your quest progress since adoption.</p>
       <% end %>
       <p class="round-caption">Groups include their inactive members. Other filters narrow the group. Team → division uses the members' current teams.</p>
       <%= link_to "Browse player groups", player_groups_path, class: "tool-link", data: { turbo_frame: "_top" } %>
@@ -165,7 +171,14 @@
     <%= tag.strong "#{GameRound::GAMES[@setup.game_type]} · #{pluralize(@setup.question_count, 'question')}" %>
     <%= tag.p @setup.scope_label, class: "round-caption" %>
     <% if available.zero? %>
-      <%= tag.p season_suggestion ? "No current-team player data for this selection. Choose a roster season to start." : "No playable questions in this scope. Review the filters above.", id: "round-start-reason", class: "round-caption", role: "status" %>
+      <% reason = if season_suggestion
+        "No current-team player data for this selection. Choose a roster season to start."
+      elsif @setup.practice_filter != "all"
+        "No playable questions match this progress filter. Choose All members, another game, or a recorded season."
+      else
+        "No playable questions in this scope. Review the filters above."
+      end %>
+      <%= tag.p reason, id: "round-start-reason", class: "round-caption", role: "status" %>
       <% if season_suggestion %>
         <%= link_to "Use #{season_suggestion.season.name} · #{pluralize(season_suggestion.available_count, 'player')}", new_game_round_path(season_suggestion.scope_params), class: "tool-button round-use-season" %>
       <% end %>

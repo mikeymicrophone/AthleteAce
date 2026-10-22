@@ -8,6 +8,7 @@ class PlayerGroupsController < ApplicationController
   end
 
   def show
+    @progress = PlayProgress.new(ace: current_ace, players: @player_group.players) if current_ace
     @pagy, @players = pagy(@player_group.players.order(:last_name, :first_name))
   end
 

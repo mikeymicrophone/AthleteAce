@@ -13,9 +13,12 @@ class GameRoundSetup
   attribute :player_ids, default: -> { [] }
   attribute :player_id, :integer
   attribute :fact_type, :string, default: "team"
+  attribute :practice_filter, :string, default: "all"
   attr_accessor :ace
 
   FACTS = { "team" => [ "Team", "team" ], "birth_city" => [ "City", "birth_city" ], "birth_country" => [ "Country", "birth_country" ] }.freeze
+  PRACTICE_FILTERS = { "all" => "All members", "remaining" => "Not yet answered correctly", "missed" => "Needs practice" }.freeze
+  validates :practice_filter, inclusion: { in: PRACTICE_FILTERS.keys }
   validates :fact_type, inclusion: { in: FACTS.keys }
 
   validates :game_type, inclusion: { in: GameRound::GAMES.keys }
@@ -43,7 +46,7 @@ class GameRoundSetup
 
   def season_suggestion
     return unless seasonal_game? && !season_id && valid? && available_count.zero?
-    return if scoped_players.where.not(team_id: nil).exists?
+    return if practice_players(scoped_players).where.not(team_id: nil).exists?
     return @season_suggestion if defined?(@season_suggestion)
 
     @season_suggestion = nil
@@ -75,7 +78,7 @@ class GameRoundSetup
         Player.all
       end
       scope = filter_players(scope)
-      NameCipherRound.new(players: scope.includes(:team).order(:id).to_a, season: season,
+      NameCipherRound.new(players: scope.includes(:team).order(:id).to_a, season: season, subject_ids: practice_subject_ids,
         team_for: season ? season_pool.method(:team_for) : nil)
     end
   end
@@ -144,25 +147,27 @@ class GameRoundSetup
   def subjects
     return Player.where(id: fact_pool.players.map(&:id)) if %w[multiple_choice image_recognition].include?(game_type)
     return Player.where(id: cipher_pool.players.map(&:id)) if game_type == "name_ciphers"
-    return filter_players(season_pool.players) if season && game_type == "player_team_match"
+    return practice_players(filter_players(season_pool.players)) if season && game_type == "player_team_match"
 
     if game_type == "guess_the_division"
       playable_leagues = Division.joins(:conference).group("conferences.league_id").having("COUNT(DISTINCT divisions.id) >= 2").select("conferences.league_id")
       scope = scoped_teams.joins(:division).where(league_id: playable_leagues)
-      scope = scope.where(id: group_players.select(:team_id)) if player_group
-      scope = scope.where(id: Player.where(id: player_ids).select(:team_id)) if player_ids.any?
+      if player_group || player_ids.any?
+        players = practice_players(filter_players(Player.all, include_inactive: true))
+        scope = scope.where(id: players.select(:team_id))
+      end
       Team.where(id: scope.select(:id))
     else
       playable_leagues = Team.group(:league_id).having("COUNT(*) >= 2").select(:league_id)
       pool = selected_team_ids.size > 1 ? scoped_teams : scoped_teams.where(league_id: playable_leagues)
       scope = Player.where(team_id: pool.select(:id))
-      filter_players(scope)
+      practice_players(filter_players(scope))
     end
   end
 
   def fact_pool
     @fact_pool ||= PlayerFactRound.new(players: (season ? filter_players(season_pool.players) : scoped_players).includes(:team, :birth_city, :birth_country).to_a,
-      game_type: game_type, fact_type: fact_type, season: season, team_for: season ? season_pool.method(:team_for) : nil)
+      game_type: game_type, fact_type: fact_type, subject_ids: practice_subject_ids, season: season, team_for: season ? season_pool.method(:team_for) : nil)
   end
 
   def scoped_players
@@ -171,7 +176,7 @@ class GameRoundSetup
   end
 
   def review_queue
-    @review_queue ||= ReviewQueue.new(ace: ace, teams: [ sport_id, league_id, conference_id, division_id, city_id, state_id, *selected_team_ids ].any? ? scoped_teams : nil, player_id: player_id, players: (player_group || player_ids.any?) ? filter_players(Player.all, include_inactive: true) : nil)
+    @review_queue ||= ReviewQueue.new(ace: ace, teams: [ sport_id, league_id, conference_id, division_id, city_id, state_id, *selected_team_ids ].any? ? scoped_teams : nil, player_id: player_id, players: (player_group || player_ids.any?) ? practice_players(filter_players(Player.all, include_inactive: true)) : nil)
   end
 
   def available_count
@@ -194,6 +199,7 @@ class GameRoundSetup
     names << City.find_by(id: city_id)&.name if city_id
     names << State.find_by(id: state_id)&.name if state_id
     names << (selected_team_ids.any? ? teams.where(id: selected_team_ids).order(:territory, :mascot).map(&:name).join(" + ") : "Any team")
+    names << PRACTICE_FILTERS[practice_filter] if practice_filter != "all"
     names.compact.join " · "
   end
 
@@ -219,6 +225,7 @@ class GameRoundSetup
   def scope_params
     fields = attributes.except("team_query").compact
     fields = fields.except("include_inactive") if season_id
+    fields = fields.except("practice_filter") if practice_filter == "all"
     team_ids.any? ? fields.except("team_id") : fields
   end
 
@@ -335,7 +342,32 @@ class GameRoundSetup
     scope
   end
 
+  def practice_subject_ids
+    return if practice_filter == "all"
+    return [] unless player_group && ace
+
+    @practice_subject_ids ||= begin
+      progress = PlayProgress.new(ace: ace, players: group_players)
+      case practice_filter
+      when "remaining"
+        correct_ids = goal_achievement ? goal_achievement.player_ids : progress.correct_player_ids
+        group_players.where.not(id: correct_ids).pluck(:id)
+      when "missed" then progress.missed_player_ids
+      else []
+      end
+    end
+  end
+
+  def practice_players(scope)
+    ids = practice_subject_ids
+    ids ? scope.where(id: ids) : scope
+  end
+
   def valid_scope
+    if practice_filter != "all"
+      errors.add(:practice_filter, "requires a player group") unless player_group
+      errors.add(:practice_filter, "requires sign-in") unless ace
+    end
     if player_ids.any? && (player_ids.size > 30 || player_ids.map(&:to_i).uniq.size != player_ids.size || Player.where(id: player_ids).count != player_ids.size)
       errors.add(:players, "must be between 1 and 30 different recorded players")
     end
