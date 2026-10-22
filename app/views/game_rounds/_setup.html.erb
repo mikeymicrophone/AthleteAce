@@ -9,6 +9,9 @@
   <% [:conference_id, :division_id, :city_id, :state_id, :player_id, :goal_achievement_id].each do |key| %>
     <%= form.hidden_field key, value: @setup.public_send(key) if @setup.public_send(key) %>
   <% end %>
+  <% @setup.player_ids.each do |id| %>
+    <%= hidden_field_tag "player_ids[]", id %>
+  <% end %>
   <%= tag.fieldset class: "round-panel" do %>
     <%= tag.legend "01 · Pick a game", class: "round-step" %>
     <%= tag.div class: "round-game-options" do %>
@@ -34,6 +37,10 @@
   <% end %>
   <%= tag.fieldset class: "round-panel" do %>
     <%= tag.legend "02 · Find your scope", class: "round-step" %>
+    <% if @setup.player_ids.any? %>
+      <p class="round-caption">Focused players · <%= Player.where(id: @setup.player_ids).order(:last_name, :first_name).map(&:name).join(" · ") %></p>
+      <%= link_to "Any players", new_game_round_path(@setup.scope_params.except("player_ids")), class: "tool-link", data: { turbo_frame: "_top" } %>
+    <% end %>
     <div class="round-season-select">
       <%= form.label :player_group_id, "Player group" %>
       <%= form.collection_select :player_group_id, PlayerGroup.order(:name), :id, :name, { include_blank: "Any players", selected: @setup.player_group_id }, data: { action: "change->round-setup#groupChanged" } %>

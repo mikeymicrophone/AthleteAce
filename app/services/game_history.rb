@@ -75,10 +75,7 @@ class GameHistory
 
   def mixups
     @mixups ||= begin
-      counts = attempts.where(game_type: "player_team_match", is_correct: false,
-        target_entity_type: "Team", chosen_entity_type: "Team").where.not(chosen_entity_id: nil)
-        .where("target_entity_id != chosen_entity_id")
-        .group(Arel.sql("LEAST(target_entity_id, chosen_entity_id)"), Arel.sql("GREATEST(target_entity_id, chosen_entity_id)")).count
+      counts = mixup_counts("Team")
       teams = Team.where(id: counts.keys.flatten.uniq).includes(:division).index_by &:id
       counts.filter_map do |ids, count|
         pair = ids.filter_map { |id| teams[id] }
@@ -87,7 +84,25 @@ class GameHistory
     end
   end
 
+  def player_mixups
+    @player_mixups ||= begin
+      counts = mixup_counts("Player")
+      players = Player.where(id: counts.keys.flatten.uniq).index_by(&:id)
+      counts.filter_map do |ids, count|
+        pair = ids.filter_map { |id| players[id] }
+        { players: pair, count: count } if pair.size == 2
+      end.sort_by { |pair| [ -pair[:count], pair[:players].map(&:name).join ] }.first(5)
+    end
+  end
+
   private
+
+  def mixup_counts(type)
+    attempts.where(subject_entity_type: "Player", is_correct: false,
+      target_entity_type: type, chosen_entity_type: type).where.not(chosen_entity_id: nil)
+      .where("target_entity_id != chosen_entity_id")
+      .group(Arel.sql("LEAST(target_entity_id, chosen_entity_id)"), Arel.sql("GREATEST(target_entity_id, chosen_entity_id)")).count
+  end
 
   def cipher_attempts
     attempts.where(game_type: RECORDED_GAMES).joins(:game_round)

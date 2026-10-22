@@ -72,7 +72,7 @@ class GameRoundsController < ApplicationController
 
   def setup_params
     params.permit(:goal_achievement_id, :player_group_id, :game_type, :length, :sport_id, :league_id, :season_id, :conference_id, :division_id, :team_id,
-      :city_id, :state_id, :include_inactive, :team_query, :fact_type, :player_id, team_ids: [])
+      :city_id, :state_id, :include_inactive, :team_query, :fact_type, :player_id, team_ids: [], player_ids: [])
   end
 
   def invalid_action(error)

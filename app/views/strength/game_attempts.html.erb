@@ -52,10 +52,10 @@
     <% end %>
   <% else %>
     <%= tag.div class: "history-insights" do %>
-      <% if @history_tab == "overall" && [nil, "player_team_match"].include?(@history.game_type) %>
+      <% if @history_tab == "overall" && [nil, "player_team_match", "multiple_choice", "phased_repetition"].include?(@history.game_type) %>
         <%= tag.section class: "history-panel", aria: { labelledby: "history-mixups-title" } do %>
           <%= tag.h2 "Teams you mix up", id: "history-mixups-title", class: "profile-section-title" %>
-          <%= tag.p "All-time Team Match · both directions", class: "history-caption" %>
+          <%= tag.p "All-time player → team answers · both directions", class: "history-caption" %>
           <% if @history.mixups.any? %>
             <%= tag.ul class: "history-mixups" do %>
               <% @history.mixups.each do |pair| %>
@@ -79,6 +79,29 @@
             <%= tag.p "No team mix-ups recorded yet.", class: "history-empty" %>
           <% end %>
         <% end %>
+      <% end %>
+      <% if @history_tab == "overall" && [nil, "name_ciphers", "image_recognition", "phased_repetition"].include?(@history.game_type) %>
+        <section class="history-panel" aria-labelledby="history-player-mixups-title">
+          <h2 id="history-player-mixups-title" class="profile-section-title">Players you mix up</h2>
+          <p class="history-caption">All-time name answers · both directions</p>
+          <% if @history.player_mixups.any? %>
+            <ul class="history-mixups">
+              <% @history.player_mixups.each do |pair| %>
+                <li class="history-mixup">
+                  <div class="history-pair">
+                    <%= entity_link pair[:players].first %><span aria-hidden="true">↔</span><%= entity_link pair[:players].last %>
+                  </div>
+                  <div class="history-mixup-detail">
+                    <span class="history-count"><%= pluralize pair[:count], "mix-up" %></span>
+                    <%= link_to "Drill names", new_game_round_path(game_type: "name_ciphers", player_ids: pair[:players].map(&:id), include_inactive: true), class: "tool-button", aria: { label: "Drill names: #{pair[:players].map(&:name).join(' and ')}" } %>
+                  </div>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="history-empty">No player mix-ups recorded yet.</p>
+          <% end %>
+        </section>
       <% end %>
       <%= tag.section class: "history-panel history-teams", aria: { labelledby: "history-teams-title" } do %>
         <%= tag.div class: "history-panel-heading" do %>

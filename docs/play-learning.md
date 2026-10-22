@@ -35,7 +35,11 @@ Only due questions with existing subjects and answer choices appear. A review ro
 
 Names known counts players with at least two correct answers across player games and a correct latest answer. A later miss removes a player from that count until another correct answer. Team-only questions affect accuracy and streaks, but not names known. Round summaries record players who became known on an answer in that round.
 
-History and its game filter cover all six games. Team history uses saved team identities for the new modes. Legacy Team Match and division attempts retain their recorded target and subject attribution.
+History and its game filter cover all six games. Team mix-ups combine wrong player-to-team answers from Team Match, Multiple Choice, and Phased Repetition. Player mix-ups combine wrong name answers from Name Ciphers, Image Recognition, and Phased Repetition. Each list combines both directions of a pair, shows up to five pairs ranked by count, and respects the selected game filter. Correct answers, skips, future attempts, other accounts, and pairs with deleted entities do not contribute. Counts are all-time totals, so correcting an answer does not erase an earlier mix-up.
+
+Use **Drill** on a team pair for Team Match. Use **Drill names** on a player pair for Name Ciphers, then optionally choose another game. Player drills retain only the selected player IDs as you change modes, submit setup, and replay. Inactive and unassigned players are allowed where the mode has the necessary data. Setup lists the focused names; **Any players** removes that selection. Other filters narrow it. Missing/deleted IDs, duplicate IDs, and selections larger than 30 are rejected rather than replaced by unrelated players.
+
+Team history uses saved team identities for the new modes. Legacy Team Match and division attempts retain their recorded target and subject attribution.
 
 Set your time zone in **Edit profile**. Daily streaks, today's players, and history day boundaries use that setting. An unset preference uses the application time zone.
 
@@ -69,7 +73,7 @@ Build styles and run the Play acceptance checks:
 
 ```sh
 mise exec -- ruby -S bundle exec rails tailwindcss:build
-mise exec -- ruby -S bundle exec rspec spec/models/play_learning_spec.rb spec/requests/play_learning_spec.rb spec/system/play_learning_spec.rb spec/models/player_groups_spec.rb spec/requests/player_groups_spec.rb spec/system/player_groups_spec.rb
+mise exec -- ruby -S bundle exec rspec spec/models/play_learning_spec.rb spec/requests/play_learning_spec.rb spec/system/play_learning_spec.rb spec/models/player_groups_spec.rb spec/requests/player_groups_spec.rb spec/system/player_groups_spec.rb spec/services/history_mixups_spec.rb spec/models/player_pair_practice_spec.rb spec/requests/history_mixups_spec.rb spec/system/history_mixups_spec.rb
 ```
 
 A nonzero build exit means CSS generation failed. A nonzero RSpec exit, any failed example, or zero examples means acceptance failed. Browser checks require local PostgreSQL and Chrome.

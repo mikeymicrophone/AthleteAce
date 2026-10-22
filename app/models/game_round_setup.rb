@@ -10,6 +10,7 @@ class GameRoundSetup
   attribute :team_query, :string
   attribute :goal_achievement_id, :integer
   attribute :player_group_id, :integer
+  attribute :player_ids, default: -> { [] }
   attribute :player_id, :integer
   attribute :fact_type, :string, default: "team"
   attr_accessor :ace
@@ -149,6 +150,7 @@ class GameRoundSetup
       playable_leagues = Division.joins(:conference).group("conferences.league_id").having("COUNT(DISTINCT divisions.id) >= 2").select("conferences.league_id")
       scope = scoped_teams.joins(:division).where(league_id: playable_leagues)
       scope = scope.where(id: group_players.select(:team_id)) if player_group
+      scope = scope.where(id: Player.where(id: player_ids).select(:team_id)) if player_ids.any?
       Team.where(id: scope.select(:id))
     else
       playable_leagues = Team.group(:league_id).having("COUNT(*) >= 2").select(:league_id)
@@ -164,12 +166,12 @@ class GameRoundSetup
   end
 
   def scoped_players
-    scope = player_group && !team_scope? ? Player.all : Player.where(team_id: scoped_teams.select(:id))
+    scope = (player_group || player_ids.any?) && !team_scope? ? Player.all : Player.where(team_id: scoped_teams.select(:id))
     filter_players(scope)
   end
 
   def review_queue
-    @review_queue ||= ReviewQueue.new(ace: ace, teams: [ sport_id, league_id, conference_id, division_id, city_id, state_id, *selected_team_ids ].any? ? scoped_teams : nil, player_id: player_id, players: player_group ? group_players : nil)
+    @review_queue ||= ReviewQueue.new(ace: ace, teams: [ sport_id, league_id, conference_id, division_id, city_id, state_id, *selected_team_ids ].any? ? scoped_teams : nil, player_id: player_id, players: (player_group || player_ids.any?) ? filter_players(Player.all, include_inactive: true) : nil)
   end
 
   def available_count
@@ -186,7 +188,7 @@ class GameRoundSetup
   end
 
   def scope_label
-    names = [ player_group&.name, sport&.name, season ? season.name : league&.name ]
+    names = [ ("#{player_ids.size} selected players" if player_ids.any?), player_group&.name, sport&.name, season ? season.name : league&.name ]
     names << Conference.find_by(id: conference_id)&.name if conference_id
     names << Division.find_by(id: division_id)&.name if division_id
     names << City.find_by(id: city_id)&.name if city_id
@@ -325,14 +327,18 @@ class GameRoundSetup
     [ sport_id, league_id, conference_id, division_id, city_id, state_id, *selected_team_ids ].any?
   end
 
-  def filter_players(scope)
+  def filter_players(scope, include_inactive: self.include_inactive)
     scope = scope.where(id: group_players.select(:id)) if player_group
     scope = scope.where(id: player_id) if player_id
+    scope = scope.where(id: player_ids) if player_ids.any?
     scope = scope.where(active: [ true, nil ]) unless season || include_inactive || player_group
     scope
   end
 
   def valid_scope
+    if player_ids.any? && (player_ids.size > 30 || player_ids.map(&:to_i).uniq.size != player_ids.size || Player.where(id: player_ids).count != player_ids.size)
+      errors.add(:players, "must be between 1 and 30 different recorded players")
+    end
     if goal_achievement_id && (!goal_achievement || goal_achievement.achievement.target_type != "PlayerGroup" || goal_achievement.achievement.target_id != player_group_id)
       errors.add(:goal_achievement, "is not an adopted achievement for this group")
     end
