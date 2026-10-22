@@ -12,8 +12,8 @@ RSpec.describe "Navigation", type: :system do
   end
 
   def open_menu(label = "Account menu")
-    expect(page).to have_css('[data-controller="shell"]') {
-      page.evaluate_script("!document.documentElement.hasAttribute('data-turbo-preview') && Boolean(window.Stimulus?.getControllerForElementAndIdentifier(document.querySelector('[data-controller=shell]'), 'shell'))")
+    expect(page).to have_css('[data-controller~="shell"]') {
+      page.evaluate_script("!document.documentElement.hasAttribute('data-turbo-preview') && Boolean(window.Stimulus?.getControllerForElementAndIdentifier(document.querySelector('[data-controller~=shell]'), 'shell'))")
     }
     find("button[aria-label='#{label}']").click
     expect(page).to have_css("dialog[open]")

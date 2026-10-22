@@ -1,6 +1,6 @@
 <% content_for :title, "Conferences" %>
 
-<h1>Conferences</h1>
+<%= browse_header "Conferences" %>
 
 <div class="mb-4 text-center">
   <%= link_to "Play: Guess the Division", new_game_round_path(game_type: "guess_the_division"), class: "game-button" %>
@@ -18,3 +18,5 @@
     <% end %>
   <% end %>
 </div>
+
+<%= browse_empty @conferences, "Conferences" %>

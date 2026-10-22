@@ -20,19 +20,31 @@ Switch sides in the dark top bar. Play has Home, Games, Quests, History, and Bro
 
 The Moderate badge counts pending submissions that the reviewer can decide, excluding their own. Open the account button for Profile, My ratings, Settings, Begin Quest, Sign Out, and Light, Dark, or System appearance. Appearance is stored on the signed-in account. Visitors can use the Appearance button, which stores the choice in a cookie.
 
-Feed currently has an empty reading view and player/team browsing. Posting, follows, leaderboards, payments, and reports remain unfinished. Admin currently provides application totals and sports/content catalog links. Existing content editors keep their current permission rules. The shell omits navigation to unfinished workflows. Contextual search is separate work.
+Feed currently has an empty reading view and player/team browsing. Posting, follows, leaderboards, payments, and reports remain unfinished. Admin currently provides application totals and sports/content catalog links. Existing content editors keep their current permission rules. The shell omits navigation to unfinished workflows.
+
+## Search
+
+Open the search control or press Command+K or Control+K. Enter at least two characters, use the arrow keys to choose a result, Enter to open it, and Escape to close. Player search includes full names and nicknames. Team search includes territory, club name, and abbreviation, using the same matching as the round scope picker. Search input is limited to 80 characters and wildcard characters are treated literally. Each record group shows at most five matches.
+
+Play searches players, teams, sports, leagues, conferences, divisions, and places. Feed currently searches players and teams; shout-out results depend on the unfinished Feed work. Moderate searches pending submissions that the reviewer can decide, plus account handles and display names. Admin adds account identities, Organizations, and existing settings destinations to the public catalog search. Search never grants access to a side the account cannot use and does not search account emails.
+
+Moderators and admins can open a matching ace's read-only identity and recent submissions. These views omit email, warnings, mutes, and role-editing controls. Those management workflows remain separate work.
+
+The five most recently opened or submitted searches are stored in the browser, separately for each account and side. Use **Clear recent searches** to remove them. Search results are fetched anew and are not stored in this history. The search control also links to a full search page when JavaScript is unavailable.
+
+See [Play rounds and learning progress](docs/play-learning.md) for the six saved games, due reviews, roster-based quest completion, time zones, anonymous preview, and production mail configuration.
 
 The committed development configuration uses `athlete_ace_development_seedtest_20261005`. Other checkouts must create that database or adjust their local database configuration.
 
 Before upgrading a database with existing Contracts, follow the [organization reconciliation requirements](docs/roster-history-proposal.md#contract-transition). The second Contract migration refuses records without a verified Organization. The development seed-test database had no legacy Contracts when this transition was applied.
 
-Apply the pending migrations, including account theme and identity, before running this version:
+Apply the pending migrations, including account theme, identity, Play reviews, and quest roster progress, before running this version:
 
 ```sh
 mise exec -- ruby -S bundle exec rails db:migrate
 ```
 
-A nonzero exit means a migration failed. These migrations add theme and identity fields without changing account roles. Existing handles remain unset until each ace chooses one.
+A nonzero exit means a migration failed. These migrations add account preferences, identity, review schedules, round learning results, and quest roster snapshots without changing account roles. Existing handles remain unset until each ace chooses one.
 
 Build the stylesheet before browser checks:
 

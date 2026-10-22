@@ -1,6 +1,6 @@
 <% content_for :title, "Countries" %>
 
-<h1>Countries</h1>
+<%= browse_header "Countries" %>
 
 <div id="countries">
   <% @countries.each do |country| %>
@@ -10,3 +10,5 @@
     <% end %>
   <% end %>
 </div>
+
+<%= browse_empty @countries, "Countries" %>

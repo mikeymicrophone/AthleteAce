@@ -14,7 +14,13 @@
   <%= render "aces/attribution", ace: @quest.created_by %>
   <section class="quest-goal-panel" aria-labelledby="quest-goal-title">
     <div><p class="eyebrow">Your goal</p><h2 id="quest-goal-title"><%= goal ? "Keep your eyes on the roster." : "Make this your next quest." %></h2><p><%= goal ? "Adopted #{l(goal.created_at.to_date, format: :long)}" : "Choose this quest and keep your progress close." %></p></div>
-    <% if goal %><%= render "quests/progress", goal: goal %><% end %>
+    <% if goal %>
+      <p class="round-caption">Answer every player in each saved roster correctly at least once. Rosters reflect recorded catalog coverage when you adopt the quest; coverage may be partial.</p>
+      <%= render "quests/progress", goal: goal %>
+      <% if (next_achievement = goal.next_achievement) %>
+        <%= link_to "Play next: #{next_achievement.name}", quest_practice_path(next_achievement), class: "game-button" %>
+      <% end %>
+    <% end %>
     <div class="page-actions">
       <% if ace_signed_in? %><%= begin_quest_button @quest %><% else %><%= link_to "Sign in to begin", new_ace_session_path, class: "game-button" %><% end %>
     </div>
@@ -29,7 +35,10 @@
       <section class="quest-achievements"><h3 class="eyebrow"><%= heading %></h3><ol>
         <% entries.each_with_index do |highlight, index| %>
           <% achievement = highlight.achievement %>
-          <li class="quest-achievement"><span class="quest-achievement-number"><%= format("%02d", index + 1) %></span><div class="quest-achievement-copy"><%= moderation_notice(highlight) %><h4><%= link_to achievement.name, achievement_path(achievement) %></h4><p><%= achievement.description %></p><span class="entity-chip"><%= icon_for_resource achievement.target_type.underscore, size: 16 %><%= achievement.target ? link_to_name(achievement.target) : "Target unavailable" %></span></div>
+          <% earned = goal&.goal_achievements&.find_by(achievement: achievement) %>
+          <li class="quest-achievement"><span class="quest-achievement-number"><%= format("%02d", index + 1) %></span><div class="quest-achievement-copy"><%= moderation_notice(highlight) %><h4><%= link_to achievement.name, achievement_path(achievement) %></h4><p><%= achievement.description %></p>
+              <% if earned&.completed_at %><p class="round-caption">Done <%= l earned.completed_at.in_time_zone(current_ace.play_time_zone).to_date, format: :long %></p>
+              <% elsif achievement.practice_scope %><p class="round-caption"><%= earned&.progress || 0 %> of <%= earned ? earned.required_player_ids.size : "the recorded" %> players answered correctly</p><% end %><span class="entity-chip"><%= icon_for_resource achievement.target_type.underscore, size: 16 %><%= achievement.target ? link_to_name(achievement.target) : "Target unavailable" %></span></div>
             <div class="page-actions"><% if (practice_path = quest_practice_path(achievement)) %><%= link_to "Practice", practice_path, class: "tool-button", aria: { label: "Practice #{achievement.name}" } %><% end %>
               <% if admin_signed_in? %><%= link_to "Edit", edit_quest_highlight_path(@quest, highlight), class: "tool-link" %><%= button_to "Remove", quest_highlight_path(@quest, highlight), method: :delete, class: "tool-link", data: { turbo_confirm: "Remove this achievement from the quest?" } %><% end %>
             </div>

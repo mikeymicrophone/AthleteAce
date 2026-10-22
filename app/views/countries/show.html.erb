@@ -1,4 +1,5 @@
-<%= tag.header @country.name, class: "country-name" %>
+<% content_for :title, @country.name %>
+<%= browse_header @country.name %>
 
 <%= render_collection @country.states %>
 

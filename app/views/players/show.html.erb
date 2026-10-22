@@ -28,7 +28,7 @@
     <%= tag.h2 "Your memory", id: "player-memory-title", class: "profile-section-title" %>
     <% if @memory_stats %>
       <%= tag.dl class: "memory-stats" do %>
-        <% { "Seen" => @memory_stats[:seen], "Right" => @memory_stats[:accuracy], "Last miss" => @memory_stats[:last_miss] }.each do |label, value| %>
+        <% { "Seen" => @memory_stats[:seen], "Right" => @memory_stats[:accuracy], "Last miss" => @memory_stats[:last_miss], "Quests" => @memory_stats[:quests] }.each do |label, value| %>
           <%= tag.div class: "memory-stat" do %>
             <%= tag.dt label, class: "eyebrow" %>
             <%= tag.dd value, class: "memory-value" %>
@@ -50,6 +50,7 @@
     <%= tag.h2 "Player Ratings", id: "player-ratings-title", class: "profile-section-title" %>
     <% if @spectrums.any? %>
       <%= rating_slider_container @player, @spectrums %>
+      <%= link_to "Missing a trait? Propose a spectrum", new_spectrum_path, class: "tool-link" if current_ace %>
     <% else %>
       <%= tag.p "No rating spectrums have been created yet.", class: "profile-empty" %>
     <% end %>

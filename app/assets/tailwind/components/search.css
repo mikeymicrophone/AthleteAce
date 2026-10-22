@@ -1,0 +1,33 @@
+.shell-search-toggle { @apply inline-flex items-center justify-center gap-2 min-w-11 min-h-11 px-2 border border-shell-line rounded-lg text-shell-ink-2; }
+.shell-search-toggle:hover { @apply bg-shell-3 text-shell-ink; }
+.shell-search-label { @apply hidden xl:block text-xs; }
+.shell-search-toggle kbd { @apply hidden lg:block text-[10px] font-mono; }
+.shell-search-dialog { @apply bg-surface text-ink border border-line rounded-panel shadow-card p-0; inset: 8dvh 0 auto; margin-inline: auto; width: min(42rem, calc(100vw - 2rem)); max-height: 82dvh; overflow-y: auto; }
+.shell-search-dialog::backdrop { background: var(--color-scrim); }
+.search-heading { @apply flex items-center justify-between gap-4 px-5 pt-4; }
+.search-heading h2 { @apply font-display font-bold text-2xl uppercase; }
+.search-form { @apply p-5; }
+.search-form input[type=search] { @apply block w-full min-h-12 border border-line-2 rounded-lg bg-surface text-ink px-3 text-base; }
+.search-form input[type=search]:focus-visible { @apply outline-2 outline-offset-2 outline-accent-text; }
+.search-status { @apply px-5 text-xs text-ink-3; }
+.search-group { @apply p-3; }
+.search-group h3, .search-recents h3 { @apply px-2 py-2 text-xs uppercase tracking-wide font-mono text-ink-3; }
+.search-result { @apply flex items-center gap-3 min-h-12 w-full max-w-full px-3 py-2 border-0 rounded-lg text-sm text-ink bg-transparent; }
+.search-result span { @apply min-w-0; overflow-wrap: anywhere; }
+.search-result small { @apply block text-xs text-ink-3; }
+.search-result:hover, .search-result[aria-selected=true] { @apply bg-accent-tint outline-2 -outline-offset-2 outline-accent-text; }
+.search-empty { @apply p-5 text-sm text-ink-2; }
+.search-keyboard-hint { @apply sticky bottom-0 p-4 bg-surface border-t border-line text-xs text-ink-3; }
+.search-recents { @apply p-3; }
+.search-recents[hidden] { display: none; }
+.search-recents button { @apply min-h-11 px-3 text-sm; }
+.search-recents div { @apply flex flex-col items-start; }
+.search-page { @apply max-w-2xl mx-auto py-8; }
+.search-page .search-form { @apply px-0; }
+.search-page input[type=submit] { @apply mt-3; }
+body:has(.shell-search-dialog[open]) { overflow: hidden; }
+@media (max-width: 760px) {
+  .nav-account { @apply gap-1; }
+  .shell-search-toggle { @apply w-10 min-w-10 px-0; }
+  .shell-search-dialog { inset-block-start: 4rem; max-height: calc(100dvh - 5rem); }
+}

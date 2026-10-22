@@ -18,6 +18,8 @@ Rails.application.routes.draw do
   get "browse", to: "browse#index", as: :browse
   get "admin", to: "admin#index", as: :admin
   resource :theme_preference, only: :update
+  get "search", to: "searches#index", as: :search
+  resources :ace_profiles, only: :show, path: "moderate/aces"
 
   get "moderate", to: "moderation#index", as: :moderation
   get "moderate/log", to: "moderation#log", as: :moderation_log

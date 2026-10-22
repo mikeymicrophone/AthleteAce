@@ -1,6 +1,7 @@
 <% content_for :title, "Feed" %>
 <div class="feed-home">
   <header class="browse-header"><div><p class="eyebrow">Feed</p><h1 class="page-title">Latest</h1><p class="round-intro">For the players and teams worth talking about.</p></div></header>
+  <section class="round-panel"><p class="eyebrow">From Play</p><h2 class="profile-section-title">Know every name</h2><p>Try one Team Match question, no account needed.</p><%= link_to "Try", play_preview_path, class: "game-button" %></section>
   <section class="shell-empty"><%= icon "star", size: 40 %><h2>No shout-outs yet.</h2><p>Get to know the players and teams around the leagues.</p>
     <div class="page-actions"><%= link_to "Browse players", players_path(side: "feed"), class: "tool-button" %><%= link_to "Browse teams", teams_path(side: "feed"), class: "tool-button" %></div>
   </section>

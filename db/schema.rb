@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_21_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_21_020000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -38,6 +38,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_000000) do
     t.string "username"
     t.string "display_name"
     t.string "avatar_color", default: "#7A4B2A", null: false
+    t.string "time_zone"
     t.index "lower((username)::text)", name: "index_aces_on_lower_username", unique: true
     t.index ["confirmation_token"], name: "index_aces_on_confirmation_token", unique: true
     t.index ["email"], name: "index_aces_on_email", unique: true
@@ -343,8 +344,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_000000) do
     t.integer "question_elapsed_ms", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "newly_known_player_ids", default: [], null: false
     t.index ["ace_id"], name: "index_game_rounds_on_ace_id"
     t.check_constraint "length >= 1 AND length <= 30 AND \"position\" >= 0 AND \"position\" <= length", name: "game_round_progress"
+  end
+
+  create_table "goal_achievements", force: :cascade do |t|
+    t.bigint "goal_id", null: false
+    t.bigint "achievement_id", null: false
+    t.jsonb "player_ids", default: [], null: false
+    t.jsonb "required_player_ids", default: [], null: false
+    t.jsonb "practice_scope", default: {}, null: false
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["achievement_id"], name: "index_goal_achievements_on_achievement_id"
+    t.index ["goal_id", "achievement_id"], name: "index_goal_achievements_on_goal_id_and_achievement_id", unique: true
+    t.index ["goal_id"], name: "index_goal_achievements_on_goal_id"
   end
 
   create_table "goals", force: :cascade do |t|
@@ -519,6 +535,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_000000) do
     t.index ["name", "sport_id"], name: "index_positions_on_name_and_sport_id", unique: true
     t.index ["seed_version"], name: "index_positions_on_seed_version"
     t.index ["sport_id"], name: "index_positions_on_sport_id"
+  end
+
+  create_table "practice_reviews", force: :cascade do |t|
+    t.bigint "ace_id", null: false
+    t.string "game_type", null: false
+    t.string "subject_type", null: false
+    t.bigint "subject_id", null: false
+    t.string "target_type", null: false
+    t.bigint "target_id", null: false
+    t.jsonb "question", null: false
+    t.integer "correct_streak", default: 0, null: false
+    t.datetime "due_at", null: false
+    t.bigint "last_attempt_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ace_id", "due_at"], name: "index_practice_reviews_on_ace_id_and_due_at"
+    t.index ["ace_id", "game_type", "subject_type", "subject_id", "target_type", "target_id"], name: "index_practice_reviews_on_identity", unique: true
+    t.index ["ace_id"], name: "index_practice_reviews_on_ace_id"
+    t.index ["last_attempt_id"], name: "index_practice_reviews_on_last_attempt_id"
   end
 
   create_table "quests", force: :cascade do |t|
@@ -816,6 +851,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_000000) do
   add_foreign_key "game_attempts", "aces"
   add_foreign_key "game_attempts", "game_rounds"
   add_foreign_key "game_rounds", "aces"
+  add_foreign_key "goal_achievements", "achievements"
+  add_foreign_key "goal_achievements", "goals"
   add_foreign_key "goals", "aces"
   add_foreign_key "goals", "quests"
   add_foreign_key "highlights", "aces", column: "created_by_id", on_delete: :nullify
@@ -834,6 +871,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_000000) do
   add_foreign_key "players", "sports"
   add_foreign_key "players", "teams"
   add_foreign_key "positions", "sports"
+  add_foreign_key "practice_reviews", "aces"
+  add_foreign_key "practice_reviews", "game_attempts", column: "last_attempt_id", on_delete: :cascade
   add_foreign_key "quests", "aces", column: "created_by_id", on_delete: :nullify
   add_foreign_key "ratings", "aces"
   add_foreign_key "ratings", "spectrums"

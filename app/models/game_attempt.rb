@@ -3,7 +3,10 @@ class GameAttempt < ApplicationRecord
   GAME_TYPES = {
     "player_team_match" => [ "Player", "Team" ],
     "guess_the_division" => [ "Team", "Division" ],
-    "name_ciphers" => [ "Player", "Player" ]
+    "name_ciphers" => [ "Player", "Player" ],
+    "multiple_choice" => [ "Player", %w[Team City Country] ],
+    "image_recognition" => [ "Player", "Player" ],
+    "phased_repetition" => [ %w[Player Team], %w[Player Team Division City Country] ]
   }.freeze
 
   belongs_to :ace
@@ -15,7 +18,7 @@ class GameAttempt < ApplicationRecord
 
   validates :game_type, inclusion: { in: GAME_TYPES.keys }
   validate :round_matches_attempt
-  validate { errors.add(:game_round, "is required for Name Ciphers") if game_type == "name_ciphers" && !game_round }
+  validate { errors.add(:game_round, "is required for this game") if %w[name_ciphers multiple_choice image_recognition phased_repetition].include?(game_type) && !game_round }
   validate :entity_types_match_game
   validates :subject_entity, :target_entity, presence: { message: :required }, if: :entity_types_valid?
 
@@ -49,9 +52,9 @@ class GameAttempt < ApplicationRecord
   def entity_types_valid?
     subject_type, answer_type = GAME_TYPES[game_type]
     subject_type.present? &&
-      subject_entity_type == subject_type &&
-      target_entity_type == answer_type &&
-      (chosen_entity_type.nil? || chosen_entity_type == answer_type)
+      Array(subject_type).include?(subject_entity_type) &&
+      Array(answer_type).include?(target_entity_type) &&
+      (chosen_entity_type.nil? || chosen_entity_type == target_entity_type)
   end
 
   def entity_types_match_game

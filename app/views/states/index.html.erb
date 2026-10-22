@@ -1,8 +1,7 @@
-<p style="color: green"><%= notice %></p>
 
 <% content_for :title, "States" %>
 
-<h1>States</h1>
+<%= browse_header "States" %>
 
 <div id="states">
   <% @states.each do |state| %>
@@ -16,3 +15,5 @@
     <% end %>
   <% end %>
 </div>
+
+<%= browse_empty @states, "States" %>

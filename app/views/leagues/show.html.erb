@@ -1,6 +1,6 @@
 <% content_for :title, @league.name %>
 
-<%= tag.header @league.name, class: "league-name" %>
+<%= browse_header @league.name %>
 
 <%= render 'filtered_show' if @filtered_breadcrumb.present? %>
 

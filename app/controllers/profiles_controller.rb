@@ -29,6 +29,6 @@ class ProfilesController < ApplicationController
   private
 
   def profile_params
-    params.require(:ace).permit(:username, :display_name, :avatar_color)
+    params.require(:ace).permit(:username, :display_name, :avatar_color, :time_zone)
   end
 end

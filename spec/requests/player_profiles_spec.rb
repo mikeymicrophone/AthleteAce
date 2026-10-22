@@ -47,7 +47,7 @@ RSpec.describe "Player profiles", type: :request do
 
     get player_path(player)
 
-    expect(document.css(".memory-value").map(&:text)).to eq(["2", "50%", "Sep 30, 2026"])
+    expect(document.css(".memory-value").map(&:text)).to eq([ "2", "50%", "Sep 30, 2026", "0" ])
     expect(document.at_css(".rating-slider-input")["disabled"]).to be_nil
   end
 
@@ -55,7 +55,7 @@ RSpec.describe "Player profiles", type: :request do
     sign_in ace
     get player_path(player)
 
-    expect(document.css(".memory-value").map(&:text)).to eq(["0", "—", "—"])
+    expect(document.css(".memory-value").map(&:text)).to eq([ "0", "—", "—", "0" ])
     expect(response.body).to include("haven’t answered a question")
   end
 

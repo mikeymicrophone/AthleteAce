@@ -5,7 +5,7 @@ class PlayProgress
   def initialize(ace:, now: Time.current)
     @ace = ace
     @now = now
-    @time_zone = Time.zone
+    @time_zone = ace.play_time_zone
   end
 
   def streaks
@@ -26,7 +26,11 @@ class PlayProgress
   end
 
   def names_known
-    memories.count { |memory| memory[:latest_correct] && memory[:correct] >= 2 }
+    known_player_ids.size
+  end
+
+  def known_player_ids
+    memories.select { |memory| memory[:latest_correct] && memory[:correct] >= 2 }.map { |memory| memory[:player_id] }
   end
 
   def misses(limit: 3)
@@ -38,15 +42,16 @@ class PlayProgress
     recorded = latest.transform_values do |attempt|
       attempt.game_round&.questions&.[](attempt.round_position)
     end
-    recorded_teams = Team.where(id: recorded.values.compact.map { |question| question["target_id"] }).index_by(&:id)
+    recorded_teams = Team.where(id: recorded.values.compact.map { |question| question["team_id"] || (question["target_id"] if question["target_type"] == "Team") }).index_by(&:id)
     playable = GameRoundSetup.new(include_inactive: true).subjects.where(id: ids).pluck(:id)
     ordered.filter_map do |memory|
       player = players[memory[:player_id]]
       next unless player
 
       question = recorded[player.id]
-      team = question ? recorded_teams[question["target_id"]] : player.team
-      next unless team && (question || playable.include?(player.id))
+      team = question ? recorded_teams[question["team_id"] || (question["target_id"] if question["target_type"] == "Team")] : player.team
+      next unless question || (team && playable.include?(player.id))
+      question = question.merge("game_type" => question.fetch("game_type", latest[player.id].game_type)) if question
 
       memory.merge(player: player, team: team, question: question, season_name: question&.dig("season_name"))
     end.first(limit)
@@ -65,7 +70,7 @@ class PlayProgress
   end
 
   def player_attempts
-    attempts.where(game_type: "player_team_match", subject_entity_type: "Player", subject_entity_id: Player.select(:id))
+    attempts.where(subject_entity_type: "Player", subject_entity_id: Player.select(:id))
   end
 
   def memories

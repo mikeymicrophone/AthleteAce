@@ -1,7 +1,17 @@
 module GameRoundsHelper
+  def round_question_mode(round)
+    round.question.fetch("game_type", round.game_type)
+  end
+
   def round_question_prompt(round)
-    return "Unscramble this player’s name. Choose the original below." if round.game_type == "name_ciphers"
-    return "Which division is this team in?" if round.game_type == "guess_the_division"
+    mode = round_question_mode(round)
+    return "Name the player in this photo." if mode == "image_recognition"
+    if mode == "multiple_choice"
+      return "Which team is this player listed with for #{round.question["season_name"]}?" if round.question["fact_type"] == "team" && round.question["season_name"]
+      return { "team" => "Which team is this player on?", "birth_city" => "Which city was this player born in?", "birth_country" => "Which country was this player born in?" }.fetch(round.question.fetch("fact_type"))
+    end
+    return "Unscramble this player’s name. Choose the original below." if mode == "name_ciphers"
+    return "Which division is this team in?" if mode == "guess_the_division"
 
     season_name = round.question["season_name"]
     season_name.present? ? "Which team is this player listed with for #{season_name}?" : "Which team is this player on?"

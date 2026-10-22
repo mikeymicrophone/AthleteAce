@@ -1,7 +1,10 @@
 # Routes for game-related functionality
 Rails.application.routes.draw do
   # Strength training routes for learning athlete names
+  get "play/preview", to: "play_previews#show", as: :play_preview
+  post "play/preview", to: "play_previews#answer"
   get "strength" => "play#index"
+  post "play/quick", to: "play#quick", as: :play_quick
   post "play/drill-misses" => "play#drill", as: :play_drill_misses
   resources :game_rounds, path: "play/rounds", only: [:new, :create, :show] do
     member do

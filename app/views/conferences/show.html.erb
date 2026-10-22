@@ -1,11 +1,10 @@
-<p style="color: green"><%= notice %></p>
 
 <% content_for :title, @conference.name %>
 
 <div id="<%= dom_id(@conference) %>" class="show-container">
-  <h1>
-    <%= display_name_with_lazy_logo(@conference) %>
-  </h1>
+  <%= browse_header @conference.name do %>
+    <%= link_to "Practice", new_game_round_path(conference_id: @conference.id), class: "game-button" %>
+  <% end %>
 
   <div class="details">
     <div class="detail-item">

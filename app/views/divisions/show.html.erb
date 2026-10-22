@@ -1,11 +1,10 @@
-<p style="color: green"><%= notice %></p>
 
 <% content_for :title, @division.name %>
 
 <div id="<%= dom_id(@division) %>" class="show-container">
-  <h1>
-    <%= display_name_with_lazy_logo(@division) %>
-  </h1>
+  <%= browse_header @division.name do %>
+    <%= link_to "Practice", new_game_round_path(division_id: @division.id), class: "game-button" %>
+  <% end %>
 
   <div class="details">
     <div class="detail-item">

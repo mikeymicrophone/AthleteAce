@@ -15,7 +15,7 @@
       <%= tag.p "Correct answers", class: "eyebrow" %>
     <% end %>
     <%= tag.dl class: "round-stats" do %>
-      <% { "Accuracy" => "#{(@stats[:correct].fdiv(@round.length) * 100).round}%", "Best streak" => @stats[:best_streak], "Answer time" => round_duration(@stats[:elapsed_ms]) }.each do |label, value| %>
+      <% { "Accuracy" => "#{(@stats[:correct].fdiv(@round.length) * 100).round}%", "Best streak" => @stats[:best_streak], "Answer time" => round_duration(@stats[:elapsed_ms]), "Names newly known" => @round.newly_known_player_ids.size }.each do |label, value| %>
         <%= tag.div do %><%= tag.dt label %><%= tag.dd value %><% end %>
       <% end %>
     <% end %>
@@ -29,14 +29,14 @@
   <% end %>
   <%= tag.section class: "round-panel", aria: { labelledby: "round-results-title" } do %>
     <%= tag.h2 "Every question, in order", id: "round-results-title", class: "profile-section-title" %>
-    <%= tag.p "#{pluralize(@round.length - @stats[:correct], 'miss')} · Choose a #{@round.game_type == 'guess_the_division' ? 'team' : 'player'} to review and rate them.", class: "round-caption" %>
+    <%= tag.p "#{pluralize(@round.length - @stats[:correct], 'miss')} · Choose a subject to review and rate.", class: "round-caption" %>
     <%= tag.ol class: "round-results" do %>
       <% @results.each do |attempt| %>
         <% question = @round.questions.fetch(attempt.round_position) %>
         <%= tag.li class: "round-result" do %>
           <%= tag.span attempt.round_position + 1, class: "round-result-number" %>
           <%= tag.div do %>
-            <%= link_to question.fetch("subject_name"), @round.game_type == "guess_the_division" ? team_path(question.fetch("subject_id")) : player_path(question.fetch("subject_id")), class: "round-result-subject" %>
+            <%= link_to question.fetch("subject_name"), question.fetch("subject_type") == "Team" ? team_path(question.fetch("subject_id")) : player_path(question.fetch("subject_id")), class: "round-result-subject" %>
             <%= tag.p "Answer: #{question.fetch('target_name')}", class: "round-caption" %>
             <% unless attempt.correct? %>
               <% chosen = question.fetch("choices").find { |choice| choice.fetch("id") == attempt.chosen_entity_id } %>

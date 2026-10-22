@@ -14,71 +14,16 @@ class StrengthController < ApplicationController
     @include_inactive = params[:include_inactive]
   end
 
-  # Multiple choice quiz for learning names
   def multiple_choice
-    filter_params = strength_filter_params
-    @players = fetch_players_with_params(filter_params)
-    
-    if @players.empty?
-      flash.now[:alert] = "No players found with the selected filters. Showing all players instead."
-      @players = Player.limit(50).to_a
-    end
-    
-    @correct_player = @players.sample
-    @options = [@correct_player] + (@players - [@correct_player]).sample([3, @players.size - 1].min)
-    @options.shuffle!
+    redirect_to new_game_round_path(strength_filter_params.merge(game_type: "multiple_choice"))
   end
 
-  # Phased repetition for spaced learning
   def phased_repetition
-    Rails.logger.debug { "PHASED REPETITION PARAMS: #{params.inspect}" }
-    
-    # Collect and process filter parameters
-    id_collect
-    
-    # Force debug logging to ensure we can see what's happening
-    Rails.logger.debug { "AFTER ID_COLLECT - Team ID: #{@team_id.inspect} (#{@team_id.class})" }
-    
-    # Double-check team_id is properly set
-    if @team_id.present?
-      team = Team.find_by(id: @team_id)
-      if team
-        Rails.logger.debug { "TEAM FOUND: #{team.territory} #{team.mascot} with #{Player.where(team_id: @team_id).count} players" }
-      else
-        Rails.logger.warn "TEAM NOT FOUND for ID: #{@team_id}"
-        @team_id = nil # Reset if team doesn't exist
-      end
-    end
-    
-    filter_params = strength_filter_params
-    Rails.logger.debug { "USING FILTER PARAMS: #{filter_params.inspect}" }
-    
-    @players = fetch_players_with_params(filter_params)
-    Rails.logger.debug { "PLAYERS FOUND: #{@players.count}" }
-    
-    if @players.empty?
-      flash.now[:alert] = "No players found with the selected filters. Showing all players instead."
-      @team_id = @sport_id = @league_id = nil
-      @players = Player.limit(50).to_a
-      Rails.logger.debug { "AFTER CLEARING FILTERS, players found: #{@players.count}" }
-    end
-    
-    @current_player = @players.sample
-    Rails.logger.debug { "SELECTED PLAYER: #{@current_player.inspect}" }
-    
-    @phase = params[:phase].present? ? params[:phase].to_i : 1
+    redirect_to new_game_round_path(strength_filter_params.merge(game_type: "phased_repetition"))
   end
 
-  # Image-based learning
   def images
-    filter_params = strength_filter_params
-    @players = fetch_players_with_params(filter_params).select { |p| p.photo_urls.present? }
-    
-    if @players.empty?
-      @players = Player.where.not(photo_urls: [nil, '']).limit(50).to_a
-    end
-    
-    @current_player = @players.sample
+    redirect_to new_game_round_path(strength_filter_params.merge(game_type: "image_recognition"))
   end
 
   # Team matching game
@@ -261,7 +206,7 @@ class StrengthController < ApplicationController
 
   # Strong parameter helper
   def strength_filter_params
-    params.permit(:team_id, :conference_id, :division_id, :sport_id, :league_id, :include_inactive, :cross_sport, team_ids: [])
+    params.permit(:team_id, :conference_id, :division_id, :sport_id, :league_id, :season_id, :length, :include_inactive, :cross_sport, team_ids: [])
   end
 
   FILTER_PARENTS = {

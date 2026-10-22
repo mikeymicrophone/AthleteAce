@@ -10,7 +10,7 @@ RSpec.describe "Play home and quests", type: :request do
     round = GameRoundSetup.new(team_id: team.id).start! ace
     get strength_path
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include("Pick your first round", "sign in to play")
+    expect(response.body).to include("Try one question", "sign in to save your progress")
     expect(response.body).not_to include(game_round_path(round), "play-scoreboard")
     expect(Nokogiri::HTML(response.body).at_css('[aria-label="Switch sides"] [data-side="play"]')["aria-current"]).to eq("page")
   end
@@ -70,13 +70,30 @@ RSpec.describe "Play home and quests", type: :request do
     get quest_path(quest)
     doc = Nokogiri::HTML(response.body)
     expect(doc.at_css("progress")[:value]).to eq("100")
-    expect(response.body).to include("1 of 1 required achievements", new_game_round_path(team_id: team.id), goal_path(goal))
+    expect(response.body).to include("1 of 1 required achievements", goal_path(goal))
+    practice = doc.at_css('a[aria-label="Practice Learn this roster"]')
+    expect(Rack::Utils.parse_nested_query(URI.parse(practice["href"]).query)).to include("team_id" => team.id.to_s, "include_inactive" => "true")
     expect(response.body).not_to include("Approved", "Created by")
     expect(goal.reload.progress).to eq(5)
     sign_out ace
     get quest_path(quest)
     expect(response.body).to include("Sign in to begin")
     expect(Nokogiri::HTML(response.body).css("progress")).to be_empty
+  end
+
+  it "uses the adopted roster scope for the next quest on the home page" do
+    quest = create(:quest)
+    achievement = create(:achievement, target: team, name: "Learn the saved roster")
+    create(:highlight, quest: quest, achievement: achievement)
+    goal = create(:goal, ace: ace, quest: quest)
+    goal.goal_achievements.find_by!(achievement: achievement).update!(practice_scope: { team_id: team.id, season_id: 123, include_inactive: true })
+    sign_in ace
+
+    get strength_path
+
+    link = Nokogiri::HTML(response.body).css("a").find { |node| node.text == "Play next: Learn the saved roster" }
+    expect(link).to be_present
+    expect(Rack::Utils.parse_nested_query(URI.parse(link["href"]).query)).to include("team_id" => team.id.to_s, "season_id" => "123")
   end
 
   it "renders a useful empty quest list" do

@@ -24,7 +24,8 @@ empty selection.
 Accuracy, day streaks, game history and today's players include cipher attempts.
 Team history uses the team saved with each puzzle, preserving historical attribution
 after a transfer. Unassigned players contribute to overall history without a team.
-The Play home names-known metric and cross-round misses list remain Team Match
-measures, labeled as such. Cipher misses can be drilled from their round summary.
+The Play home names-known metric and cross-round misses include all player games,
+including Name Ciphers. Cipher misses can also be drilled from their round summary.
 
-Multiple Choice, Phased Repetition and Image Recognition remain outside saved rounds.
+See [Play rounds and learning progress](play-learning.md) for the six saved modes,
+review scheduling, quest roster completion, time zones, and anonymous preview.

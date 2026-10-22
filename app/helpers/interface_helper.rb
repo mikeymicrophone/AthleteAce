@@ -7,6 +7,15 @@ module InterfaceHelper
     end
   end
 
+  def browse_empty(collection, title)
+    return if collection.any?
+
+    tag.section class: "round-panel play-empty" do
+      tag.h2("No #{title.downcase} recorded", class: "profile-section-title") +
+        tag.p("Try a broader scope or explore another category.") + link_to("Browse", browse_path, class: "tool-button")
+    end
+  end
+
   def entity_link record
     return "" unless record
 

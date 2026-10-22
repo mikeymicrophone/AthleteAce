@@ -1,11 +1,28 @@
 class PlayController < ApplicationController
-  before_action :authenticate_ace!, only: :drill
+  before_action :authenticate_ace!, only: [ :drill, :quick ]
 
   def drill
     round = GameRoundSetup.new(include_inactive: true).start_misses! current_ace
     redirect_to game_round_path(round), status: :see_other
   rescue GameRound::InvalidAction => error
     redirect_to strength_path, alert: error.message, status: :see_other
+  end
+
+  def quick
+    if ReviewQueue.new(ace: current_ace).entries.any?
+      round = GameRoundSetup.new(game_type: "phased_repetition", include_inactive: true).start!(current_ace)
+    elsif PlayProgress.new(ace: current_ace).misses.any?
+      round = GameRoundSetup.new(include_inactive: true).start_misses!(current_ace, limit: 10)
+    else
+      affinity = current_ace.ratings.active.where(target_type: "Team", spectrum: Spectrum.approved.where(name: "Affinity")).where("value > 0").order(value: :desc).limit(30).pluck(:target_id)
+      setup = GameRoundSetup.new(team_ids: affinity)
+      setup = GameRoundSetup.new if setup.available_count.zero?
+      setup = setup.season_suggestion if setup.available_count.zero? && setup.season_suggestion
+      round = setup.start!(current_ace)
+    end
+    redirect_to game_round_path(round), status: :see_other
+  rescue ActiveModel::ValidationError, GameRound::InvalidAction => error
+    redirect_to new_game_round_path, alert: error.message, status: :see_other
   end
 
   def index
@@ -15,6 +32,7 @@ class PlayController < ApplicationController
     return unless current_ace
 
     @progress = PlayProgress.new ace: current_ace
+    @due_count = ReviewQueue.new(ace: current_ace).entries.size
     @misses = @progress.misses
     @players_today = @progress.players_today
     @history = GameHistory.new ace: current_ace

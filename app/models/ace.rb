@@ -4,6 +4,7 @@ class Ace < ApplicationRecord
     "Plum" => "#704267", "Slate" => "#485569", "Rust" => "#93452F" }.freeze
   RESERVED_USERNAMES = %w[admin administrator moderator athleteace athlete_ace support system staff help].freeze
 
+  normalizes :time_zone, with: ->(value) { value.presence }
   normalizes :username, with: ->(value) { value.strip.downcase.presence }
   normalizes :display_name, with: ->(value) { value.strip }
   validates :theme, inclusion: { in: THEMES }
@@ -26,6 +27,12 @@ class Ace < ApplicationRecord
   has_many :ratings, dependent: :destroy
   has_many :game_attempts, dependent: :destroy
   has_many :game_rounds, dependent: :destroy
+  has_many :practice_reviews, dependent: :destroy
+  validates :time_zone, inclusion: { in: ActiveSupport::TimeZone.all.map(&:name) }, allow_nil: true
+
+  def play_time_zone
+    ActiveSupport::TimeZone[time_zone.to_s] || Time.zone
+  end
 
   def can_moderate?
     admin? || moderator?

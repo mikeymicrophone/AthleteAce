@@ -1,12 +1,13 @@
 class GameHistory
   GAMES = GameRound::GAMES
   CIPHER_TEAM = "(game_rounds.questions -> game_attempts.round_position ->> 'team_id')::bigint".freeze
+  RECORDED_GAMES = %w[name_ciphers multiple_choice phased_repetition image_recognition].freeze
   attr_reader :attempts, :game_type, :team, :today, :time_zone
 
   def initialize(ace:, game_type: nil, team: nil, now: Time.current)
     @game_type = game_type if GAMES.key? game_type
     @team = team
-    @time_zone = Time.zone
+    @time_zone = ace.play_time_zone
     @today = now.in_time_zone(time_zone).to_date
     @attempts = ace.game_attempts.where(game_type: GAMES.keys).where(created_at: ..now)
     @attempts = attempts.where(game_type: @game_type) if @game_type
@@ -27,7 +28,7 @@ class GameHistory
     @days ||= begin
       zone = GameAttempt.connection.quote time_zone.tzinfo.identifier
       date = Arel.sql "DATE(created_at AT TIME ZONE 'UTC' AT TIME ZONE #{zone})"
-      counts = attempts.where(created_at: (today - 13).in_time_zone..).group(date, :is_correct).count
+      counts = attempts.where(created_at: (today - 13).in_time_zone(time_zone)..).group(date, :is_correct).count
       ((today - 13)..today).map do |day|
         correct = counts.fetch [ day, true ], 0
         total = correct + counts.fetch([ day, false ], 0)
@@ -89,7 +90,7 @@ class GameHistory
   private
 
   def cipher_attempts
-    attempts.where(game_type: "name_ciphers").joins(:game_round)
+    attempts.where(game_type: RECORDED_GAMES).joins(:game_round)
   end
 
   def accuracy(correct, total)

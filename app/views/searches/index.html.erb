@@ -1,0 +1,9 @@
+<% content_for :title, "Search" %>
+<section class="search-page"><h1 class="page-title">Search</h1>
+  <%= form_with url: search_path, method: :get, class: "search-form" do |form| %>
+    <%= form.hidden_field :side, value: current_side %>
+    <%= form.label :q, shell_search_placeholder %>
+    <%= form.search_field :q, value: @search.query, required: true, maxlength: 80 %><%= form.submit "Search", class: "tool-button" %>
+  <% end %>
+  <div class="search-results" role="listbox" aria-label="Search results"><%= render "results" %></div>
+</section>

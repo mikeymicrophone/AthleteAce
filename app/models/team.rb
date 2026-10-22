@@ -27,6 +27,10 @@ class Team < ApplicationRecord
   delegate :sport, to: :league
   delegate :city, :state, :country, to: :stadium, allow_nil: true
 
+  scope :matching_name, ->(query) {
+    where("CONCAT_WS(' ', teams.territory, teams.mascot, teams.abbreviation) ILIKE ?", "%#{sanitize_sql_like(query)}%")
+  }
+
   def name
     "#{territory} #{mascot}"
   end

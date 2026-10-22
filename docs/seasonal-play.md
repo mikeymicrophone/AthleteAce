@@ -18,5 +18,5 @@ round-miss drills preserve that context. Cross-round missed-name drills reuse
 saved questions when available, so a player transfer does not change the answer.
 No current-team assignments or source roster records are rewritten.
 
-Season selection currently applies to Team Match. Guess the Division continues
+Season selection applies to Team Match, Name Ciphers, Multiple Choice, and Image Recognition. Guess the Division continues
 to use current classification; switching to it clears the historical season.

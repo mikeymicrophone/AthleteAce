@@ -1,39 +1,25 @@
 <% content_for :title, @team.name %>
-
 <%= render 'filtered_show' if @filtered_breadcrumb.present? %>
-
-<div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-  <div class="flex items-center gap-4 w-full md:w-auto">
-    <% if @team.logo_url.present? %>
-      <img src="<%= @team.logo_url %>" alt="<%= @team.name %> logo" class="h-20 w-20 object-contain bg-white rounded shadow border border-gray-200" />
-    <% end %>
-    <div>
-      <h1 class="text-4xl font-extrabold text-gray-900"><%= @team.name %></h1>
-      <% if @team.current_organization.present? %>
-        <div class="mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">
-          Organization:
-          <span class="normal-case tracking-normal text-base text-orange-700">
-            <%= link_to @team.current_organization.name, organization_path(@team.current_organization), class: "hover:underline" %>
-          </span>
-        </div>
-      <% end %>
-    </div>
-  </div>
-  <div class="w-full md:w-auto text-right">
-    <span class="text-lg text-gray-600 font-medium">Stadium:</span>
-    <span class="text-xl font-semibold text-orange-700">
-      <%= display_name_with_lazy_logo(@team.stadium) %>
-    </span>
-  </div>
-</div>
-
-<%= tag.div(id: dom_id(@team, :players_on), class: "mt-8 bg-white rounded-lg shadow p-6") do %>
-  <h2 class="text-xl font-bold mb-4 text-gray-800">Players</h2>
-  <ul class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-    <% @team.players.each do |player| %>
-      <li class="flex items-center p-4 bg-orange-50 rounded shadow hover:bg-orange-100 transition-colors duration-150">
-        <%= link_to_name player %>
-      </li>
-    <% end %>
-  </ul>
+<%= browse_header @team.name do %>
+  <%= link_to "Practice this team", new_game_round_path(team_id: @team.id), class: "game-button" %>
 <% end %>
+<section class="round-panel">
+  <div class="profile-chips"><%= entity_link @team.league %><%= entity_link @team.division %><%= entity_link @team.stadium %><%= entity_link @team.current_organization %></div>
+  <%= link_to "Explore roster seasons", new_game_round_path(team_id: @team.id), class: "tool-link" %>
+</section>
+<section id="<%= dom_id(@team, :players_on) %>" class="round-panel">
+  <h2 class="profile-section-title">Players</h2>
+  <% if @team.players.any? %>
+    <ul class="play-game-grid">
+      <% @team.players.order(:last_name, :first_name).each do |player| %>
+        <li class="index-record"><%= record_identity player %></li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="round-caption">No current-team player assignments recorded. Choose a roster season in round setup to use historical player lists.</p>
+  <% end %>
+</section>
+<section class="round-panel">
+  <h2 class="profile-section-title">How aces rate <%= @team.name %></h2>
+  <%= rating_slider_container @team, Spectrum.visible_to(current_ace).order(:name) %>
+</section>

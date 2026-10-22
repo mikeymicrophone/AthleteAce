@@ -1,4 +1,5 @@
-<%= tag.header @sport.name, class: "sport-name" %>
+<% content_for :title, @sport.name %>
+<%= browse_header @sport.name %>
 
 <%= tag.div class: "leagues" do %>
   <%= pluralize @sport.leagues.count, "League" %>

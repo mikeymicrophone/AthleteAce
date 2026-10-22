@@ -1,3 +1,4 @@
+<% mode = round_question_mode(@round) %>
 <% content_for :title, GameRound::GAMES.fetch(@round.game_type) %>
 <%= tag.div class: "round-page round-play-page" do %>
   <%= turbo_frame_tag dom_id(@round), data: { controller: "round", action: "keydown->round#key" }, tabindex: -1 do %>
@@ -31,17 +32,23 @@
     <% else %>
       <%= tag.section class: "round-subject" do %>
         <%= tag.p round_question_prompt(@round), class: "round-question-prompt" %>
-        <% if @round.game_type == "name_ciphers" %>
+        <% if mode == "image_recognition" %>
+          <div data-controller="photo-question">
+            <h1 class="profile-section-title" data-round-target="heading" tabindex="-1">Who is this player?</h1>
+            <%= image_tag @round.question.fetch("subject_photo_url"), alt: "Player to identify", class: "round-recognition-photo", data: {action: "error->photo-question#failed"} %>
+            <p hidden data-photo-question-target="error" role="alert">This photo could not load. Pause this round and try another game.</p>
+          </div>
+        <% elsif mode == "name_ciphers" %>
           <%= tag.h1 @round.question.fetch("scrambled_name"), class: "round-cipher-name", tabindex: -1, data: { round_target: "heading" } %>
           <%= tag.p "Same letters. A familiar name.", class: "round-caption" %>
         <% else %>
-          <% if @round.game_type == "player_team_match" %>
+          <% if mode == "player_team_match" %>
             <%= round_player_portrait @round.question, @subject %>
           <% else %>
             <%= entity_avatar @subject, size: :large if @subject %>
           <% end %>
           <%= tag.div class: "round-subject-details" do %>
-            <%= tag.p @round.game_type == "player_team_match" ? "Know the player. Find the team." : "Find their place in the league.", class: "eyebrow" %>
+            <%= tag.p mode == "player_team_match" ? "Know the player. Find the team." : "Find their place in the league.", class: "eyebrow" %>
             <%= tag.h1 @round.question.fetch("subject_name"), class: "page-title", tabindex: -1, data: { round_target: "heading" } %>
             <%= tag.p @round.question["subject_position"], class: "round-caption" if @round.question["subject_position"].present? %>
             <% if (number_caption = round_jersey_caption(@round.question)) %>
@@ -52,14 +59,14 @@
       <% end %>
       <%= form_with url: answer_game_round_path(@round), data: { action: "turbo:submit-start->round#submitting turbo:submit-end->round#submitted" } do |form| %>
         <%= form.hidden_field :position, value: @round.position %>
-        <%= tag.div class: ["round-choices", ("round-name-choices" if @round.game_type == "name_ciphers")] do %>
+        <%= tag.div class: ["round-choices", ("round-name-choices" if mode == "name_ciphers")] do %>
           <% @round.question.fetch("choices").each_with_index do |choice, index| %>
             <%= button_tag type: "submit", name: "choice_id", value: choice.fetch("id"), disabled: @attempt.present?,
               class: round_choice_class(choice, @attempt, @round.question), data: { round_target: "choice" } do %>
               <%= tag.span index + 1, class: "round-choice-key", aria: { hidden: true } %>
-              <% if @round.game_type == "name_ciphers" %>
+              <% if %w[name_ciphers multiple_choice image_recognition].include?(mode) %>
                 <%= tag.strong choice.fetch("name"), class: "round-choice-name" %>
-              <% elsif @round.game_type == "player_team_match" %>
+              <% elsif mode == "player_team_match" %>
                 <%= tag.span class: "round-team-answer" do %>
                   <%= round_answer_badge choice %>
                   <%= tag.span class: "round-answer-identity" do %>

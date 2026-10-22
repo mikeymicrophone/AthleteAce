@@ -1,7 +1,8 @@
 class GameRound < ApplicationRecord
   class InvalidAction < StandardError; end
 
-  GAMES = { "player_team_match" => "Team Match", "guess_the_division" => "Guess the Division", "name_ciphers" => "Name Ciphers" }.freeze
+  GAMES = { "player_team_match" => "Team Match", "guess_the_division" => "Guess the Division", "name_ciphers" => "Name Ciphers",
+    "multiple_choice" => "Multiple Choice", "phased_repetition" => "Phased Repetition", "image_recognition" => "Image Recognition" }.freeze
   LENGTHS = [ 10, 20, 30 ].freeze
 
   belongs_to :ace
@@ -54,13 +55,20 @@ class GameRound < ApplicationRecord
       choice = question.fetch("choices").find { |item| item.fetch("id").to_s == choice_id.to_s }
       raise InvalidAction, "Choose one of the answers shown." if choice_id.present? && !choice
 
+      known_before = PlayProgress.new(ace: ace).known_player_ids.include?(question.fetch("subject_id")) if question.fetch("subject_type") == "Player"
       attempt = game_attempts.create! ace: ace, game_type: game_type, round_position: position,
         subject_entity_type: question.fetch("subject_type"), subject_entity_id: question.fetch("subject_id"),
         target_entity_type: question.fetch("target_type"), target_entity_id: question.fetch("target_id"),
         chosen_entity_type: choice && question.fetch("target_type"), chosen_entity_id: choice&.fetch("id"),
         options_presented: question.fetch("choices").map { |item| item.fetch("id") },
         is_correct: choice&.fetch("id") == question.fetch("target_id"), time_elapsed_ms: answer_time_ms
-      update! question_started_at: nil, question_elapsed_ms: 0
+      PracticeReview.record! attempt, question
+      ace.goals.active.where(quest: Quest.approved).find_each { |goal| goal.record_answer!(attempt) }
+      learned = newly_known_player_ids
+      if known_before == false && attempt.correct? && PlayProgress.new(ace: ace).known_player_ids.include?(attempt.subject_entity_id)
+        learned |= [ attempt.subject_entity_id ]
+      end
+      update! question_started_at: nil, question_elapsed_ms: 0, newly_known_player_ids: learned
       attempt
     end
   end

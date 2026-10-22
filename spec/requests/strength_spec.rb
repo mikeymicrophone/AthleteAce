@@ -18,10 +18,17 @@ RSpec.describe "Strength training", type: :request do
   context "when signed in" do
     before { sign_in create(:ace) }
 
-    %w[multiple_choice phased_repetition images team_match game_attempts].each do |page|
+    %w[team_match game_attempts].each do |page|
       it "renders #{page}" do
         get "/strength/#{page}"
         expect(response).to have_http_status(:success)
+      end
+    end
+
+    { "multiple_choice" => "multiple_choice", "phased_repetition" => "phased_repetition", "images" => "image_recognition" }.each do |page, mode|
+      it "redirects #{page} to scoped saved-round setup" do
+        get "/strength/#{page}", params: { team_id: team.id }
+        expect(response).to redirect_to(new_game_round_path(team_id: team.id, game_type: mode))
       end
     end
 

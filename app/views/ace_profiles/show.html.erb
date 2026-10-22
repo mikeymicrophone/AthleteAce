@@ -1,0 +1,6 @@
+<% content_for :title, @ace.public_name %>
+<section class="moderation-page"><header class="browse-header"><div><p class="eyebrow">Ace</p><h1 class="page-title"><%= @ace.public_name %></h1><%= ace_identity @ace %><p class="round-caption">Fan since <%= @ace.created_at.year %></p></div></header>
+  <h2 class="profile-section-title">Recent submissions</h2>
+  <% if @submissions.empty? %><p>No submissions yet.</p><% end %>
+  <ol class="moderation-list"><% @submissions.each do |record| %><li class="moderation-row"><div><p class="eyebrow"><%= record.model_name.human %> · <%= record.moderation_status %></p><%= link_to moderation_item_name(record), moderation_item_path(type: record.class.name, id: record.id), class: "tool-link" %></div></li><% end %></ol>
+</section>

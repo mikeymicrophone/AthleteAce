@@ -1,4 +1,5 @@
-<%= tag.header @city.name, class: "city-name" %>
+<% content_for :title, @city.name %>
+<%= browse_header @city.name %>
 <%= display_name_with_lazy_logo @city.state, logo_attribute: :flag_url %>
 <%= display_name_with_lazy_logo @city.country, logo_attribute: :flag_url %>
 

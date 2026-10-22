@@ -8,6 +8,12 @@ class GameRoundSetup
   %i[sport_id league_id season_id conference_id division_id city_id state_id team_id].each { |key| attribute key, :integer }
   attribute :team_ids, default: -> { [] }
   attribute :team_query, :string
+  attribute :player_id, :integer
+  attribute :fact_type, :string, default: "team"
+  attr_accessor :ace
+
+  FACTS = { "team" => [ "Team", "team" ], "birth_city" => [ "City", "birth_city" ], "birth_country" => [ "Country", "birth_country" ] }.freeze
+  validates :fact_type, inclusion: { in: FACTS.keys }
 
   validates :game_type, inclusion: { in: GameRound::GAMES.keys }
   validates :length, inclusion: { in: GameRound::LENGTHS }
@@ -53,7 +59,7 @@ class GameRoundSetup
   end
 
   def seasonal_game?
-    %w[player_team_match name_ciphers].include?(game_type)
+    %w[player_team_match name_ciphers multiple_choice image_recognition].include?(game_type)
   end
 
   def cipher_pool
@@ -102,7 +108,7 @@ class GameRoundSetup
   def selectable_teams
     scope = teams
     if team_query.present?
-      scope = scope.where("CONCAT(teams.territory, ' ', teams.mascot, ' ', teams.abbreviation) ILIKE ?", "%#{Team.sanitize_sql_like(team_query)}%")
+      scope = scope.matching_name(team_query)
     end
     scope.order(:territory, :mascot).limit(100)
   end
@@ -121,8 +127,9 @@ class GameRoundSetup
   end
 
   def subjects
+    return Player.where(id: fact_pool.players.map(&:id)) if %w[multiple_choice image_recognition].include?(game_type)
     return Player.where(id: cipher_pool.players.map(&:id)) if game_type == "name_ciphers"
-    return season_pool.players if season && game_type == "player_team_match"
+    return player_id ? season_pool.players.where(id: player_id) : season_pool.players if season && game_type == "player_team_match"
 
     if game_type == "guess_the_division"
       playable_leagues = Division.joins(:conference).group("conferences.league_id").having("COUNT(DISTINCT divisions.id) >= 2").select("conferences.league_id")
@@ -132,13 +139,35 @@ class GameRoundSetup
       pool = selected_team_ids.size > 1 ? scoped_teams : scoped_teams.where(league_id: playable_leagues)
       scope = Player.where(team_id: pool.select(:id))
       scope = scope.where(active: [ true, nil ]) unless include_inactive
+      scope = scope.where(id: player_id) if player_id
       scope
     end
   end
 
+  def fact_pool
+    @fact_pool ||= PlayerFactRound.new(players: (season ? season_pool.players : scoped_players).includes(:team, :birth_city, :birth_country).to_a,
+      game_type: game_type, fact_type: fact_type, season: season, team_for: season ? season_pool.method(:team_for) : nil)
+  end
+
+  def scoped_players
+    scope = Player.where(team_id: scoped_teams.select(:id))
+    scope = scope.where(id: player_id) if player_id
+    scope = scope.where(active: [ true, nil ]) unless include_inactive
+    scope
+  end
+
+  def review_queue
+    @review_queue ||= ReviewQueue.new(ace: ace, teams: [ sport_id, league_id, conference_id, division_id, city_id, state_id, *selected_team_ids ].any? ? scoped_teams : nil, player_id: player_id)
+  end
+
   def available_count
     @available_count ||= if valid?
-      game_type == "name_ciphers" ? cipher_pool.available_count : subjects.count
+      case game_type
+      when "name_ciphers" then cipher_pool.available_count
+      when "multiple_choice", "image_recognition" then fact_pool.available_count
+      when "phased_repetition" then review_queue.entries.size
+      else subjects.count
+      end
     else
       0
     end
@@ -161,7 +190,11 @@ class GameRoundSetup
   def pool_coverage
     return [] unless seasonal_game? && valid?
 
-    players = game_type == "name_ciphers" ? cipher_pool.players : subjects.includes(:team).to_a
+    players = case game_type
+    when "name_ciphers" then cipher_pool.players
+    when "multiple_choice", "image_recognition" then fact_pool.players
+    else subjects.includes(:team).to_a
+    end
     entries = players.group_by { |player| season ? season_pool.team_for(player) : player.team }
       .map { |team, members| { team: team, count: members.size } }
     missing = selected_team_ids - entries.filter_map { |entry| entry.fetch(:team)&.id }
@@ -175,11 +208,29 @@ class GameRoundSetup
     team_ids.any? ? fields.except("team_id") : fields
   end
 
+  def preview_question
+    return unless valid? && game_type == "player_team_match" && available_count.positive?
+
+    subject = subjects.reorder(Arel.sql("RANDOM()")).first
+    question = questions_for([ subject ]).first.deep_stringify_keys
+    correct = question.fetch("choices").find { |choice| choice.fetch("id") == question.fetch("target_id") }
+    question["choices"] = ((question.fetch("choices") - [ correct ]).sample(3) + [ correct ]).shuffle
+    question
+  end
+
   def start!(ace)
+    self.ace = ace
     raise ActiveModel::ValidationError, self unless valid?
     if available_count.zero?
       errors.add :base, "No playable questions in this scope. Try another team or league."
       raise ActiveModel::ValidationError, self
+    end
+
+    if %w[multiple_choice image_recognition].include?(game_type)
+      return save_round!(ace, fact_pool.questions(length: length, balance_teams: selected_team_ids.size > 1))
+    end
+    if game_type == "phased_repetition"
+      return save_round!(ace, review_queue.questions(length: length), label: "Due review · #{scope_label}")
     end
 
     if game_type == "name_ciphers"
@@ -193,21 +244,23 @@ class GameRoundSetup
     if balanced
       candidates = RoundSubjectPicker.pick(candidates, length: length) { |player| season ? season_pool.team_for(player).id : player.team_id }
     end
-    create_round! ace, candidates
+    save_round! ace, questions_for(candidates)
   end
 
-  def start_misses!(ace)
-    misses = PlayProgress.new(ace: ace).misses
+  def start_misses!(ace, limit: 3)
+    misses = PlayProgress.new(ace: ace).misses(limit: limit)
     players = misses.map { |miss| miss.fetch(:player) }
     raise GameRound::InvalidAction, "There are no playable missed names to drill right now." if players.empty?
 
     recorded = misses.filter_map { |miss| [ miss.fetch(:player).id, miss[:question] ] if miss[:question] }.to_h
-    create_round! ace, players, drill: true, recorded_questions: recorded
+    questions = questions_for(players, recorded_questions: recorded).map { |question| question.deep_stringify_keys.reverse_merge("game_type" => "player_team_match") }
+    ace.game_rounds.create! game_type: "phased_repetition", length: questions.size, questions: questions,
+      scope: { "drill" => true, "include_inactive" => true }, scope_label: "Recent misses", started_at: Time.current, question_started_at: Time.current
   end
 
   private
 
-  def create_round!(ace, candidates, drill: false, recorded_questions: {})
+  def questions_for(candidates, recorded_questions: {})
     pools = {}
     questions = candidates.map do |subject|
       next recorded_questions.fetch(subject.id) if recorded_questions.key?(subject.id)
@@ -217,6 +270,7 @@ class GameRoundSetup
       pool = pools[question_league.id] ||= choice_pool(question_league)
       choices = ((pool - [ target ]).sample(5) + [ target ]).shuffle
       { subject_type: subject.class.name, subject_id: subject.id, subject_name: subject.name,
+        team_id: subject.is_a?(Player) ? target.id : subject.id, season_id: season_id,
         target_type: target.class.name, target_id: target.id, target_name: target.name,
         choices: choices.map { |item|
           { id: item.id, name: item.name, abbreviation: item.abbreviation }.tap do |choice|
@@ -239,9 +293,7 @@ class GameRoundSetup
         end
       end
     end
-    label = drill ? "Recent misses · Team Match" : scope_label
-    scope = drill ? scope_params.merge("drill" => true, "length" => questions.size) : scope_params
-    save_round! ace, questions, scope: scope, label: label
+    questions
   end
 
   def save_round!(ace, questions, scope: scope_params, label: scope_label)
@@ -258,11 +310,12 @@ class GameRoundSetup
   end
 
   def valid_scope
+    errors.add(:player, "is no longer available") if player_id && !Player.exists?(player_id)
     errors.add(:season, "is no longer available") if season_id && !season
     if season
       errors.add(:season, "is outside the selected league") if league_id && season.league_id != league_id
       errors.add(:season, "is outside the selected sport") if sport_id && season.league.sport_id != sport_id
-      errors.add(:season, "is supported for Team Match and Name Ciphers only") unless seasonal_game?
+      errors.add(:season, "is supported for player games only") unless seasonal_game?
       errors.add(:season, "needs at least two recorded teams for answer choices") if game_type == "player_team_match" && teams.count < 2
     end
     errors.add(:sport, "is no longer available") if sport_id && !sport

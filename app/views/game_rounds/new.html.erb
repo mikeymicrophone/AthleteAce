@@ -29,13 +29,4 @@
     <%= render "setup" %>
   <% end %>
 
-  <%= tag.details class: "round-panel round-other-games" do %>
-    <%= tag.summary "More ways to practice" %>
-    <%= tag.p "Explore the other training modes.", class: "round-caption" %>
-    <%= tag.div class: "page-actions" do %>
-      <% [["Multiple Choice", strength_multiple_choice_path], ["Phased Repetition", strength_phased_repetition_path], ["Image Recognition", strength_images_path]].each do |title, path| %>
-        <%= link_to title, path, class: "tool-button" %>
-      <% end %>
-    <% end %>
-  <% end %>
 <% end %>

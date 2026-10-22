@@ -16,7 +16,7 @@ module ShellNavigation
   def current_side
     @current_side ||= begin
       owned = case controller_name
-      when "play", "strength", "game_rounds", "division_guessing_games", "game_attempts" then "play"
+      when "play", "play_previews", "strength", "game_rounds", "division_guessing_games", "game_attempts" then "play"
       when "feed" then "feed"
       when "moderation" then "mod"
       when "admin" then "admin"

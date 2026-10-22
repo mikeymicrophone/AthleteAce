@@ -46,7 +46,7 @@ RSpec.describe "Seasonal Team Match", type: :system do
       click_button "Drill these 1"
     end
     expect(page).to have_css(".round-game-progress", text: "1 / 1")
-    expect(ace.game_rounds.last.questions.sole).to eq(question)
+    expect(ace.game_rounds.last.questions.sole.except("game_type")).to eq(question)
     find(".round-choice[value='#{question.fetch('target_id')}']").click
     expect(page).to have_css(".round-feedback", text: /Correct/i)
     expect(Player.where.not(team_id: nil)).to be_empty

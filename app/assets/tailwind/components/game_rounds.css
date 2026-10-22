@@ -133,3 +133,5 @@
 .round-pool-coverage { @apply mt-3 mb-4; }
 .round-pool-coverage summary { @apply cursor-pointer min-h-11 py-3 font-semibold; }
 .round-pool-coverage ul { @apply grid sm:grid-cols-2 gap-1 mb-2; }
+
+.round-recognition-photo { @apply block w-64 h-64 max-w-full object-cover object-top mx-auto rounded-tool; }

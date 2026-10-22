@@ -12,10 +12,12 @@ module QuestsHelper
     { completed: completed, required: required, percent: required.positive? ? (completed.fdiv(required) * 100).round : 0 }
   end
 
-  def quest_practice_path achievement
-    key = { "Team" => :team_id, "Division" => :division_id, "Conference" => :conference_id,
-      "League" => :league_id, "Sport" => :sport_id, "City" => :city_id, "State" => :state_id }[achievement.target_type]
-    new_game_round_path(key => achievement.target_id) if key && achievement.target
+  def quest_practice_path(achievement, goal: nil)
+    return unless achievement.practice_scope && achievement.target
+
+    goal ||= quest_goal(@quest) if @quest
+    entry = goal&.goal_achievements&.find_by(achievement: achievement)
+    new_game_round_path(entry ? entry.practice_scope : achievement.practice_scope)
   end
 
   # Renders a button for an ace to begin a quest

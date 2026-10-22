@@ -1,6 +1,6 @@
-<p style="color: green"><%= notice %></p>
 
 <% content_for :title, "Sports" %>
+<%= browse_header "Sports" %>
 
 <div id="sports">
   <% @sports.each do |sport| %>
@@ -12,3 +12,5 @@
     <% end %>
   <% end %>
 </div>
+
+<%= browse_empty @sports, "Sports" %>

@@ -4,14 +4,14 @@ class GameRoundsController < ApplicationController
   rescue_from GameRound::InvalidAction, with: :invalid_action
 
   def new
-    @setup = GameRoundSetup.new setup_params
+    @setup = GameRoundSetup.new setup_params.merge(ace: current_ace)
     @sports = Sport.order(:name)
     store_location_for :ace, new_game_round_path(@setup.scope_params) if !ace_signed_in? && @setup.valid?
     @unfinished_rounds = current_ace ? current_ace.game_rounds.unfinished.limit(5) : []
   end
 
   def create
-    @setup = GameRoundSetup.new setup_params
+    @setup = GameRoundSetup.new setup_params.merge(ace: current_ace)
     @round = @setup.start! current_ace
     redirect_to game_round_path(@round), status: :see_other
   rescue ActiveModel::ValidationError
@@ -26,8 +26,7 @@ class GameRoundsController < ApplicationController
     @attempt = @round.current_attempt
     @miss_count = @round.miss_count_for(@attempt)
     @stats = @round.stats
-    type = GameAttempt::GAME_TYPES.fetch(@round.game_type).first
-    @subject = (type == "Player" ? Player : Team).find_by id: @round.question.fetch("subject_id")
+    @subject = (@round.question.fetch("subject_type") == "Player" ? Player : Team).find_by id: @round.question.fetch("subject_id")
   end
 
   def answer
@@ -73,7 +72,7 @@ class GameRoundsController < ApplicationController
 
   def setup_params
     params.permit(:game_type, :length, :sport_id, :league_id, :season_id, :conference_id, :division_id, :team_id,
-      :city_id, :state_id, :include_inactive, :team_query, team_ids: [])
+      :city_id, :state_id, :include_inactive, :team_query, :fact_type, :player_id, team_ids: [])
   end
 
   def invalid_action(error)
