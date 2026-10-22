@@ -14,7 +14,7 @@ Each saved draft version can create one submitted post. Retrying the same submis
 
 ## Feed
 
-Public Feed includes approved, spent posts. Signed-in aces also see their own funded pending posts, labeled **in review**. Other accounts cannot see pending posts. **My teams** intersects posts with the recorded team context and chosen league; its personal team cards remain separate from the stream. Target names remain recorded after catalog deletion. A pending post with a deleted target must be rejected, releasing its reservation, rather than approved.
+Public Feed and [team walls](shout-out-operations.md) include approved, spent posts. Signed-in aces also see their own funded pending posts, labeled **in review**. Other accounts cannot see pending posts. **My teams** intersects posts with the recorded team context and chosen league; its personal team cards remain separate from the stream. Target names remain recorded after catalog deletion. A pending post with a deleted target must be rejected, releasing its reservation, rather than approved.
 
 For each visitor, ranking uses:
 
@@ -29,6 +29,8 @@ Higher scores appear first. Each post has its own draw, derived from a random vi
 Configure `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` through the app's secret storage. See `config/stripe.env.example` for variable names. Use test keys and Stripe CLI test events locally; live payments have not been verified by the automated suite. Checkout is disabled without both variables. There is no client-side publishable key because payment entry is hosted by Stripe.
 
 Register `POST /stripe/webhook` for `checkout.session.completed` and `checkout.session.expired`. It verifies the raw-body signature and timestamp with Stripe's Ruby SDK, checks test/live mode against the secret key, and checks currency, amount, purchaser, session identity, payment status, and reference before fulfilling. A paid session is processed once even when Stripe sends different duplicate event IDs. Expiry does not undo an already paid purchase.
+
+The [reports and revenue guide](shout-out-operations.md) covers report resolution, mandatory refunds, and the distinction between cash purchases and spent credit.
 
 Apply migrations and build CSS before testing:
 

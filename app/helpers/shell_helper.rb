@@ -15,17 +15,18 @@ module ShellHelper
       [ [ "Latest", "star", feed_path ], [ "Players", "shirt-sport", players_path(side: "feed") ],
         [ "Teams", "shield", teams_path(side: "feed") ] ]
     when "mod"
-      [ [ "Queue", "shield-check", moderation_path ], [ "Decision log", "history", moderation_log_path ] ]
+      [ [ "Queue", "shield-check", moderation_path ], [ "Reports", "flag", reports_path ], [ "Decision log", "history", moderation_log_path ] ]
     when "admin"
-      [ [ "Overview", "home", admin_path ], [ "Sports data", "layout-grid", browse_path(section: "sports", side: "admin") ],
+      [ [ "Overview", "home", admin_path ], [ "Revenue", "list-numbers", shout_out_revenue_path ], [ "Sports data", "layout-grid", browse_path(section: "sports", side: "admin") ],
         [ "Content catalog", "script", browse_path(section: "content", side: "admin") ] ]
     end
   end
 
   def active_shell_tab
     case current_side
-    when "mod" then action_name == "log" ? "Decision log" : "Queue"
+    when "mod" then controller_name == "reports" ? "Reports" : (action_name == "log" ? "Decision log" : "Queue")
     when "admin"
+      return "Revenue" if controller_name == "shout_out_revenues"
       controller_name == "admin" ? "Overview" : (params[:section] == "content" ? "Content catalog" : "Sports data")
     when "feed"
       { "players" => "Players", "teams" => "Teams" }.fetch(controller_name, "Latest")

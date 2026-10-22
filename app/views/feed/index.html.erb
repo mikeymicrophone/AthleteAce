@@ -49,13 +49,7 @@
     <section aria-label="Shout-outs" class="shout-out-stream">
       <p class="round-caption">Bid-weighted order with a random boost for each visitor.</p>
       <% @posts.each do |post| %>
-        <article class="round-panel shout-out-card" id="<%= dom_id(post) %>">
-          <p class="eyebrow"><%= post.moderation_status == "pending" ? "Your shout-out · in review" : "Shout-out" %></p>
-          <h2 class="profile-section-title"><%= post.target ? link_to(post.target_name, post.target) : post.target_name %></h2>
-          <%= render "aces/attribution", ace: post.created_by %>
-          <p class="draft-message"><%= post.message %></p>
-          <p class="round-caption"><%= time_ago_in_words(post.created_at) %> ago</p>
-        </article>
+        <%= render "shout_outs/card", post: post %>
       <% end %>
       <%== @posts_pagy.series_nav if @posts_pagy.pages > 1 %>
     </section>

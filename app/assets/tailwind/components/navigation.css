@@ -120,3 +120,12 @@ body:is([data-side=play], [data-side=feed]) main > :is(.flash-notice, .flash-ale
 .payment-form .account-input { @apply w-full; }
 .shout-out-card .profile-section-title { overflow-wrap: anywhere; }
 .shout-out-stream { @apply mt-6; }
+.team-masthead .team-title { @apply flex items-center gap-4 mb-5; }
+.team-masthead .page-title { overflow-wrap: anywhere; }
+.team-masthead .page-actions { @apply my-5; }
+.team-wall-layout { @apply grid gap-6 mt-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]; align-items: start; }
+.team-wall-layout > * { @apply min-w-0; }
+.team-wall-layout .shout-out-card { @apply mt-5; }
+.revenue-table-wrap { @apply overflow-x-auto max-w-full; }
+.revenue-table { @apply w-full text-left text-sm; }
+.revenue-table :is(th, td) { @apply p-3 border-b border-line whitespace-nowrap; }

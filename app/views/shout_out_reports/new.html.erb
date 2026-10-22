@@ -1,0 +1,18 @@
+<% content_for :title, "Report shout-out" %>
+<%= browse_header "Report shout-out" %>
+<%= render "shout_outs/card", post: @post %>
+<section class="round-panel">
+  <% if @report.persisted? %>
+    <h2 class="profile-section-title">You already reported this shout-out.</h2>
+    <p>Your report is <%= @report.resolved_at ? "resolved" : "waiting for review" %>.</p>
+  <% else %>
+    <p>Your reason and note are visible to reviewers, not the post's author or other visitors.</p>
+    <% if @report.errors.any? %><p role="alert"><%= @report.errors.full_messages.to_sentence %></p><% end %>
+    <%= form_with model: @report, url: shout_out_shout_out_reports_path(@post), class: "payment-form" do |form| %>
+      <div><%= form.label :reason %><%= form.select :reason, ShoutOutReport::REASONS, {}, class: "account-input" %></div>
+      <div><%= form.label :note, "Note (optional)" %><%= form.text_area :note, maxlength: 2000, class: "account-input" %></div>
+      <%= form.submit "Send report", class: "game-button" %>
+    <% end %>
+  <% end %>
+  <%= link_to "Back to Feed", feed_path, class: "tool-link" %>
+</section>

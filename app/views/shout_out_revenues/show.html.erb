@@ -1,0 +1,35 @@
+<% content_for :title, "Shout-out revenue" %>
+<%= browse_header "Shout-out revenue" do %><%= link_to "Export daily CSV", shout_out_revenue_path(days: @revenue.days, format: :csv), class: "tool-button" %><% end %>
+<nav class="history-tabs" aria-label="Revenue range">
+  <% ShoutOutRevenue::RANGES.each do |days| %><%= link_to "#{days} days", shout_out_revenue_path(days: days), aria: { current: @revenue.days == days ? "page" : nil } %><% end %>
+</nav>
+<p class="round-intro"><%= @revenue.from %> to <%= @revenue.through %> · UTC · today so far</p>
+<p>Purchases are cash received through Stripe. Credit spent is paid from that balance and is not a second cash payment. Credit refunds stay in the wallet.</p>
+<section class="shell-overview" aria-label="Period totals">
+  <% [["Cash purchases", "purchase"], ["Credit spent on approvals", "capture"], ["Reservations released", "release"], ["Refunded to credit", "refund"]].each do |label, kind| %>
+    <div class="round-panel"><p class="eyebrow"><%= label %></p><strong><%= number_to_currency @revenue.totals.fetch(kind) / 100.to_d %></strong></div>
+  <% end %>
+</section>
+<section class="round-panel">
+  <h2 class="profile-section-title">Current wallet balances</h2>
+  <p>All-time balances, separate from the selected period.</p>
+  <p>Available credit: <%= number_to_currency @available / 100.to_d %> · Reserved credit: <%= number_to_currency @reserved / 100.to_d %></p>
+  <p><%= pluralize @live_count, "live post" %> now · <%= pluralize @paying_aces, "paying ace" %> in this period</p>
+  <p>Card fees and net cash are unavailable. Actual Stripe balance-transaction data has not been synced; no fee estimate is included.</p>
+</section>
+<section class="round-panel">
+  <h2 class="profile-section-title">Daily flows</h2>
+  <div class="revenue-table-wrap" tabindex="0" role="region" aria-label="Daily revenue table, scroll horizontally">
+    <table class="revenue-table"><thead><tr><th scope="col">Date (UTC)</th><th scope="col">Purchases</th><th scope="col">Credit spent</th><th scope="col">Released</th><th scope="col">Credit refunds</th></tr></thead><tbody>
+      <% @revenue.daily.reverse_each do |date, row| %>
+        <tr><th scope="row"><%= date %><%= " · so far" if date == @revenue.through %></th><% ShoutOutRevenue::KINDS.each do |kind| %><td><%= number_to_currency row.fetch(kind) / 100.to_d %></td><% end %></tr>
+      <% end %>
+    </tbody></table>
+  </div>
+</section>
+<section class="round-panel">
+  <h2 class="profile-section-title">Top targets by credit spent</h2>
+  <p class="round-caption">Approvals in this period, before any later credit refunds.</p>
+  <% if @targets.any? %><ol class="wallet-history"><% @targets.each do |name, count, amount| %><li><%= name %> · <%= pluralize count, "approval" %> · <%= number_to_currency amount / 100.to_d %></li><% end %></ol>
+  <% else %><p>No approvals in this period.</p><% end %>
+</section>

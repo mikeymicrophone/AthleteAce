@@ -1,0 +1,30 @@
+<% content_for :title, "Review reports" %>
+<%= browse_header "Review reports" do %><%= link_to "Reports inbox", reports_path, class: "tool-button" %><% end %>
+<%= render "shout_outs/card", post: @post %>
+<section class="round-panel">
+  <h2 class="profile-section-title">Open report reasons</h2>
+  <p><%= @reason_counts.map { |reason, count| "#{reason}: #{count}" }.join(" · ").presence || "No open reports." %></p>
+  <%= link_to "Author profile", ace_profile_path(@post.created_by), class: "tool-link" %>
+  <%= link_to "Moderation history", moderation_item_path(type: "ShoutOut", id: @post.id), class: "tool-link" %>
+  <% if @own_report %><p>Another reviewer must decide your report.</p>
+  <% elsif @last_report_id && @post.approved? && @post.funding_status == "spent" %>
+    <%= form_with url: report_path(@post), method: :patch, class: "payment-form" do |form| %>
+      <%= form.hidden_field :revision, value: @post.moderation_revision %><%= form.hidden_field :last_report_id, value: @last_report_id %>
+      <div><%= form.label :reason, "Decision reason" %><%= form.text_area :reason, required: true, maxlength: 2000, class: "account-input" %></div>
+      <p>Hiding removes this post from every wall and Feed and returns the full <%= number_to_currency @post.bid_cents / 100.to_d %> bid to the author's credit wallet.</p>
+      <div class="page-actions"><%= form.button "Keep live", name: :decision, value: "keep", class: "tool-button" %><%= form.button "Hide and refund credit", name: :decision, value: "hide", class: "game-button" %></div>
+    <% end %>
+  <% end %>
+</section>
+<section class="round-panel">
+  <h2 class="profile-section-title">What reporters said</h2>
+  <ul class="wallet-history">
+    <% @reports.each do |report| %>
+      <li><strong><%= report.reason %></strong> · <%= report.reporter ? ace_identity(report.reporter) : "Former ace" %><p class="draft-message"><%= report.note %></p>
+        <p class="round-caption">Reported <%= time_ago_in_words(report.created_at) %> ago</p>
+        <% if report.resolved_at %><p><%= report.resolution.humanize %> · <%= report.resolved_by ? ace_identity(report.resolved_by) : "Former reviewer" %> · <%= l report.resolved_at, format: :short %></p><p class="draft-message"><%= report.decision_reason %></p><% end %>
+      </li>
+    <% end %>
+  </ul>
+  <%== @pagy.series_nav if @pagy.pages > 1 %>
+</section>

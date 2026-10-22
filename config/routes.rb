@@ -22,6 +22,7 @@ Rails.application.routes.draw do
   post "stripe/webhook", to: "stripe_webhooks#create"
   resources :shout_outs, only: [ :index, :show, :create ] do
     post :pay, on: :member
+    resources :shout_out_reports, path: "reports", only: [ :new, :create ]
   end
   resources :shout_out_drafts, path: "feed/drafts", except: :show do
     collection { get :targets }
@@ -30,12 +31,14 @@ Rails.application.routes.draw do
   resources :player_groups
   get "browse", to: "browse#index", as: :browse
   get "admin", to: "admin#index", as: :admin
+  resource :shout_out_revenue, path: "admin/revenue", only: :show
   resource :theme_preference, only: :update
   get "search", to: "searches#index", as: :search
   resources :ace_profiles, only: :show, path: "moderate/aces"
 
   get "moderate", to: "moderation#index", as: :moderation
   get "moderate/log", to: "moderation#log", as: :moderation_log
+  resources :reports, path: "moderate/reports", only: [ :index, :show, :update ]
   get "moderate/:type/:id", to: "moderation#show", as: :moderation_item
   patch "moderate/:type/:id", to: "moderation#update"
   post "moderate/:type/:id/compare", to: "moderation#compare", as: :compare_moderation_item

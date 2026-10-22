@@ -62,4 +62,51 @@ RSpec.describe "Concurrent credit operations" do
     expect(account.attributes.values_at("available_cents", "reserved_cents")).to eq([ 25, 75 ])
     expect(ShoutOut.where(created_by_id: ace_id).count).to eq(1)
   end
+
+  it "returns the bid only once when report decisions arrive together" do
+    post_id, report_id, reviewer_id = committed do
+      author = create(:ace)
+      reviewer = create(:ace, moderator: true)
+      buy_credit(author)
+      post = submit_credit(ace: author, target: create(:player), bid: 125)
+      review_post(post, action: "approve", reviewer: reviewer)
+      report = post.shout_out_reports.create!(reporter: create(:ace), reason: "Spam")
+      [ post.id, report.id, reviewer.id ]
+    end
+    results = race do
+      begin
+        post = ShoutOut.find(post_id)
+        Moderation::ResolveReports.call(post: post, actor: Ace.find(reviewer_id), action: "hide",
+          revision: 1, last_report_id: report_id, reason: "Off topic")
+        :hidden
+      rescue Moderation::Review::Conflict
+        :stale
+      end
+    end
+    expect(results.tally).to eq(hidden: 1, stale: 1)
+    post = ShoutOut.find(post_id)
+    expect(CreditAccount.for(post.created_by).available_cents).to eq(1000)
+    expect(CreditEntry.where(source: post, kind: "refund").count).to eq(1)
+    expect(ShoutOutReport.find(report_id).resolution).to eq("hidden")
+  end
+
+  it "enforces one report per ace and post even for simultaneous inserts" do
+    post_id, reporter_id = committed do
+      author = create(:ace)
+      buy_credit(author)
+      post = submit_credit(ace: author, target: create(:player))
+      review_post(post, action: "approve")
+      [ post.id, create(:ace).id ]
+    end
+    results = race do
+      begin
+        ShoutOutReport.create!(shout_out_id: post_id, reporter_id: reporter_id, reason: "Spam")
+        :created
+      rescue ActiveRecord::RecordNotUnique
+        :duplicate
+      end
+    end
+    expect(results.tally).to eq(created: 1, duplicate: 1)
+    expect(ShoutOutReport.where(shout_out_id: post_id, reporter_id: reporter_id).count).to eq(1)
+  end
 end

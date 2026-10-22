@@ -17,9 +17,9 @@ module ShellNavigation
     @current_side ||= begin
       owned = case controller_name
       when "play", "play_previews", "strength", "game_rounds", "division_guessing_games", "game_attempts" then "play"
-      when "feed", "shout_out_drafts", "shout_outs", "wallets", "stripe_purchases" then "feed"
-      when "moderation" then "mod"
-      when "admin" then "admin"
+      when "feed", "shout_out_drafts", "shout_outs", "wallets", "stripe_purchases", "shout_out_reports" then "feed"
+      when "moderation", "reports" then "mod"
+      when "admin", "shout_out_revenues" then "admin"
       end
       candidate = owned || params[:side] || session[:side]
       candidate.presence_in(available_sides) || default_side

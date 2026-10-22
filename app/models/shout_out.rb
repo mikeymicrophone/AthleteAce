@@ -4,6 +4,7 @@ class ShoutOut < ApplicationRecord
   belongs_to :target, polymorphic: true, optional: true
   belongs_to :shout_out_draft, optional: true
   has_many :stripe_purchases, dependent: :restrict_with_error
+  has_many :shout_out_reports, dependent: :restrict_with_error
   attr_readonly :message, :bid_cents, :target_type, :target_id, :target_name, :created_by_id, :payment_method
   validates :bid_cents, numericality: { only_integer: true, greater_than: 0 }
   validates :payment_method, inclusion: { in: %w[credit stripe] }

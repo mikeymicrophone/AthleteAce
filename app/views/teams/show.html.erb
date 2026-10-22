@@ -1,27 +1,54 @@
 <% content_for :title, @team.name %>
-<%= render 'filtered_show' if @filtered_breadcrumb.present? %>
-<%= browse_header @team.name do %>
-  <%= render "follows/button", record: @team %>
-  <%= link_to "Write a shout-out draft", new_shout_out_draft_path(target_type: "Team", target_id: @team.id), class: "tool-button" %>
-  <%= link_to "Practice this team", new_game_round_path(team_id: @team.id), class: "game-button" %>
-<% end %>
-<section class="round-panel">
+<%= filtered_breadcrumb_nav @filtered_breadcrumb if @filtered_breadcrumb.present? %>
+<section class="round-panel team-masthead">
+  <div class="team-title"><%= round_team_badge @team %><h1 class="page-title"><%= @team.name %></h1></div>
   <div class="profile-chips"><%= entity_link @team.league %><%= entity_link @team.division %><%= entity_link @team.stadium %><%= entity_link @team.current_organization %></div>
+  <div class="page-actions">
+    <%= render "follows/button", record: @team %>
+    <%= link_to "Write a shout-out draft", new_shout_out_draft_path(target_type: "Team", target_id: @team.id), class: "tool-button" %>
+    <%= link_to "Practice this team", new_game_round_path(team_id: @team.id), class: "game-button" %>
+  </div>
   <%= link_to "Explore roster seasons", new_game_round_path(team_id: @team.id), class: "tool-link" %>
 </section>
-<section id="<%= dom_id(@team, :players_on) %>" class="round-panel">
-  <h2 class="profile-section-title">Players</h2>
-  <% if @team.players.any? %>
-    <ul class="play-game-grid">
-      <% @team.players.order(:last_name, :first_name).each do |player| %>
-        <li class="index-record"><%= record_identity player %></li>
-      <% end %>
-    </ul>
-  <% else %>
-    <p class="round-caption">No current-team player assignments recorded. Choose a roster season in round setup to use historical player lists.</p>
+<nav class="history-tabs" aria-label="Team sections">
+  <% [ ["wall", "Wall"], ["roster", "Roster"], ["ratings", "Ratings"] ].each do |tab, label| %>
+    <%= link_to label, url_for(tab: tab, page: nil), aria: { current: @tab == tab ? "page" : nil } %>
   <% end %>
-</section>
-<section class="round-panel">
-  <h2 class="profile-section-title">How aces rate <%= @team.name %></h2>
-  <%= rating_slider_container @team, Spectrum.visible_to(current_ace).order(:name) %>
-</section>
+</nav>
+<% if @tab == "wall" %>
+  <div class="team-wall-layout">
+    <section aria-label="Team shout-out wall">
+      <h2 class="profile-section-title"><%= pluralize @weekly_count, "live shout-out" %> this week</h2>
+      <nav class="history-tabs" aria-label="Wall filters">
+        <% [ ["all", "All"], ["team", "Team"], ["players", "Players"] ].each do |filter, label| %>
+          <%= link_to label, url_for(wall_filter: filter, page: nil), aria: { current: @wall_filter == filter ? "page" : nil } %>
+        <% end %>
+      </nav>
+      <p class="round-caption">Bid-weighted order with a random boost for each visitor.</p>
+      <% if @posts.any? %>
+        <%= render partial: "shout_outs/card", collection: @posts, as: :post %>
+        <%== @pagy.series_nav if @pagy.pages > 1 %>
+      <% else %><section class="round-panel"><h2>No shout-outs here yet.</h2><p>Approved shout-outs for this team and its players appear here.</p></section><% end %>
+    </section>
+    <aside class="round-panel">
+      <h2 class="profile-section-title">Most shouted players this week</h2>
+      <% if @most_shouted.any? %>
+        <ol class="wallet-history"><% @most_shouted.each do |name, count| %><li><%= name %> · <%= pluralize count, "shout-out" %></li><% end %></ol>
+      <% else %><p>No player shout-outs went live this week.</p><% end %>
+      <%= link_to "How aces rate #{@team.name}", url_for(tab: "ratings", page: nil), class: "tool-link" %>
+    </aside>
+  </div>
+<% elsif @tab == "roster" %>
+  <section id="<%= dom_id(@team, :players_on) %>" class="round-panel">
+    <h2 class="profile-section-title">Players</h2>
+    <% if @players.any? %>
+      <ul class="play-game-grid"><% @players.each do |player| %><li class="index-record"><%= record_identity player %></li><% end %></ul>
+      <%== @pagy.series_nav if @pagy.pages > 1 %>
+    <% else %><p class="round-caption">No current-team player assignments recorded. Choose a roster season in round setup to use historical player lists.</p><% end %>
+  </section>
+<% else %>
+  <section class="round-panel">
+    <h2 class="profile-section-title">How aces rate <%= @team.name %></h2>
+    <%= rating_slider_container @team, Spectrum.visible_to(current_ace).order(:name) %>
+  </section>
+<% end %>

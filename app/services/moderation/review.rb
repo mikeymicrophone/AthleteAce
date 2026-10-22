@@ -11,7 +11,10 @@ module Moderation
       raise ArgumentError, "Give a reason for this decision." if %w[reject hide].include?(action) && reason.blank?
       raise ArgumentError, "The reason is too long." if reason.to_s.length > 2000
 
-      record.with_lock do
+      record.with_lock(requires_new: true) do
+        if record.is_a?(ShoutOut) && action == "hide" && record.shout_out_reports.open.where(reporter_id: actor.id).exists?
+          raise Forbidden, "Another reviewer must decide your report."
+        end
         if record.moderation_revision != revision || record.moderation_status != status
           raise Conflict, "This item changed or another reviewer already decided it. Reload before reviewing."
         end
@@ -29,6 +32,10 @@ module Moderation
         record.update!(moderation_status: destination)
         record.moderation_decisions.create!(actor: actor, action: action == "reopen" ? "reopened" : destination,
           from_status: previous, to_status: destination, revision: revision, reason: reason, snapshot: record.moderation_snapshot)
+        if record.is_a?(ShoutOut) && action == "hide"
+          record.shout_out_reports.open.update_all(resolution: "hidden", decision_reason: reason, resolved_by_id: actor.id,
+            resolved_at: Time.current, updated_at: Time.current)
+        end
       end
       record
     end

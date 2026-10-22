@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_22_050000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_22_060000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -742,6 +742,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_050000) do
     t.check_constraint "target_type IS NULL OR (target_type::text = ANY (ARRAY['Team'::character varying, 'Player'::character varying]::text[]))", name: "drafts_supported_target"
   end
 
+  create_table "shout_out_reports", force: :cascade do |t|
+    t.bigint "shout_out_id", null: false
+    t.bigint "reporter_id"
+    t.string "reason", null: false
+    t.text "note"
+    t.string "resolution"
+    t.text "decision_reason"
+    t.bigint "resolved_by_id"
+    t.datetime "resolved_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["reporter_id"], name: "index_shout_out_reports_on_reporter_id"
+    t.index ["resolved_at", "shout_out_id"], name: "index_shout_out_reports_on_resolved_at_and_shout_out_id"
+    t.index ["resolved_by_id"], name: "index_shout_out_reports_on_resolved_by_id"
+    t.index ["shout_out_id", "reporter_id"], name: "index_shout_out_reports_on_shout_out_id_and_reporter_id", unique: true
+    t.index ["shout_out_id"], name: "index_shout_out_reports_on_shout_out_id"
+    t.check_constraint "reason::text = ANY (ARRAY['Harassment'::character varying, 'Spam'::character varying, 'Off-topic'::character varying, 'Other'::character varying]::text[])", name: "report_reason"
+    t.check_constraint "resolution IS NULL AND resolved_at IS NULL OR resolution IS NOT NULL AND (resolution::text = ANY (ARRAY['kept_live'::character varying, 'hidden'::character varying]::text[])) AND resolved_at IS NOT NULL", name: "report_resolution"
+  end
+
   create_table "shout_outs", force: :cascade do |t|
     t.bigint "created_by_id", null: false
     t.string "target_type"
@@ -1012,6 +1032,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_050000) do
   add_foreign_key "seasons", "teams", column: "champion_id"
   add_foreign_key "seasons", "years"
   add_foreign_key "shout_out_drafts", "aces"
+  add_foreign_key "shout_out_reports", "aces", column: "reporter_id", on_delete: :nullify
+  add_foreign_key "shout_out_reports", "aces", column: "resolved_by_id", on_delete: :nullify
+  add_foreign_key "shout_out_reports", "shout_outs"
   add_foreign_key "shout_outs", "aces", column: "created_by_id"
   add_foreign_key "shout_outs", "leagues", on_delete: :nullify
   add_foreign_key "shout_outs", "shout_out_drafts", on_delete: :nullify

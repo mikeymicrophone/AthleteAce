@@ -83,3 +83,4 @@ gem "nokogiri", "~> 1.19"
 gem "ransack", "~> 5.0"
 
 gem "stripe"
+gem "csv"
