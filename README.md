@@ -20,7 +20,7 @@ Switch sides in the dark top bar. Play has Home, Games, Quests, History, and Bro
 
 The Moderate badge counts pending submissions that the reviewer can decide, excluding their own. Open the account button for Profile, My ratings, Settings, Begin Quest, Sign Out, and Light, Dark, or System appearance. Appearance is stored on the signed-in account. Visitors can use the Appearance button, which stores the choice in a cookie.
 
-Feed currently has an empty reading view and player/team browsing. My teams shows a private, paginated team list from your follows and high Affinity ratings, with league filters and practice links. Posting, the shout-out stream, leaderboards, payments, and reports remain unfinished. Admin currently provides application totals and sports/content catalog links. Existing content editors keep their current permission rules. The shell omits navigation to unfinished workflows.
+Feed currently has an empty reading view and player/team browsing. My teams shows a private, paginated team list from your follows and high Affinity ratings, with league filters and practice links. [Private shout-out drafts](docs/shout-out-drafts.md) support target search, message previews, saving, editing, and deletion. Publishing, the shout-out stream, leaderboards, payments, and reports remain unfinished. Admin currently provides application totals and sports/content catalog links. Existing content editors keep their current permission rules. The shell omits navigation to unfinished workflows.
 
 ## Search
 

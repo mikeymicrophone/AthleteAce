@@ -1,0 +1,16 @@
+<%= turbo_frame_tag "draft-target-results" do %>
+  <% if @search.query.length < 2 %>
+    <p class="round-caption">Enter at least 2 characters.</p>
+  <% elsif @groups.empty? %>
+    <p class="round-caption">No matching players or teams.</p>
+  <% else %>
+    <% @groups.each do |label, records| %>
+      <h3 class="eyebrow"><%= label %></h3>
+      <div class="draft-target-options">
+        <% records.each do |record| %>
+          <%= button_tag record.name, type: "button", class: "tool-button", aria: { label: "Choose #{record.name}" }, data: { action: "draft-composer#choose", target_type: record.class.name, target_id: record.id, target_name: record.name } %>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>

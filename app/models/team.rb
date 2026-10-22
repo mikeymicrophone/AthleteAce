@@ -1,4 +1,5 @@
 class Team < ApplicationRecord
+  has_many :shout_out_drafts, as: :target, dependent: :nullify
   has_many :follows, as: :followable, dependent: :destroy
   include Ratable
   before_validation :assign_palette_text_color

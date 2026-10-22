@@ -105,3 +105,12 @@ body:is([data-side=play], [data-side=feed]) main > :is(.flash-notice, .flash-ale
 .feed-team-filters select:focus-visible { @apply outline-2 outline-offset-2 outline-accent-text; }
 .feed-team-card .record-identity > div { min-width: 0; }
 .feed-team-card .identity-name { overflow-wrap: anywhere; }
+.draft-grid { @apply grid gap-6 lg:grid-cols-2; align-items: start; }
+.draft-composer > .round-caption { @apply mb-5; }
+.draft-composer form { @apply flex flex-col items-start gap-3 my-5; }
+.draft-composer form .account-input { @apply w-full; }
+.draft-target-options { @apply flex flex-wrap gap-2 my-3; }
+.draft-selected { @apply font-semibold; }
+.draft-card { @apply min-w-0; }
+.draft-card .profile-section-title, .draft-selected { overflow-wrap: anywhere; }
+.draft-message { white-space: pre-wrap; overflow-wrap: anywhere; }

@@ -1,0 +1,18 @@
+<% content_for :title, "My shout-out drafts" %>
+<%= browse_header "My shout-out drafts" do %><%= link_to "Write a draft", new_shout_out_draft_path, class: "game-button" %><% end %>
+<p class="round-caption">Private drafts. Checkout and publication are not available yet.</p>
+<% if @drafts.any? %>
+  <div class="draft-grid">
+    <% @drafts.each do |draft| %>
+      <article class="round-panel draft-card">
+        <h2 class="profile-section-title"><%= draft.target&.name || "Target no longer available" %></h2>
+        <p class="draft-message"><%= draft.message %></p>
+        <p class="round-caption">Saved <%= time_ago_in_words(draft.updated_at) %> ago</p>
+        <div class="page-actions"><%= link_to "Edit draft", edit_shout_out_draft_path(draft), class: "tool-button" %><%= button_to "Delete draft", shout_out_draft_path(draft), method: :delete, class: "tool-button" %></div>
+      </article>
+    <% end %>
+  </div>
+  <%== @pagy.series_nav if @pagy.pages > 1 %>
+<% else %>
+  <section class="shell-empty"><h2>No drafts yet.</h2><p>Choose a player or team and start writing.</p></section>
+<% end %>

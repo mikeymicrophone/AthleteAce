@@ -6,6 +6,8 @@
     <%= link_to "My teams", feed_path(view: "my_teams"), aria: { current: @view == "my_teams" ? "page" : nil } %>
   </nav>
 
+  <div class="page-actions"><%= link_to "Write a draft", new_shout_out_draft_path, class: "game-button" %><%= link_to "My drafts", shout_out_drafts_path, class: "tool-button" if current_ace %></div>
+
   <% if @view == "my_teams" %>
     <% if current_ace %>
       <section class="round-panel" aria-labelledby="feed-teams-title">

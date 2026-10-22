@@ -15,6 +15,9 @@ Rails.application.routes.draw do
   draw :design        # Design reference pages (not in production)
 
   get "feed", to: "feed#index", as: :feed
+  resources :shout_out_drafts, path: "feed/drafts", except: :show do
+    collection { get :targets }
+  end
   resources :follows, only: [ :create, :destroy ]
   resources :player_groups
   get "browse", to: "browse#index", as: :browse

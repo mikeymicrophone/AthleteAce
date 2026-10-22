@@ -14,6 +14,7 @@
         <%= entity_link @player.league %>
       <% end %>
       <%= render "follows/button", record: @player %>
+      <%= link_to "Write a shout-out draft", new_shout_out_draft_path(target_type: "Player", target_id: @player.id), class: "tool-button" %>
       <% if @player.team %>
         <%= tag.div class: "page-actions" do %>
           <%= link_to new_game_round_path(team_id: @player.team_id), class: "game-button" do %>

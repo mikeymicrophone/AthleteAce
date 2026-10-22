@@ -21,6 +21,7 @@ class Ace < ApplicationRecord
          :recoverable, :rememberable, :validatable,
          :trackable, :confirmable
 
+  has_many :shout_out_drafts, dependent: :destroy
   has_many :follows, dependent: :destroy
   has_many :goals, dependent: :destroy
   has_many :active_goals, -> { Goal.active }, class_name: "Goal"

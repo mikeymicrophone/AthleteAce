@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_22_031000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_22_040000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -704,6 +704,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_031000) do
     t.index ["year_id"], name: "index_seasons_on_year_id"
   end
 
+  create_table "shout_out_drafts", force: :cascade do |t|
+    t.bigint "ace_id", null: false
+    t.string "target_type"
+    t.bigint "target_id"
+    t.text "message", null: false
+    t.integer "lock_version", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ace_id"], name: "index_shout_out_drafts_on_ace_id"
+    t.index ["target_type", "target_id"], name: "index_shout_out_drafts_on_target"
+    t.check_constraint "target_type IS NULL OR (target_type::text = ANY (ARRAY['Team'::character varying, 'Player'::character varying]::text[]))", name: "drafts_supported_target"
+  end
+
   create_table "spectrums", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -926,6 +939,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_031000) do
   add_foreign_key "seasons", "leagues"
   add_foreign_key "seasons", "teams", column: "champion_id"
   add_foreign_key "seasons", "years"
+  add_foreign_key "shout_out_drafts", "aces"
   add_foreign_key "spectrums", "aces", column: "created_by_id", on_delete: :nullify
   add_foreign_key "stadiums", "cities"
   add_foreign_key "states", "countries"
