@@ -27,7 +27,7 @@ module SearchesHelper
     return [] unless current_side == "admin" && query.length >= 2
 
     [ [ "Account settings", edit_ace_registration_path ], [ "Your profile", edit_profile_path ],
-      [ "Admin overview", admin_path ], [ "People", admin_people_path ], [ "Sports data", browse_path(section: "sports", side: "admin") ],
+      [ "Admin overview", admin_path ], [ "People", admin_people_path ], [ "Sports data", admin_catalog_records_path ],
       [ "Content catalog", browse_path(section: "content", side: "admin") ] ].select { |name, _path| name.downcase.include?(query.downcase) }
   end
 end

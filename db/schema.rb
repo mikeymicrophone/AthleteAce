@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_23_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_23_030000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -152,6 +152,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_020000) do
     t.index ["stadium_id"], name: "index_campaigns_on_stadium_id"
     t.index ["team_id", "season_id"], name: "index_campaigns_on_team_id_and_season_id", unique: true
     t.index ["team_id"], name: "index_campaigns_on_team_id"
+  end
+
+  create_table "catalog_edits", force: :cascade do |t|
+    t.bigint "actor_id"
+    t.string "actor_name", null: false
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.string "entity_code"
+    t.string "record_name", null: false
+    t.jsonb "before_values", null: false
+    t.jsonb "after_values", null: false
+    t.jsonb "submitted_values", null: false
+    t.string "request_key", limit: 128, null: false
+    t.text "reason"
+    t.datetime "reason_supplied_at"
+    t.datetime "created_at", null: false
+    t.index ["actor_id", "request_key"], name: "index_catalog_edits_on_actor_id_and_request_key", unique: true
+    t.index ["actor_id"], name: "index_catalog_edits_on_actor_id"
+    t.index ["id"], name: "index_catalog_edits_without_reason", where: "(reason IS NULL)"
+    t.index ["record_type", "record_id", "id"], name: "index_catalog_edits_on_record_type_and_record_id_and_id"
+    t.check_constraint "reason IS NULL AND reason_supplied_at IS NULL OR reason IS NOT NULL AND length(btrim(reason)) >= 1 AND length(btrim(reason)) <= 2000 AND reason_supplied_at IS NOT NULL", name: "catalog_edit_reason"
+    t.check_constraint "record_type::text = ANY (ARRAY['Player'::character varying, 'Team'::character varying]::text[])", name: "catalog_edit_record_type"
   end
 
   create_table "cities", force: :cascade do |t|
@@ -1101,6 +1123,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_020000) do
   add_foreign_key "campaigns", "seasons"
   add_foreign_key "campaigns", "stadiums"
   add_foreign_key "campaigns", "teams"
+  add_foreign_key "catalog_edits", "aces", column: "actor_id", on_delete: :nullify
   add_foreign_key "cities", "states"
   add_foreign_key "conferences", "leagues"
   add_foreign_key "contestants", "campaigns"

@@ -1,0 +1,29 @@
+<% content_for :title, "Sports data" %>
+<div class="moderation-page people-page">
+  <header class="browse-header"><div><p class="eyebrow">Admin</p><h1 class="page-title">Sports data</h1><p><%= pluralize @counts[:players], "player" %> · <%= pluralize @counts[:teams], "team" %></p></div></header>
+  <div class="page-actions"><%= link_to "Players", admin_catalog_records_path(kind: "players"), class: "tool-button", aria: { current: @directory.kind == "players" ? "page" : nil } %><%= link_to "Teams", admin_catalog_records_path(kind: "teams"), class: "tool-button", aria: { current: @directory.kind == "teams" ? "page" : nil } %><%= link_to "Correction history", admin_catalog_edits_path, class: "tool-link" %><%= link_to "Other sports data", browse_path(section: "sports", side: "admin"), class: "tool-link" %></div>
+  <%= form_with url: admin_catalog_records_path, method: :get, class: "people-filters" do |form| %>
+    <%= form.hidden_field :kind, value: @directory.kind %>
+    <div><%= form.label :q, "Search #{@directory.kind}" %><%= form.search_field :q, value: @directory.query, maxlength: 80, placeholder: "Name or entity code", class: "account-input" %></div>
+    <div><%= form.label :league_id, "League" %><%= form.select :league_id, options_from_collection_for_select(@leagues, :id, :name, @directory.league_id), { include_blank: "All leagues" }, class: "account-input" %></div>
+    <% if @directory.kind == "players" %>
+      <div><%= form.label :team_id, "Team" %><%= form.select :team_id, options_from_collection_for_select(@teams, :id, :name, @directory.team_id), { include_blank: "All teams" }, class: "account-input" %></div>
+      <div><%= form.label :position, "Position" %><%= form.text_field :position, value: @directory.position, maxlength: 100, class: "account-input", placeholder: "Exact position" %></div>
+      <div><%= form.label :status, "Status" %><%= form.select :status, options_for_select([["All statuses", ""], ["Active", "active"], ["Inactive", "inactive"], ["Unknown", "unknown"]], @directory.status), {}, class: "account-input" %></div>
+      <div><%= form.label :photo, "Photo" %><%= form.select :photo, options_for_select([["All players", ""], ["Has photo", "present"], ["Missing photo", "missing"]], @directory.photo), {}, class: "account-input" %></div>
+    <% end %>
+    <div><%= form.label :edited, "Corrections" %><%= form.select :edited, options_for_select([["All records", ""], ["Has edit history", "yes"]], @directory.edited), {}, class: "account-input" %></div>
+    <div class="page-actions"><%= form.submit "Filter sports data", class: "tool-button" %><%= link_to "Clear", admin_catalog_records_path(kind: @directory.kind), class: "tool-link" %></div>
+  <% end %>
+  <p class="round-caption"><%= pluralize @pagy.count, "matching record" %> · Sorted by name · Changes save immediately and appear in correction history.</p>
+  <div class="people-table"><table><thead><tr><th><%= @directory.kind.singularize.titleize %></th><th>League</th><% if @directory.kind == "players" %><th>Team</th><th>Position</th><th>Status</th><th>Photo</th><% else %><th>Division</th><th>Players</th><th>Colors</th><th>Stadium</th><% end %><th>Corrections</th></tr></thead><tbody>
+    <% @records.each do |record| %>
+      <tr><td><%= link_to record.name, edit_admin_catalog_record_path(record, kind: @directory.kind) %><p class="round-caption"><%= record.entity_code.presence || "No entity code" %><% if record.is_a?(Team) %> · <%= record.abbreviation %><% end %></p></td><td><%= record.league&.name || "Unknown" %></td>
+        <% if record.is_a?(Player) %><td><%= record.team&.name || "Unassigned" %></td><td><%= record.current_position.presence || "Unknown" %></td><td><%= record.active.nil? ? "Unknown" : record.active? ? "Active" : "Inactive" %></td><td><%= record.photo_urls.to_a.any?(&:present?) ? "Available" : "Missing" %></td>
+        <% else %><td><%= record.division&.name || "Unassigned" %></td><td><%= number_with_delimiter record.player_count %></td><td><%= [record.primary_color, record.secondary_color].compact.join(" / ").presence || "Not set" %></td><td><%= record.stadium&.name || "Unassigned" %></td><% end %>
+        <td><%= @edited_ids.include?(record.id) ? "Has edit history" : "No recorded edits" %><p class="round-caption">Updated <%= l record.updated_at.to_date, format: :long %></p></td></tr>
+    <% end %>
+  </tbody></table></div>
+  <% if @records.empty? %><section class="round-panel"><h2>No matching records.</h2><p>Try another name or change the filters.</p></section><% end %>
+  <%== @pagy.series_nav if @pagy.pages > 1 %>
+</div>

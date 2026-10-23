@@ -35,6 +35,8 @@ Rails.application.routes.draw do
   get "browse", to: "browse#index", as: :browse
   namespace :admin do
     resources :people, only: [ :index, :show, :update ]
+    resources :catalog_records, path: "sports-data", only: [ :index, :edit, :update ]
+    resources :catalog_edits, only: [ :index, :show, :update ]
   end
   get "admin", to: "admin#index", as: :admin
   resource :shout_out_revenue, path: "admin/revenue", only: :show

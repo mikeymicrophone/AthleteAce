@@ -17,7 +17,7 @@ module ShellHelper
     when "mod"
       [ [ "Queue", "shield-check", moderation_path ], [ "Reports", "flag", reports_path ], [ "Escalations", "shield", escalations_path ], [ "Decision log", "history", moderation_log_path ] ]
     when "admin"
-      [ [ "Overview", "home", admin_path ], [ "People", "id-badge-2", admin_people_path ], [ "Revenue", "list-numbers", shout_out_revenue_path ], [ "Sports data", "layout-grid", browse_path(section: "sports", side: "admin") ],
+      [ [ "Overview", "home", admin_path ], [ "People", "id-badge-2", admin_people_path ], [ "Revenue", "list-numbers", shout_out_revenue_path ], [ "Sports data", "layout-grid", admin_catalog_records_path ],
         [ "Content catalog", "script", browse_path(section: "content", side: "admin") ] ]
     end
   end
