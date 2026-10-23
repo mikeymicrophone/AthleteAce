@@ -8,7 +8,7 @@ Expand **Warn**, enter **Warning reason**, optionally select a related submissio
 
 Use **Add moderator note** for internal context. Notes stay visible to other reviewers and are unavailable to the ace concerned, even if that ace is a reviewer. Mute notes have the same privacy boundary. Warning reasons, mute reasons and early-ending reasons are visible to the ace.
 
-Moderators can act on fans. Admins can also act on moderators. Self-actions and actions against admin accounts are unavailable. Another authorized reviewer must handle the account. Suspension and role management remain separate Admin People work.
+Moderators can act on fans. Admins can also act on moderators. Self-actions and actions against admin accounts are unavailable. Another authorized reviewer must handle the account. [Suspension and role management](admin-people.md) are separate admin-only actions in Admin People.
 
 ## Start or end a timed mute
 
@@ -45,7 +45,7 @@ Warnings, mutes and notes are separate from the content Decision log. The log co
 | Identity and privacy | Staff actions can expose notes or silently become account suspension. | Explicit: hierarchy and self-action restrictions, private internal notes, personal reasons only, unchanged sign-in/Play/wallet permissions. |
 | History | Current content or deleted actors can rewrite the apparent warning. | Explicit: retain related names and action history. Show deleted-reviewer attribution without inventing an identity. |
 
-The six acceptance probes are explicitly resolved. No backstop or judgment items remain. [Escalation controls](moderation-escalations.md) hand account cases to another admin without changing permissions. Account suspension remains separate work.
+The six acceptance probes are explicitly resolved. No backstop or judgment items remain. [Escalation controls](moderation-escalations.md) hand account cases to another admin without changing permissions. [Account suspension](admin-people.md) is a separate admin-only action.
 
 ## Verify locally
 

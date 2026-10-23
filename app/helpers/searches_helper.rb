@@ -15,7 +15,7 @@ module SearchesHelper
     if record.is_a?(ShoutOut) && current_side == "feed"
       feed_post_path(record)
     elsif record.is_a?(Ace)
-      ace_profile_path(record, side: current_side)
+      current_side == "admin" ? admin_person_path(record) : ace_profile_path(record, side: current_side)
     elsif Moderation::Queue::TYPES.value?(record.class)
       moderation_item_path(type: record.class.name, id: record.id)
     else
@@ -27,7 +27,7 @@ module SearchesHelper
     return [] unless current_side == "admin" && query.length >= 2
 
     [ [ "Account settings", edit_ace_registration_path ], [ "Your profile", edit_profile_path ],
-      [ "Admin overview", admin_path ], [ "Sports data", browse_path(section: "sports", side: "admin") ],
+      [ "Admin overview", admin_path ], [ "People", admin_people_path ], [ "Sports data", browse_path(section: "sports", side: "admin") ],
       [ "Content catalog", browse_path(section: "content", side: "admin") ] ].select { |name, _path| name.downcase.include?(query.downcase) }
   end
 end

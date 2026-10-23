@@ -33,6 +33,9 @@ Rails.application.routes.draw do
   resources :follows, only: [ :create, :destroy ]
   resources :player_groups
   get "browse", to: "browse#index", as: :browse
+  namespace :admin do
+    resources :people, only: [ :index, :show, :update ]
+  end
   get "admin", to: "admin#index", as: :admin
   resource :shout_out_revenue, path: "admin/revenue", only: :show
   resource :theme_preference, only: :update

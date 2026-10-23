@@ -1,6 +1,7 @@
 class StripeWebhooksController < ApplicationController
   skip_before_action :verify_authenticity_token
   skip_before_action :require_ace_identity
+  skip_before_action :reject_suspended_account
 
   def create
     return head :service_unavailable unless StripeCheckout.configured?

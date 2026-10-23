@@ -8,6 +8,7 @@ class ApplicationController < ActionController::Base
 
   # Configure permitted parameters for Devise
   before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :reject_suspended_account, unless: :devise_controller?
   before_action :require_ace_identity, unless: :devise_controller?
   after_action :store_browsing_location, unless: :devise_controller?
 
@@ -15,6 +16,7 @@ class ApplicationController < ActionController::Base
   rescue_from ActiveRecord::StaleObjectError do
     render plain: "This content changed while you were editing. Reload and try again.", status: :conflict
   end
+  rescue_from Ace::AccountSuspended, with: :end_suspended_session
   rescue_from Ace::PostingMuted do |error|
     response.headers["Cache-Control"] = "private, no-store"
     @posting_mute = error.mute
@@ -27,6 +29,15 @@ class ApplicationController < ActionController::Base
   MAX_PER_PAGE = 100
 
   protected
+
+  def reject_suspended_account
+    end_suspended_session if current_ace&.suspended?
+  end
+
+  def end_suspended_session
+    sign_out :ace
+    redirect_to new_ace_session_path, status: :see_other, alert: "Your account is suspended. Contact support for help."
+  end
 
   def require_posting_access!
     current_ace.ensure_posting_access!

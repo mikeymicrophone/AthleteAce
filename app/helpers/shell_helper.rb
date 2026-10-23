@@ -17,7 +17,7 @@ module ShellHelper
     when "mod"
       [ [ "Queue", "shield-check", moderation_path ], [ "Reports", "flag", reports_path ], [ "Escalations", "shield", escalations_path ], [ "Decision log", "history", moderation_log_path ] ]
     when "admin"
-      [ [ "Overview", "home", admin_path ], [ "Revenue", "list-numbers", shout_out_revenue_path ], [ "Sports data", "layout-grid", browse_path(section: "sports", side: "admin") ],
+      [ [ "Overview", "home", admin_path ], [ "People", "id-badge-2", admin_people_path ], [ "Revenue", "list-numbers", shout_out_revenue_path ], [ "Sports data", "layout-grid", browse_path(section: "sports", side: "admin") ],
         [ "Content catalog", "script", browse_path(section: "content", side: "admin") ] ]
     end
   end
@@ -28,6 +28,7 @@ module ShellHelper
       return "Escalations" if controller_name == "escalations"
       controller_name == "reports" ? "Reports" : (action_name == "log" ? "Decision log" : "Queue")
     when "admin"
+      return "People" if controller_name == "people"
       return "Revenue" if controller_name == "shout_out_revenues"
       controller_name == "admin" ? "Overview" : (params[:section] == "content" ? "Content catalog" : "Sports data")
     when "feed"

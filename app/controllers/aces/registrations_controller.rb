@@ -1,8 +1,12 @@
 class Aces::RegistrationsController < Devise::RegistrationsController
   def destroy
     unless resource.destroy
-      redirect_to edit_ace_registration_path, status: :see_other,
-        alert: "Your account has financial records and cannot be deleted here. Contact support to arrange account closure."
+      alert = if resource.errors.of_kind?(:base, :last_active_admin)
+        "Your account is the last active admin. Another confirmed admin must remain before you can close it."
+      else
+        "Your account has financial records and cannot be deleted here. Contact support to arrange account closure."
+      end
+      redirect_to edit_ace_registration_path, status: :see_other, alert: alert
       return
     end
 

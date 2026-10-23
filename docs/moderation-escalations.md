@@ -49,4 +49,4 @@ The original escalation reason stays outside owner pages and decision-log CSV ex
 | Account handoff | Preserve roles and access. Warnings and mutes remain explicit separate actions. |
 | Queue routing | Exclude open content cases from queue rows and counts. Block ordinary review and report decisions until resolution. |
 
-All six boundaries have explicit behavior. Specialized admin overturns, suspension and broader reviewer analytics remain separate work.
+All six boundaries have explicit behavior. [Account suspension](admin-people.md) is a separate admin-only action. Specialized admin overturns and broader reviewer analytics remain separate work.

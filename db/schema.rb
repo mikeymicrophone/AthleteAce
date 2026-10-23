@@ -10,10 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_23_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_23_020000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "account_actions", force: :cascade do |t|
+    t.bigint "ace_id"
+    t.bigint "actor_id"
+    t.string "ace_name", null: false
+    t.string "action", null: false
+    t.text "reason", null: false
+    t.jsonb "before_state", null: false
+    t.jsonb "after_state", null: false
+    t.string "request_key", limit: 128, null: false
+    t.datetime "created_at", null: false
+    t.index ["ace_id"], name: "index_account_actions_on_ace_id"
+    t.index ["actor_id", "request_key"], name: "index_account_actions_on_actor_id_and_request_key", unique: true
+    t.index ["actor_id"], name: "index_account_actions_on_actor_id"
+  end
 
   create_table "aces", force: :cascade do |t|
     t.string "email", default: "", null: false
@@ -39,6 +54,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_010000) do
     t.string "display_name"
     t.string "avatar_color", default: "#7A4B2A", null: false
     t.string "time_zone"
+    t.datetime "suspended_at"
+    t.integer "account_version", default: 0, null: false
+    t.integer "session_version", default: 0, null: false
     t.index "lower((username)::text)", name: "index_aces_on_lower_username", unique: true
     t.index ["confirmation_token"], name: "index_aces_on_confirmation_token", unique: true
     t.index ["email"], name: "index_aces_on_email", unique: true
@@ -865,6 +883,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_010000) do
     t.check_constraint "bid_cents > 0", name: "positive_shout_out_bid"
   end
 
+  create_table "sign_in_events", force: :cascade do |t|
+    t.bigint "ace_id", null: false
+    t.string "outcome", null: false
+    t.string "ip_address", limit: 64
+    t.string "user_agent", limit: 512
+    t.datetime "created_at", null: false
+    t.index ["ace_id", "created_at", "id"], name: "index_sign_in_events_on_ace_id_and_created_at_and_id"
+    t.index ["ace_id"], name: "index_sign_in_events_on_ace_id"
+  end
+
   create_table "spectrums", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -1058,6 +1086,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_010000) do
     t.index ["seed_version"], name: "index_years_on_seed_version"
   end
 
+  add_foreign_key "account_actions", "aces", column: "actor_id", on_delete: :nullify
+  add_foreign_key "account_actions", "aces", on_delete: :nullify
   add_foreign_key "achievements", "aces", column: "created_by_id", on_delete: :nullify
   add_foreign_key "activations", "campaigns"
   add_foreign_key "activations", "contracts"
@@ -1142,6 +1172,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_010000) do
   add_foreign_key "shout_outs", "leagues", on_delete: :nullify
   add_foreign_key "shout_outs", "shout_out_drafts", on_delete: :nullify
   add_foreign_key "shout_outs", "teams", on_delete: :nullify
+  add_foreign_key "sign_in_events", "aces", on_delete: :cascade
   add_foreign_key "spectrums", "aces", column: "created_by_id", on_delete: :nullify
   add_foreign_key "stadiums", "cities"
   add_foreign_key "states", "countries"

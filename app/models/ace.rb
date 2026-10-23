@@ -1,4 +1,6 @@
 class Ace < ApplicationRecord
+  class AccountSuspended < StandardError; end
+
   class PostingMuted < StandardError
     attr_reader :mute
 
@@ -22,6 +24,7 @@ class Ace < ApplicationRecord
   validates :display_name, presence: true, length: { maximum: 60 }, if: -> { username.present? }
   validates :avatar_color, inclusion: { in: AVATAR_COLORS.values }
   validate :keep_username
+  before_destroy :keep_active_admin, prepend: true
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
@@ -50,8 +53,28 @@ class Ace < ApplicationRecord
     ActiveSupport::TimeZone[time_zone.to_s] || Time.zone
   end
 
+  def role
+    admin? ? "admin" : moderator? ? "moderator" : "fan"
+  end
+
+  def suspended?
+    suspended_at.present?
+  end
+
+  def active_for_authentication?
+    super && !suspended?
+  end
+
+  def inactive_message
+    suspended? ? :suspended : super
+  end
+
+  def authenticatable_salt
+    session_version.positive? ? "#{super}:#{session_version}" : super
+  end
+
   def can_moderate?
-    admin? || moderator?
+    !suspended? && (admin? || moderator?)
   end
 
   def active_posting_mute
@@ -59,6 +82,7 @@ class Ace < ApplicationRecord
   end
 
   def ensure_posting_access!
+    raise AccountSuspended if suspended?
     mute = active_posting_mute
     raise PostingMuted, mute if mute
   end
@@ -117,6 +141,15 @@ class Ace < ApplicationRecord
   end
 
   private
+
+  def keep_active_admin
+    self.class.connection.execute("SELECT pg_advisory_xact_lock(194191, 1)")
+    lock!
+    if admin? && !suspended? && !self.class.where(admin: true, suspended_at: nil).where.not(confirmed_at: nil).where.not(id: id).exists?
+      errors.add :base, :last_active_admin, message: "Keep at least one active admin."
+      throw :abort
+    end
+  end
 
   def keep_username
     errors.add :username, "cannot be changed" if username_in_database.present? && will_save_change_to_username?

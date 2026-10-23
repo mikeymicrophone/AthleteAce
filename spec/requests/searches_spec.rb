@@ -92,7 +92,7 @@ RSpec.describe "Shell search", type: :request do
     author = create(:ace, username: "wrigley_wes", display_name: "Wes Rivera")
     sign_in admin
     search "wrigley", side: "admin"
-    expect(response.body).to include("Wes Rivera", "@wrigley_wes", ace_profile_path(author, side: "admin"))
+    expect(response.body).to include("Wes Rivera", "@wrigley_wes", admin_person_path(author))
     expect(response.body).not_to include(author.email)
     search "@wrigley_wes", side: "admin"
     expect(response.body).to include("Wes Rivera", "@wrigley_wes")

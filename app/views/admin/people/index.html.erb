@@ -1,0 +1,18 @@
+<% content_for :title, "People" %>
+<div class="moderation-page people-page">
+  <header class="browse-header"><div><p class="eyebrow">Admin</p><h1 class="page-title">People</h1><p><%= @counts.map { |name, count| %w[aces admins moderators].include?(name) ? pluralize(count, name.singularize) : "#{number_with_delimiter(count)} #{name}" }.join(" · ") %></p></div></header>
+  <%= form_with url: admin_people_path, method: :get, class: "people-filters" do |form| %>
+    <div><%= form.label :q, "Search aces" %><%= form.search_field :q, value: @directory.query, maxlength: 80, placeholder: "Name, handle or email", class: "account-input" %></div>
+    <div><%= form.label :role, "Role" %><%= form.select :role, options_for_select([["All roles", ""], ["Fan", "fan"], ["Moderator", "moderator"], ["Admin", "admin"]], @directory.role), {}, class: "account-input" %></div>
+    <div><%= form.label :status, "Status" %><%= form.select :status, options_for_select([["All statuses", ""], ["Active", "active"], ["Warned", "warned"], ["Muted", "muted"], ["Suspended", "suspended"]], @directory.status), {}, class: "account-input" %></div>
+    <div><%= form.label :joined_from, "Joined from" %><%= form.date_field :joined_from, value: @directory.joined_from, class: "account-input" %></div>
+    <div><%= form.label :joined_to, "Joined through" %><%= form.date_field :joined_to, value: @directory.joined_to, class: "account-input" %></div>
+    <div class="page-actions"><%= form.submit "Filter people", class: "tool-button" %><%= link_to "Clear", admin_people_path, class: "tool-link" %></div>
+  <% end %>
+  <p class="round-caption"><%= pluralize @pagy.count, "matching ace" %> · Newest joined first · Spent is credit captured minus credit refunds.</p>
+  <div class="people-table"><table><thead><tr><th>Ace</th><th>Role</th><th>Joined</th><th>Last signed in</th><th>Spent</th><th>Status</th></tr></thead><tbody>
+    <% @aces.each do |ace| %><tr><td><%= link_to ace.public_name, admin_person_path(ace) %><p class="round-caption"><%= ace.handle %> · <%= ace.email %></p></td><td><%= ace.role.titleize %></td><td><%= l ace.created_at.to_date, format: :long %></td><td><%= ace.current_sign_in_at ? time_ago_in_words(ace.current_sign_in_at) + " ago" : "Never recorded" %></td><td><%= number_to_currency ace.spent_cents.to_i / 100.to_d %></td><td><%= ace.suspended? ? "Suspended" : @muted_ids.include?(ace.id) ? "Muted" : @warned_ids.include?(ace.id) ? "Warned" : "Active" %></td></tr><% end %>
+  </tbody></table></div>
+  <% if @aces.empty? %><section class="round-panel"><h2>No matching aces.</h2><p>Try another name or change the filters.</p></section><% end %>
+  <%== @pagy.series_nav if @pagy.pages > 1 %>
+</div>

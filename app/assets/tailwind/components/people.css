@@ -1,0 +1,12 @@
+@layer components {
+  .people-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-block: 1.5rem; }
+  .people-filters label, .people-actions label { display: block; margin-bottom: .4rem; }
+  .people-actions { display: grid; gap: 1rem; }
+  .people-table { overflow-x: auto; }
+  .people-table table { width: 100%; min-width: 720px; border-collapse: collapse; }
+  .people-table th, .people-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--color-line); }
+  .people-table td:first-child { min-width: 210px; overflow-wrap: anywhere; }
+  .people-page p { overflow-wrap: anywhere; }
+  .people-actions .page-actions { flex-wrap: wrap; }
+  .people-actions, .people-table, .people-filters { min-width: 0; }
+}
