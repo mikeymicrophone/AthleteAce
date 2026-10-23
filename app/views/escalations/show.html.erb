@@ -1,0 +1,24 @@
+<% content_for :title, "Escalation: #{@escalation.subject_name}" %>
+<div class="moderation-page">
+  <%= link_to "Back to escalations", escalations_path(status: @escalation.resolved_at? ? "resolved" : "open"), class: "tool-link" %>
+  <header class="browse-header"><div><p class="eyebrow"><%= @escalation.subject_type %> · <%= @escalation.resolved_at? ? "Resolved" : "Open" %></p><h1 class="page-title"><%= @escalation.subject_name %></h1></div></header>
+  <section class="round-panel"><h2 class="profile-section-title">Captured case</h2><p><%= @escalation.reason %></p><p class="round-caption"><%= @escalation.requested_by ? ace_identity(@escalation.requested_by) : "Deleted reviewer" %> · <%= l @escalation.created_at, format: :long %></p>
+    <p class="round-caption"><%= @escalation.captured_status %><%= " · revision #{@escalation.revision}" if @escalation.revision %></p>
+    <dl class="moderation-fields"><% @escalation.snapshot.each do |key, value| %><dt><%= key.humanize %></dt><dd><%= value %></dd><% end %></dl>
+    <% if @subject %><div class="page-actions"><%= link_to "Inspect current case", @subject.is_a?(Ace) ? ace_profile_path(@subject) : moderation_item_path(type: @subject.class.name, id: @subject.id), class: "tool-button" %></div><% else %><p>The original subject no longer exists. Its captured context remains available.</p><% end %>
+  </section>
+  <% if @escalation.resolved_at? %>
+    <section class="round-panel"><h2 class="profile-section-title">Resolution</h2><p><%= ModerationEscalation::RESOLUTIONS.fetch(@escalation.resolution) %></p><p><%= @escalation.resolution_reason %></p><p class="round-caption"><%= @escalation.resolved_by ? ace_identity(@escalation.resolved_by) : "Deleted admin" %> · <%= l @escalation.resolved_at, format: :long %></p></section>
+  <% elsif @can_resolve %>
+    <section class="round-panel"><h2 class="profile-section-title">Admin resolution</h2>
+      <% if @escalation.subject_type == "Ace" %><p>Resolve this handoff without changing account permissions. Use the current profile for any separate warning or mute.</p><% elsif !@escalation.current_content? %><p>The content changed or disappeared. Only closing without changes is available. Inspect the current case before taking further action.</p><% end %>
+      <%= form_with url: escalation_path(@escalation), method: :patch do |form| %>
+        <%= form.hidden_field :version, value: @escalation.lock_version %>
+        <%= form.label :resolution, "Resolution" %><%= form.select :resolution, @resolutions.map { |value, label| [label, value] }, {}, class: "account-input" %>
+        <%= form.label :reason, "Resolution reason" %><%= form.text_area :reason, required: true, maxlength: 2000, class: "moderation-reason" %>
+        <p class="round-caption">Decision reasons can be visible to the content author through normal moderation history. Hiding a live shout-out returns its full bid as credit. Refunded posts cannot be republished for free.</p>
+        <%= form.submit "Resolve escalation", class: "tool-button" %>
+      <% end %>
+    </section>
+  <% else %><section class="round-panel"><p><%= @own_report ? "Another admin must decide your report." : current_ace.admin? ? "Another admin must resolve an escalation you requested." : "An admin must resolve this escalation." %></p></section><% end %>
+</div>

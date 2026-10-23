@@ -15,6 +15,7 @@ class ModerationController < ApplicationController
     @providers = DecisionModels::Client::CONFIG.keys.map { |provider| DecisionModels::Client.new(provider) }
     @evaluations = @item.decision_evaluations.order(created_at: :desc).limit(20)
     @decisions = @item.moderation_decisions.includes(:actor).order(created_at: :desc, id: :desc).limit(100)
+    @escalation = ModerationEscalation.open.visible_to(current_ace).find_by(subject: @item)
   end
 
   def update

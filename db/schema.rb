@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_22_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_23_010000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -503,6 +503,33 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_090000) do
     t.index ["actor_id"], name: "index_moderation_decisions_on_actor_id"
     t.index ["created_at", "id"], name: "index_moderation_decisions_on_created_at_and_id"
     t.index ["subject_type", "subject_id"], name: "index_moderation_decisions_on_subject"
+  end
+
+  create_table "moderation_escalations", force: :cascade do |t|
+    t.string "subject_type", null: false
+    t.bigint "subject_id", null: false
+    t.bigint "subject_ace_id"
+    t.bigint "requested_by_id"
+    t.string "subject_name", null: false
+    t.text "reason", null: false
+    t.jsonb "snapshot", default: {}, null: false
+    t.integer "revision"
+    t.string "captured_status"
+    t.string "request_key", limit: 128, null: false
+    t.string "resolution"
+    t.text "resolution_reason"
+    t.bigint "resolved_by_id"
+    t.datetime "resolved_at"
+    t.integer "lock_version", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["requested_by_id", "request_key"], name: "unique_escalation_request", unique: true
+    t.index ["requested_by_id"], name: "index_moderation_escalations_on_requested_by_id"
+    t.index ["resolved_at", "created_at", "id"], name: "idx_on_resolved_at_created_at_id_b4f1098179"
+    t.index ["resolved_by_id"], name: "index_moderation_escalations_on_resolved_by_id"
+    t.index ["subject_ace_id"], name: "index_moderation_escalations_on_subject_ace_id"
+    t.index ["subject_type", "subject_id"], name: "index_moderation_escalations_on_subject"
+    t.index ["subject_type", "subject_id"], name: "one_open_escalation_per_subject", unique: true, where: "(resolved_at IS NULL)"
   end
 
   create_table "moderator_notes", force: :cascade do |t|
@@ -1072,6 +1099,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_090000) do
   add_foreign_key "memberships", "divisions"
   add_foreign_key "memberships", "teams"
   add_foreign_key "moderation_decisions", "aces", column: "actor_id", on_delete: :nullify
+  add_foreign_key "moderation_escalations", "aces", column: "requested_by_id", on_delete: :nullify
+  add_foreign_key "moderation_escalations", "aces", column: "resolved_by_id", on_delete: :nullify
+  add_foreign_key "moderation_escalations", "aces", column: "subject_ace_id", on_delete: :nullify
   add_foreign_key "moderator_notes", "aces", column: "moderator_id", on_delete: :nullify
   add_foreign_key "moderator_notes", "aces", on_delete: :cascade
   add_foreign_key "mutes", "aces", column: "ended_by_id", on_delete: :nullify

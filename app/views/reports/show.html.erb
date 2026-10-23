@@ -6,7 +6,10 @@
   <p><%= @reason_counts.map { |reason, count| "#{reason}: #{count}" }.join(" · ").presence || "No open reports." %></p>
   <%= link_to "Author profile", ace_profile_path(@post.created_by), class: "tool-link" %>
   <%= link_to "Moderation history", moderation_item_path(type: "ShoutOut", id: @post.id), class: "tool-link" %>
-  <% if @own_report %><p>Another reviewer must decide your report.</p>
+  <% if @escalation %>
+    <p>An admin must resolve this case through Escalations.</p>
+    <%= link_to "View escalation", escalation_path(@escalation), class: "tool-button" %>
+  <% elsif @own_report %><p>Another reviewer must decide your report.</p>
   <% elsif @last_report_id && @post.approved? && @post.funding_status == "spent" %>
     <%= form_with url: report_path(@post), method: :patch, class: "payment-form" do |form| %>
       <%= form.hidden_field :revision, value: @post.moderation_revision %><%= form.hidden_field :last_report_id, value: @last_report_id %>

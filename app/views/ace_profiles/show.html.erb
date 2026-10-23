@@ -8,6 +8,7 @@
     <% unless @own_profile %><p><%= @report_count %> reports received · <%= @open_report_count %> open</p><% end %>
   </section>
   <% if @can_manage %><%= render "posting_forms" %><% else %><p class="round-caption">Self-actions and actions against admins are unavailable. An admin must handle another moderator's account.</p><% end %>
+  <%= render "escalations/entry", subject: @ace, escalation: @escalation %>
   <nav class="history-tabs ace-moderation-tabs" aria-label="Ace moderation sections">
     <% [["submissions", "Submissions"], ["reports", "Reports"], ["actions", "Warnings and mutes"], ["notes", "Moderator notes"]].each do |tab, label| %><%= link_to label, ace_profile_path(@ace, tab: tab), aria: { current: @tab == tab ? "page" : nil } %><% end %>
   </nav>

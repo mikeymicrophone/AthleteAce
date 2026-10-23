@@ -50,7 +50,9 @@ module Moderation
     private
 
     def scope(model)
+      escalated_ids = ModerationEscalation.open.where(subject_type: model.name).select(:subject_id)
       model = model.where.not(funding_status: "unfunded") if model == ShoutOut
+      model = model.where.not(id: escalated_ids)
       model.where(moderation_status: status).where.not(created_by_id: @reviewer.id).or(
         model.where(moderation_status: status, created_by_id: nil)
       )

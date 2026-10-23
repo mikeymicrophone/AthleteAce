@@ -4,7 +4,7 @@ module Moderation
     class Forbidden < StandardError; end
     ACTIONS = { "approve" => "approved", "reject" => "rejected", "hide" => "hidden", "reopen" => "pending" }.freeze
 
-    def self.call(record:, actor:, action:, revision:, status:, reason: nil)
+    def self.call(record:, actor:, action:, revision:, status:, reason: nil, escalation: nil)
       raise Forbidden, "Review requires a moderator or admin." unless actor.can_moderate?
       raise Forbidden, "Another reviewer must decide your submission." if record.created_by_id == actor.id
       destination = ACTIONS.fetch(action) { raise ArgumentError, "Unknown review action" }
@@ -12,6 +12,10 @@ module Moderation
       raise ArgumentError, "The reason is too long." if reason.to_s.length > 2000
 
       record.with_lock(requires_new: true) do
+        open_escalation = ModerationEscalation.open.find_by(subject: record)
+        if open_escalation && (!actor.admin? || escalation&.id != open_escalation.id)
+          raise Forbidden, "This submission is escalated. An admin must resolve it through Escalations."
+        end
         if record.is_a?(ShoutOut) && action == "hide" && record.shout_out_reports.open.where(reporter_id: actor.id).exists?
           raise Forbidden, "Another reviewer must decide your report."
         end

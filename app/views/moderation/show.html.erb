@@ -16,7 +16,9 @@
   <%= render "shortcuts", review: true %>
   <section class="round-panel"><h2 class="profile-section-title">Submission</h2><%= render "aces/attribution", ace: @item.created_by %><dl class="moderation-fields"><% @item.moderation_snapshot.except("id", "type").each do |key, value| %><dt><%= key.humanize %></dt><dd><%= value %></dd><% end %></dl></section>
   <section class="round-panel"><h2 class="profile-section-title">Your decision</h2>
-    <% if @item.created_by_id == current_ace.id %>
+    <% if @escalation %>
+      <p>An admin must resolve this case through Escalations.</p>
+    <% elsif @item.created_by_id == current_ace.id %>
       <p>Another reviewer must decide your submission.</p>
     <% else %>
       <%= form_with url: moderation_item_path(type: @item.class.name, id: @item.id, **queue_context), method: :patch do |form| %>
@@ -30,6 +32,7 @@
       <% end %>
     <% end %>
   </section>
+  <%= render "escalations/entry", subject: @item, escalation: @escalation %>
   <section class="round-panel"><h2 class="profile-section-title">AI comparison</h2><p class="round-intro">Jev and Luna offer recommendations. Your decision controls publication.</p>
     <ul class="moderation-providers" aria-label="AI provider configuration">
       <% @providers.each do |client| %>

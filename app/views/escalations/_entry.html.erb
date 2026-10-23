@@ -1,0 +1,13 @@
+<% if escalation %>
+  <aside class="moderation-notice"><p>This case is waiting for an admin.</p><%= link_to "View escalation", escalation_path(escalation), class: "tool-button" %></aside>
+<% elsif subject.is_a?(Ace) ? subject.id != current_ace.id : subject.created_by_id != current_ace.id %>
+  <details class="round-panel"><summary class="profile-section-title">Escalate to admin</summary>
+    <p class="round-caption">Capture this case for an admin. <%= subject.is_a?(Ace) ? "Account permissions stay unchanged." : "It leaves the normal queue until the escalation is resolved." %> Your reason stays private to reviewers who can view the case.</p>
+    <%= form_with url: escalations_path do |form| %>
+      <%= form.hidden_field :subject_type, value: subject.class.name %><%= form.hidden_field :subject_id, value: subject.id %><%= form.hidden_field :request_key, value: SecureRandom.uuid %>
+      <% unless subject.is_a?(Ace) %><%= form.hidden_field :revision, value: subject.moderation_revision %><%= form.hidden_field :captured_status, value: subject.moderation_status %><% end %>
+      <%= form.label :reason, "Escalation reason", for: "escalation-reason" %><%= form.text_area :reason, id: "escalation-reason", required: true, maxlength: 2000, class: "moderation-reason" %>
+      <%= form.submit "Escalate to admin", class: "tool-button" %>
+    <% end %>
+  </details>
+<% end %>

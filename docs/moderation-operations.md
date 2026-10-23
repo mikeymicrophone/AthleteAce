@@ -65,7 +65,7 @@ Totals cover every matching event, not just the current page. Approved events in
 
 **Export CSV** downloads all matching events regardless of the current page. The limit is 10,000 events. An oversized export returns HTTP 400 with a request to narrow the filters, rather than dropping rows. An empty export contains its header only. The fields are event ID, UTC timestamp, subject type and ID, action, revision, previous and next status, actor ID and handle, recorded name and decision reason. It excludes account emails, report notes, provider evaluations, financial details and arbitrary snapshot fields. Spreadsheet-sensitive text receives a leading apostrophe, including handles beginning with @ and cells beginning with formula characters after whitespace. CSV quoting preserves commas and line breaks.
 
-HTML and CSV require moderator or admin access and send private, no-store cache headers. Reading or exporting does not change moderation, content or credit. Report **Keep live** resolutions remain in the reports inbox, outside this global event log. AI comparisons remain on each submission. Escalation and specialized admin-overturn workflows remain separate work.
+HTML and CSV require moderator or admin access and send private, no-store cache headers. Reading or exporting does not change moderation, content or credit. Report **Keep live** resolutions remain in the reports inbox, outside this global event log. AI comparisons remain on each submission. [Escalations](moderation-escalations.md) keep private handoff reasons outside the global log and export. A content decision made through an escalation enters the normal decision log with its resolution reason. Specialized admin-overturn workflows remain separate work.
 
 ## Warn or mute an ace
 

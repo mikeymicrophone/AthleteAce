@@ -9,6 +9,7 @@ class AceProfilesController < ApplicationController
     @tab = params[:tab].presence || "submissions"
     raise ActionController::BadRequest unless %w[submissions reports actions notes].include?(@tab)
     @own_profile = @ace.id == current_ace.id
+    @escalation = ModerationEscalation.open.visible_to(current_ace).find_by(subject: @ace) unless @own_profile
     @can_manage = Moderation::PostingAction.allowed?(current_ace, @ace)
     @active_mute = @ace.active_posting_mute
     @warning_count = @ace.warnings.count

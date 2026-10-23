@@ -44,6 +44,7 @@ Rails.application.routes.draw do
 
   get "moderate", to: "moderation#index", as: :moderation
   get "moderate/log", to: "moderation#log", as: :moderation_log
+  resources :escalations, path: "moderate/escalations", only: [ :index, :show, :create, :update ]
   resources :reports, path: "moderate/reports", only: [ :index, :show, :update ]
   get "moderate/:type/:id", to: "moderation#show", as: :moderation_item
   patch "moderate/:type/:id", to: "moderation#update"

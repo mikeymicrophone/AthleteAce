@@ -6,6 +6,9 @@ module Moderation
       raise ArgumentError, "Choose Keep live or Hide." unless %w[keep hide].include?(action)
       raise ArgumentError, "Give a reason of at most 2000 characters." if reason.blank? || reason.length > 2000
       post.with_lock(requires_new: true) do
+        if ModerationEscalation.open.exists?(subject: post)
+          raise Review::Forbidden, "An admin must resolve the escalation before deciding reports."
+        end
         reports = post.shout_out_reports.open
         raise Review::Forbidden, "Another reviewer must decide your report." if reports.where(reporter_id: actor.id).exists?
         unless post.approved? && post.funding_status == "spent" && post.moderation_revision == revision &&

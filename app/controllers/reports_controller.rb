@@ -23,6 +23,7 @@ class ReportsController < ApplicationController
     @open_reports = @post.shout_out_reports.open
     @last_report_id = @open_reports.maximum(:id)
     @own_report = @open_reports.where(reporter_id: current_ace.id).exists?
+    @escalation = ModerationEscalation.open.visible_to(current_ace).find_by(subject: @post)
     @reason_counts = @open_reports.group(:reason).count
     @pagy, @reports = pagy(@post.shout_out_reports.includes(:reporter, :resolved_by).order(created_at: :desc, id: :desc), limit: 25)
   end

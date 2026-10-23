@@ -1,0 +1,8 @@
+<% content_for :title, "Escalations" %>
+<div class="moderation-page">
+  <header class="browse-header"><div><p class="eyebrow">Moderate</p><h1 class="page-title">Escalations</h1><p class="round-intro"><%= pluralize @open_count, "open case" %> · Admin resolution required</p></div></header>
+  <nav class="history-tabs" aria-label="Escalation status"><% %w[open resolved].each do |status| %><%= link_to status.titleize, escalations_path(status: status), aria: { current: @status == status ? "page" : nil } %><% end %></nav>
+  <% if @escalations.empty? %><section class="round-panel"><h2>No <%= @status %> escalations.</h2><p>Cases escalated from submissions and ace profiles appear here.</p></section><% end %>
+  <ol class="moderation-list"><% @escalations.each do |escalation| %><li class="moderation-row"><div><p class="eyebrow"><%= escalation.subject_type %> · <%= escalation.resolved_at? ? "Resolved" : "Open" %></p><h2><%= link_to escalation.subject_name, escalation_path(escalation) %></h2><p><%= escalation.reason %></p><p class="round-caption">Escalated <%= l escalation.created_at, format: :long %> · <%= escalation.requested_by ? ace_identity(escalation.requested_by) : "Deleted reviewer" %></p></div></li><% end %></ol>
+  <%== @pagy.series_nav if @pagy.pages > 1 %>
+</div>

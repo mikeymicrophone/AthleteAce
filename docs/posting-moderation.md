@@ -45,7 +45,7 @@ Warnings, mutes and notes are separate from the content Decision log. The log co
 | Identity and privacy | Staff actions can expose notes or silently become account suspension. | Explicit: hierarchy and self-action restrictions, private internal notes, personal reasons only, unchanged sign-in/Play/wallet permissions. |
 | History | Current content or deleted actors can rewrite the apparent warning. | Explicit: retain related names and action history. Show deleted-reviewer attribution without inventing an identity. |
 
-The six acceptance probes are explicitly resolved. No backstop or judgment items remain. Escalation controls and account suspension remain separate work.
+The six acceptance probes are explicitly resolved. No backstop or judgment items remain. [Escalation controls](moderation-escalations.md) hand account cases to another admin without changing permissions. Account suspension remains separate work.
 
 ## Verify locally
 
