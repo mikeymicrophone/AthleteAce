@@ -10,6 +10,16 @@ The team directory supports name, abbreviation, and entity-code search, plus lea
 
 Search treats SQL wildcards literally and uses at most 80 Unicode code points after trimming. Both directories sort by name with ID as the tie-breaker and paginate 25 records at a time. Invalid filter values return HTTP 400. An unsupported record kind returns HTTP 404.
 
+## Download filtered catalog data
+
+**Export filtered CSV** downloads every matching player or team, regardless of the current table page. The download preserves the directory's filters and name/ID ordering. Empty results produce a header-only CSV. Exports above 10,000 records return HTTP 400 with a request to narrow the filters; they never silently truncate. Access and private cache rules are the same as the HTML directory.
+
+Player columns include local record ID, entity code, names, JSON-encoded nicknames, birthdate, current position, activity, sport code/name, current team and league codes/names, JSON-encoded photo URLs, debut/draft years, and UTC update time. Team columns include local record ID, entity code, identity fields, league/division codes and names, colors, current player count, stadium code/name, website/logo URLs, founding year, and UTC update time. Missing scalar values are blank, including unknown activity or missing entity codes. Activity otherwise uses `true` or `false`. Array values retain JSON `null` versus `[]`. Codes are the stored preferred codes; aliases are not exported.
+
+These exports describe current fields and associations. They do not infer assignments from contracts or historical rosters. Local numeric IDs cannot identify records across rebuilt databases. Use entity codes for matching when present. Account identities, correction reasons, biographies, and arbitrary model fields are excluded.
+
+CSV text that starts with a spreadsheet formula marker or leading tab/newline receives an apostrophe prefix, including markers after whitespace. Embedded commas and newlines use CSV quoting. The download does not modify stored values or correction history. This spreadsheet-safe review format is not an importable seed manifest, complete backup, or automatic correction-replay format. The JSONL correction export below retains exact audited changes for seed maintenance.
+
 ## Save and explain a correction
 
 Player edits support first name, last name, nicknames, birthdate, current position, debut year, draft year, activity, biography paragraphs, and photo URLs. Team edits support territory, mascot, abbreviation, founded year, website URL, logo URL, and primary and secondary colors. Entity codes, associations, jersey assignments, and historical participation are not editable through these forms.

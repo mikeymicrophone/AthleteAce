@@ -15,6 +15,10 @@
     <div><%= form.label :edited, "Corrections" %><%= form.select :edited, options_for_select([["All records", ""], ["Has edit history", "yes"]], @directory.edited), {}, class: "account-input" %></div>
     <div class="page-actions"><%= form.submit "Filter sports data", class: "tool-button" %><%= link_to "Clear", admin_catalog_records_path(kind: @directory.kind), class: "tool-link" %></div>
   <% end %>
+  <div class="page-actions">
+    <%= link_to "Export filtered CSV", admin_catalog_records_path(params.permit(:kind, :q, :league_id, :team_id, :position, :status, :photo, :edited).to_h.symbolize_keys.merge(format: :csv)), class: "tool-button", data: { turbo: false } %>
+    <p class="round-caption">All matching records, up to 10,000. Larger exports require narrower filters.</p>
+  </div>
   <p class="round-caption"><%= pluralize @pagy.count, "matching record" %> · Sorted by name · Changes save immediately and appear in correction history.</p>
   <div class="people-table"><table><thead><tr><th><%= @directory.kind.singularize.titleize %></th><th>League</th><% if @directory.kind == "players" %><th>Team</th><th>Position</th><th>Status</th><th>Photo</th><% else %><th>Division</th><th>Players</th><th>Colors</th><th>Stadium</th><% end %><th>Corrections</th></tr></thead><tbody>
     <% @records.each do |record| %>

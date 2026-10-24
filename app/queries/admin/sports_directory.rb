@@ -1,5 +1,12 @@
+require "csv"
+
 module Admin
   class SportsDirectory
+    EXPORT_LIMIT = 10_000
+    CSV_HEADERS = {
+      "players" => %w[record_id entity_code first_name last_name nicknames_json birthdate current_position active sport_code sport_name current_team_code current_team_name current_league_code current_league_name photo_urls_json debut_year draft_year updated_at_utc],
+      "teams" => %w[record_id entity_code territory mascot abbreviation league_code league_name division_code division_name primary_color secondary_color text_color current_player_count stadium_code stadium_name website_url logo_url founded_year updated_at_utc]
+    }.freeze
     attr_reader :kind, :query, :league_id, :team_id, :status, :position, :photo, :edited
 
     def initialize(params)
@@ -46,6 +53,39 @@ module Admin
       edits = CatalogEdit.where(record_type: @model.name)
       @model.where(entity_code: edits.select(:entity_code)).or(
         @model.where(entity_code: nil, id: edits.where(entity_code: nil).select(:record_id)))
+    end
+
+    def csv
+      scope = records
+      scope = scope.includes(:sport) if kind == "players"
+      rows = scope.limit(EXPORT_LIMIT + 1).to_a
+      raise ArgumentError, "Export exceeds #{EXPORT_LIMIT} records. Narrow the filters." if rows.size > EXPORT_LIMIT
+
+      CSV.generate(encoding: "UTF-8") do |csv|
+        csv << CSV_HEADERS.fetch(kind)
+        rows.each do |record|
+          csv << csv_values(record).map { |value| value.is_a?(String) && value.match?(/\A(?:[\t\r\n]|[[:space:]\x00-\x1f]*[=+\-@])/) ? "'#{value}" : value }
+        end
+      end
+    end
+
+    private
+
+    def csv_values(record)
+      if kind == "players"
+        team = record.team
+        league = team&.league
+        [ record.id, record.entity_code, record.first_name, record.last_name, record.nicknames.to_json,
+          record.birthdate&.iso8601, record.current_position, record.active, record.sport&.entity_code, record.sport&.name,
+          team&.entity_code, team&.name, league&.entity_code, league&.name, record.photo_urls.to_json,
+          record.debut_year, record.draft_year, record.updated_at.utc.iso8601(6) ]
+      else
+        [ record.id, record.entity_code, record.territory, record.mascot, record.abbreviation,
+          record.league&.entity_code, record.league&.name, record.division&.entity_code, record.division&.name,
+          record.primary_color, record.secondary_color, record.text_color, record.player_count,
+          record.stadium&.entity_code, record.stadium&.name, record.url, record.logo_url, record.founded_year,
+          record.updated_at.utc.iso8601(6) ]
+      end
     end
   end
 end

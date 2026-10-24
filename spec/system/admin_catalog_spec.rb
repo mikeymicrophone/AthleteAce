@@ -10,7 +10,11 @@ RSpec.describe "Admin sports data workflow", type: :system do
     page.driver.browser.execute_cdp "Emulation.setDeviceMetricsOverride", width: 390, height: 844, deviceScaleFactor: 1, mobile: false
     fill_in "Search players", with: "Jalen"
     click_button "Filter sports data"
+    expect(page).to have_current_path(/q=Jalen/)
     expect(page).to have_content("Jalen Brunson")
+    export = find_link("Export filtered CSV")
+    expect(URI.parse(export[:href]).path).to eq(admin_catalog_records_path(format: :csv))
+    expect(Rack::Utils.parse_query(URI.parse(export[:href]).query)).to include("q" => "Jalen", "kind" => "players")
     expect(page.evaluate_script("document.documentElement.scrollWidth <= window.innerWidth")).to be(true)
     save_screenshot("/tmp/screenshots/catalog-players-mobile.png")
     click_link "Jalen Brunson"
@@ -28,6 +32,8 @@ RSpec.describe "Admin sports data workflow", type: :system do
     click_link "Correction history"
     expect(page).to have_content("Reason not supplied")
     click_link "Jalen Brunson · Edit ##{first.id}"
+    expect(page).to have_current_path(admin_catalog_edit_path(first))
+    expect(page).to have_no_css("html[data-turbo-preview]")
     fill_in "Why did you make this change?", with: "The roster gives his full first name."
     click_button "Save reason"
     expect(page).to have_content("Reason saved.")

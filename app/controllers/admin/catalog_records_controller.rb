@@ -6,13 +6,20 @@ class Admin::CatalogRecordsController < ApplicationController
 
   def index
     @directory = Admin::SportsDirectory.new(params)
-    @counts = { players: Player.count, teams: Team.count }
-    @leagues = League.order(:name)
-    @teams = Team.order(:territory, :mascot)
-    @pagy, @records = pagy(@directory.records, limit: 25)
-    @edited_ids = @directory.edited_records.where(id: @records.map(&:id)).pluck(:id)
+    respond_to do |format|
+      format.html do
+        @counts = { players: Player.count, teams: Team.count }
+        @leagues = League.order(:name)
+        @teams = Team.order(:territory, :mascot)
+        @pagy, @records = pagy(@directory.records, limit: 25)
+        @edited_ids = @directory.edited_records.where(id: @records.map(&:id)).pluck(:id)
+      end
+      format.csv do
+        send_data @directory.csv, type: "text/csv; charset=utf-8", filename: "athleteace-#{@directory.kind}-#{Date.current.iso8601}.csv"
+      end
+    end
   rescue ArgumentError => error
-    render plain: error.message, status: :bad_request
+    render plain: error.message, content_type: "text/plain", status: :bad_request
   end
 
   def edit
