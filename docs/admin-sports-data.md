@@ -1,6 +1,6 @@
 # Admin sports data
 
-Admin **Sports data** provides player and team search, editing, and correction history. Fans and moderators cannot access these pages. Responses use private, no-store cache headers.
+Admin **Sports data** provides player and team search, editing, correction history, and read-only game inspection. Fans and moderators cannot access these pages. Responses use private, no-store cache headers.
 
 ## Directory
 
@@ -9,6 +9,18 @@ The player directory supports name, nickname, and entity-code search, plus leagu
 The team directory supports name, abbreviation, and entity-code search, plus league and edit-history filters. It shows division, current player count, colors, and stadium. Teams have no activity field. **Other sports data** opens the existing catalog for other sports entities.
 
 Search treats SQL wildcards literally and uses at most 80 Unicode code points after trimming. Both directories sort by name with ID as the tie-breaker and paginate 25 records at a time. Invalid filter values return HTTP 400. An unsupported record kind returns HTTP 404.
+
+## Inspect games and participation
+
+**Games** opens the schedule directory. Search matches game names and preferred entity codes, with literal wildcard handling and an 80-code-point limit. Filters cover competition, participating season, participating team, inclusive start-date bounds, and presence of recorded appearances. Team and season must match the same participating campaign. This supports cross-league games without relying on a game-level season or the teams' current league assignments.
+
+Each game appears once, even with multiple participants or competition memberships. Results show campaign names, season names, competition round summaries, and recorded appearance counts. Games sort by start date descending, then ID descending, with unknown dates last. Each page contains up to 25 games. Invalid filters or inverted date ranges return HTTP 400.
+
+A game detail page separates **Appearances** from **Roster entries**, with 25 entries per page. Appearances show recorded player, campaign, jersey number, starter status, and statistics. Unknown starter status stays Unknown. The directory's appearance filter checks for any recorded appearance, not complete participation coverage.
+
+Roster entries come from observations whose `details.game_code` exactly matches the game's preferred `entity_code` and whose campaign participated in that game. The page shows roster kind, coverage, effective date, observation time, entry status, jersey number, and entry details. A game without an entity code has no matched roster observations. Alias-code resolution and a normalized roster-to-game association remain outside this view.
+
+Same-day rosters, contracts, and current player team fields do not establish game availability or actual participation. Missing appearances do not establish that nobody played. Missing roster entries do not establish absence. These pages read existing records without creating, repairing, or reseeding them. All routes require an admin and return private, no-store cache headers.
 
 ## Download filtered catalog data
 

@@ -20,6 +20,7 @@ module ShellNavigation
       when "feed", "feed_posts", "shout_out_leaderboards", "shout_out_reactions", "shout_out_drafts", "shout_outs", "wallets", "stripe_purchases", "shout_out_reports" then "feed"
       when "moderation", "reports", "escalations" then "mod"
       when "admin", "people", "shout_out_revenues", "catalog_records", "catalog_edits" then "admin"
+      when "games" then "admin" if controller_path == "admin/games"
       end
       candidate = owned || params[:side] || session[:side]
       candidate.presence_in(available_sides) || default_side

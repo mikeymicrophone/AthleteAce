@@ -16,6 +16,7 @@
     <div class="page-actions"><%= form.submit "Filter sports data", class: "tool-button" %><%= link_to "Clear", admin_catalog_records_path(kind: @directory.kind), class: "tool-link" %></div>
   <% end %>
   <div class="page-actions">
+    <%= link_to "Games", admin_games_path, class: "tool-button" %>
     <%= link_to "Export filtered CSV", admin_catalog_records_path(params.permit(:kind, :q, :league_id, :team_id, :position, :status, :photo, :edited).to_h.symbolize_keys.merge(format: :csv)), class: "tool-button", data: { turbo: false } %>
     <p class="round-caption">All matching records, up to 10,000. Larger exports require narrower filters.</p>
   </div>
