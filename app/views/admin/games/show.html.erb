@@ -6,7 +6,7 @@
     <% @contestants.each do |entry| %><p><%= entry.campaign.name %> · <%= entry.campaign.season.name %></p><% end %>
     <% if @contestants.empty? %><p>No recorded participants.</p><% end %>
     <h2 class="profile-section-title">Competitions</h2>
-    <% @memberships.each do |membership| %><p><%= link_to contest_display_name(membership.contest), contest_path(membership.contest, side: "admin") %> · <%= competition_game_summary(membership) %></p><% end %>
+    <% @memberships.each do |membership| %><p><%= link_to contest_display_name(membership.contest), admin_competition_path(membership.contest) %> · <%= competition_game_summary(membership) %></p><% end %>
     <% if @memberships.empty? %><p>No linked competitions.</p><% end %>
   </section>
   <div class="page-actions"><%= link_to "Appearances", admin_game_path(@game), class: "tool-button", aria: { current: @tab == "appearances" ? "page" : nil } %><%= link_to "Roster entries", admin_game_path(@game, tab: "rosters"), class: "tool-button", aria: { current: @tab == "rosters" ? "page" : nil } %></div>

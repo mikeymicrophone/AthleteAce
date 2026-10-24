@@ -1,6 +1,6 @@
 # Admin sports data
 
-Admin **Sports data** provides player and team search, editing, correction history, and read-only game inspection. Fans and moderators cannot access these pages. Responses use private, no-store cache headers.
+Admin **Sports data** provides player and team search, editing, correction history, and read-only game and competition inspection. Fans and moderators cannot access these pages. Responses use private, no-store cache headers.
 
 ## Directory
 
@@ -9,6 +9,18 @@ The player directory supports name, nickname, and entity-code search, plus leagu
 The team directory supports name, abbreviation, and entity-code search, plus league and edit-history filters. It shows division, current player count, colors, and stadium. Teams have no activity field. **Other sports data** opens the existing catalog for other sports entities.
 
 Search treats SQL wildcards literally and uses at most 80 Unicode code points after trimming. Both directories sort by name with ID as the tie-breaker and paginate 25 records at a time. Invalid filter values return HTTP 400. An unsupported record kind returns HTTP 404.
+
+## Inspect competitions and title awards
+
+**Competitions** lists stored competitions separately from Games. Search matches names and preferred entity codes, treats wildcards literally, and uses at most 80 code points. Filters cover exact stored kind, participating season, participating team, and presence of recorded title awards. Kind options come from stored competition records. Unknown kinds return no matches.
+
+Team and season filters match the same entrant campaign. A cross-league cup can match several participating seasons while its own assigned season remains unset. The assigned season column reports the stored field only. Results show recorded entrant, linked game, and title-award counts without loading every entrant. Competitions sort by start date descending, then ID descending, with unknown dates last. Each page contains up to 25 competitions. Invalid filter shapes, IDs, or title filters return HTTP 400.
+
+Competition detail shows context, dates, assigned season, format rounds, and all stored format rules. Custom JSON fields remain visible in **All recorded rules**. **Entrants** shows campaign names and seasons, placing, wins, and losses. Unknown standings remain Unknown; recorded zeroes stay zero. **Title awards** shows each recorded title's name, key, code, winning campaign, season, and award date. Both tabs paginate 25 records at a time.
+
+Title records are the source for award counts and winners. Standings, legacy champion fields, and missing records do not create implied awards. **View games** opens the Games directory with this competition selected. Game membership links return to the Admin competition page, including round and game-number summaries.
+
+These pages require an admin, return private, no-store cache headers, and do not change competition, award, game, or seed records. Editing competitions, generating schedules, and assigning title awards remain outside this view.
 
 ## Inspect games and participation
 

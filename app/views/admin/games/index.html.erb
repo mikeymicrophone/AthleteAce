@@ -1,6 +1,7 @@
 <% content_for :title, "Sports data · Games" %>
 <div class="moderation-page people-page">
   <%= link_to "Back to sports data", admin_catalog_records_path, class: "tool-link" %>
+  <%= link_to "Competitions", admin_competitions_path, class: "tool-link" %>
   <header class="browse-header"><div><p class="eyebrow">Admin · Sports data</p><h1 class="page-title">Games</h1><p>Inspect schedules and recorded participation.</p></div></header>
   <%= form_with url: admin_games_path, method: :get, class: "people-filters" do |form| %>
     <div><%= form.label :q, "Search games" %><%= form.search_field :q, value: @directory.query, maxlength: 80, placeholder: "Name or entity code", class: "account-input" %></div>
@@ -17,7 +18,7 @@
     <% @games.each do |game| %>
       <tr><td><%= link_to contest_display_name(game), admin_game_path(game) %><p class="round-caption"><%= game.entity_code.presence || "No entity code" %></p></td><td><%= game.begin_date&.iso8601 || "Unknown" %></td>
         <td><% game.contestants.sort_by(&:id).each do |entry| %><p><%= entry.campaign.name %> · <%= entry.campaign.season.name %></p><% end %><% if game.contestants.empty? %>No recorded participants<% end %></td>
-        <td><% game.competition_memberships.sort_by(&:id).each do |membership| %><p><%= contest_display_name(membership.contest) %> · <%= competition_game_summary(membership) %></p><% end %><% if game.competition_memberships.empty? %>Unlinked<% end %></td>
+        <td><% game.competition_memberships.sort_by(&:id).each do |membership| %><p><%= link_to contest_display_name(membership.contest), admin_competition_path(membership.contest) %> · <%= competition_game_summary(membership) %></p><% end %><% if game.competition_memberships.empty? %>Unlinked<% end %></td>
         <td><%= @appearance_counts.fetch(game.id, 0) %></td></tr>
     <% end %>
   </tbody></table></div>

@@ -35,6 +35,7 @@ Rails.application.routes.draw do
   resources :player_groups
   get "browse", to: "browse#index", as: :browse
   namespace :admin do
+    resources :competitions, only: [ :index, :show ]
     resources :games, only: [ :index, :show ]
     resources :people, only: [ :index, :show, :update ]
     resources :catalog_records, path: "sports-data", only: [ :index, :edit, :update ]
