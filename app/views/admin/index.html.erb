@@ -1,8 +1,40 @@
 <% content_for :title, "Admin overview" %>
-<header class="browse-header"><div><p class="eyebrow">Admin</p><h1 class="page-title">Overview</h1></div></header>
+<header class="browse-header"><div><p class="eyebrow">Admin</p><h1 class="page-title">Overview</h1><p class="round-caption">As of <%= @overview.as_of.strftime("%B %-d, %Y · %H:%M:%S") %> UTC · today so far</p></div></header>
+<section class="shell-overview admin-today" aria-label="Today and open cases">
+  <% [["Cash purchases today", number_to_currency(@overview.cash_today / 100.to_d), "cash"], ["New accounts today", number_with_delimiter(@overview.new_aces_today), "accounts"], ["Review events today", number_with_delimiter(@overview.review_total), "reviews"], ["Open escalations", number_with_delimiter(@overview.escalation_count), "escalations"]].each do |label, value, key| %>
+    <div class="round-panel"><p class="eyebrow"><%= label %></p><strong data-overview="<%= key %>"><%= value %></strong></div>
+  <% end %>
+</section>
 <section class="shell-overview" aria-label="Application totals">
   <% [["Aces", @ace_count], ["Players", @player_count], ["Teams", @team_count], ["Waiting review", shell_pending_count]].each do |label, count| %>
     <div class="round-panel"><p class="eyebrow"><%= label %></p><strong><%= number_with_delimiter(count) %></strong></div>
   <% end %>
 </section>
 <div class="page-actions"><%= link_to "People", admin_people_path, class: "tool-button" %><%= link_to "Escalations", escalations_path, class: "tool-button" %><%= link_to "Shout-out revenue", shout_out_revenue_path, class: "tool-button" %><%= link_to "Sports data", admin_catalog_records_path, class: "tool-button" %><%= link_to "Content catalog", browse_path(section: "content", side: "admin"), class: "tool-button" %><%= link_to "Review queue", moderation_path, class: "tool-button" %></div>
+<section class="round-panel admin-cash" aria-labelledby="admin-cash-title">
+  <h2 id="admin-cash-title" class="profile-section-title">Cash purchases · last 14 days</h2>
+  <p><%= number_to_currency(@overview.cash_total / 100.to_d) %> · <%= @overview.cash_daily.keys.first %> to <%= @overview.today %> · UTC</p>
+  <p class="round-caption">Verified purchases recorded when credit was added. Spending that credit is not another cash payment. Today is incomplete.</p>
+  <% maximum = [@overview.cash_daily.values.max, 1].max %>
+  <ol class="admin-cash-days">
+    <% @overview.cash_daily.each do |date, cents| %>
+      <li data-cash-date="<%= date %>"><time datetime="<%= date %>"><%= date.strftime("%b %-d") %><%= " · today" if date == @overview.today %></time><div class="admin-cash-track" aria-hidden="true"><span style="width: <%= (cents.fdiv(maximum) * 100).round(2) %>%"></span></div><span><%= number_to_currency(cents / 100.to_d) %></span></li>
+    <% end %>
+  </ol>
+</section>
+<section class="round-panel" aria-labelledby="admin-review-title">
+  <h2 id="admin-review-title" class="profile-section-title">Recorded review events today</h2>
+  <p class="round-caption">Approvals, rejections, hides and reopenings with a recorded prior state. Excludes submissions and trusted creation. These are events, not unique posts or a speed ranking.</p>
+  <% if @overview.review_counts.any? %>
+    <ul class="admin-review-counts"><% @overview.review_counts.sort_by { |actor_id, count| [-count, actor_id || 0] }.each do |actor_id, count| %><li><span><%= @overview.reviewers[actor_id]&.public_name || "System or deleted account" %></span><strong><%= pluralize count, "event" %></strong></li><% end %></ul>
+  <% else %><p>No recorded review events today.</p><% end %>
+  <%= link_to "Decision log", moderation_log_path, class: "tool-button" %>
+</section>
+<section class="round-panel" aria-labelledby="admin-escalation-title">
+  <h2 id="admin-escalation-title" class="profile-section-title">Open escalations</h2>
+  <p class="round-caption">Oldest first, showing up to five cases you can view. Your own submissions and account cases are excluded. Some cases need a different admin to resolve.</p>
+  <% if @overview.escalations.any? %>
+    <ul class="admin-escalation-list"><% @overview.escalations.each do |escalation| %><li><div><h3><%= escalation.subject_name %></h3><p class="round-caption"><%= escalation.subject_type %> · <%= escalation.created_at.utc.strftime("%b %-d, %H:%M UTC") %></p></div><%= link_to "View case", escalation_path(escalation), class: "tool-button" %></li><% end %></ul>
+  <% else %><p>No open escalations you can view.</p><% end %>
+  <%= link_to "All escalations", escalations_path, class: "tool-link" %>
+</section>

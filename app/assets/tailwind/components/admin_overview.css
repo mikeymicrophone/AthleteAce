@@ -1,0 +1,11 @@
+.admin-today strong { @apply text-3xl; overflow-wrap: anywhere; }
+.admin-cash-days { @apply grid gap-3 mt-5 text-sm; list-style: none; padding-left: 0; }
+.admin-cash-days li { display: grid; grid-template-columns: 6rem minmax(0, 1fr) 5rem; gap: .6rem; align-items: center; }
+.admin-cash-days li > span { @apply text-right font-mono; overflow-wrap: anywhere; }
+.admin-cash-track { @apply h-3 rounded bg-surface-2 overflow-hidden; }
+.admin-cash-track span { @apply block h-full bg-accent; }
+.admin-review-counts, .admin-escalation-list { @apply grid gap-4 my-5; list-style: none; padding-left: 0; }
+.admin-review-counts li, .admin-escalation-list li { @apply flex flex-wrap justify-between items-center gap-3 border-b border-line pb-3; }
+.admin-escalation-list h3 { @apply font-semibold; overflow-wrap: anywhere; }
+
+.admin-review-counts span { overflow-wrap: anywhere; min-width: 0; }
