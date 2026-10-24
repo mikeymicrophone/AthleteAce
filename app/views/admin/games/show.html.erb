@@ -19,7 +19,7 @@
   <p class="round-caption"><%= pluralize @pagy.count, @tab == "rosters" ? "recorded roster entry" : "recorded appearance" %>. Missing records do not establish absence.</p>
   <div class="people-table"><table><thead><tr><th>Player</th><th>Team</th><th>Jersey</th><th><%= @tab == "rosters" ? "Status" : "Starter" %></th><th>Recorded details</th></tr></thead><tbody>
     <% @entries.each do |entry| %>
-      <tr><td><%= link_to entry.player.name, player_path(entry.player, side: "admin") %><p class="round-caption"><%= entry.entity_code.presence || "No entity code" %></p></td><td><%= (@tab == "rosters" ? entry.roster : entry.contestant).campaign.name %></td><td><%= entry.jersey_number.presence || "Unknown" %></td>
+      <tr><td><%= link_to entry.player.name, admin_player_history_path(entry.player) %><p class="round-caption"><%= entry.entity_code.presence || "No entity code" %></p></td><td><%= (@tab == "rosters" ? entry.roster : entry.contestant).campaign.name %></td><td><%= entry.jersey_number.presence || "Unknown" %></td>
         <td><%= @tab == "rosters" ? entry.status.presence || "Unknown" : entry.starter.nil? ? "Unknown" : entry.starter ? "Yes" : "No" %></td>
         <td><%= (@tab == "rosters" ? entry.details : entry.statistics).to_json %></td></tr>
     <% end %>

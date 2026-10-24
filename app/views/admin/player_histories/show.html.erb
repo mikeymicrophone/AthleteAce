@@ -1,0 +1,13 @@
+<% content_for :title, "#{@player.name} · Player history" %>
+<div class="moderation-page people-page">
+  <div class="page-actions"><%= link_to "Back to players", admin_catalog_records_path(kind: "players"), class: "tool-link" %><%= link_to "Edit profile data", edit_admin_catalog_record_path(@player, kind: "players"), class: "tool-link" %><%= link_to "Public player page", player_path(@player, side: "admin"), class: "tool-link" %></div>
+  <header class="browse-header"><div><p class="eyebrow">Admin · Sports data · Player history</p><h1 class="page-title"><%= @player.name %></h1><p><%= @player.entity_code.presence || "No entity code" %></p><p>Current profile team: <%= @player.team&.name || "Unassigned" %></p></div></header>
+  <p class="round-caption">Contracts, team assignments, roster observations, transactions, and actual appearances are separate recorded facts. Missing records do not establish absence or eligibility. Unknown dates remain unknown.</p>
+  <nav class="page-actions" aria-label="Player history">
+    <% @counts.each do |tab, count| %><%= link_to "#{tab.to_s.humanize} (#{count})", admin_player_history_path(@player, tab: tab), class: "tool-button", aria: { current: @tab == tab.to_s ? "page" : nil } %><% end %>
+  </nav>
+  <p class="round-caption"><%= pluralize @pagy.count, "record" %> · Newest known dates first · Up to 25 per page</p>
+  <%= render @tab %>
+  <% if @records.empty? %><section class="round-panel"><h2>No recorded <%= @tab %>.</h2></section><% end %>
+  <%== @pagy.series_nav if @pagy.pages > 1 %>
+</div>

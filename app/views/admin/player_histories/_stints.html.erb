@@ -1,0 +1,9 @@
+<p class="round-caption">Stints describe team assignments. An unknown end date is not proof of a current assignment or game availability.</p>
+<div class="people-table"><table><thead><tr><th>Team</th><th>Start</th><th>End</th><th>Status</th><th>Contract</th><th>Linked transactions</th><th>Recorded metadata</th></tr></thead><tbody>
+  <% @records.each do |stint| %><tr>
+    <td><%= stint.team.name %><p class="round-caption"><%= stint.entity_code.presence || "No entity code" %></p></td><td><%= stint.start_date&.iso8601 || "Unknown" %></td><td><%= stint.end_date&.iso8601 || "Unknown" %></td><td><%= stint.status.presence || "Unknown" %></td>
+    <td><% if stint.contract %><%= stint.contract.organization.name %><p class="round-caption"><%= stint.contract.entity_code.presence || "Contract ##{stint.contract_id}" %></p><% else %>Not linked<% end %></td>
+    <td><% { "Start" => stint.start_transaction, "End" => stint.end_transaction }.each do |label, event| %><p><%= label %>: <% if event %><%= event.kind %> · <%= event.effective_on&.iso8601 || "Date unknown" %> · <%= event.entity_code.presence || "Transaction ##{event.id}" %><% else %>Not linked<% end %></p><% end %></td>
+    <td><%= render "metadata", source: stint.source, details: stint.details %></td>
+  </tr><% end %>
+</tbody></table></div>

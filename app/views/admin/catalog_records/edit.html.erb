@@ -2,6 +2,7 @@
 <div class="moderation-page people-page">
   <%= link_to "Back to #{@kind}", admin_catalog_records_path(kind: @kind), class: "tool-link" %>
   <header class="browse-header"><div><p class="eyebrow">Admin · Sports data</p><h1 class="page-title">Edit <%= @record.name %></h1><p><%= @record.entity_code.presence || "No entity code" %> · <%= @record.league&.name || "League unknown" %></p></div></header>
+  <% if @kind == "players" %><%= link_to "Player history", admin_player_history_path(@record), class: "tool-button" %><% end %>
   <% if @error %><div role="alert" class="round-panel"><p><%= @error %></p><%= link_to "Reload current record", edit_admin_catalog_record_path(@record, kind: @kind), class: "tool-link" %></div><% end %>
   <section class="round-panel">
     <%= form_with url: admin_catalog_record_path(@record, kind: @kind), method: :patch, class: "people-actions catalog-form" do |form| %>

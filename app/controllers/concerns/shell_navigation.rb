@@ -19,7 +19,7 @@ module ShellNavigation
       when "play", "play_previews", "strength", "game_rounds", "division_guessing_games", "game_attempts" then "play"
       when "feed", "feed_posts", "shout_out_leaderboards", "shout_out_reactions", "shout_out_drafts", "shout_outs", "wallets", "stripe_purchases", "shout_out_reports" then "feed"
       when "moderation", "reports", "escalations" then "mod"
-      when "admin", "people", "shout_out_revenues", "catalog_records", "catalog_edits", "competitions" then "admin"
+      when "admin", "people", "shout_out_revenues", "catalog_records", "catalog_edits", "competitions", "player_histories" then "admin"
       when "games" then "admin" if controller_path == "admin/games"
       end
       candidate = owned || params[:side] || session[:side]

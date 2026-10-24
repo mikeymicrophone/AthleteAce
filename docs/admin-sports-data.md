@@ -10,6 +10,20 @@ The team directory supports name, abbreviation, and entity-code search, plus lea
 
 Search treats SQL wildcards literally and uses at most 80 Unicode code points after trimming. Both directories sort by name with ID as the tie-breaker and paginate 25 records at a time. Invalid filter values return HTTP 400. An unsupported record kind returns HTTP 404.
 
+## Trace a player's recorded history
+
+**Player history** opens from the player edit form or a player's row in an Admin game. The page separates the current profile team from five historical tabs: **Stints**, **Contracts**, **Transactions**, **Rosters**, and **Appearances**. Each tab shows its full record count and paginates 25 rows. Only records associated with that player appear.
+
+Stints show recorded team assignments, date bounds, status, linked contract organization, and explicitly linked start and end transactions. An unknown end date does not prove a current assignment. Contracts show the organization, dates, optional legacy team, and recorded details. Neither record establishes game availability.
+
+Transactions show the player's entry in each recorded event, including kind, effective date, organization and team endpoints, event metadata, and player-entry details. Effective dates use the existing day-resolution `effective_on` field. The page does not fabricate exact event times or apply transactions to stints or contracts. A transaction linked from a stint can appear there without a corresponding player-entry record in the Transactions tab.
+
+Rosters show campaign and season, roster kind and coverage, effective date, UTC observation time, availability status, jersey number, and metadata. Roster observations remain separate from actual appearances. Appearances show the recorded game, campaign and season, jersey number, starter status, statistics, and metadata. Game links open the Admin game page. Missing records do not establish absence or eligibility.
+
+Tabs sort by their effective, start, or game date descending, with unknown dates last. Record IDs break ties deterministically. Unknown dates and starter status remain Unknown. Recorded zero statistics and jersey number `00` remain intact. Observation source and detail mappings are escaped JSON inside expandable sections. Contracts have a details field without a separate observation source.
+
+The history route requires an admin and returns private, no-store cache headers. Invalid tabs return HTTP 400, and missing players return HTTP 404. These views do not edit history, infer stints from current teams, replay transactions, or change seed records. **Edit profile data** returns to the existing audited correction form.
+
 ## Inspect competitions and title awards
 
 **Competitions** lists stored competitions separately from Games. Search matches names and preferred entity codes, treats wildcards literally, and uses at most 80 code points. Filters cover exact stored kind, participating season, participating team, and presence of recorded title awards. Kind options come from stored competition records. Unknown kinds return no matches.
