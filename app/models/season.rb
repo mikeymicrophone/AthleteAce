@@ -4,6 +4,7 @@ class Season < ApplicationRecord
   belongs_to :champion, class_name: "Team", optional: true
   belongs_to :championship_contest, class_name: "Contest", optional: true
   has_many :campaigns, dependent: :destroy
+  has_many :title_awards, through: :campaigns
   has_many :teams, through: :campaigns
   has_many :activations, through: :campaigns
   has_many :contests, dependent: :destroy

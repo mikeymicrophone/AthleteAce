@@ -9,6 +9,7 @@ class Campaign < ApplicationRecord
   has_one :league, through: :season
   has_one :sport, through: :league
   has_many :contestants, dependent: :destroy
+  has_many :title_awards, through: :contestants
   has_many :contests, through: :contestants
   has_many :activations, dependent: :destroy
   has_many :contracts, -> { distinct }, through: :activations
@@ -22,6 +23,7 @@ class Campaign < ApplicationRecord
   validates :team_id, uniqueness: { scope: :season_id }
   validate :conference_matches_season_league
   validate :division_matches_season_context
+  validate :preserve_contest_seasons, on: :update
 
   def name
     display_name.presence || [territory, mascot].compact_blank.join(" ").presence || team.name
@@ -37,6 +39,12 @@ class Campaign < ApplicationRecord
   end
 
   private
+
+  def preserve_contest_seasons
+    if will_save_change_to_season_id? && contestants.joins(:contest).where.not(contests: { season_id: nil }).where.not(contests: { season_id: season_id }).exists?
+      errors.add :season, "must agree with the campaign's contests"
+    end
+  end
 
   def conference_matches_season_league
     return unless conference && season

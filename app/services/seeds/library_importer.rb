@@ -15,7 +15,9 @@ module Seeds
       "JerseyNumberAssignment" => JerseyNumberAssignment,
       "Transaction" => Transaction, "TransactionPlayer" => TransactionPlayer,
       "Stint" => Stint, "Roster" => Roster, "RosterEntry" => RosterEntry,
-      "Contest" => Contest, "Contestant" => Contestant, "Appearance" => Appearance,
+      "Contest" => Contest, "Game" => Game, "ContestGame" => ContestGame,
+      "TitleAward" => TitleAward, "Federation" => Federation,
+      "Contestant" => Contestant, "Appearance" => Appearance,
       "PlayerGroup" => PlayerGroup, "PlayerGroupMembership" => PlayerGroupMembership
     }.freeze
     SCOPE_ASSOCIATIONS = {
@@ -27,13 +29,15 @@ module Seeds
       "JerseyNumberAssignment" => %w[player team],
       "Stint" => %w[player team], "Roster" => %w[campaign], "RosterEntry" => %w[roster player],
       "Contestant" => %w[contest campaign], "Appearance" => %w[player contestant],
+      "ContestGame" => %w[contest game], "TitleAward" => %w[contest winner],
       "TransactionPlayer" => %w[event player], "PlayerGroupMembership" => %w[player_group player]
     }.freeze
     POLYMORPHIC_TYPES = {
       [ "League", "jurisdiction" ] => %w[Country State City],
-      [ "Contest", "context" ] => %w[League Conference Division]
+      [ "Contest", "context" ] => %w[League Conference Division Sport Federation Organization],
+      [ "Game", "context" ] => %w[League Conference Division Sport Federation Organization]
     }.freeze
-    PROTECTED_ATTRIBUTES = %w[id entity_code created_at updated_at seed_version last_seeded_at].freeze
+    PROTECTED_ATTRIBUTES = %w[id type entity_code created_at updated_at seed_version last_seeded_at].freeze
 
     attr_reader :report
 
@@ -98,8 +102,9 @@ module Seeds
       model = MODELS.fetch(type) { raise Error, "Unsupported entity type #{type}" }
       binding = EntityCode.find_by(namespace: @namespace, catalog: @catalog, code: local_code(code))
       if binding
-        raise Error, "#{code} identifies #{binding.record_type}, not #{type}" unless binding.record_type == type
+        raise Error, "#{code} identifies #{binding.record_type}, not #{type}" unless binding.record_type == model.polymorphic_name
         target = binding.resolved_record || model.find_by(entity_code: binding.canonical_code)
+        raise Error, "#{code} identifies a competition, not a game" if target && model == Game && !target.is_a?(Game)
         return target if target
       end
       model.find_by(entity_code: local_code(code))
@@ -193,7 +198,7 @@ module Seeds
       codes = ([record.code] + record.aliases).uniq
       bindings = EntityCode.where(namespace: @namespace, catalog: @catalog, code: codes).lock.to_a
       bindings.each do |binding|
-        raise Error, "#{binding.code} already identifies #{binding.record_type}" unless binding.record_type == record.type
+        raise Error, "#{binding.code} already identifies #{binding.record_type}" unless binding.record_type == model.polymorphic_name
       end
       targets = codes.filter_map { |code| resolve_code(record.type, code) }.uniq(&:id)
       raise Error, "#{record.location}: aliases identify different #{record.type} records" if targets.length > 1
@@ -353,7 +358,8 @@ module Seeds
       keys = {
         Year => %w[number], Season => %w[year league], Campaign => %w[team season], Activation => %w[player campaign],
         PlayerGroupMembership => %w[player_group player], RosterEntry => %w[roster player], Contestant => %w[contest campaign],
-        Appearance => %w[contestant player], TransactionPlayer => %w[event player]
+        Appearance => %w[contestant player], TransactionPlayer => %w[event player],
+        ContestGame => %w[contest game], TitleAward => %w[contest key]
       }[model]
       return unless keys && keys.all? { |key| desired[key].present? }
       model.find_by(desired.slice(*keys))

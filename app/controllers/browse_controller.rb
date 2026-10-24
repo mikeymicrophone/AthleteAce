@@ -3,7 +3,7 @@ class BrowseController < ApplicationController
     "sports" => [ "Sports data", %w[player_groups sports leagues conferences divisions teams players stadiums organizations federations organization_affiliations memberships contracts activations] ],
     "places" => [ "Places", %w[countries states cities] ],
     "content" => [ "Quests and ratings", %w[quests goals achievements spectrums ratings] ],
-    "time" => [ "Time", %w[years seasons campaigns contests] ]
+    "time" => [ "Time", %w[years seasons campaigns contests games] ]
   }.freeze
 
   def index

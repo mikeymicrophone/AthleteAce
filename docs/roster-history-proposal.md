@@ -26,6 +26,8 @@ Roster categories and transaction kinds are strings rather than fixed sport-spec
 
 ## Existing contests
 
+The [competition/game extension](competition-games.md) adds JSONB format rules, a Game subclass preserving existing game identities, per-competition game metadata and explicit title awards. It supports cross-league cup entries without duplicating team-season Campaigns. The original participation semantics below still apply.
+
 Contest and Contestant model an event/competition and its participating Campaigns. `Contest.kind` distinguishes games from series, tournaments, and other aggregates. Existing kinds remain unknown rather than being guessed. An Appearance references Contestant, which identifies both its game and team-season; two games on the same day remain distinct.
 
 Appearances require `kind: game`. A Contest with appearances cannot be reclassified, or moved outside linked known stint dates. Changes to a Stint, Roster, or Contestant also check their linked participation. Scheduled fixtures, game outcomes, and sport-specific statistical validation still need their own model rules.

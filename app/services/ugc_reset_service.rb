@@ -13,7 +13,7 @@ class UgcResetService
     Organization, OrganizationAffiliation, Membership, Position, Role,
     
     # Time-based models
-    Year, Season, Campaign, Contest, Contestant,
+    Year, Season, Campaign, Contest, Contestant, ContestGame, TitleAward,
     
     # Contract system  
     Contract, Activation, Transaction, TransactionPlayer, Stint, Roster, RosterEntry, Appearance,
@@ -81,7 +81,7 @@ class UgcResetService
     end
     
     # Warn about models not explicitly classified
-    all_models = ApplicationRecord.descendants.select { |model| model.table_exists? }
+    all_models = ApplicationRecord.descendants.select { |model| model.table_exists? }.map(&:base_class).uniq
     unclassified = all_models - CORE_MODELS - UGC_MODELS
     
     if unclassified.any?

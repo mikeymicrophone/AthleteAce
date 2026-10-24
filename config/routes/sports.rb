@@ -19,6 +19,7 @@ Rails.application.routes.draw do
   resources :years, only: [:index, :show]
   resources :campaigns, only: [:index, :show]
   resources :contests, only: [:index, :show]
+  resources :games, only: [ :index, :show ]
   
   # Contract system
   resources :contracts, only: [:index, :show]

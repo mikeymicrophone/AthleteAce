@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_23_030000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_24_010100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -204,6 +204,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_030000) do
     t.index ["seed_version"], name: "index_conferences_on_seed_version"
   end
 
+  create_table "contest_games", force: :cascade do |t|
+    t.bigint "contest_id", null: false
+    t.bigint "game_id", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.string "entity_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["contest_id", "game_id"], name: "index_contest_games_on_contest_id_and_game_id", unique: true
+    t.index ["contest_id"], name: "index_contest_games_on_contest_id"
+    t.index ["entity_code"], name: "index_contest_games_on_entity_code", unique: true
+    t.index ["game_id"], name: "index_contest_games_on_game_id"
+    t.index ["metadata"], name: "index_contest_games_on_metadata", using: :gin
+    t.check_constraint "contest_id <> game_id", name: "game_cannot_contain_itself"
+    t.check_constraint "jsonb_typeof(metadata) = 'object'::text", name: "contest_game_metadata_is_object"
+  end
+
   create_table "contestants", force: :cascade do |t|
     t.bigint "contest_id", null: false
     t.bigint "campaign_id", null: false
@@ -218,6 +234,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_030000) do
     t.string "entity_code"
     t.index ["campaign_id"], name: "index_contestants_on_campaign_id"
     t.index ["contest_id", "campaign_id"], name: "index_contestants_on_contest_id_and_campaign_id", unique: true
+    t.index ["contest_id", "id"], name: "index_contestants_on_contest_id_and_id", unique: true
     t.index ["contest_id"], name: "index_contestants_on_contest_id"
     t.index ["entity_code"], name: "index_contestants_on_entity_code", unique: true
   end
@@ -232,17 +249,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_030000) do
     t.integer "champion_id"
     t.bigint "season_id"
     t.text "comments"
-    t.json "details"
+    t.jsonb "details"
     t.string "seed_version"
     t.datetime "last_seeded_at", precision: nil
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "entity_code"
     t.string "kind"
+    t.string "type"
+    t.jsonb "format_rules", default: {}, null: false
     t.index ["context_type", "context_id"], name: "index_contests_on_context"
     t.index ["entity_code"], name: "index_contests_on_entity_code", unique: true
     t.index ["kind", "begin_date"], name: "index_contests_on_kind_and_begin_date"
     t.index ["season_id"], name: "index_contests_on_season_id"
+    t.index ["type"], name: "index_contests_on_type"
+    t.check_constraint "jsonb_typeof(format_rules) = 'object'::text", name: "contest_format_is_object"
+    t.check_constraint "type IS NOT NULL AND kind IS NOT NULL AND type::text = 'Game'::text AND kind::text = 'game'::text OR type IS NULL AND kind::text IS DISTINCT FROM 'game'::text", name: "contest_game_type"
   end
 
   create_table "contracts", force: :cascade do |t|
@@ -365,6 +387,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_030000) do
     t.datetime "updated_at", null: false
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.string "entity_code"
+    t.index ["entity_code"], name: "index_federations_on_entity_code", unique: true
     t.index ["seed_version"], name: "index_federations_on_seed_version"
   end
 
@@ -1047,6 +1071,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_030000) do
     t.index ["stadium_id"], name: "index_teams_on_stadium_id"
   end
 
+  create_table "title_awards", force: :cascade do |t|
+    t.bigint "contest_id", null: false
+    t.bigint "winner_id", null: false
+    t.string "key", null: false
+    t.string "name", null: false
+    t.date "awarded_on"
+    t.jsonb "source", default: {}, null: false
+    t.jsonb "details", default: {}, null: false
+    t.string "entity_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["contest_id", "key"], name: "index_title_awards_on_contest_id_and_key", unique: true
+    t.index ["contest_id"], name: "index_title_awards_on_contest_id"
+    t.index ["entity_code"], name: "index_title_awards_on_entity_code", unique: true
+  end
+
   create_table "transaction_players", force: :cascade do |t|
     t.bigint "transaction_id", null: false
     t.bigint "player_id", null: false
@@ -1126,6 +1166,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_030000) do
   add_foreign_key "catalog_edits", "aces", column: "actor_id", on_delete: :nullify
   add_foreign_key "cities", "states"
   add_foreign_key "conferences", "leagues"
+  add_foreign_key "contest_games", "contests"
+  add_foreign_key "contest_games", "contests", column: "game_id"
   add_foreign_key "contestants", "campaigns"
   add_foreign_key "contestants", "contests"
   add_foreign_key "contests", "seasons"
@@ -1208,6 +1250,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_030000) do
   add_foreign_key "stripe_purchases", "shout_outs"
   add_foreign_key "teams", "leagues"
   add_foreign_key "teams", "stadiums"
+  add_foreign_key "title_awards", "contestants", column: ["contest_id", "winner_id"], primary_key: ["contest_id", "id"]
+  add_foreign_key "title_awards", "contests"
   add_foreign_key "transaction_players", "organizations", column: "from_organization_id"
   add_foreign_key "transaction_players", "organizations", column: "to_organization_id"
   add_foreign_key "transaction_players", "players"

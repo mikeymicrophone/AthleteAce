@@ -1,0 +1,13 @@
+@layer components {
+  .competition-context { margin-block: 1.5rem; overflow-wrap: anywhere; }
+  .competition-context h2 { margin-block: 1rem .5rem; font-weight: 600; }
+  .competition-context li, .competition-context > div { margin-block: .5rem; }
+  .competition-context p { color: var(--color-ink-2); }
+  .contest-show-page .info-item { background: var(--color-surface); color: var(--color-ink); }
+  .contest-show-page .info-item dt { color: var(--color-ink-3); }
+  .contest-show-page .info-item dd { color: var(--color-ink); }
+  .contest-show-page .contest-title { font-size: 1.5rem; font-weight: 700; margin-block: 1rem; }
+  .contest-show-page .standings-table { width: 100%; border-collapse: collapse; }
+  .contest-show-page .standings-table th, .contest-show-page .standings-table td { padding: .5rem; text-align: left; border-bottom: 1px solid var(--color-line); }
+  .contest-show-page .details-json { white-space: pre-wrap; overflow-wrap: anywhere; }
+}

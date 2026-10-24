@@ -34,6 +34,8 @@ The five most recently opened or submitted searches are stored in the browser, s
 
 See [Play rounds and learning progress](docs/play-learning.md) for the six saved games, due reviews, roster-based quest completion, time zones, anonymous preview, and production mail configuration.
 
+Sporting [competitions, games and titles](docs/competition-games.md) support league seasons, playoffs, cross-league cups, JSONB format rules, shared fixtures and separate title awards. These sporting Games are distinct from Play's quiz rounds. Player appearance ingestion remains follow-up work.
+
 The committed development configuration uses `athlete_ace_development_seedtest_20261005`. Other checkouts must create that database or adjust their local database configuration.
 
 Before upgrading a database with existing Contracts, follow the [organization reconciliation requirements](docs/roster-history-proposal.md#contract-transition). The second Contract migration refuses records without a verified Organization. The development seed-test database had no legacy Contracts when this transition was applied.

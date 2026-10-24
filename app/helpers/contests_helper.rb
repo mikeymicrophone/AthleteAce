@@ -6,7 +6,7 @@ module ContestsHelper
   def contests_index_page
     tag.div class: "contests-index-page" do
       tag.header(class: "page-header") do
-        tag.h1("Contests", class: "page-title")
+        tag.h1(@catalog_title || "Contests", class: "page-title")
       end +
       tag.main(class: "contests-grid") do
         @contests.map { |contest| contest_item(contest) }.join.html_safe
@@ -50,7 +50,7 @@ module ContestsHelper
   def contest_show_page(contest)
     tag.div class: "contest-show-page" do
       tag.div(class: "contest-show-header") do
-        link_to("← Back to Contests", contests_path, class: "back-link") +
+        link_to(contest.kind == "game" ? "← Back to Games" : "← Back to Contests", contest.kind == "game" ? games_path : contests_path, class: "back-link") +
         tag.h1(contest_display_name(contest), class: "contest-title")
       end +
       tag.div(class: "contest-content") do
@@ -59,6 +59,7 @@ module ContestsHelper
           contest_dates_section(contest)
         end.to_s.html_safe +
         contest_appearances_section(contest) +
+        contest_competition_section(contest) +
         if contest.comments.present?
           contest_comments_section(contest)
         end.to_s.html_safe +
@@ -72,6 +73,45 @@ module ContestsHelper
     end
   end
   
+  def contest_competition_section(contest)
+    tag.section(class: "round-panel competition-context") do
+      if contest.kind == "game"
+        tag.h2("Competitions", class: "section-title") +
+          safe_join(contest.competition_memberships.includes(:contest).map do |membership|
+            tag.div do
+              link_to(contest_display_name(membership.contest), contest_path(membership.contest)) +
+                tag.p(competition_game_summary(membership))
+            end
+          end)
+      else
+        tag.h2("Competition format", class: "section-title") +
+          tag.ul do
+            safe_join(contest.format_rules.fetch("rounds", []).map do |round|
+              tag.li([ round["name"].presence || round["key"].humanize, ("Best of #{round['best_of']}" if round["best_of"]) ].compact.join(" · "))
+            end)
+          end +
+          tag.h2("Games", class: "section-title") +
+          safe_join(contest.contest_games.includes(:game).sort_by { |membership| [ membership.game.begin_date || Date.new(1), membership.game_id ] }.map do |membership|
+            tag.div do
+              link_to(contest_display_name(membership.game), game_path(membership.game)) +
+                tag.p(competition_game_summary(membership))
+            end
+          end) +
+          tag.h2("Titles awarded", class: "section-title") +
+          safe_join(contest.title_awards.includes(winner: { campaign: :team }).order(:key).map do |award|
+            tag.p { tag.strong(award.name) + " · " + link_to_name(award.team) }
+          end)
+      end
+    end
+  end
+
+  def competition_game_summary(membership)
+    metadata = membership.metadata
+    [ metadata["round"]&.humanize, ("Group #{metadata['group']}" if metadata["group"]),
+      metadata["series"], ("Game #{metadata['game_number']}" if metadata["game_number"]),
+      ("Leg #{metadata['leg']}" if metadata["leg"]) ].compact.join(" · ")
+  end
+
   def contest_info_section(contest)
     tag.div class: "contest-info-section" do
       tag.h2("Contest Information", class: "section-title") +

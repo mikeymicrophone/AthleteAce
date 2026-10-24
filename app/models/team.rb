@@ -20,6 +20,7 @@ class Team < ApplicationRecord
   has_one :current_organization, through: :current_organization_affiliation, source: :organization
   has_many :memberships, dependent: :destroy
   has_many :campaigns, dependent: :destroy
+  has_many :title_awards, through: :campaigns
   has_one :active_membership, -> { where(active: true) }, class_name: 'Membership'
   has_one :division, through: :active_membership
   has_one :conference, through: :division
