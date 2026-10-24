@@ -1,0 +1,5 @@
+.shout-out-bid-totals { @apply grid grid-cols-2 gap-5 sm:grid-cols-4; }
+.shout-out-bid-totals dt { @apply text-sm text-ink-2; }
+.shout-out-bid-totals dd { @apply mt-2 font-mono text-xl font-bold; overflow-wrap: anywhere; }
+.shout-out-history-filters { @apply flex flex-wrap gap-2 mb-5; }
+.shout-out-history-filters [aria-current="page"] { @apply border-accent-text text-accent-text bg-accent-tint; }

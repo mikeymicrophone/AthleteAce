@@ -19,3 +19,10 @@
     <p>Live. Your bid has been spent.</p><%= link_to "View Feed", feed_path, class: "tool-button" %>
   <% end %>
 </section>
+<% if @shout_out.target && !current_ace.active_posting_mute %>
+  <section class="round-panel">
+    <h2 class="profile-section-title">Start another submission</h2>
+    <p>Copy this message and target into a private draft. Choose and fund a new bid when you submit it.</p>
+    <%= button_to "Copy to new draft", copy_to_draft_shout_out_path(@shout_out), class: "tool-button" %>
+  </section>
+<% end %>

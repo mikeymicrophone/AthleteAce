@@ -12,6 +12,14 @@ Approval spends reserved credit and publishes the post. Rejection releases the r
 
 Each saved draft version can create one submitted post. Retrying the same submission reuses it; changing its bid requires editing and saving a new draft version. Wallet purchases carry a request key, Stripe requests use a persistent purchase-based idempotency key, and ledger operations are keyed by source and action. Purchases, posts, and credit accounts use database row locks so simultaneous requests cannot duplicate credit or spend the same balance twice. Application workflows only append ledger entries; persisted `CreditEntry` records are read-only. Accounts with financial records require a separate closure process rather than ordinary deletion.
 
+## My shout-outs
+
+**My shout-outs** is private to the signed-in ace. Filter by All, Awaiting payment, In review, Live, Rejected, or Hidden. Each filter shows its total count across that ace's history. Pagination preserves the selected status and sorts newest submissions first, with descending ID as the tie-breaker. Unknown status values return HTTP 400.
+
+**Your bid totals** summarizes all owned submissions, regardless of the selected filter: awaiting payment, reserved for review, spent on live posts, and returned as credit. These are current post-state totals, not cash receipts or available wallet balances. Rejected reservations and hidden-post refunds both contribute to **Returned as credit**. Unfunded posts count only as awaiting payment, not in review.
+
+From an owned post with an existing target, **Copy to new draft** copies the submitted message and target into a separate private draft. Later edits to the original draft do not affect this copy. The original submission, moderation history, bid, credit ledger, and balances stay unchanged. Choose and fund a new bid through the ordinary submission flow. Muted or suspended aces cannot use this action, and a deleted target prevents copying. Numbered or emailed receipts and PDF downloads remain future work.
+
 ## Feed
 
 Public Feed and [team walls](shout-out-operations.md) include approved, spent posts. Signed-in aces also see their own funded pending posts, labeled **in review**. Other accounts cannot see pending posts. **My teams** intersects posts with the recorded team context and chosen sport/league; its personal team cards remain separate from the stream. Target names remain recorded after catalog deletion. A pending post with a deleted target must be rejected, releasing its reservation, rather than approved.

@@ -24,6 +24,7 @@ Rails.application.routes.draw do
   post "stripe/webhook", to: "stripe_webhooks#create"
   resources :shout_outs, only: [ :index, :show, :create ] do
     post :pay, on: :member
+    post :copy_to_draft, on: :member
     resources :shout_out_reports, path: "reports", only: [ :new, :create ]
     resources :shout_out_reactions, path: "reactions", param: :kind, only: [ :update, :destroy ]
   end

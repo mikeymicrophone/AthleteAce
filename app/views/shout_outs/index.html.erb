@@ -1,8 +1,27 @@
 <% content_for :title, "My shout-outs" %>
 <%= browse_header "My shout-outs" do %><%= link_to "Write a draft", new_shout_out_draft_path, class: "game-button" %><%= link_to "Credit wallet", wallet_path, class: "tool-button" %><% end %>
+<section class="round-panel" aria-labelledby="bid-totals-title">
+  <h2 id="bid-totals-title" class="profile-section-title">Your bid totals</h2>
+  <p class="round-caption">Across all your submissions. Your available credit is in the wallet.</p>
+  <dl class="shout-out-bid-totals">
+    <% { "unfunded" => "Awaiting payment", "reserved" => "Reserved for review", "spent" => "Spent on live posts", "refunded" => "Returned as credit" }.each do |status, label| %>
+      <div><dt><%= label %></dt><dd data-bid-total="<%= status %>"><%= number_to_currency(@bid_totals.fetch(status, 0) / 100.to_d) %></dd></div>
+    <% end %>
+  </dl>
+</section>
+<nav class="page-actions shout-out-history-filters" aria-label="Filter your shout-outs">
+  <% @filters.each do |status, filter| %>
+    <%= link_to "#{filter.fetch(:label)} (#{@counts.fetch(status)})", shout_outs_path(status: status), class: "tool-button", aria: { current: (@status == status ? "page" : nil) } %>
+  <% end %>
+</nav>
 <% if @shout_outs.any? %>
   <% @shout_outs.each do |post| %>
     <article class="round-panel"><h2 class="profile-section-title"><%= post.target_name %></h2><p class="draft-message"><%= post.message %></p><p><%= post.moderation_status.humanize %> · <%= post.funding_status.humanize %> · <%= number_to_currency(post.bid_cents / 100.to_d) %></p><%= link_to "Details", shout_out_path(post), class: "tool-button" %></article>
   <% end %>
   <%== @pagy.series_nav if @pagy.pages > 1 %>
-<% else %><section class="round-panel"><h2>No shout-outs yet.</h2><p>Write a draft and choose your bid to submit one.</p></section><% end %>
+<% else %>
+  <section class="round-panel">
+    <% if @counts.fetch("all").zero? %><h2>No shout-outs yet.</h2><p>Write a draft and choose your bid to submit one.</p>
+    <% else %><h2>No shout-outs in this status.</h2><%= link_to "Show all shout-outs", shout_outs_path, class: "tool-button" %><% end %>
+  </section>
+<% end %>
