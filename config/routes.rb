@@ -39,7 +39,7 @@ Rails.application.routes.draw do
     resources :competitions, only: [ :index, :show ]
     resources :games, only: [ :index, :show ]
     resources :people, only: [ :index, :show, :update ]
-    resources :catalog_records, path: "sports-data", only: [ :index, :edit, :update ]
+    resources :catalog_records, path: "sports-data", only: [ :index, :new, :create, :edit, :update ]
     resources :catalog_edits, only: [ :index, :show, :update ]
   end
   get "admin", to: "admin#index", as: :admin

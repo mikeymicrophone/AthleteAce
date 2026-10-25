@@ -3,6 +3,7 @@
   <%= link_to "Correction history", admin_catalog_edits_path, class: "tool-link" %>
   <header class="browse-header"><div><p class="eyebrow">Admin · Sports data · Edit #<%= @edit.id %></p><h1 class="page-title"><%= @edit.record_name %></h1><p><%= @edit.actor_name %> · <%= l @edit.created_at, format: :long %></p><p class="round-caption"><%= @edit.record_type %> · <%= @edit.entity_code.presence || "No entity code" %> · Record #<%= @edit.record_id %></p></div></header>
   <section class="round-panel"><h2 class="profile-section-title">Saved changes</h2>
+    <% if @edit.before_values.empty? %><p>Created a new <%= @edit.record_type.downcase %>. There was no previous record.</p><% end %>
     <% @edit.after_values.each do |field, value| %><div class="catalog-change"><h3><%= field.humanize %></h3><dl class="catalog-diff"><div><dt>Before</dt><dd><%= catalog_value @edit.before_values[field] %></dd></div><div><dt>After</dt><dd><%= catalog_value value %></dd></div></dl></div><% end %>
   </section>
   <% if @error %><p role="alert"><%= @error %></p><% end %>

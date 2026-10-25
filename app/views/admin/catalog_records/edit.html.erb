@@ -7,22 +7,7 @@
   <section class="round-panel">
     <%= form_with url: admin_catalog_record_path(@record, kind: @kind), method: :patch, class: "people-actions catalog-form" do |form| %>
       <%= form.hidden_field :version, value: @version %><%= form.hidden_field :request_key, value: @request_key %>
-      <% @fields.each do |field| %>
-        <% value = @values[field] %>
-        <div><%= label_tag "record_#{field}", field.humanize %>
-          <% if Admin::EditCatalog::ARRAYS.include?(field) %>
-            <%= text_area_tag "record[#{field}]", value.is_a?(Array) ? value.join("\n") : value, id: "record_#{field}", rows: field == "bio" ? 5 : 3, class: "moderation-reason" %><p class="round-caption">One <%= field == "bio" ? "paragraph" : field == "photo_urls" ? "URL" : "nickname" %> per line.</p>
-          <% elsif field == "active" %>
-            <%= select_tag "record[active]", options_for_select([["Unknown", "unknown"], ["Active", "true"], ["Inactive", "false"]], value.nil? ? "unknown" : value.to_s), id: "record_active", class: "account-input" %>
-          <% elsif field == "birthdate" %>
-            <%= date_field_tag "record[#{field}]", value, id: "record_#{field}", class: "account-input" %>
-          <% elsif Admin::EditCatalog::YEARS.include?(field) %>
-            <%= number_field_tag "record[#{field}]", value, id: "record_#{field}", min: 1000, max: 9999, step: 1, class: "account-input" %>
-          <% else %>
-            <%= text_field_tag "record[#{field}]", value, id: "record_#{field}", maxlength: field.end_with?("url") ? 2048 : field == "abbreviation" ? 16 : 100, class: "account-input" %>
-          <% end %>
-        </div>
-      <% end %>
+      <%= render "fields" %>
       <p class="round-caption">Save first, then add a reason to the recorded change. Corrections need to be copied into seed sources before a rebuild.</p>
       <div class="page-actions"><%= form.submit "Save changes", class: "tool-button" %><%= link_to "Cancel", admin_catalog_records_path(kind: @kind), class: "tool-link" %></div>
     <% end %>

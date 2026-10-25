@@ -10,6 +10,18 @@ The team directory supports name, abbreviation, and entity-code search, plus lea
 
 Search treats SQL wildcards literally and uses at most 80 Unicode code points after trimming. Both directories sort by name with ID as the tie-breaker and paginate 25 records at a time. Invalid filter values return HTTP 400. An unsupported record kind returns HTTP 404.
 
+## Add a player
+
+**Add player** opens an admin-only creation form. The form requires at least one name component and a unique local entity code. Codes allow up to 120 letters, digits, underscores, and hyphen-separated parts, such as `PLAYER-JORDAN-REED-1998`. A `MIC-ALA-` prefix is rejected because the form accepts local codes. Codes are case-sensitive. Sport is optional; a selected sport must exist.
+
+The new profile uses the same profile-field validation as corrections. It starts without a current team, contract, stint, jersey assignment, or appearance. Same-name records are not merged. An unknown sport or activity stays unknown.
+
+**Create player** saves the player, reserves its code in namespace `MIC`, catalog `ALA`, and creates a `CatalogEdit` in one transaction. Failure to save any part rolls back all three. Existing codes or bindings are not reassigned. The creation audit has an empty `before` mapping and an `after` snapshot of supported profile fields, entity code, and local sport ID. The reason page explicitly identifies the entry as a creation.
+
+The next page asks **Why did you make this change?** The player is already saved. The original admin can skip the prompt and explain that exact audit entry later. The existing reason immutability rules apply. Repeating the same creation request with the same admin, request key, and normalized values returns the original audit without creating another player. Reusing the key for different values or a correction returns HTTP 409.
+
+Add the new profile and its chosen code to seed sources manually before a database rebuild. The audit's sport ID is local to the database; resolve that reference to the sport's seed code when preparing a manifest. Creation does not publish seed files, replay the log, or establish historical participation. Team creation remains outside this form.
+
 ## Inspect dated number assignments
 
 The player directory shows **Assigned number** for each player's current profile team on **Number on date**. The date defaults to the application's current date and stays explicit in the form and CSV download link. Changing it does not change directory membership or reconstruct historical team assignments.
@@ -106,4 +118,4 @@ The [existing seed pipeline](yaml-seed-library.md#running-and-replay) remains un
 
 ## Acceptance boundaries
 
-Input lengths, empty arrays, unknown activity, literal search, deterministic ordering, and pagination have explicit behavior above. Transactional saves, stale forms, concurrent retries, separate edits on the same subject, missing reasons, and concurrent explanations have automated checks. Audit snapshots remain separate from approval decisions and seed replay. Automatic incorporation status, bulk editing, creation, and additional catalog entity editors remain outside this build.
+Input lengths, empty arrays, unknown activity, literal search, deterministic ordering, and pagination have explicit behavior above. Transactional saves, stale forms, concurrent retries, separate edits on the same subject, missing reasons, and concurrent explanations have automated checks. Audit snapshots remain separate from approval decisions and seed replay. Automatic incorporation status, bulk editing, team creation, and additional catalog entity editors remain outside this build.

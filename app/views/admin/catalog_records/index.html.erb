@@ -17,6 +17,7 @@
     <div class="page-actions"><%= form.submit "Filter sports data", class: "tool-button" %><%= link_to "Clear", admin_catalog_records_path(kind: @directory.kind), class: "tool-link" %></div>
   <% end %>
   <div class="page-actions">
+    <% if @directory.kind == "players" %><%= link_to "Add player", new_admin_catalog_record_path(kind: "players"), class: "tool-button" %><% end %>
     <%= link_to "Games", admin_games_path, class: "tool-button" %>
     <%= link_to "Competitions", admin_competitions_path, class: "tool-button" %>
     <%= link_to "Export filtered CSV", admin_catalog_records_path(params.permit(:kind, :q, :league_id, :team_id, :position, :status, :photo, :edited).to_h.symbolize_keys.merge(format: :csv, number_on: @directory.number_on&.iso8601)), class: "tool-button", data: { turbo: false } %>

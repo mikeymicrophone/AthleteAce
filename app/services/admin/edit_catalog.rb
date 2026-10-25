@@ -47,6 +47,36 @@ module Admin
       end
     end
 
+    def self.create_player(actor:, attributes:, entity_code:, sport_id:, request_key:)
+      submitted = normalize(Player.new, attributes)
+      raise ArgumentError, "Invalid edit request key." unless request_key.is_a?(String) && request_key.length.between?(1, 128)
+      raise ArgumentError, "Supply a local entity code of up to 120 letters, digits, underscores and hyphen-separated parts." unless entity_code.is_a?(String) && entity_code.strip.length.between?(1, 120) && entity_code.strip.match?(/\A[A-Za-z0-9_]+(?:-[A-Za-z0-9_]+)*\z/)
+      code = entity_code.strip
+      raise ArgumentError, "Use a local code without the MIC-ALA- prefix." if code.start_with?("MIC-ALA-")
+      raise ArgumentError, "Choose a sport." unless sport_id.nil? || (sport_id.is_a?(String) && (sport_id.blank? || sport_id.match?(/\A[1-9]\d{0,17}\z/)))
+      sport = sport_id.present? ? Sport.find_by(id: sport_id) : nil
+      raise ArgumentError, "Choose an existing sport." if sport_id.present? && !sport
+      submitted = { "operation" => "create_player", "attributes" => submitted, "entity_code" => code, "sport_id" => sport&.id }
+      actor.with_lock do
+        raise Forbidden, "An active admin must edit sports data." unless actor.admin? && actor.active_for_authentication?
+        existing = CatalogEdit.find_by(actor: actor, request_key: request_key)
+        if existing
+          raise Conflict, "This request key was already used for a different edit. Reload before saving." unless existing.submitted_values == submitted
+          return existing
+        end
+        player = Player.new(submitted.fetch("attributes").merge(entity_code: code, sport: sport))
+        raise ArgumentError, "Supply at least one part of the name." if [ player.first_name, player.last_name ].all?(&:blank?)
+        player.save!
+        EntityCode.create!(namespace: "MIC", catalog: "ALA", code: code, canonical_code: code, record: player)
+        CatalogEdit.create!(actor: actor, actor_name: "#{actor.public_name} #{actor.handle}", record_type: "Player",
+          record_id: player.id, entity_code: code, record_name: player.name, before_values: {},
+          after_values: player.attributes.slice(*FIELDS.fetch("Player"), "entity_code", "sport_id"),
+          submitted_values: submitted, request_key: request_key)
+      end
+    rescue ActiveRecord::RecordNotUnique
+      raise Conflict, "This entity code is already in use. Choose another code."
+    end
+
     def self.normalize(record, attributes)
       allowed = FIELDS.fetch(record.class.name)
       raise ArgumentError, "Unsupported catalog fields." if attributes.empty? || (attributes.keys - allowed).any?
@@ -64,7 +94,9 @@ module Admin
           value.present? ? value.to_i : nil
         elsif field == "birthdate"
           raise Date::Error if value.present? && !value.match?(/\A\d{4}-\d{2}-\d{2}\z/)
-          value.present? ? Date.iso8601(value).iso8601 : nil
+          date = value.present? ? Date.iso8601(value) : nil
+          raise Date::Error if date && date.year.zero?
+          date&.iso8601
         elsif field == "active"
           raise ArgumentError, "Choose Active, Inactive or Unknown." unless %w[true false unknown].include?(value)
           value == "unknown" ? nil : value == "true"

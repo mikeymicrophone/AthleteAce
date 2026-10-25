@@ -23,6 +23,29 @@ class Admin::CatalogRecordsController < ApplicationController
     render plain: error.message, content_type: "text/plain", status: :bad_request
   end
 
+  def new
+    prepare_new_player
+    @values = Player.new.attributes
+    @request_key = SecureRandom.uuid
+  end
+
+  def create
+    prepare_new_player
+    @values = params.expect(record: @fields).to_h
+    @request_key = params.expect(:request_key)
+    edit = Admin::EditCatalog.create_player(actor: current_ace, attributes: @values, entity_code: params[:entity_code],
+      sport_id: params[:sport_id], request_key: @request_key)
+    redirect_to admin_catalog_edit_path(edit), status: :see_other, notice: "Player created. Why did you make this change?"
+  rescue Admin::EditCatalog::Forbidden => error
+    render plain: error.message, status: :forbidden
+  rescue Admin::EditCatalog::Conflict => error
+    @error = error.message
+    render :new, status: :conflict
+  rescue ArgumentError, ActiveRecord::RecordInvalid => error
+    @error = error.message
+    render :new, status: :unprocessable_content
+  end
+
   def edit
     @values = @record.attributes
     @version = Admin::EditCatalog.version(@record)
@@ -50,6 +73,12 @@ class Admin::CatalogRecordsController < ApplicationController
   end
 
   private
+
+  def prepare_new_player
+    raise ActiveRecord::RecordNotFound unless params[:kind].blank? || params[:kind] == "players"
+    @fields = Admin::EditCatalog::FIELDS.fetch("Player")
+    @sports = Sport.order(:name, :id)
+  end
 
   def load_record
     @kind = params[:kind].presence || "players"

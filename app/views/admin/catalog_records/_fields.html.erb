@@ -1,0 +1,16 @@
+      <% @fields.each do |field| %>
+        <% value = @values[field] %>
+        <div><%= label_tag "record_#{field}", field.humanize %>
+          <% if Admin::EditCatalog::ARRAYS.include?(field) %>
+            <%= text_area_tag "record[#{field}]", value.is_a?(Array) ? value.join("\n") : value, id: "record_#{field}", rows: field == "bio" ? 5 : 3, class: "moderation-reason" %><p class="round-caption">One <%= field == "bio" ? "paragraph" : field == "photo_urls" ? "URL" : "nickname" %> per line.</p>
+          <% elsif field == "active" %>
+            <%= select_tag "record[active]", options_for_select([["Unknown", "unknown"], ["Active", "true"], ["Inactive", "false"]], value.nil? ? "unknown" : value.to_s), id: "record_active", class: "account-input" %>
+          <% elsif field == "birthdate" %>
+            <%= date_field_tag "record[#{field}]", value, id: "record_#{field}", class: "account-input" %>
+          <% elsif Admin::EditCatalog::YEARS.include?(field) %>
+            <%= number_field_tag "record[#{field}]", value, id: "record_#{field}", min: 1000, max: 9999, step: 1, class: "account-input" %>
+          <% else %>
+            <%= text_field_tag "record[#{field}]", value, id: "record_#{field}", maxlength: field.end_with?("url") ? 2048 : field == "abbreviation" ? 16 : 100, class: "account-input" %>
+          <% end %>
+        </div>
+      <% end %>
