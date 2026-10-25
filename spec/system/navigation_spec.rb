@@ -129,7 +129,8 @@ RSpec.describe "Navigation", type: :system do
     phone_viewport
     expect_no_overflow
     within('[aria-label="Admin navigation mobile"]') { click_link "Content catalog" }
-    expect(page).to have_content(/quests and ratings/i)
+    expect(page).to have_current_path(admin_content_catalog_path)
+    expect(page).to have_content("Manage quests, achievements, and rating spectrums.")
     expect(page).to have_css('body[data-side="admin"]')
     page.save_screenshot Rails.root.join("tmp/screenshots/shell-admin-mobile.png")
   end

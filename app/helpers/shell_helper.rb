@@ -18,7 +18,7 @@ module ShellHelper
       [ [ "Queue", "shield-check", moderation_path ], [ "Reports", "flag", reports_path ], [ "Escalations", "shield", escalations_path ], [ "Decision log", "history", moderation_log_path ] ]
     when "admin"
       [ [ "Overview", "home", admin_path ], [ "People", "id-badge-2", admin_people_path ], [ "Revenue", "list-numbers", shout_out_revenue_path ], [ "Sports data", "layout-grid", admin_catalog_records_path ],
-        [ "Content catalog", "script", browse_path(section: "content", side: "admin") ] ]
+        [ "Content catalog", "script", admin_content_catalog_path ] ]
     end
   end
 
@@ -28,6 +28,7 @@ module ShellHelper
       return "Escalations" if controller_name == "escalations"
       controller_name == "reports" ? "Reports" : (action_name == "log" ? "Decision log" : "Queue")
     when "admin"
+      return "Content catalog" if %w[content_catalog quests achievements spectrums highlights].include?(controller_name)
       return "People" if controller_name == "people"
       return "Revenue" if controller_name == "shout_out_revenues"
       controller_name == "admin" ? "Overview" : (params[:section] == "content" ? "Content catalog" : "Sports data")
