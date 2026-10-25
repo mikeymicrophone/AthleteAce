@@ -59,14 +59,8 @@ class GameRoundsController < ApplicationController
     @stats = @round.stats
     group_id = @round.scope["player_group_id"]
     @summary_group = PlayerGroup.find_by(id: group_id) if group_id
-    if @round.scope["goal_achievement_id"]
-      @learning_entry = GoalAchievement.joins(:achievement, goal: { quest: :highlights })
-        .merge(Quest.approved).merge(Achievement.approved).merge(Highlight.approved)
-        .where(goals: { ace_id: current_ace.id }, achievements: { target_type: "PlayerGroup", target_id: group_id })
-        .where("highlights.achievement_id = goal_achievements.achievement_id")
-        .includes(:achievement, goal: :quest).find_by(id: @round.scope["goal_achievement_id"])
-    end
-    if @summary_group && !@learning_entry
+    @learning_entries = @round.quest_learning_entries
+    if @summary_group && @learning_entries.empty?
       progress = PlayProgress.new(ace: current_ace, players: @summary_group.players)
       @group_overview = GroupPracticeOverview.new(groups: [ @summary_group ], progress: progress).rows.sole
     end

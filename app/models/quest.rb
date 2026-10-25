@@ -6,6 +6,13 @@ class Quest < ApplicationRecord
   has_many :aces, through: :goals
   
   validates :name, presence: true
+
+  def approved_at
+    return unless approved?
+
+    moderation_decisions.where(action: "approved", to_status: "approved", revision: moderation_revision)
+      .order(created_at: :desc, id: :desc).pick(:created_at)
+  end
   
   # Add an achievement to this quest
   def add_achievement(achievement, position: nil, required: true)

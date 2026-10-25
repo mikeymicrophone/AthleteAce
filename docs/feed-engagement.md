@@ -34,6 +34,10 @@ Counts are fresh SQL aggregates. There is no stale leaderboard cache or sidebar 
 
 ## Search and share live posts
 
+Player profiles show up to three public live shout-outs and link to **All player shout-outs**. The preview and full list use the same visitor-session bid-weighted order as Feed. The full list paginates 25 posts and opens in the Feed shell. The profile retains its originating side.
+
+The profile's weekly count uses live posts approved in the current Monday-to-Sunday UTC week. The preview and full list include live posts from all weeks. Hiding a post removes it from both on the next read. Pending posts, including the viewer's own, and unfunded, rejected, or hidden posts are excluded. Transferring the player does not move these player-specific posts. These pages refresh on navigation or reload rather than subscribing to the Feed refresh stream.
+
 **Search live shout-outs** on Feed matches messages, recorded target names, public display names and handles. It accepts 2 to 80 Unicode code points and treats SQL wildcard characters literally. Whitespace is trimmed; input longer than 80 characters is shortened to 80. Empty input returns the normal Feed; a one-character direct Feed query returns HTTP 400. Shell search retains its existing minimum-two-character prompt and adds up to five live shout-out matches on the Feed side.
 
 Both searches use the same visitor-session weighted order as Feed. On **My teams**, a search remains restricted to followed/high-Affinity teams and the selected sport and league. The query stays in search forms, pagination and the All/My teams links. Search does not include the viewer's own pending posts, even for moderators or admins. Drafts, rejected/hidden/unfunded posts, report notes, account email and financial records are absent.

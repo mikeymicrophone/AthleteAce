@@ -45,6 +45,10 @@ Rounds started through an adopted group achievement show that achievement's curr
 
 Quest progress appears only for the account that owns the adopted goal, while its quest, achievement, and requirement remain approved. If that progress is unavailable, an existing group can still show ordinary lifetime coverage. After a group is deleted, saved results remain readable and **Play again** is omitted because the group cannot start a new round.
 
+Other player-subject rounds show current progress for adopted player, team, league, sport, and place achievements whose saved rosters intersect the round's questions. Goals adopted after the round finished are excluded. Each adopted goal has one panel, with an unfinished matching achievement preferred. Several affected goals can appear. These panels use the saved adoption rosters, so later catalog additions do not change their denominators. Other target types keep their usual practice links; the remaining-member filter continues to apply to adopted group achievements.
+
+New rounds record completed and required achievement counts and percentages for goals eligible at round start and still eligible at finish. These snapshots are stored with the round, and a repeated finish does not overwrite them. A goal adopted during the round can show current progress, but receives no invented start value or recorded pair. **At round start** and **At round finish** remain recorded even when later play changes the current progress bar. The values describe the goal at those moments, rather than attributing every change solely to that round. Replay creates new snapshots and does not put the old snapshot data in setup links. Older rounds without snapshots show current progress without invented before/after values.
+
 ## Review timing
 
 Each saved answer updates a `PracticeReview` for that account, original game, subject, and target. A miss returns in 10 minutes. Successive correct answers schedule review after 1, 3, 7, 14, and then 30 days. Another miss resets that sequence. Repeated submissions of the same question do not add attempts or change the schedule twice.
@@ -78,6 +82,8 @@ Team history uses saved team identities for the new modes. Legacy Team Match and
 Set your time zone in **Edit profile**. Daily streaks, today's players, and history day boundaries use that setting. An unset preference uses the application time zone.
 
 ## Quest completion
+
+Quest detail shows **Approved** with the UTC date of its latest recorded approval for the current moderation revision. Recorded trusted approvals also supply a date. An approved quest without that history says **Approval date not recorded**. Pending or otherwise non-approved revisions do not display an old approval date.
 
 Adopting a quest saves the recorded player roster for each supported achievement. Answer every player in that saved roster correctly at least once after adoption to complete the achievement. Repeated answers for one player do not advance roster coverage. A later wrong answer does not remove earned quest progress. Required achievements determine quest completion; optional achievements do not block it.
 

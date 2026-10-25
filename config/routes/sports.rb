@@ -7,7 +7,10 @@ Rails.application.routes.draw do
   resources :conferences, only: [:index, :show]
   resources :divisions, only: [:index, :show]
   resources :teams, only: [:index, :show]
-  resources :players, only: [:index, :show]
+  resources :players, only: [ :index, :show ] do
+    resources :shout_outs, only: :index, module: :players
+  end
+  resources :people, only: :show
   resources :organizations, only: [:index, :show]
   
   # Organizational structure

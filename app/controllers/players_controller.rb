@@ -46,6 +46,10 @@ class PlayersController < ApplicationController
     @filtered_breadcrumb = build_filtered_breadcrumb @player, @current_filters
     @spectrums = Spectrum.visible_to(current_ace).order :name
     @seasons = Season.where(id: @player.campaigns.select(:season_id)).includes(:year, :league).recent
+    @weekly_shout_out_count = ShoutOutLeaderboard.new.posts.where(target: @player).count
+    seed = session[:shout_out_feed_seed] ||= SecureRandom.hex(16)
+    @shout_outs = ShoutOutFeed.ranked(@player.shout_outs.live, seed: seed).includes(:created_by, :target).limit(3)
+    response.headers["Cache-Control"] = "private, no-store"
 
     if ace_signed_in?
       attempts = current_ace.game_attempts.where subject_entity: @player

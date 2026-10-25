@@ -1,7 +1,17 @@
 <% goal = entry.goal %>
-<section class="round-panel round-learning-progress" aria-labelledby="round-quest-progress-title">
-  <h2 id="round-quest-progress-title" class="profile-section-title"><%= goal.status == "completed" ? "Quest complete" : "Your quest progress" %></h2>
+<% title_id = dom_id(entry, :round_quest_progress_title) %>
+<section class="round-panel round-learning-progress" aria-labelledby="<%= title_id %>">
+  <h2 id="<%= title_id %>" class="profile-section-title"><%= goal.status == "completed" ? "Quest complete" : "Your quest progress" %></h2>
   <%= link_to goal.quest.name, quest_path(goal.quest), class: "play-quest-name" %>
+  <% recorded = @round.scope["quest_progress"]&.find { |snapshot| snapshot["goal_id"] == goal.id } %>
+  <% if recorded && recorded["after"] %>
+    <dl class="round-stats round-recorded-quest-progress" aria-label="Recorded quest progress">
+      <% { "before" => "At round start", "after" => "At round finish" }.each do |key, label| %>
+        <% progress = recorded.fetch(key) %>
+        <div><dt><%= label %></dt><dd data-quest-progress-point="<%= key %>"><%= progress.fetch("percent") %>% · <%= progress.fetch("completed") %> of <%= progress.fetch("required") %> required achievements</dd></div>
+      <% end %>
+    </dl>
+  <% end %>
   <%= render "quests/progress", goal: goal %>
   <h3><%= entry.achievement.name %></h3>
   <p><%= entry.progress %> of <%= entry.required_player_ids.size %> players answered correctly since adoption.</p>

@@ -11,7 +11,7 @@
   <%= link_to "Explore roster seasons", new_game_round_path(team_id: @team.id), class: "tool-link" %>
 </section>
 <nav class="history-tabs" aria-label="Team sections">
-  <% [ ["wall", "Wall"], ["roster", "Roster"], ["ratings", "Ratings"] ].each do |tab, label| %>
+  <% [ ["wall", "Wall"], ["roster", "Roster"], ["staff", "Coaches, staff & broadcasters"], ["ratings", "Ratings"] ].each do |tab, label| %>
     <%= link_to label, url_for(tab: tab, page: nil), aria: { current: @tab == tab ? "page" : nil } %>
   <% end %>
 </nav>
@@ -46,6 +46,8 @@
       <%== @pagy.series_nav if @pagy.pages > 1 %>
     <% else %><p class="round-caption">No current-team player assignments recorded. Choose a roster season in round setup to use historical player lists.</p><% end %>
   </section>
+<% elsif @tab == "staff" %>
+  <%= render "staff_tenures/list", staff_tenures: @staff_tenures %>
 <% else %>
   <section class="round-panel">
     <h2 class="profile-section-title">How aces rate <%= @team.name %></h2>

@@ -14,6 +14,9 @@
         <%= entity_link @player.league %>
       <% end %>
       <%= render "follows/button", record: @player %>
+      <% if @player.person %>
+        <%= link_to "Coaching, staff and broadcasting history", person_path(@player.person), class: "tool-link" %>
+      <% end %>
       <%= link_to "Write a shout-out draft", new_shout_out_draft_path(target_type: "Player", target_id: @player.id), class: "tool-button" %>
       <% if @player.team %>
         <%= tag.div class: "page-actions" do %>
@@ -57,6 +60,17 @@
       <%= tag.p "No rating spectrums have been created yet.", class: "profile-empty" %>
     <% end %>
   <% end %>
+
+  <section class="profile-section player-shout-outs" aria-labelledby="player-shout-outs-title">
+    <div class="play-section-heading"><h2 id="player-shout-outs-title" class="profile-section-title">Shout-outs for <%= @player.name %></h2><%= link_to "All player shout-outs", player_shout_outs_path(@player), class: "tool-link" %></div>
+    <p class="round-caption"><%= pluralize @weekly_shout_out_count, "live shout-out" %> approved this week · UTC</p>
+    <% if @shout_outs.any? %>
+      <p class="round-caption">Top live posts, in bid-weighted order with a random boost for each visitor.</p>
+      <%= render partial: "shout_outs/card", collection: @shout_outs, as: :post, locals: { reactions: ShoutOutReactionSummary.new(posts: @shout_outs, ace: current_ace) } %>
+    <% else %>
+      <p class="profile-empty">No live shout-outs for this player yet.</p>
+    <% end %>
+  </section>
 
   <%= tag.section class: "profile-section", aria: { labelledby: "player-related-title" } do %>
     <%= tag.h2 "Related", id: "player-related-title", class: "profile-section-title" %>

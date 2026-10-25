@@ -113,6 +113,8 @@
 .round-stats { @apply flex flex-wrap gap-6 sm:gap-10; }
 .round-stats dt { @apply text-xs text-ink-2; }
 .round-stats dd { @apply font-mono text-2xl font-bold mt-2; }
+.round-recorded-quest-progress { @apply my-4; }
+.round-recorded-quest-progress dd { @apply text-base; overflow-wrap: anywhere; }
 .round-results { @apply mt-5; }
 .round-result { @apply flex items-center gap-3 sm:gap-5 py-4 border-b border-line; }
 .round-result:last-child { @apply border-b-0; }

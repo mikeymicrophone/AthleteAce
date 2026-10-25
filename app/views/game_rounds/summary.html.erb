@@ -20,8 +20,8 @@
       <% end %>
     <% end %>
   <% end %>
-  <% if @learning_entry %>
-    <%= render "learning_progress", entry: @learning_entry %>
+  <% if @learning_entries.any? %>
+    <%= render partial: "learning_progress", collection: @learning_entries, as: :entry %>
   <% elsif @group_overview %>
     <section class="round-learning-progress" aria-labelledby="round-group-progress-title">
       <h2 id="round-group-progress-title" class="profile-section-title">Current group progress</h2>

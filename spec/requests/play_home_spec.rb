@@ -73,7 +73,7 @@ RSpec.describe "Play home and quests", type: :request do
     expect(response.body).to include("1 of 1 required achievements", goal_path(goal))
     practice = doc.at_css('a[aria-label="Practice Learn this roster"]')
     expect(Rack::Utils.parse_nested_query(URI.parse(practice["href"]).query)).to include("team_id" => team.id.to_s, "include_inactive" => "true")
-    expect(response.body).not_to include("Approved", "Created by")
+    expect(response.body).not_to include("Created by")
     expect(goal.reload.progress).to eq(5)
     sign_out ace
     get quest_path(quest)

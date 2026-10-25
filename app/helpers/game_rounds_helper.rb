@@ -77,6 +77,6 @@ module GameRoundsHelper
   def round_replay_params(round)
     # Short pools and misses drills retain the originally requested round size.
     requested = round.scope.fetch("length", round.length).to_i
-    round.scope.except("drill").merge("length" => GameRound::LENGTHS.include?(requested) ? requested : 10)
+    round.scope.except("drill", "quest_progress").merge("length" => GameRound::LENGTHS.include?(requested) ? requested : 10)
   end
 end

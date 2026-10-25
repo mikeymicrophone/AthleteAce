@@ -13,6 +13,7 @@ class GameRound < ApplicationRecord
   validates :length, numericality: { only_integer: true, in: 1..30 }
   validates :scope_label, :started_at, presence: true
   validate { errors.add(:questions, "must match the round length") unless questions.size == length }
+  before_create :record_starting_quest_progress
 
   def question
     questions[position]
@@ -80,8 +81,18 @@ class GameRound < ApplicationRecord
       raise InvalidAction, "Resume the round before continuing." if paused?
 
       next_position = position + 1
-      update! position: next_position, finished_at: next_position == length ? Time.current : nil,
-        question_started_at: next_position == length ? nil : Time.current
+      completed_at = next_position == length ? Time.current : nil
+      changes = { position: next_position, finished_at: completed_at,
+        question_started_at: completed_at ? nil : Time.current }
+      if completed_at && scope["quest_progress"]
+        entries = quest_learning_entries(as_of: completed_at).index_by(&:goal_id)
+        snapshots = scope.fetch("quest_progress").map do |snapshot|
+          entry = entries[snapshot.fetch("goal_id")]
+          entry ? snapshot.merge("after" => quest_progress_snapshot(entry.goal)) : snapshot
+        end
+        changes[:scope] = scope.merge("quest_progress" => snapshots)
+      end
+      update! changes
     end
   end
 
@@ -103,6 +114,25 @@ class GameRound < ApplicationRecord
 
   def results
     game_attempts.order(:round_position).to_a
+  end
+
+  def quest_learning_entries(as_of: finished_at || Time.current)
+    player_ids = questions.filter_map { |question| question["subject_id"] if question["subject_type"] == "Player" }.uniq
+    return [] if player_ids.empty?
+
+    entries = GoalAchievement.joins(:achievement, goal: { quest: :highlights })
+      .merge(Quest.approved).merge(Achievement.approved).merge(Highlight.approved)
+      .where(goals: { ace_id: ace_id }).where("goals.created_at <= ?", as_of)
+      .where("highlights.achievement_id = goal_achievements.achievement_id")
+      .where("EXISTS (SELECT 1 FROM jsonb_array_elements_text(goal_achievements.required_player_ids) AS member(value) WHERE member.value IN (?))", player_ids.map(&:to_s))
+    if scope["goal_achievement_id"]
+      entries = entries.where(id: scope["goal_achievement_id"], achievements: { target_type: "PlayerGroup", target_id: scope["player_group_id"] })
+    else
+      entries = entries.where.not(achievements: { target_type: "PlayerGroup" })
+    end
+    entries.includes(:achievement, goal: :quest).order(:goal_id, :id).group_by(&:goal_id).values.map do |matches|
+      matches.find { |entry| !entry.completed_at } || matches.first
+    end
   end
 
   def stats
@@ -129,6 +159,22 @@ class GameRound < ApplicationRecord
   end
 
   private
+
+  def record_starting_quest_progress
+    self.scope = scope.except("quest_progress")
+    entries = quest_learning_entries(as_of: started_at)
+    return if entries.empty?
+
+    snapshots = entries.map { |entry| { "goal_id" => entry.goal_id, "before" => quest_progress_snapshot(entry.goal) } }
+    self.scope = scope.merge("quest_progress" => snapshots)
+  end
+
+  def quest_progress_snapshot(goal)
+    required = goal.quest.highlights.public_requirements.required.count
+    completed = [ goal.progress, required ].min
+    { "completed" => completed, "required" => required,
+      "percent" => required.positive? ? (completed.fdiv(required) * 100).round : 0 }
+  end
 
   def answer_time_ms
     elapsed = question_started_at ? ((Time.current - question_started_at) * 1000).round : 0

@@ -1,0 +1,8 @@
+<% content_for :title, @person.name %>
+<section class="round-panel">
+  <h1 class="page-title"><%= @person.name %></h1>
+  <% if @person.player %>
+    <%= link_to "Athletic profile: #{@person.player.name}", player_path(@person.player), class: "tool-link" %>
+  <% end %>
+</section>
+<%= render "staff_tenures/list", staff_tenures: @staff_tenures %>

@@ -56,7 +56,7 @@ class TeamsController < ApplicationController
   def show
     @tab = params[:tab].presence || "wall"
     @wall_filter = params[:wall_filter].presence || "all"
-    raise ActionController::BadRequest unless %w[wall roster ratings].include?(@tab) && %w[all team players].include?(@wall_filter)
+    raise ActionController::BadRequest unless %w[wall roster staff ratings].include?(@tab) && %w[all team players].include?(@wall_filter)
     # Load any filters that were applied when navigating to this show page
     load_current_filters
     
@@ -79,6 +79,8 @@ class TeamsController < ApplicationController
       @pagy, @posts = pagy(ShoutOutFeed.ranked(posts.includes(:created_by, :target), seed: seed), limit: 25)
     elsif @tab == "roster"
       @pagy, @players = pagy(@team.players.order(:last_name, :first_name, :id), limit: 25)
+    elsif @tab == "staff"
+      @staff_tenures = @team.staff_tenures.includes(:person, :organization, :team).chronological
     end
   end
 
