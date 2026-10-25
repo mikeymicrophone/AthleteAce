@@ -11,6 +11,7 @@ module Seeds
       "Division" => Division, "Team" => Team, "Organization" => Organization,
       "OrganizationAffiliation" => OrganizationAffiliation,
       "Year" => Year, "Season" => Season, "Campaign" => Campaign, "Player" => Player,
+      "Person" => Person, "StaffTenure" => StaffTenure,
       "Contract" => Contract, "Activation" => Activation,
       "JerseyNumberAssignment" => JerseyNumberAssignment,
       "Transaction" => Transaction, "TransactionPlayer" => TransactionPlayer,
@@ -25,6 +26,7 @@ module Seeds
       "League" => %w[sport], "Conference" => %w[league], "Division" => %w[conference],
       "Team" => %w[league], "Season" => %w[league year], "Player" => %w[sport],
       "OrganizationAffiliation" => %w[organization team],
+      "Person" => %w[player], "StaffTenure" => %w[person organization team],
       "Contract" => %w[player organization], "Campaign" => %w[team], "Activation" => %w[player],
       "JerseyNumberAssignment" => %w[player team],
       "Stint" => %w[player team], "Roster" => %w[campaign], "RosterEntry" => %w[roster player],
@@ -356,6 +358,7 @@ module Seeds
 
     def natural_target(model, desired)
       keys = {
+        Person => %w[player],
         Year => %w[number], Season => %w[year league], Campaign => %w[team season], Activation => %w[player campaign],
         PlayerGroupMembership => %w[player_group player], RosterEntry => %w[roster player], Contestant => %w[contest campaign],
         Appearance => %w[contestant player], TransactionPlayer => %w[event player],

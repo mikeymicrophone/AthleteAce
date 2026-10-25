@@ -1,4 +1,6 @@
 class Player < ApplicationRecord
+  has_one :person, dependent: :nullify
+  after_create :create_person_identity!
   has_many :shout_outs, as: :target, dependent: :nullify
   has_many :shout_out_drafts, as: :target, dependent: :nullify
   has_many :follows, as: :followable, dependent: :destroy
@@ -111,5 +113,22 @@ class Player < ApplicationRecord
       recent_correct: recent_correct,
       recent_accuracy: recent_total > 0 ? (recent_correct.to_f / recent_total * 100).round : 0
     }
+  end
+
+  private
+
+  def create_person_identity!
+    code = "PERSON-#{entity_code.presence || SecureRandom.uuid.upcase}"
+    identity = Person.find_or_create_by!(entity_code: code) do |record|
+      record.name = name.strip.presence || "Unnamed athlete"
+      record.player = self
+    end
+    identity.with_lock do
+      if identity.player_id.present? && identity.player_id != id
+        errors.add :person, "is already linked to another athletic profile"
+        raise ActiveRecord::RecordInvalid, self
+      end
+      identity.update! player: self if identity.player_id.nil?
+    end
   end
 end

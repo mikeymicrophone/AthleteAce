@@ -7,7 +7,7 @@ class UgcResetService
     # Sports hierarchy (top to bottom)
     Country, State, City, Stadium,
     Sport, League, Conference, Division, Team, Player,
-    JerseyNumberAssignment, PlayerGroup, PlayerGroupMembership,
+    JerseyNumberAssignment, PlayerGroup, PlayerGroupMembership, Person, StaffTenure,
     
     # Organizational structure
     Organization, OrganizationAffiliation, Membership, Position, Role,

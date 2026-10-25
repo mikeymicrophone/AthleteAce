@@ -52,9 +52,17 @@ RSpec.describe "Expanded seasonal seed catalog" do
 
   it "seeds all club organizations and independently sourced roster observations" do
     importer.call(paths)
-    expect(Organization.count).to eq(114)
+    expect(Organization.joins(:organization_affiliations).distinct.count).to eq(114)
     expect(OrganizationAffiliation.count).to eq(114)
     expect(Team.all.all? { |team| team.current_organization.present? }).to be(true)
+    person = importer.resolve_code("Person", "PERSON-KERR_STEVE")
+    expect(person.player.name).to eq("Steve Kerr")
+    expect(person.staff_tenures.pluck(:role)).to contain_exactly("coach", "broadcaster")
+    broadcast = person.staff_tenures.broadcaster.sole
+    expect(broadcast.organization.name).to eq("TNT")
+    expect(broadcast.team).to be_nil
+    expect(broadcast.end_date).to be_nil
+    expect(broadcast).not_to be_ongoing
     expect(Roster.count).to eq(83)
     expect(RosterEntry.count).to eq(281)
     expect(Roster.where(coverage: "complete").map { |roster| roster.campaign.abbreviation }).to match_array(%w[NYK SF])
