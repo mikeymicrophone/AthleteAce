@@ -12,6 +12,7 @@ class Admin::CatalogRecordsController < ApplicationController
         @leagues = League.order(:name)
         @teams = Team.order(:territory, :mascot)
         @pagy, @records = pagy(@directory.records, limit: 25)
+        @number_assignments = @directory.number_assignments(@records)
         @edited_ids = @directory.edited_records.where(id: @records.map(&:id)).pluck(:id)
       end
       format.csv do

@@ -8,6 +8,7 @@
     <div><%= form.label :league_id, "League" %><%= form.select :league_id, options_from_collection_for_select(@leagues, :id, :name, @directory.league_id), { include_blank: "All leagues" }, class: "account-input" %></div>
     <% if @directory.kind == "players" %>
       <div><%= form.label :team_id, "Team" %><%= form.select :team_id, options_from_collection_for_select(@teams, :id, :name, @directory.team_id), { include_blank: "All teams" }, class: "account-input" %></div>
+      <div><%= form.label :number_on, "Number on date" %><%= form.date_field :number_on, value: @directory.number_on, class: "account-input" %></div>
       <div><%= form.label :position, "Position" %><%= form.text_field :position, value: @directory.position, maxlength: 100, class: "account-input", placeholder: "Exact position" %></div>
       <div><%= form.label :status, "Status" %><%= form.select :status, options_for_select([["All statuses", ""], ["Active", "active"], ["Inactive", "inactive"], ["Unknown", "unknown"]], @directory.status), {}, class: "account-input" %></div>
       <div><%= form.label :photo, "Photo" %><%= form.select :photo, options_for_select([["All players", ""], ["Has photo", "present"], ["Missing photo", "missing"]], @directory.photo), {}, class: "account-input" %></div>
@@ -18,14 +19,15 @@
   <div class="page-actions">
     <%= link_to "Games", admin_games_path, class: "tool-button" %>
     <%= link_to "Competitions", admin_competitions_path, class: "tool-button" %>
-    <%= link_to "Export filtered CSV", admin_catalog_records_path(params.permit(:kind, :q, :league_id, :team_id, :position, :status, :photo, :edited).to_h.symbolize_keys.merge(format: :csv)), class: "tool-button", data: { turbo: false } %>
+    <%= link_to "Export filtered CSV", admin_catalog_records_path(params.permit(:kind, :q, :league_id, :team_id, :position, :status, :photo, :edited).to_h.symbolize_keys.merge(format: :csv, number_on: @directory.number_on&.iso8601)), class: "tool-button", data: { turbo: false } %>
     <p class="round-caption">All matching records, up to 10,000. Larger exports require narrower filters.</p>
   </div>
+  <% if @directory.kind == "players" %><p class="round-caption">Assigned numbers on <%= @directory.number_on.iso8601 %> for each player's current profile team. This date does not change directory membership or establish a historical team assignment. Observed game and roster numbers appear in Player history.</p><% end %>
   <p class="round-caption"><%= pluralize @pagy.count, "matching record" %> · Sorted by name · Changes save immediately and appear in correction history.</p>
-  <div class="people-table"><table><thead><tr><th><%= @directory.kind.singularize.titleize %></th><th>League</th><% if @directory.kind == "players" %><th>Team</th><th>Position</th><th>Status</th><th>Photo</th><% else %><th>Division</th><th>Players</th><th>Colors</th><th>Stadium</th><% end %><th>Corrections</th></tr></thead><tbody>
+  <div class="people-table"><table><thead><tr><th><%= @directory.kind.singularize.titleize %></th><th>League</th><% if @directory.kind == "players" %><th>Team</th><th>Assigned number</th><th>Position</th><th>Status</th><th>Photo</th><% else %><th>Division</th><th>Players</th><th>Colors</th><th>Stadium</th><% end %><th>Corrections</th></tr></thead><tbody>
     <% @records.each do |record| %>
       <tr><td><%= link_to record.name, edit_admin_catalog_record_path(record, kind: @directory.kind) %><p class="round-caption"><%= record.entity_code.presence || "No entity code" %><% if record.is_a?(Team) %> · <%= record.abbreviation %><% end %></p></td><td><%= record.league&.name || "Unknown" %></td>
-        <% if record.is_a?(Player) %><td><%= record.team&.name || "Unassigned" %></td><td><%= record.current_position.presence || "Unknown" %></td><td><%= record.active.nil? ? "Unknown" : record.active? ? "Active" : "Inactive" %></td><td><%= record.photo_urls.to_a.any?(&:present?) ? "Available" : "Missing" %></td>
+        <% if record.is_a?(Player) %><td><%= record.team&.name || "Unassigned" %></td><td><%= link_to @number_assignments[[record.id, record.team_id]]&.number || "Unknown", admin_player_history_path(record, tab: "numbers") %></td><td><%= record.current_position.presence || "Unknown" %></td><td><%= record.active.nil? ? "Unknown" : record.active? ? "Active" : "Inactive" %></td><td><%= record.photo_urls.to_a.any?(&:present?) ? "Available" : "Missing" %></td>
         <% else %><td><%= record.division&.name || "Unassigned" %></td><td><%= number_with_delimiter record.player_count %></td><td><%= [record.primary_color, record.secondary_color].compact.join(" / ").presence || "Not set" %></td><td><%= record.stadium&.name || "Unassigned" %></td><% end %>
         <td><%= @edited_ids.include?(record.id) ? "Has edit history" : "No recorded edits" %><p class="round-caption">Updated <%= l record.updated_at.to_date, format: :long %></p></td></tr>
     <% end %>

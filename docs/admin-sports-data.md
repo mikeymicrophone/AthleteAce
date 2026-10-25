@@ -10,9 +10,21 @@ The team directory supports name, abbreviation, and entity-code search, plus lea
 
 Search treats SQL wildcards literally and uses at most 80 Unicode code points after trimming. Both directories sort by name with ID as the tie-breaker and paginate 25 records at a time. Invalid filter values return HTTP 400. An unsupported record kind returns HTTP 404.
 
+## Inspect dated number assignments
+
+The player directory shows **Assigned number** for each player's current profile team on **Number on date**. The date defaults to the application's current date and stays explicit in the form and CSV download link. Changing it does not change directory membership or reconstruct historical team assignments.
+
+The column uses `JerseyNumberAssignment` records with inclusive date bounds. In that model, a missing start or end is an open bound. Matching assignments load in one query for the displayed page or export. An unassigned player or a player without a matching number assignment displays Unknown. The column does not substitute another team's number or a number observed only in a roster or appearance.
+
+The linked number opens **Number assignments** in Player history. This tab shows every recorded assignment for that player, including team, number, inclusive date range, entity code, source, and details. Missing bounds display **Open start** or **Open end**. Results sort by start date descending, then ID descending, with open starts last, and paginate 25 records. Number assignments do not establish membership, availability, or an actual appearance.
+
+Player CSV exports append `number_on`, `assigned_jersey_number`, and `number_assignment_code`. The date is always explicit. Missing assignments produce blank number and code fields. String numbers such as `00` remain unchanged in the CSV. Spreadsheet importers need to treat the number column as text to retain leading zeroes. Team exports keep their existing columns.
+
+Malformed number dates or years outside 0001 through 9999 return HTTP 400 for HTML and CSV. An explicit number date on the team directory returns HTTP 400. These views do not edit or infer number assignments.
+
 ## Trace a player's recorded history
 
-**Player history** opens from the player edit form or a player's row in an Admin game. The page separates the current profile team from five historical tabs: **Stints**, **Contracts**, **Transactions**, **Rosters**, and **Appearances**. Each tab shows its full record count and paginates 25 rows. Only records associated with that player appear.
+**Player history** opens from the player edit form or a player's row in an Admin game. The page separates the current profile team from six historical tabs: **Stints**, **Contracts**, **Transactions**, **Rosters**, **Appearances**, and **Number assignments**. Each tab shows its full record count and paginates 25 rows. Only records associated with that player appear.
 
 Stints show recorded team assignments, date bounds, status, linked contract organization, and explicitly linked start and end transactions. An unknown end date does not prove a current assignment. Contracts show the organization, dates, optional legacy team, and recorded details. Neither record establishes game availability.
 

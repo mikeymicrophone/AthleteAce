@@ -6,11 +6,13 @@ class Admin::PlayerHistoriesController < ApplicationController
   def show
     @player = Player.includes(:team).find(params[:id])
     @tab = params[:tab].presence || "stints"
-    return render plain: "Choose a player history tab.", status: :bad_request unless %w[stints contracts transactions rosters appearances].include?(@tab)
+    return render plain: "Choose a player history tab.", status: :bad_request unless %w[stints contracts transactions rosters appearances numbers].include?(@tab)
 
     @counts = { stints: @player.stints.count, contracts: @player.contracts.count, transactions: @player.transaction_players.count,
-      rosters: @player.roster_entries.count, appearances: @player.appearances.count }
+      rosters: @player.roster_entries.count, appearances: @player.appearances.count, numbers: @player.jersey_number_assignments.count }
     records = case @tab
+    when "numbers"
+      @player.jersey_number_assignments.includes(:team).order(Arel.sql("jersey_number_assignments.start_date DESC NULLS LAST, jersey_number_assignments.id DESC"))
     when "stints"
       @player.stints.includes(:team, :start_transaction, :end_transaction, contract: :organization)
         .order(Arel.sql("stints.start_date DESC NULLS LAST, stints.id DESC"))
