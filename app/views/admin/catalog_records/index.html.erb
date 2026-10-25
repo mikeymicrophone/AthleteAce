@@ -25,14 +25,26 @@
   </div>
   <% if @directory.kind == "players" %><p class="round-caption">Assigned numbers on <%= @directory.number_on.iso8601 %> for each player's current profile team. This date does not change directory membership or establish a historical team assignment. Observed game and roster numbers appear in Player history.</p><% end %>
   <p class="round-caption"><%= pluralize @pagy.count, "matching record" %> · Sorted by name · Changes save immediately and appear in correction history.</p>
+  <%= form_with url: admin_catalog_records_path(format: :csv), method: :get, data: { turbo: false, controller: "catalog-selection" } do |form| %>
+    <%= form.hidden_field :kind, value: @directory.kind, id: nil %>
+    <%= form.hidden_field :selection, value: "selected" %>
+    <% params.permit(:q, :league_id, :team_id, :position, :status, :photo, :edited).each do |key, value| %><%= hidden_field_tag key, value, id: nil %><% end %>
+    <% if @directory.kind == "players" %><%= form.hidden_field :number_on, value: @directory.number_on.iso8601, id: nil %><% end %>
+    <div class="page-actions">
+      <label><input type="checkbox" data-catalog-selection-target="all" data-action="catalog-selection#toggleAll"> Select page</label>
+      <span data-catalog-selection-target="count" aria-live="polite">0 selected</span>
+      <%= form.submit "Export selected CSV", class: "tool-button", data: { catalog_selection_target: "submit" } %>
+    </div>
+    <p class="round-caption">Select up to 25 rows shown on this page. Selection resets when you change pages or filters. The export also applies the current filters.</p>
   <div class="people-table"><table><thead><tr><th><%= @directory.kind.singularize.titleize %></th><th>League</th><% if @directory.kind == "players" %><th>Team</th><th>Assigned number</th><th>Position</th><th>Status</th><th>Photo</th><% else %><th>Division</th><th>Players</th><th>Colors</th><th>Stadium</th><% end %><th>Corrections</th></tr></thead><tbody>
     <% @records.each do |record| %>
-      <tr><td><%= link_to record.name, edit_admin_catalog_record_path(record, kind: @directory.kind) %><p class="round-caption"><%= record.entity_code.presence || "No entity code" %><% if record.is_a?(Team) %> · <%= record.abbreviation %><% end %></p></td><td><%= record.league&.name || "Unknown" %></td>
+      <tr><td><%= check_box_tag "selected_ids[]", record.id, false, id: "select_record_#{record.id}", aria: { label: "Select #{record.name}" }, data: { catalog_selection_target: "item", action: "catalog-selection#update" } %> <%= link_to record.name, edit_admin_catalog_record_path(record, kind: @directory.kind) %><p class="round-caption"><%= record.entity_code.presence || "No entity code" %><% if record.is_a?(Team) %> · <%= record.abbreviation %><% end %></p></td><td><%= record.league&.name || "Unknown" %></td>
         <% if record.is_a?(Player) %><td><%= record.team&.name || "Unassigned" %></td><td><%= link_to @number_assignments[[record.id, record.team_id]]&.number || "Unknown", admin_player_history_path(record, tab: "numbers") %></td><td><%= record.current_position.presence || "Unknown" %></td><td><%= record.active.nil? ? "Unknown" : record.active? ? "Active" : "Inactive" %></td><td><%= record.photo_urls.to_a.any?(&:present?) ? "Available" : "Missing" %></td>
         <% else %><td><%= record.division&.name || "Unassigned" %></td><td><%= number_with_delimiter record.player_count %></td><td><%= [record.primary_color, record.secondary_color].compact.join(" / ").presence || "Not set" %></td><td><%= record.stadium&.name || "Unassigned" %></td><% end %>
         <td><%= @edited_ids.include?(record.id) ? "Has edit history" : "No recorded edits" %><p class="round-caption">Updated <%= l record.updated_at.to_date, format: :long %></p></td></tr>
     <% end %>
   </tbody></table></div>
+  <% end %>
   <% if @records.empty? %><section class="round-panel"><h2>No matching records.</h2><p>Try another name or change the filters.</p></section><% end %>
   <%== @pagy.series_nav if @pagy.pages > 1 %>
 </div>

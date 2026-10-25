@@ -10,8 +10,17 @@ module Admin
     attr_reader :kind, :query, :league_id, :team_id, :status, :position, :photo, :edited, :number_on
 
     def initialize(params)
-      %i[kind q league_id team_id status position photo edited number_on].each do |key|
+      %i[kind q league_id team_id status position photo edited number_on selection].each do |key|
         raise ArgumentError, "Invalid sports filter." unless params[key].nil? || params[key].is_a?(String)
+      end
+      if params[:selection]
+        ids = params[:selected_ids]
+        unless params[:selection] == "selected" && ids.is_a?(Array) && ids.length.between?(1, 25) && ids.all? { |id| id.is_a?(String) && id.match?(/\A[1-9]\d{0,17}\z/) }
+          raise ArgumentError, "Select 1 to 25 records to export."
+        end
+        @selected_ids = ids.uniq
+      elsif params.key?(:selected_ids)
+        raise ArgumentError, "Choose the selected-record export."
       end
       @kind = params[:kind].presence || "players"
       @model = EditCatalog.model_for(kind)
@@ -38,6 +47,7 @@ module Admin
 
     def records
       records = @model.all
+      records = records.where(id: @selected_ids) if @selected_ids
       if query.present?
         fields = kind == "players" ? "players.first_name, players.last_name, array_to_string(players.nicknames, ' '), players.entity_code" : "teams.territory, teams.mascot, teams.abbreviation, teams.entity_code"
         records = records.where("CONCAT_WS(' ', #{fields}) ILIKE ?", "%#{@model.sanitize_sql_like(query)}%")

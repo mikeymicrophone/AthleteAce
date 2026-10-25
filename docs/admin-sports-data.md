@@ -10,6 +10,16 @@ The team directory supports name, abbreviation, and entity-code search, plus lea
 
 Search treats SQL wildcards literally and uses at most 80 Unicode code points after trimming. Both directories sort by name with ID as the tie-breaker and paginate 25 records at a time. Invalid filter values return HTTP 400. An unsupported record kind returns HTTP 404.
 
+## Export selected rows
+
+Each player or team row has a checkbox. **Select page** checks every displayed row, with a maximum of 25. The selected count and partial-selection indicator update as individual checkboxes change. **Export selected CSV** downloads only checked records that still match the current directory filters. It preserves directory ordering, the player number date, existing CSV columns, and spreadsheet protection. A selected ID is not enough to bypass the filters.
+
+Selection resets on page or filter navigation. It does not include other pages or silently expand to all matching records. **Export filtered CSV** remains the separate download for all matching records across pages.
+
+Selected exports require `selection=selected` and 1–25 positive record-ID strings in `selected_ids[]`. Duplicate IDs export once. A missing, empty, oversized, or malformed selection returns HTTP 400. Valid selected IDs that no longer match or exist produce fewer rows, including a header-only CSV when none remain. The requested table page does not truncate an explicit selection.
+
+The controls work as a normal GET form without Turbo interception. JavaScript updates selection counts, selects the page, and disables the export button when nothing is checked. Without JavaScript, individual checkboxes and the selected export still work, and the server rejects an empty selection. These actions require an admin, return private, no-store responses, and change no catalog or audit records.
+
 ## Add a player
 
 **Add player** opens an admin-only creation form. The form requires at least one name component and a unique local entity code. Codes allow up to 120 letters, digits, underscores, and hyphen-separated parts, such as `PLAYER-JORDAN-REED-1998`. A `MIC-ALA-` prefix is rejected because the form accepts local codes. Codes are case-sensitive. Sport is optional; a selected sport must exist.
