@@ -10,7 +10,7 @@
     <div class="round-panel"><p class="eyebrow"><%= label %></p><strong><%= number_with_delimiter(count) %></strong></div>
   <% end %>
 </section>
-<div class="page-actions"><%= link_to "People", admin_people_path, class: "tool-button" %><%= link_to "Escalations", escalations_path, class: "tool-button" %><%= link_to "Shout-out revenue", shout_out_revenue_path, class: "tool-button" %><%= link_to "Sports data", admin_catalog_records_path, class: "tool-button" %><%= link_to "Content catalog", admin_content_catalog_path, class: "tool-button" %><%= link_to "Review queue", moderation_path, class: "tool-button" %></div>
+<div class="page-actions"><%= link_to "People", admin_people_path, class: "tool-button" %><%= link_to "Escalations", escalations_path, class: "tool-button" %><%= link_to "Shout-out revenue", shout_out_revenue_path, class: "tool-button" %><%= link_to "Sports data", admin_catalog_records_path, class: "tool-button" %><%= link_to "Content catalog", admin_content_catalog_path, class: "tool-button" %><%= link_to "Moderation oversight", admin_moderation_oversight_path, class: "tool-button" %><%= link_to "Review queue", moderation_path, class: "tool-button" %></div>
 <section class="round-panel admin-cash" aria-labelledby="admin-cash-title">
   <h2 id="admin-cash-title" class="profile-section-title">Cash purchases · last 14 days</h2>
   <p><%= number_to_currency(@overview.cash_total / 100.to_d) %> · <%= @overview.cash_daily.keys.first %> to <%= @overview.today %> · UTC</p>

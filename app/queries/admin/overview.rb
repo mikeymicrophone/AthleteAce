@@ -10,8 +10,7 @@ module Admin
       revenue = ShoutOutRevenue.new(days: "30", now: @as_of)
       @cash_daily = revenue.daily.to_a.last(14).to_h.transform_values { |row| row.fetch("purchase") }
       @new_aces_today = Ace.where(created_at: today_range).count
-      @review_counts = ModerationDecision.where(created_at: today_range,
-        action: %w[approved rejected hidden reopened], from_status: Moderation::Queue::STATUSES).group(:actor_id).count
+      @review_counts = ModerationDecision.review_transitions.where(created_at: today_range).group(:actor_id).count
       @reviewers = Ace.where(id: @review_counts.keys.compact).index_by(&:id)
       visible_cases = ModerationEscalation.visible_to(admin).open
       @escalation_count = visible_cases.count

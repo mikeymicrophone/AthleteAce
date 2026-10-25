@@ -31,7 +31,7 @@ module ShellHelper
       return "Content catalog" if %w[content_catalog quests achievements spectrums highlights].include?(controller_name)
       return "People" if controller_name == "people"
       return "Revenue" if controller_name == "shout_out_revenues"
-      controller_name == "admin" ? "Overview" : (params[:section] == "content" ? "Content catalog" : "Sports data")
+      %w[admin moderation_oversight].include?(controller_name) ? "Overview" : (params[:section] == "content" ? "Content catalog" : "Sports data")
     when "feed"
       return "Leaders" if controller_name == "shout_out_leaderboards"
       { "players" => "Players", "teams" => "Teams" }.fetch(controller_name, "Latest")

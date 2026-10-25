@@ -6,6 +6,13 @@ class ModerationDecision < ApplicationRecord
   validates :revision, numericality: { only_integer: true, greater_than: 0 }
   validates :reason, length: { maximum: 2000 }
 
+  scope :review_transitions, -> {
+    where(action: "approved", from_status: "pending", to_status: "approved")
+      .or(where(action: "rejected", from_status: "pending", to_status: "rejected"))
+      .or(where(action: "hidden", from_status: "approved", to_status: "hidden"))
+      .or(where(action: "reopened", from_status: %w[rejected hidden], to_status: "pending"))
+  }
+
   def readonly?
     persisted?
   end

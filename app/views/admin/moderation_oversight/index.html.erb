@@ -1,0 +1,52 @@
+<% content_for :title, "Moderation oversight" %>
+<% log = @oversight.log %>
+<% wait = @oversight.pending_wait %>
+<% types = log.type ? [log.type] : Moderation::Queue::TYPES.keys %>
+<div class="moderation-oversight people-page">
+  <header class="browse-header">
+    <div><p class="eyebrow">Admin</p><h1 class="page-title">Moderation oversight</h1><p class="round-caption">As of <%= log.as_of.strftime("%B %-d, %Y · %H:%M:%S UTC") %></p></div>
+    <div class="page-actions"><%= link_to "Overview", admin_path, class: "tool-button" %><%= link_to "Decision log", moderation_log_path(**log.filters), class: "tool-button" %><%= link_to "Escalations", escalations_path, class: "tool-button" %></div>
+  </header>
+
+  <%= form_with url: admin_moderation_oversight_path, method: :get, class: "decision-log-filters" do |form| %>
+    <div><%= form.label :from, "From (UTC)" %><%= form.date_field :from, value: log.from.iso8601, required: true, max: log.as_of.to_date.iso8601, class: "account-input" %></div>
+    <div><%= form.label :through, "Through (UTC)" %><%= form.date_field :through, value: log.through.iso8601, required: true, max: log.as_of.to_date.iso8601, class: "account-input" %></div>
+    <div><%= form.label :item_type, "Content type" %><%= form.select :item_type, options_for_select(Moderation::Queue::TYPES.keys.map { |type| [type.pluralize, type] }, log.type), { include_blank: "All types" }, class: "account-input" %></div>
+    <div class="page-actions"><%= form.submit "Apply filters", class: "tool-button" %><%= link_to "Clear filters", admin_moderation_oversight_path, class: "tool-link" %></div>
+  <% end %>
+  <p class="round-caption">Up to <%= Admin::ModerationOversight::MAX_DAYS %> inclusive UTC days. The current day is incomplete.</p>
+
+  <section class="oversight-metrics" aria-label="Review metrics">
+    <div class="round-panel"><p class="eyebrow">Review events</p><strong data-oversight="total"><%= number_with_delimiter @oversight.counts.values.sum %></strong><p class="round-caption">Across the selected dates.</p></div>
+    <div class="round-panel"><p class="eyebrow">Median pending wait</p><strong data-oversight="wait"><%= wait[:median_seconds] ? distance_of_time_in_words(0, wait[:median_seconds], include_seconds: true) : "Not recorded" %></strong><p class="round-caption"><%= wait[:matched] %> of <%= wait[:total] %> decision pairs matched.</p></div>
+    <div class="round-panel"><p class="eyebrow">Later status changes</p><strong data-oversight="changes"><%= @oversight.counts.fetch("hidden", 0) + @oversight.counts.fetch("reopened", 0) %></strong><p class="round-caption">Hides and reopenings.</p></div>
+  </section>
+  <p class="round-caption">Counts include approvals, rejections, hides and reopenings. These are recorded events, not unique submissions, reviewer rankings or review targets. Submissions, trusted creation and content-edit events are excluded.</p>
+  <% if @oversight.counts.empty? %><section class="round-panel"><h2 class="profile-section-title">No recorded review events</h2><p>Choose different dates or a broader content type.</p></section><% end %>
+
+  <section class="round-panel" aria-labelledby="oversight-volume-title">
+    <h2 id="oversight-volume-title" class="profile-section-title">Review events by day</h2>
+    <% maximum = [@oversight.daily.values.max, 1].max %>
+    <ol class="oversight-chart" aria-label="Daily review events">
+      <% @oversight.daily.each do |date, count| %>
+        <li title="<%= date %>: <%= pluralize count, 'event' %>"><span aria-hidden="true" style="height: <%= count.fdiv(maximum) * 100 %>%"></span><span class="sr-only"><%= date %>: <%= pluralize count, "event" %></span></li>
+      <% end %>
+    </ol>
+    <div class="oversight-axis"><time><%= log.from %></time><span>Peak <%= pluralize @oversight.daily.values.max, "event" %> per day</span><time><%= log.through %></time></div>
+    <details class="oversight-daily-values"><summary>Daily values</summary><ul><% @oversight.daily.each do |date, count| %><li><%= link_to date.iso8601, moderation_log_path(**log.filters.merge(from: date.iso8601, through: date.iso8601)), class: "tool-link" %><span><%= pluralize count, "event" %></span></li><% end %></ul></details>
+  </section>
+
+  <section class="round-panel" aria-labelledby="oversight-type-title">
+    <h2 id="oversight-type-title" class="profile-section-title">Recorded transitions by content type</h2>
+    <p class="round-caption">Open a count to inspect its matching decision records.</p>
+    <div class="people-table"><table><thead><tr><th scope="col">Type</th><% %w[approved rejected hidden reopened].each do |action| %><th scope="col"><%= action.titleize %></th><% end %></tr></thead><tbody>
+      <% types.each do |type| %><tr><th scope="row"><%= type.pluralize %></th><% %w[approved rejected hidden reopened].each do |action| %><td><%= link_to @oversight.by_type.fetch([type, action], 0), moderation_log_path(**log.filters.merge(item_type: type, decision_action: action)), class: "tool-link", aria: { label: "#{type.pluralize} #{action}: #{@oversight.by_type.fetch([type, action], 0)} events" } %></td><% end %></tr><% end %>
+    </tbody></table></div>
+  </section>
+
+  <section class="round-panel" aria-labelledby="oversight-definitions-title">
+    <h2 id="oversight-definitions-title" class="profile-section-title">What these metrics mean</h2>
+    <p>Pending wait runs from a recorded submission or reopening to the next approval or rejection of that same content revision. The decision must fall within the selected dates; its pending entry can be earlier. Missing or inconsistent pairs are excluded from the median and remain in the event counts. The wait measures elapsed calendar time, including handoffs.</p>
+    <p>Later hides and reopenings describe publication-state changes. Formal appeals are not linked to original decisions, so an overturn rate is unavailable. These changes do not establish that a prior reviewer was wrong.</p>
+  </section>
+</div>

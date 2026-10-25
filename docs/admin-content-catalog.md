@@ -22,4 +22,4 @@ The name opens the existing detail page in the Admin shell. **Edit** opens the e
 
 **Review & history** opens the record in Moderate with its current status and type selected. Review still forbids deciding one's own submission. An open escalation links to its case only when the admin can view it. Resolution restrictions and immutable decision history remain in the existing moderation services.
 
-Quest, achievement, and spectrum records do not currently have alias fields or a merge model. This directory adds no alias or merge controls. Duplicate merging remains deferred under AA-196. Oversight latency and overturn analytics remain separate work under AA-207.
+Quest, achievement, and spectrum records do not currently have alias fields or a merge model. This directory adds no alias or merge controls. Duplicate merging remains deferred under AA-196. [Moderation oversight](admin-moderation-oversight.md) provides recorded transition counts and pending-wait measurements. Formal appeal-linked overturn analytics remain separate work under AA-207 and AA-203.

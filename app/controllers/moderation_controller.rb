@@ -42,7 +42,7 @@ class ModerationController < ApplicationController
   def log
     response.headers["Cache-Control"] = "private, no-store"
     @log = Moderation::DecisionLog.new(from: params[:from], through: params[:through], type: params[:item_type],
-      actor_id: params[:actor_id], action: params[:decision_action])
+      actor_id: params[:actor_id], action: params[:decision_action], reviews_only: params[:reviews_only])
     respond_to do |format|
       format.html do
         @actors = Ace.where(id: ModerationDecision.select(:actor_id)).order(:username, :id)

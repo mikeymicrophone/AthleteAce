@@ -6,13 +6,15 @@ module Moderation
     ACTIONS = %w[submitted approved rejected hidden reopened].freeze
     attr_reader :from, :through, :type, :actor_id, :action, :as_of
 
-    def initialize(from: nil, through: nil, type: nil, actor_id: nil, action: nil, now: Time.current)
+    def initialize(from: nil, through: nil, type: nil, actor_id: nil, action: nil, reviews_only: nil, now: Time.current)
       @as_of = now.utc
       @through = date(through.presence || @as_of.to_date.iso8601)
       @from = date(from.presence || (@through - 29).iso8601)
       raise ArgumentError, "Choose dates in order, ending today or earlier." if @from > @through || @through > @as_of.to_date
       @type = type.presence
       @action = action.presence
+      @reviews_only = reviews_only.presence
+      raise ArgumentError, "Choose the review-transition filter." if @reviews_only && @reviews_only != "1"
       raise ArgumentError, "Choose a recorded content type." if @type && !Queue::TYPES.key?(@type)
       raise ArgumentError, "Choose a recorded action." if @action && !ACTIONS.include?(@action)
       @actor_id = actor_id.presence
@@ -26,6 +28,7 @@ module Moderation
       @scope = @scope.where(subject_type: @type) if @type
       @scope = @scope.where(action: @action) if @action
       @scope = @scope.where(actor_id: @actor_id == "unattributed" ? nil : @actor_id) if @actor_id
+      @scope = @scope.review_transitions if reviews_only?
     end
 
     def records
@@ -37,7 +40,12 @@ module Moderation
     end
 
     def filters
-      { from: from.iso8601, through: through.iso8601, item_type: type, actor_id: actor_id, decision_action: action }
+      { from: from.iso8601, through: through.iso8601, item_type: type, actor_id: actor_id, decision_action: action,
+        reviews_only: reviews_only? ? "1" : nil }
+    end
+
+    def reviews_only?
+      @reviews_only == "1"
     end
 
     def csv
@@ -58,7 +66,7 @@ module Moderation
     private
 
     def date(value)
-      raise ArgumentError, "Use dates in YYYY-MM-DD format." unless value.to_s.match?(/\A\d{4}-\d{2}-\d{2}\z/)
+      raise ArgumentError, "Use dates in YYYY-MM-DD format." unless value.is_a?(String) && value.match?(/\A\d{4}-\d{2}-\d{2}\z/)
       parsed = Date.iso8601(value)
       raise ArgumentError, "Use dates with a positive year." unless parsed.year.positive?
       parsed

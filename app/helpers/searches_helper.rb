@@ -28,6 +28,6 @@ module SearchesHelper
 
     [ [ "Account settings", edit_ace_registration_path ], [ "Your profile", edit_profile_path ],
       [ "Admin overview", admin_path ], [ "People", admin_people_path ], [ "Sports data", admin_catalog_records_path ],
-      [ "Content catalog", admin_content_catalog_path ] ].select { |name, _path| name.downcase.include?(query.downcase) }
+      [ "Content catalog", admin_content_catalog_path ], [ "Moderation oversight", admin_moderation_oversight_path ] ].select { |name, _path| name.downcase.include?(query.downcase) }
   end
 end

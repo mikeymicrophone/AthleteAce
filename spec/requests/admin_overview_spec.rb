@@ -49,6 +49,9 @@ RSpec.describe "Admin overview", type: :request do
       review_post(post, action: "hide", reviewer: reviewer)
       create(:quest, created_by: author)
       create(:quest, created_by: admin, moderation_status: "approved")
+      trusted = create(:quest, name: "Trusted roster guide")
+      trusted.moderation_editor = admin
+      trusted.update!(name: "Updated trusted roster guide")
       quest = create(:quest, created_by: author)
       Moderation::Review.call(record: quest, actor: former, action: "reject", revision: 1, status: "pending", reason: "Needs revision")
       former.destroy!
