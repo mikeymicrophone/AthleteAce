@@ -1,5 +1,5 @@
 <% content_for :title, "Most shouted" %>
-<%= browse_header "Most shouted" do %><%= link_to "Back to Feed", feed_path, class: "tool-button" %><% end %>
+<%= browse_header "Most shouted", eyebrow: "Feed" do %><%= link_to "Back to Feed", feed_path, class: "tool-button" %><% end %>
 <p class="round-intro"><%= @leaderboard.week %> to <%= @leaderboard.week + 6 %> · Monday to Sunday · UTC</p>
 <p>Live shout-outs approved during this week. Each post counts once; bids and reactions do not affect these standings.</p>
 <nav class="history-tabs" aria-label="Leaderboard targets">
@@ -11,6 +11,7 @@
   <div><%= form.label :sport_id, "Sport" %><%= form.collection_select :sport_id, @sports, :id, :name, { include_blank: "All sports", selected: @sport&.id } %></div>
   <div><%= form.label :league_id, "League" %><%= form.collection_select :league_id, @leagues, :id, :name, { include_blank: "All leagues", selected: @league&.id } %></div>
   <%= form.submit "Apply filters", class: "tool-button" %>
+  <% if @sport || @league %><%= link_to "Clear filters", shout_out_leaderboard_path(kind: @leaderboard.kind, week: @leaderboard.week.iso8601), class: "tool-link" %><% end %>
 <% end %>
 <div class="page-actions">
   <%= link_to "Previous week", url_for(week: (@leaderboard.week - 7).iso8601, page: nil), class: "tool-button" %>

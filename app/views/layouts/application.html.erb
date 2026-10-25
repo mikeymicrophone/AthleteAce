@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-theme="<%= current_theme %>">
+<html lang="en" data-theme="<%= current_theme %>">
   <head>
     <title><%= content_for(:title) || "Athlete Ace" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -28,12 +28,13 @@
   </head>
 
   <body data-side="<%= current_side %>" data-controller="theme" data-theme-preference-value="<%= current_theme %>">
+    <%= link_to "Skip to content", "#main-content", class: "shell-skip-link" %>
     <%= render "layouts/navigation" %>
     <div class="shell-layout <%= 'shell-tool-layout' if %w[mod admin].include?(current_side) %>">
     <% if %w[mod admin].include?(current_side) %>
       <aside class="shell-sidebar"><p class="eyebrow"><%= current_side == "mod" ? "Moderate" : "Admin" %></p><%= render "layouts/side_links", location: "sidebar" %></aside>
     <% end %>
-    <main class="app-main min-w-0 px-4">
+    <main id="main-content" tabindex="-1" class="app-main min-w-0 px-4">
       <% if notice %>
         <div class="flash-notice" role="alert">
           <span class="block sm:inline"><%= notice %></span>

@@ -1,5 +1,5 @@
 <% content_for :title, "Shout-out revenue" %>
-<%= browse_header "Shout-out revenue" do %><%= link_to "Export daily CSV", shout_out_revenue_path(days: @revenue.days, format: :csv), class: "tool-button" %><% end %>
+<%= browse_header "Shout-out revenue", eyebrow: "Admin" do %><%= link_to "Export daily CSV", shout_out_revenue_path(days: @revenue.days, format: :csv), class: "tool-button" %><% end %>
 <nav class="history-tabs" aria-label="Revenue range">
   <% ShoutOutRevenue::RANGES.each do |days| %><%= link_to "#{days} days", shout_out_revenue_path(days: days), aria: { current: @revenue.days == days ? "page" : nil } %><% end %>
 </nav>

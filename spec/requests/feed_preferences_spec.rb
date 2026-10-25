@@ -13,7 +13,8 @@ RSpec.describe "My teams on Feed", type: :request do
     ace.follows.create!(followable: team)
     get feed_path, params: { view: "my_teams", ace_id: ace.id }
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include("Sign in to see teams", "No shout-outs yet.", "Try one Team Match question")
+    expect(response.body).to include("Sign in to see teams", "Try one Team Match question")
+    expect(response.body).not_to include("No shout-outs yet.")
     expect(team_cards).to be_empty
     expect(response.body).not_to include(team.name)
   end

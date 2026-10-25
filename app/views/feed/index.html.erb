@@ -60,9 +60,10 @@
       <% end %>
       <%== @posts_pagy.series_nav if @posts_pagy.pages > 1 %>
     </section>
-  <% else %>
-    <section class="shell-empty"><%= icon "star", size: 40 %><h2>No shout-outs yet.</h2><p>Get to know the players and teams around the leagues.</p>
-      <div class="page-actions"><%= link_to "Browse players", players_path(side: "feed"), class: "tool-button" %><%= link_to "Browse teams", teams_path(side: "feed"), class: "tool-button" %></div>
+  <% elsif @posts %>
+    <% filtered = @query.present? || @sport || @league %>
+    <section class="shell-empty"><%= icon "star", size: 40 %><h2><%= filtered ? "No matching shout-outs." : "No shout-outs yet." %></h2><p><%= filtered ? "Try another search or reset this view." : "Get to know the players and teams around the leagues." %></p>
+      <div class="page-actions"><% if filtered %><%= link_to "Reset view", feed_path(view: @view), class: "tool-button" %><% end %><%= link_to "Browse players", players_path(side: "feed"), class: "tool-button" %><%= link_to "Browse teams", teams_path(side: "feed"), class: "tool-button" %></div>
     </section>
   <% end %>
 </div>

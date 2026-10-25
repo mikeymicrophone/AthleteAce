@@ -1,5 +1,5 @@
 <% content_for :title, "Your shout-out" %>
-<%= browse_header "Your shout-out" do %><%= link_to "My shout-outs", shout_outs_path, class: "tool-button" %><%= link_to "Credit wallet", wallet_path, class: "tool-button" %><% end %>
+<%= browse_header "Your shout-out", eyebrow: "Feed" do %><%= link_to "My shout-outs", shout_outs_path, class: "tool-button" %><%= link_to "Credit wallet", wallet_path, class: "tool-button" %><% end %>
 <section class="round-panel shout-out-card">
   <h2 class="profile-section-title"><%= @shout_out.target_name %></h2>
   <p class="draft-message"><%= @shout_out.message %></p>

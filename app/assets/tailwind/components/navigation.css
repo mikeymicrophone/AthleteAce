@@ -1,4 +1,6 @@
 .navigation-container { @apply sticky top-0 z-50 bg-shell text-shell-ink border-b border-shell-line; }
+.shell-skip-link { @apply sr-only; }
+.shell-skip-link:focus { @apply not-sr-only fixed top-2 left-2 z-[60] rounded-lg bg-surface text-ink px-4 py-3 font-semibold outline-2 outline-accent-text; }
 .navigation-inner { @apply relative mx-auto max-w-7xl px-4 py-3 grid items-center gap-4; grid-template-columns: auto 1fr auto; }
 .ace-brand { @apply inline-flex items-center gap-2 text-2xl font-display font-extrabold uppercase tracking-tight whitespace-nowrap; }
 .ace-brand-mark { @apply inline-flex items-center justify-center w-9 h-9 bg-play text-on-accent rounded-md; }

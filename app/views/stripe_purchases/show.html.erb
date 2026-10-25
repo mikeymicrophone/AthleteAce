@@ -1,5 +1,5 @@
 <% content_for :title, "Payment status" %>
-<%= browse_header "Payment status" do %><%= link_to "Credit wallet", wallet_path, class: "tool-button" %><% end %>
+<%= browse_header "Payment status", eyebrow: "Feed" do %><%= link_to "Credit wallet", wallet_path, class: "tool-button" %><% end %>
 <section class="round-panel">
   <h2 class="profile-section-title"><%= @purchase.status == "paid" ? "Payment received" : (@purchase.status == "expired" ? "Checkout expired" : "Awaiting payment confirmation") %></h2>
   <p><%= number_to_currency @purchase.amount_cents / 100.to_d %></p>

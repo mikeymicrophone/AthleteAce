@@ -6,6 +6,8 @@ On **All** or **My teams**, choose **Sport** and **League**, enter an optional *
 
 Post filters use the league recorded at submission, including its sport. A player transfer does not move an old post. On My teams, the same selections also narrow the personal team cards, using each team's current league. Posts and team cards keep separate pagination.
 
+An empty filtered post list says **No matching shout-outs**. **Reset view** clears the query, sport and league while retaining All or My teams. The signed-out My teams view offers sign-in without claiming that the personal post list is empty.
+
 Open Feed pages receive live updates when a shout-out is approved or hidden. Turbo morphs the current page and preserves scroll position. The current URL, visitor-session ranking seed and unsubmitted filter/search values stay in place. A refresh reruns the current URL's filters, even while you edit a different selection. Select **Search posts** to apply those edits. An approval may change which posts fit on a page; surviving posts retain their relative weighted order.
 
 The public Action Cable stream `public_shout_outs` carries only a refresh instruction after the moderation transaction commits. It contains no post HTML, identifiers, messages, author details, report data or wallet information. Each browser requests its own page with its own session, pending-post visibility and reaction selections. Rejected submissions and reactions do not send this refresh. Reaction actions update the acting visitor's card; team walls, permalinks and leaderboards refresh on their next read.
@@ -23,6 +25,8 @@ Reactions are free. They never change credit, bids, Feed ranking, leaderboard co
 ## Read weekly leaders
 
 Open **Leaders** from Feed or its navigation. The public page separates **Players** and **Teams** and offers week, sport and league filters. The Teams board counts posts targeting the team itself, not its players. Each currently live post counts once, regardless of its bid or reactions.
+
+**Clear filters** removes the selected sport and league while keeping the week and Players or Teams selection.
 
 Weeks run Monday through Sunday in UTC, using the approval decision timestamp rather than draft/submission time. A selected YYYY-MM-DD date normalizes to its Monday. Invalid dates, malformed target types and future weeks return HTTP 400. Empty weeks show an empty state. Previous/next week and **This week** preserve target/filter selections; pages contain 25 ranked targets.
 

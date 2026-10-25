@@ -1,5 +1,5 @@
 <% content_for :title, "Report shout-out" %>
-<%= browse_header "Report shout-out" %>
+<%= browse_header "Report shout-out", eyebrow: "Feed" %>
 <%= render "shout_outs/card", post: @post %>
 <section class="round-panel">
   <% if @report.persisted? %>

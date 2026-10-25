@@ -1,8 +1,8 @@
 module InterfaceHelper
-  def browse_header title, &block
+  def browse_header(title, eyebrow: "Browse", &block)
     tag.header class: "browse-header" do
       tag.div do
-        tag.p("Browse", class: "eyebrow") + tag.h1(title, class: "page-title")
+        tag.p(eyebrow, class: "eyebrow") + tag.h1(title, class: "page-title")
       end + tag.div(class: "page-actions", &block)
     end
   end

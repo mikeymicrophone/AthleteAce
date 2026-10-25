@@ -1,5 +1,5 @@
 <% content_for :title, "Credit wallet" %>
-<%= browse_header "Credit wallet" do %><%= link_to "My shout-outs", shout_outs_path, class: "tool-button" %><% end %>
+<%= browse_header "Credit wallet", eyebrow: "Feed" do %><%= link_to "My shout-outs", shout_outs_path, class: "tool-button" %><% end %>
 <section class="round-panel" aria-labelledby="wallet-balance-title">
   <h2 id="wallet-balance-title" class="profile-section-title">Your credit</h2>
   <p class="wallet-available">Available: <%= number_to_currency @account.available_cents / 100.to_d %></p>

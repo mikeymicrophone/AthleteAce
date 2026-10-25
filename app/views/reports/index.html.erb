@@ -1,5 +1,5 @@
 <% content_for :title, "Reports inbox" %>
-<%= browse_header "Reports inbox" do %><%= link_to "Review queue", moderation_path, class: "tool-button" %><% end %>
+<%= browse_header "Reports inbox", eyebrow: "Moderate" do %><%= link_to "Review queue", moderation_path, class: "tool-button" %><% end %>
 <p class="round-intro">Live content aces flagged · most-reported first. Your own posts are excluded.</p>
 <nav class="history-tabs" aria-label="Report status">
   <%= link_to "Open #{@open_count}", reports_path, aria: { current: @status == "open" ? "page" : nil } %>

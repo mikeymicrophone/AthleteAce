@@ -1,5 +1,5 @@
 <% content_for :title, "Review reports" %>
-<%= browse_header "Review reports" do %><%= link_to "Reports inbox", reports_path, class: "tool-button" %><% end %>
+<%= browse_header "Review reports", eyebrow: "Moderate" do %><%= link_to "Reports inbox", reports_path, class: "tool-button" %><% end %>
 <%= render "shout_outs/card", post: @post %>
 <section class="round-panel">
   <h2 class="profile-section-title">Open report reasons</h2>
