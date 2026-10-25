@@ -6,38 +6,38 @@
   <% end %>
 
   <div class="flex justify-between items-center mb-6">
-    <h1 class="font-bold text-4xl">Your Ratings</h1>
+    <%= browse_header "Your Ratings" %>
   </div>
 
   <% if @ratings.any? %>
-    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-      <ul class="divide-y divide-gray-200">
+    <div class="bg-surface rounded-card overflow-hidden mb-6">
+      <ul class="divide-y divide-line">
         <% @ratings.each do |rating| %>
-          <li class="p-4 hover:bg-gray-50">
+          <li class="p-4 hover:bg-surface-2">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between">
               <div class="flex-1">
                 <div class="flex justify-between mb-2">
                   <div>
                     <span class="font-medium">
                       <% if rating.target_type == 'Player' %>
-                        <%= link_to rating.target.name, player_path(rating.target), class: "text-blue-600 hover:underline" %>
-                        <span class="text-gray-500 text-sm">(Player)</span>
+                        <%= link_to rating.target.name, player_path(rating.target), class: "text-accent-text hover:underline" %>
+                        <span class="text-ink-3 text-sm">(Player)</span>
                       <% elsif rating.target_type == 'Team' %>
-                        <%= link_to rating.target.name, team_path(rating.target), class: "text-blue-600 hover:underline" %>
-                        <span class="text-gray-500 text-sm">(Team)</span>
+                        <%= link_to rating.target.name, team_path(rating.target), class: "text-accent-text hover:underline" %>
+                        <span class="text-ink-3 text-sm">(Team)</span>
                       <% end %>
                     </span>
-                    <span class="ml-2 text-sm text-gray-500">
-                      on <%= link_to rating.spectrum.name, spectrum_path(rating.spectrum), class: "text-blue-600 hover:underline" %>
+                    <span class="ml-2 text-sm text-ink-3">
+                      on <%= link_to rating.spectrum.name, spectrum_path(rating.spectrum), class: "text-accent-text hover:underline" %>
                     </span>
                   </div>
-                  <span class="text-sm text-gray-500">
+                  <span class="text-sm text-ink-3">
                     <%= rating.created_at.strftime("%b %d, %Y") %>
                   </span>
                 </div>
-                
+
                 <div class="mt-2">
-                  <div class="w-full bg-gray-200 rounded-full h-2.5">
+                  <div class="w-full bg-line rounded-full h-2.5">
                     <div class="<%= rating.value >= 0 ? 'bg-green-600' : 'bg-red-600' %> h-2.5 rounded-full" style="width: <%= rating.percentage_value %>%"></div>
                   </div>
                   <div class="flex justify-between text-xs mt-1">
@@ -46,16 +46,16 @@
                     <span><%= rating.spectrum.high_label %></span>
                   </div>
                 </div>
-                
+
                 <% if rating.notes.present? %>
-                  <div class="mt-2 text-sm text-gray-600">
+                  <div class="mt-2 text-sm text-ink-2">
                     <%= rating.notes %>
                   </div>
                 <% end %>
               </div>
-              
+
               <div class="mt-3 sm:mt-0 sm:ml-4 flex space-x-2">
-                <%= link_to "Edit", edit_rating_path(rating), class: "text-blue-600 hover:text-blue-800" %>
+                <%= link_to "Edit", edit_rating_path(rating), class: "text-accent-text hover:text-ink" %>
                 <%= button_to "Delete", rating, method: :delete, class: "text-red-600 hover:text-red-800", data: { turbo_confirm: "Are you sure?" } %>
               </div>
             </div>
@@ -64,11 +64,11 @@
       </ul>
     </div>
   <% else %>
-    <div class="bg-white rounded-lg shadow-md p-6 text-center">
-      <p class="text-gray-500 mb-4">You haven't rated any players or teams yet.</p>
+    <div class="bg-surface rounded-card  p-6 text-center">
+      <p class="text-ink-3 mb-4">You haven't rated any players or teams yet.</p>
       <p>
-        Browse <%= link_to "players", players_path, class: "text-blue-600 hover:underline" %> or 
-        <%= link_to "teams", teams_path, class: "text-blue-600 hover:underline" %> to start rating them.
+        Browse <%= link_to "players", players_path, class: "text-accent-text hover:underline" %> or
+        <%= link_to "teams", teams_path, class: "text-accent-text hover:underline" %> to start rating them.
       </p>
     </div>
   <% end %>

@@ -13,11 +13,11 @@
     <% if achievement.quests.visible_to(current_ace).merge(Highlight.visible_to(current_ace)).any? %>
       <ul class="list-disc ml-5">
         <% achievement.quests.visible_to(current_ace).merge(Highlight.visible_to(current_ace)).each do |quest| %>
-          <li><%= link_to quest.name, quest, class: "text-blue-600 hover:text-blue-800" %></li>
+          <li><%= link_to quest.name, quest, class: "text-accent-text hover:underline" %></li>
         <% end %>
       </ul>
     <% else %>
-      <span class="text-gray-500 italic">Not part of any quests</span>
+      <span class="text-ink-3 italic">Not part of any quests</span>
     <% end %>
   </div>
   <div>

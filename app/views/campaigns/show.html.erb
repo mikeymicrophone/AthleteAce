@@ -1,12 +1,7 @@
-<p style="color: green"><%= notice %></p>
-
-<% content_for :title, "#{@campaign.team.name} - #{@campaign.season.name}" %>
-
-<%= tag.header "#{@campaign.team.name} - #{@campaign.season.name}", class: "campaign-title" %>
-
-<%= tag.div class: "campaign-details" do %>
-  <%= display_name_with_lazy_logo @campaign.team %>
-  <%= display_name_with_lazy_logo @campaign.season %>
-  <%= display_name_with_lazy_logo @campaign.league %>
-  <%= display_name_with_lazy_logo @campaign.sport %>
+<% content_for :title, "#{@campaign.name} - #{@campaign.season.name}" %>
+<%= browse_header "#{@campaign.name} - #{@campaign.season.name}" do %>
+  <%= link_to "Seasonal memberships", [@campaign, :activations], class: "tool-button" %>
 <% end %>
+<%= browse_metadata "Team" => entity_link(@campaign.team), "Season" => entity_link(@campaign.season), "League" => entity_link(@campaign.league), "Sport" => entity_link(@campaign.sport), "Conference" => entity_link(@campaign.conference), "Division" => entity_link(@campaign.division), "Stadium" => entity_link(@campaign.stadium), "City" => entity_link(@campaign.city) %>
+<%= render_collection @campaign.contests.competitions, title: "Competitions" %>
+<%= render_collection @campaign.activated_players, title: "Seasonal players", logo_attribute: :photo_url %>

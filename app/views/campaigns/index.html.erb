@@ -1,15 +1,13 @@
-<p style="color: green"><%= notice %></p>
-
 <% content_for :title, "Campaigns" %>
-
-<h1>Campaigns</h1>
-
+<%= browse_header "Campaigns" %>
 <div id="campaigns">
   <% @campaigns.each do |campaign| %>
-    <%= tag.div(id: dom_id(campaign), class: "index-record") do %>
-      <%= display_name_with_lazy_logo campaign.team %>
-      <%= display_name_with_lazy_logo campaign.season %>
-      <%= link_to "View", campaign %>
+    <%= index_record campaign do %>
+      <%= link_to campaign.name, campaign, class: "identity-name" %>
+      <%= entity_link campaign.team %>
+      <%= entity_link campaign.season %>
+      <%= entity_link campaign.league %>
     <% end %>
   <% end %>
 </div>
+<%= browse_empty @campaigns, "Campaigns" %>

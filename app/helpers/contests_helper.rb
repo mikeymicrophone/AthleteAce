@@ -5,12 +5,11 @@ module ContestsHelper
   
   def contests_index_page
     tag.div class: "contests-index-page" do
-      tag.header(class: "page-header") do
-        tag.h1(@catalog_title || "Contests", class: "page-title")
-      end +
-      tag.main(class: "contests-grid") do
+      browse_header(@catalog_title || "Contests") +
+      tag.div(class: "contests-grid") do
         @contests.map { |contest| contest_item(contest) }.join.html_safe
       end +
+      browse_empty(@contests, @catalog_title || "Contests").to_s.html_safe +
       (@pagy.series_nav if @pagy.pages > 1).to_s.html_safe
     end
   end
@@ -19,7 +18,7 @@ module ContestsHelper
     tag.article class: "contest-item" do
       tag.header(class: "contest-header") do
         link_to(contest, class: "contest-link") do
-          tag.h3(contest_display_name(contest), class: "contest-name")
+          tag.h2(contest_display_name(contest), class: "contest-name")
         end
       end +
       tag.div(class: "contest-details") do
@@ -42,16 +41,15 @@ module ContestsHelper
         end.to_s.html_safe
       end +
       tag.footer(class: "contest-actions") do
-        link_to("View Details", contest, class: "btn btn-outline")
+        link_to("View Details", contest, class: "tool-button")
       end
     end
   end
   
   def contest_show_page(contest)
     tag.div class: "contest-show-page" do
-      tag.div(class: "contest-show-header") do
-        link_to(contest.kind == "game" ? "← Back to Games" : "← Back to Contests", contest.kind == "game" ? games_path : contests_path, class: "back-link") +
-        tag.h1(contest_display_name(contest), class: "contest-title")
+      browse_header(contest_display_name(contest)) do
+        link_to(contest.kind == "game" ? "← Back to Games" : "← Back to Contests", contest.kind == "game" ? games_path : contests_path, class: "tool-button back-link")
       end +
       tag.div(class: "contest-content") do
         contest_info_section(contest) +

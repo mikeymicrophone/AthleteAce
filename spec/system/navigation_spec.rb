@@ -123,6 +123,7 @@ RSpec.describe "Navigation", type: :system do
     expect(page).to have_current_path(admin_path)
     within('[aria-label="Switch sides"]') { expect(all("a").size).to eq(4) }
     within(".shell-sidebar") { click_link "Sports data" }
+    click_link "Other sports data"
     within("#browse-sports") { click_link "Teams" }
     expect(page).to have_css('body[data-side="admin"]')
     phone_viewport

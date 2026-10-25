@@ -1,60 +1,8 @@
-
 <% content_for :title, @conference.name %>
-
-<div id="<%= dom_id(@conference) %>" class="show-container">
-  <%= browse_header @conference.name do %>
-    <%= link_to "Practice", new_game_round_path(conference_id: @conference.id), class: "game-button" %>
-  <% end %>
-
-  <div class="details">
-    <div class="detail-item">
-      <strong>League:</strong>
-      <%= link_to @conference.league.name, @conference.league %>
-    </div>
-
-    <div class="detail-item">
-      <strong>Abbreviation:</strong>
-      <%= @conference.abbreviation %>
-    </div>
-  </div>
-
-  <div class="divisions-section">
-    <h2>Divisions</h2>
-    <% if @divisions.any? %>
-      <div id="divisions">
-        <% @divisions.each do |division| %>
-          <%= tag.div(id: dom_id(division), class: "index-record") do %>
-            <%= link_to division do %>
-              <%= display_name_with_lazy_logo(division) %>
-            <% end %>
-            <%= link_to pluralize(division.teams.count, "team"), [division, :teams] %>
-          <% end %>
-        <% end %>
-      </div>
-    <% else %>
-      <p>No divisions found.</p>
-    <% end %>
-  </div>
-
-  <div class="teams-section">
-    <h2>Teams</h2>
-    <% if @teams.any? %>
-      <div id="teams">
-        <% @teams.each do |team| %>
-          <%= tag.div(id: dom_id(team), class: "index-record") do %>
-            <%= link_to team do %>
-              <%= display_name_with_lazy_logo(team) %>
-            <% end %>
-            <%= link_to team.division.name, team.division if team.division %>
-          <% end %>
-        <% end %>
-      </div>
-    <% else %>
-      <p>No teams found.</p>
-    <% end %>
-  </div>
-
-  <div class="actions">
-    <%= link_to "Back", conferences_path, class: "button" %>
-  </div>
-</div>
+<%= browse_header @conference.name do %>
+  <%= link_to "Practice", new_game_round_path(conference_id: @conference.id), class: "game-button" %>
+  <%= link_to "Back to Conferences", conferences_path, class: "tool-button" %>
+<% end %>
+<%= browse_metadata "League" => entity_link(@conference.league), "Abbreviation" => @conference.abbreviation %>
+<%= render_collection @divisions, parent: @conference, link_to_collection: true %>
+<%= render_collection @teams, parent: @conference, link_to_collection: true %>

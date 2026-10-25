@@ -1,16 +1,12 @@
 <% content_for :title, @league.name %>
-
-<%= browse_header @league.name %>
-
-<%= render 'filtered_show' if @filtered_breadcrumb.present? %>
-
-<%= display_name_with_lazy_logo @league.jurisdiction, logo_attribute: :flag_url %>
-<%= display_name_with_lazy_logo @league.sport, logo_attribute: :icon_url %>
-
-<%= render_collection(@league.conferences) %>
-
-<%= render_collection(@league.divisions) %>
-
-<%= render_teams_collection(@league.teams, parent: @league) %>
-
-<%= render_players_collection(@league.players, parent: @league, link_to_collection: true) %>
+<%= filtered_breadcrumb_nav(@filtered_breadcrumb) if @filtered_breadcrumb.present? %>
+<%= browse_header @league.name do %>
+  <%= link_to "Practice", new_game_round_path(league_id: @league.id), class: "game-button" %>
+<% end %>
+<%= browse_metadata "Sport" => entity_link(@league.sport), "Jurisdiction" => entity_link(@league.jurisdiction) %>
+<%= render_collection @league.conferences %>
+<%= render_collection @league.divisions %>
+<%= render_collection @teams, parent: @league, link_to_collection: true %>
+<%= render_collection @league.players.order(:last_name, :first_name), parent: @league, link_to_collection: true, limit: 12, logo_attribute: :photo_url %>
+<%= render_collection @league.seasons.recent %>
+<%= render_collection @league.contests.competitions.distinct, title: "Competitions", parent: @league, link_to_collection: true, limit: 12 %>

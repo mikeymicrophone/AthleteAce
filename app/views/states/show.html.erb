@@ -1,15 +1,7 @@
 <% content_for :title, @state.name %>
 <%= browse_header @state.name %>
-<%= display_name_with_lazy_logo @state.country, logo_attribute: :flag_url %>
-
-<%= render_collection @state.cities %>
-
-<%= render_collection @state.stadiums %>
-
-<%= render_teams_collection @state.teams %>
-
-<% @state.teams.each do |team| %>
-  <%= display_name_with_lazy_logo team.league %>
-  <%= display_name_with_lazy_logo team.sport %>
-  <%= render_players_collection team.players, sport_name: team.sport.name %>
-<% end %>
+<%= browse_metadata "Country" => entity_link(@state.country) %>
+<%= render_collection @state.cities.order(:name), parent: @state, link_to_collection: true, limit: 12 %>
+<%= render_collection @state.stadiums.order(stadiums: { name: :asc }), parent: @state, link_to_collection: true %>
+<%= render_collection @state.teams.distinct.order(:territory, :mascot), parent: @state, link_to_collection: true %>
+<%= render_collection @state.players.order(:last_name, :first_name), parent: @state, link_to_collection: true, title: "Players born here", limit: 12, logo_attribute: :photo_url %>

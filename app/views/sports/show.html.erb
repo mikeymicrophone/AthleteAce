@@ -1,16 +1,10 @@
 <% content_for :title, @sport.name %>
-<%= browse_header @sport.name %>
-
-<%= tag.div class: "leagues" do %>
-  <%= pluralize @sport.leagues.count, "League" %>
-  <% @sport.leagues.each do |league| %>
-    <%= tag.div id: dom_id(league), class: "league" do %>
-      <%= tag.header display_name_with_lazy_logo(league), class: "league-name" %>
-      <%= display_name_with_lazy_logo league.jurisdiction, logo_attribute: :flag_url %>
-      <%= render_collection(league.conferences) %>
-      <%= render_collection(league.divisions) %>
-      <%= render_teams_collection(league.teams, parent: league, link_to_collection: true, title: "team") %>
-      <%= render_players_collection(league.players, parent: league, link_to_collection: true, title: "player") %>
-    <% end %>
-  <% end %>
+<%= browse_header @sport.name do %>
+  <%= link_to "Teams", [@sport, :teams], class: "tool-button" %>
+  <%= link_to "Players", [@sport, :players], class: "tool-button" %>
 <% end %>
+<%= render_collection @sport.leagues.order(:name), parent: @sport, link_to_collection: true %>
+<%= render_collection @sport.conferences, parent: @sport, link_to_collection: true %>
+<%= render_collection @sport.divisions, parent: @sport, link_to_collection: true %>
+<%= render_collection @sport.teams.order(:territory, :mascot), parent: @sport, link_to_collection: true, limit: 12 %>
+<%= render_collection @sport.players.order(:last_name, :first_name), parent: @sport, link_to_collection: true, limit: 12, logo_attribute: :photo_url %>

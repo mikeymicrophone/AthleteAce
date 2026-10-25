@@ -16,6 +16,14 @@ module InterfaceHelper
     end
   end
 
+  def browse_metadata(facts)
+    tag.dl class: "browse-metadata" do
+      safe_join(facts.map do |label, value|
+        tag.div { tag.dt(label) + tag.dd(value.presence || "Not recorded") }
+      end)
+    end
+  end
+
   def entity_link record
     return "" unless record
 

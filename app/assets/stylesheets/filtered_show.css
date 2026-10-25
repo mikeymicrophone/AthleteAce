@@ -11,38 +11,41 @@
 
 .breadcrumb-list {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem;
   font-size: 0.875rem;
 }
 
 .breadcrumb-item {
+  min-width: 0;
+  overflow-wrap: anywhere;
   display: flex;
   align-items: center;
 }
 
 .breadcrumb-separator {
   margin: 0 0.25rem;
-  color: #9ca3af;
+  color: var(--color-ink-3);
 }
 
 .breadcrumb-link {
-  color: #4b5563;
+  color: var(--color-ink-2);
 }
 
 .breadcrumb-link:hover {
-  color: #2563eb;
+  color: var(--color-accent-text);
 }
 
 .breadcrumb-type {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--color-ink-3);
   margin-right: 0.25rem;
 }
 
 .breadcrumb .current {
   font-weight: 500;
-  color: #1d4ed8;
+  color: var(--color-ink-2);
 }
 
 /* Metadata styles */
@@ -62,12 +65,12 @@
 .title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--color-ink);
 }
 
 .description {
   margin-top: 0.25rem;
-  color: #4b5563;
+  color: var(--color-ink-2);
 }
 
 /* Resource metadata tags */
@@ -84,34 +87,34 @@
   display: inline-flex;
   align-items: center;
   padding: 0.25rem 0.75rem;
-  background-color: #f3f4f6;
+  background-color: var(--color-surface-2);
   border-radius: 9999px;
   font-size: 0.875rem;
 }
 
 .tag-label {
   margin-right: 0.25rem;
-  color: #6b7280;
+  color: var(--color-ink-3);
 }
 
 .tag-value {
-  color: #2563eb;
+  color: var(--color-accent-text);
 }
 
 .tag-value:hover {
-  color: #1d4ed8;
+  color: var(--color-ink-2);
   text-decoration: underline;
 }
 
 /* Specific resource types can customize further */
 .league-header .title {
-  color: #1e40af;
+  color: var(--color-ink);
 }
 
 .team-header .title {
-  color: #b45309;
+  color: var(--color-ink);
 }
 
 .player-header .title {
-  color: #047857;
+  color: var(--color-ink);
 }

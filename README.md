@@ -16,7 +16,7 @@ Open **Profile** in the account menu to view or edit your display name and initi
 
 The root opens Feed for visitors and Play for signed-in fans. Moderators and admins return to their last side in the current session. Their first visit opens Moderate or Admin. A saved return page takes precedence after sign-in.
 
-Switch sides in the dark top bar. Play has Home, Games, Quests, History, and Browse tabs. Moderate and Admin use a sidebar on desktop. On mobile, navigation within each side moves to the bottom of the screen. Shared player, team, place, quest, and catalog pages keep the side you arrived from. Browse replaces the old table dropdowns and retains their catalog links.
+Switch sides in the dark top bar. Play has Home, Games, Quests, History, and Browse tabs. Moderate and Admin use a sidebar on desktop. On mobile, navigation within each side moves to the bottom of the screen. Shared player, team, place, quest, and catalog pages keep the side you arrived from. Browse replaces the old table dropdowns and retains their catalog links. [Entity overviews](docs/browse-entities.md) connect sports, places, seasons, organizations, and dated participation records through related-record sections and scoped directories.
 
 The Moderate badge counts pending submissions that the reviewer can decide, excluding their own. Open the account button for Profile, My ratings, Settings, Begin Quest, Sign Out, and Light, Dark, or System appearance. Appearance is stored on the signed-in account. Visitors can use the Appearance button, which stores the choice in a cookie.
 
@@ -35,6 +35,8 @@ The five most recently opened or submitted searches are stored in the browser, s
 See [Play rounds and learning progress](docs/play-learning.md) for the six saved games, due reviews, roster-based quest completion, time zones, anonymous preview, and production mail configuration.
 
 Sporting [competitions, games and titles](docs/competition-games.md) support league seasons, playoffs, cross-league cups, JSONB format rules, shared fixtures and separate title awards. These sporting Games are distinct from Play's quiz rounds. Player appearance ingestion remains follow-up work.
+
+[People, coaches, staff, and broadcasters](docs/people-and-staff.md) share person identities across athletic profiles and organizational appointments. Organization pages and the team staff tab show sourced appointments and their recorded dates. Apply the people and staff migration before browsing these pages.
 
 The committed development configuration uses `athlete_ace_development_seedtest_20261005`. Other checkouts must create that database or adjust their local database configuration.
 

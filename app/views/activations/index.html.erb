@@ -1,13 +1,14 @@
 <% content_for :title, "Activations" %>
 
 <% if @campaign %>
-  <h1 class="page-title"><%= @campaign.name %> · <%= @campaign.season.label.presence || @campaign.season.year.number %></h1>
+  <%= browse_header "#{@campaign.name} · #{@campaign.season.label.presence || @campaign.season.year.number}" %>
   <p><%= pluralize(@campaign.activations.count, "known seasonal player") %></p>
 <% else %>
-  <h1 class="page-title">Seasonal memberships</h1>
+  <%= browse_header "Seasonal memberships" %>
 <% end %>
 
 <%== @pagy.series_nav %>
+<%= browse_empty @activations, "Seasonal memberships" %>
 
 <%= index_collection("activations") do %>
   <% @activations.each do |activation| %>

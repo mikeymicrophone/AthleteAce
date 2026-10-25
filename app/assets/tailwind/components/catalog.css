@@ -7,3 +7,28 @@
   .catalog-diff dd, .catalog-reason { white-space: pre-wrap; overflow-wrap: anywhere; }
   @media (max-width: 600px) { .catalog-diff { grid-template-columns: 1fr; } }
 }
+
+@layer components {
+  .browse-header .page-title { overflow-wrap: anywhere; }
+  .browse-metadata { @apply grid grid-cols-1 gap-4 rounded-card border border-line bg-surface p-5 mb-6 sm:grid-cols-2 xl:grid-cols-3; }
+  .browse-metadata > div { min-width: 0; overflow-wrap: anywhere; }
+  .browse-metadata dt { @apply text-xs font-semibold uppercase tracking-wider text-ink-3 mb-2; }
+  .browse-metadata dd { @apply text-sm text-ink; }
+  .related-section { @apply rounded-card border border-line bg-surface p-5 mb-6; min-width: 0; overflow-wrap: anywhere; }
+  .related-header { @apply flex flex-wrap items-center justify-between gap-4 mb-5; }
+  .related-count, .related-empty { @apply text-sm text-ink-3 mt-2; }
+  .related-grid { @apply grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3; }
+  .related-record { @apply block min-w-0 rounded-card border border-line bg-surface-2 p-4 text-ink transition-colors; overflow-wrap: anywhere; }
+  .related-record:hover { @apply border-line-2; }
+  .related-record:focus-visible { outline: 2px solid var(--color-accent-text); outline-offset: 3px; }
+  .related-record .lazy-logo-container { @apply flex items-center gap-3; }
+  .related-record .logo-placeholder { @apply shrink-0; }
+  .browse-json { @apply font-mono text-sm text-ink-2; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .catalog-record { @apply rounded-card border border-line bg-surface p-5 mb-4; min-width: 0; overflow-wrap: anywhere; }
+  .contract-record, .activation-record { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+  .contract-info-value, .activation-info-value { min-width: 0; overflow-wrap: anywhere; }
+  .contract-details-json, .activation-details-json { overflow-wrap: anywhere; }
+  @media (max-width: 640px) {
+    .contract-record, .activation-record { grid-template-columns: 1fr; }
+  }
+}

@@ -1,4 +1,5 @@
 <% content_for :title, "Contracts" %>
+<%= browse_header "Contracts" %>
 
 <%== @pagy.series_nav %>
 
@@ -15,5 +16,6 @@
     <% end %>
   <% end %>
 <% end %>
+<%= browse_empty @contracts, "Contracts" %>
 
 <%== @pagy.series_nav %>

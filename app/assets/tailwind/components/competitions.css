@@ -1,4 +1,20 @@
 @layer components {
+  .contests-grid { @apply grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3; }
+  .contest-item { @apply flex min-w-0 flex-col rounded-card border border-line bg-surface p-5; overflow-wrap: anywhere; }
+  .contest-name { @apply font-display text-2xl font-bold text-ink; }
+  .contest-details { @apply flex-1 text-sm text-ink-2 mt-3; }
+  .contest-actions { @apply mt-5; }
+  .contest-content { @apply space-y-5; }
+  .contest-info-section, .details-section, .contestants-section { @apply rounded-card border border-line bg-surface p-5; min-width: 0; overflow-wrap: anywhere; }
+  .contestants-section { overflow-x: auto; }
+  .contest-content .section-title, .details-title, .contestants-title { @apply text-xl font-semibold text-ink mb-4; }
+  .contest-dates { @apply text-ink-3 mt-3; }
+  .contest-details .contest-description { @apply leading-relaxed; }
+  .appearance-record { @apply border-t border-line py-4; }
+  .appearance-record h3 { @apply font-semibold; }
+  .appearance-record > p { @apply text-sm text-ink-3; }
+  .participants-list { @apply grid grid-cols-1 gap-3 sm:grid-cols-2; }
+  .participant-item { @apply rounded-card bg-surface-2 p-3; }
   .competition-context { margin-block: 1.5rem; overflow-wrap: anywhere; }
   .competition-context h2 { margin-block: 1rem .5rem; font-weight: 600; }
   .competition-context li, .competition-context > div { margin-block: .5rem; }
@@ -6,8 +22,7 @@
   .contest-show-page .info-item { background: var(--color-surface); color: var(--color-ink); }
   .contest-show-page .info-item dt { color: var(--color-ink-3); }
   .contest-show-page .info-item dd { color: var(--color-ink); }
-  .contest-show-page .contest-title { font-size: 1.5rem; font-weight: 700; margin-block: 1rem; }
-  .contest-show-page .standings-table { width: 100%; border-collapse: collapse; }
+  .contest-show-page .standings-table { width: 100%; border-collapse: collapse; font-size: .875rem; }
   .contest-show-page .standings-table th, .contest-show-page .standings-table td { padding: .5rem; text-align: left; border-bottom: 1px solid var(--color-line); }
   .contest-show-page .details-json { white-space: pre-wrap; overflow-wrap: anywhere; }
 }

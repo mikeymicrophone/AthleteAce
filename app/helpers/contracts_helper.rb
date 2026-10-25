@@ -43,15 +43,9 @@ module ContractsHelper
 
   def contract_show_display(contract)
     tag.div class: "contract-show" do
-      contract_show_header(contract) +
+      browse_header("Contract ##{contract.id}") +
       contract_show_content(contract) +
       contract_show_actions(contract)
-    end
-  end
-
-  def contract_show_header(contract)
-    tag.div class: "contract-show-header" do
-      tag.h1 "Contract ##{contract.id}", class: "contract-show-title"
     end
   end
 

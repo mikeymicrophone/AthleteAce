@@ -1,290 +1,40 @@
-/* Seasons Index Page */
-.seasons-index-page {
-  @apply w-full space-y-8;
-}
-
-.seasons-hero {
-  @apply overflow-hidden rounded-3xl border border-amber-200 bg-linear-to-br from-amber-50 via-white to-sky-50 p-8 shadow-sm lg:p-10;
-}
-
-.seasons-eyebrow {
-  @apply text-xs font-semibold uppercase tracking-[0.28em] text-amber-700;
-}
-
-.seasons-page-title {
-  @apply mt-3 text-5xl font-black tracking-tight text-gray-950 sm:text-6xl;
-}
-
-.seasons-intro {
-  @apply mt-4 max-w-3xl text-base leading-7 text-gray-600 sm:text-lg;
-}
-
-.seasons-grid {
-  @apply grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3;
-}
-
-/* Season Item */
-.season-item {
-  @apply h-full;
-}
-
-.season-link {
-  @apply relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-gray-200 bg-white p-6 shadow-sm transition duration-200;
-}
-
-.season-link::before {
-  content: "";
-  @apply pointer-events-none absolute inset-x-0 top-0 h-1 bg-linear-to-r from-amber-400 via-orange-500 to-sky-500 opacity-90;
-}
-
-.season-link:hover {
-  @apply -translate-y-1 border-amber-300 shadow-xl;
-}
-
-.season-card-topline {
-  @apply flex items-start justify-between gap-3;
-}
-
-.season-league-badge {
-  @apply inline-flex max-w-fit items-center rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-900 ring-1 ring-amber-200;
-}
-
-.season-status-badge {
-  @apply inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-gray-600;
-}
-
-.season-primary {
-  @apply mt-8;
-}
-
-.season-year {
-  @apply text-6xl font-black leading-none tracking-tight text-gray-950 sm:text-7xl;
-}
-
-.season-format {
-  @apply mt-3 text-lg font-medium text-gray-500;
-}
-
-.season-details {
-  @apply mt-8 space-y-3 border-t border-gray-100 pt-5;
-}
-
-.season-champion-bank {
-  @apply rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3;
-}
-
-.season-champion-label {
-  @apply block text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-amber-700;
-}
-
-.season-champion-link {
-  @apply mt-2 flex text-gray-950 no-underline;
-}
-
-.season-champion-link:hover {
-  @apply text-amber-900;
-}
-
-.season-champion-link .lazy-logo-container {
-  @apply flex items-center gap-3;
-}
-
-.season-champion-link .logo-placeholder {
-  @apply h-9 w-9;
-}
-
-.season-champion-link [data-lazy-logo-target="name"] {
-  @apply font-semibold;
-}
-
-.season-sport {
-  @apply text-sm font-semibold uppercase tracking-[0.22em] text-sky-700;
-}
-
-.season-dates {
-  @apply text-sm leading-6 text-gray-600;
-}
-
-.season-actions {
-  @apply mt-6 pt-2;
-}
-
-.season-cta {
-  @apply inline-flex items-center text-sm font-semibold text-gray-900;
-}
-
-.season-cta::after {
-  content: "→";
-  @apply ml-2 text-base text-amber-600 transition-transform duration-200;
-}
-
-.season-link:hover .season-cta::after {
-  @apply translate-x-1;
-}
-
-/* Season Show Page */
-.season-show-page {
-  @apply w-full space-y-8;
-}
-
-.season-show-header {
-  @apply overflow-hidden rounded-3xl border border-amber-200 bg-linear-to-br from-amber-50 via-white to-sky-50 p-8 shadow-sm;
-}
-
-.season-back-link {
-  @apply inline-flex items-center text-sm font-semibold text-amber-800 hover:text-amber-950 hover:underline;
-}
-
-.season-title {
-  @apply mt-4 text-5xl font-black tracking-tight text-gray-950;
-}
-
-.season-subtitle {
-  @apply mt-3 text-xl font-medium text-gray-600;
-}
-
-.season-content {
-  @apply grid grid-cols-1 gap-8 lg:grid-cols-2;
-}
-
-.season-link-banks {
-  @apply grid grid-cols-1 gap-8 xl:grid-cols-2;
-}
-
-.season-link-bank {
-  @apply rounded-3xl border border-gray-200 bg-white p-6 shadow-sm;
-}
-
-.season-link-bank-header {
-  @apply mb-5 flex items-end justify-between gap-4 border-b border-gray-100 pb-4;
-}
-
-.season-link-bank-count {
-  @apply text-sm font-semibold uppercase tracking-[0.16em] text-gray-500;
-}
-
-.season-link-bank-grid {
-  @apply grid grid-cols-1 gap-3 sm:grid-cols-2;
-}
-
-.season-link-bank-empty {
-  @apply rounded-2xl bg-gray-50 px-4 py-6 text-sm text-gray-500;
-}
-
-.season-team-link-card,
-.season-campaign-link-card {
-  @apply flex min-h-24 items-center rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4 text-gray-900 transition duration-200;
-}
-
-.season-team-link-card:hover,
-.season-campaign-link-card:hover {
-  @apply -translate-y-0.5 border-amber-300 bg-white shadow-md;
-}
-
-.season-team-link-card .lazy-logo-container {
-  @apply flex items-center gap-3;
-}
-
-.season-team-link-card .logo-placeholder {
-  @apply h-10 w-10;
-}
-
-.season-team-link-card [data-lazy-logo-target="name"] {
-  @apply font-semibold text-gray-950 no-underline;
-}
-
-.season-campaign-link-card {
-  @apply flex-col items-start justify-center gap-1;
-}
-
-.season-campaign-name {
-  @apply text-base font-semibold text-gray-950;
-}
-
-.season-campaign-label {
-  @apply text-xs font-semibold uppercase tracking-[0.18em] text-amber-700;
-}
-
-.season-info-section {
-  @apply rounded-3xl border border-gray-200 bg-white p-6 shadow-sm;
-}
-
-.season-section-title {
-  @apply text-2xl font-bold tracking-tight text-gray-950;
-}
-
-.info-grid {
-  @apply mt-5 grid grid-cols-1 gap-4 md:grid-cols-2;
-}
-
-.info-item {
-  @apply rounded-2xl bg-gray-50 p-4;
-}
-
-.info-item dt {
-  @apply text-sm font-semibold uppercase tracking-[0.16em] text-gray-500;
-}
-
-.info-item dd {
-  @apply mt-2 text-xl font-semibold text-gray-950;
-}
-
-.info-item.secondary dd {
-  @apply text-gray-700;
-}
-
-.dates-list {
-  @apply mt-5 space-y-3;
-}
-
-.date-item {
-  @apply rounded-2xl bg-gray-50 p-4;
-}
-
-.date-item dt {
-  @apply text-sm font-semibold uppercase tracking-[0.16em] text-gray-500;
-}
-
-.date-item dd {
-  @apply mt-1 text-base text-gray-700;
-}
-
-.comments-section {
-  @apply rounded-3xl border border-gray-200 bg-white p-6 shadow-sm;
-}
-
-.comments-title {
-  @apply text-xl font-bold text-gray-950;
-}
-
-.comments-list {
-  @apply mt-4 space-y-3;
-}
-
-.comment-item {
-  @apply rounded-2xl border-l-4 border-amber-300 bg-amber-50 px-4 py-3 text-gray-700;
-}
-
-.seed-info-section {
-  @apply rounded-3xl border border-sky-200 bg-sky-50 p-6;
-}
-
-.seed-info-title {
-  @apply text-xl font-bold text-gray-950;
-}
-
-.seed-info-grid {
-  @apply mt-4 grid grid-cols-1 gap-4 md:grid-cols-2;
-}
-
-.seed-info-item {
-  @apply rounded-2xl bg-white/80 p-4;
-}
-
-.seed-info-item dt {
-  @apply text-sm font-semibold uppercase tracking-[0.16em] text-gray-500;
-}
-
-.seed-info-item dd {
-  @apply mt-1 text-base font-medium text-gray-700;
+@layer components {
+  .seasons-index-page, .season-show-page { @apply w-full space-y-6; }
+  .seasons-grid { @apply grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3; }
+  .season-item { @apply flex h-full flex-col rounded-card border border-line bg-surface p-5; min-width: 0; overflow-wrap: anywhere; }
+  .season-link { @apply block text-ink; }
+  .season-card-topline { @apply flex flex-wrap items-start justify-between gap-3; }
+  .season-league-badge, .season-status-badge { @apply inline-flex rounded-full bg-surface-2 px-3 py-1 text-xs font-semibold text-ink-2; }
+  .season-primary { @apply mt-6; }
+  .season-year { @apply font-display text-6xl font-extrabold leading-none text-ink; }
+  .season-format { @apply mt-2 text-lg text-ink-3; }
+  .season-details { @apply mt-5 space-y-3 border-t border-line pt-4; }
+  .season-champion-bank { @apply mt-4 rounded-card border border-line bg-surface-2 p-4; }
+  .season-champion-label { @apply block text-xs font-semibold uppercase tracking-wider text-ink-3; }
+  .season-champion-link { @apply mt-2 flex font-semibold text-ink; }
+  .season-champion-link .lazy-logo-container, .season-team-link-card .lazy-logo-container { @apply flex items-center gap-3; }
+  .season-sport { @apply text-xs font-semibold uppercase tracking-wider text-ink-2; }
+  .season-dates { @apply text-sm text-ink-3; }
+  .season-actions { @apply mt-5; }
+  .season-cta { @apply text-sm font-semibold text-ink; }
+  .season-content, .season-link-banks { @apply grid grid-cols-1 gap-5 xl:grid-cols-2; }
+  .season-link-bank, .season-info-section, .comments-section, .seed-info-section { @apply rounded-card border border-line bg-surface p-5; min-width: 0; overflow-wrap: anywhere; }
+  .season-link-bank-header { @apply flex flex-wrap items-end justify-between gap-3 border-b border-line pb-4 mb-4; }
+  .season-section-title { @apply text-xl font-semibold text-ink; }
+  .season-link-bank-count, .season-link-bank-empty { @apply text-sm text-ink-3; }
+  .season-link-bank-grid { @apply grid grid-cols-1 gap-3 sm:grid-cols-2; }
+  .season-team-link-card, .season-campaign-link-card { @apply flex min-w-0 items-center gap-3 rounded-card border border-line bg-surface-2 p-4 text-ink; }
+  .season-team-link-card:hover, .season-campaign-link-card:hover { @apply border-line-2; }
+  .season-campaign-link-card { @apply flex-col items-start justify-center gap-1; }
+  .season-campaign-name { @apply font-semibold; }
+  .season-campaign-label { @apply text-xs uppercase tracking-wider text-ink-3; }
+  .info-grid { @apply mt-5 grid grid-cols-1 gap-4 md:grid-cols-2; }
+  .info-item, .date-item, .seed-info-item { @apply min-w-0 rounded-card bg-surface-2 p-4; overflow-wrap: anywhere; }
+  .info-item dt, .date-item dt, .seed-info-item dt { @apply text-xs font-semibold uppercase tracking-wider text-ink-3; }
+  .info-item dd, .date-item dd, .seed-info-item dd { @apply mt-2 text-sm text-ink; }
+  .dates-list { @apply mt-5 space-y-3; }
+  .comments-title, .seed-info-title { @apply text-xl font-semibold text-ink; }
+  .comments-list { @apply mt-4 space-y-3; }
+  .comment-item { @apply rounded-card bg-surface-2 p-4 text-ink-2; }
+  .seed-info-grid { @apply mt-4 grid grid-cols-1 gap-4 md:grid-cols-2; }
 }

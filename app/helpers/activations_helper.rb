@@ -72,19 +72,13 @@ module ActivationsHelper
 
   def activation_show_display(activation)
     tag.div class: "activation-show" do
-      activation_show_header(activation) +
+      browse_header("Activation ##{activation.id}") +
       activation_show_content(activation) +
       activation_show_actions(activation)
     end
   end
 
   private
-
-  def activation_show_header(activation)
-    tag.div class: "activation-show-header" do
-      tag.h1 "Activation ##{activation.id}", class: "activation-show-title"
-    end
-  end
 
   def activation_show_content(activation)
     tag.div class: "activation-show-content" do

@@ -32,7 +32,7 @@ class LeaguesController < ApplicationController
 
   def show
     load_current_filters
-    @teams = @league.teams.includes(:stadium).order(:name)
+    @teams = @league.teams.includes(:stadium).order(:territory, :mascot)
     load_filter_options
     @filtered_breadcrumb = build_filtered_breadcrumb @league, @current_filters
   end
