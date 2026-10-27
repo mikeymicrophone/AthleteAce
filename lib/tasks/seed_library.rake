@@ -100,5 +100,13 @@ namespace :seeds do
     # the default catalog's palettes to an unrelated library.
     palettes = Seeds::TeamPaletteImporter.new(root: root.parent.join("sports")).call
     puts({ team_palettes: palettes.transform_values(&:length) }.to_json)
+    Rake::Task["seeds:current_teams"].invoke
+  end
+
+  desc "Assign players the team they are listed with in their league's latest rostered season"
+  task current_teams: :environment do
+    report = Seeds::CurrentTeamImporter.new.call
+    puts({ current_teams: report.transform_values(&:length) }.to_json)
+    report[:conflicts].each { |conflict| puts conflict.to_json }
   end
 end
