@@ -42,12 +42,12 @@
     </section>
   </div>
 
-  <% if current_ace %>
+  <% if current_ace && (@misses.any? || @due_count.positive? || @players_today.any?) %>
     <div class="play-home-grid">
-      <section class="play-panel play-misses" aria-labelledby="play-misses-title">
-        <div class="play-section-heading"><h2 id="play-misses-title">You keep missing</h2><%= link_to "History", strength_game_attempts_path, class: "tool-link" %></div>
-        <p class="round-caption">All player games · unresolved misses</p>
-        <% if @misses.any? %>
+      <% if @misses.any? %>
+        <section class="play-panel play-misses" aria-labelledby="play-misses-title">
+          <div class="play-section-heading"><h2 id="play-misses-title">You keep missing</h2><%= link_to "History", strength_game_attempts_path, class: "tool-link" %></div>
+          <p class="round-caption">All player games · unresolved misses</p>
           <ul class="play-player-list">
             <% @misses.each do |miss| %>
               <% player = miss.fetch(:player) %>
@@ -56,42 +56,36 @@
           </ul>
           <%= button_to "Drill these #{@misses.size}", play_drill_misses_path, class: "game-button" %>
           <p class="round-caption">A correct answer clears a name from this list.</p>
-        <% else %>
-          <div class="play-empty"><%= icon "check", size: 36 %><h3>No names to drill right now.</h3><p>Missed names with playable team data appear here until you get them right.</p></div>
-        <% end %>
-      </section>
-      <section class="play-panel" aria-labelledby="play-review-title">
-        <h2 id="play-review-title" class="profile-section-title">Due for review</h2>
-        <p><%= pluralize @due_count, "question" %> ready to revisit.</p>
-        <% if @due_count.positive? %><%= button_to "Review now", game_rounds_path, params: {game_type: "phased_repetition", include_inactive: true}, class: "game-button" %><% end %>
-        <p class="round-caption">A miss returns in 10 minutes. Correct answers gradually space reviews farther apart.</p>
-      </section>
-      <section class="play-panel play-rate-today" aria-labelledby="play-rate-title">
-        <div class="play-section-heading"><h2 id="play-rate-title">Rate who you met</h2><span class="eyebrow">Today’s practice</span></div>
-        <% if @players_today.any? %>
+        </section>
+      <% end %>
+      <% if @due_count.positive? %>
+        <section class="play-panel" aria-labelledby="play-review-title">
+          <h2 id="play-review-title" class="profile-section-title">Due for review</h2>
+          <p><%= pluralize @due_count, "question" %> ready to revisit.</p>
+          <%= button_to "Review now", game_rounds_path, params: {game_type: "phased_repetition", include_inactive: true}, class: "game-button" %>
+          <p class="round-caption">A miss returns in 10 minutes. Correct answers gradually space reviews farther apart.</p>
+        </section>
+      <% end %>
+      <% if @players_today.any? %>
+        <section class="play-panel play-rate-today" aria-labelledby="play-rate-title">
+          <div class="play-section-heading"><h2 id="play-rate-title">Rate who you met</h2><span class="eyebrow">Today’s practice</span></div>
           <ul class="play-player-list">
             <% @players_today.each do |player| %>
               <li><%= entity_avatar player %><div><h3><%= player.name %></h3><p><%= player.team&.name %></p></div><%= link_to "Rate", player_path(player, anchor: "player-ratings-title"), class: "tool-button", aria: { label: "Rate #{player.name}" } %></li>
             <% end %>
           </ul>
-        <% else %>
-          <div class="play-empty"><%= icon "shirt-sport", size: 36 %><h3>Meet a few players first.</h3><p>The players you practice today will appear here, ready to rate.</p></div>
-        <% end %>
-      </section>
+        </section>
+      <% end %>
     </div>
   <% end %>
 
-  <% if current_ace %>
+  <% if current_ace && @group_overviews.any? %>
     <section class="play-groups" aria-labelledby="play-groups-title">
       <div class="play-section-heading"><h2 id="play-groups-title">Your groups</h2><%= link_to "All groups", player_groups_path, class: "tool-link" %></div>
       <p class="round-caption">Recent group rounds · your lifetime answers for current members.</p>
-      <% if @group_overviews.any? %>
-        <div class="play-home-grid">
-          <%= render partial: "player_groups/practice_card", collection: @group_overviews, as: :overview %>
-        </div>
-      <% else %>
-        <div class="play-panel play-empty"><h3>Choose a group to learn.</h3><p>Groups you practice will appear here with your progress.</p><%= link_to "Browse groups", player_groups_path, class: "tool-button" %></div>
-      <% end %>
+      <div class="play-home-grid">
+        <%= render partial: "player_groups/practice_card", collection: @group_overviews, as: :overview %>
+      </div>
     </section>
   <% end %>
 

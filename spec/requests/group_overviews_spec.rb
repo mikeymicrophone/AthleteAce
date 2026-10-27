@@ -67,11 +67,11 @@ RSpec.describe "Group practice overviews", type: :request do
     expect(response.body).not_to include("2 of 2", "Every current member answered correctly")
   end
 
-  it "keeps the index paginated and offers group discovery before any group rounds" do
+  it "keeps the index paginated and leaves groups off Play before any group rounds" do
     (Pagy::OPTIONS[:limit] + 1).times { |i| PlayerGroup.create!(name: "Names #{format('%02d', i)}", players: players) }
     sign_in ace
     get strength_path
-    expect(response.body).to include("Choose a group to learn", "Browse groups")
+    expect(response.body).not_to include("Your groups")
     get player_groups_path
     expect(Nokogiri::HTML(response.body).css(".group-practice-card").size).to eq(Pagy::OPTIONS[:limit])
     get player_groups_path, params: { page: 2 }

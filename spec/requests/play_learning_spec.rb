@@ -14,7 +14,7 @@ RSpec.describe "Play learning flows", type: :request do
     expect(Nokogiri::HTML(response.body).css('input[type="radio"][name="game_type"]').map { |i| i["value"] }).to match_array(GameRound::GAMES.keys)
     get strength_path
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include("Due for review", "0 questions")
+    expect(response.body).not_to include("Due for review", "You keep missing", "Rate who you met")
   end
 
   it "scores new games on the server, records history, and refuses the legacy attempt API for saved-only modes" do

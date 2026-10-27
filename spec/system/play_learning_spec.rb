@@ -54,7 +54,7 @@ RSpec.describe "Play learning", type: :system do
     no_overflow
     page.save_screenshot Rails.root.join("tmp/screenshots/play-roster-quest-dark.png")
     visit strength_path
-    expect(page).to have_content(/Due for review/i)
+    expect(page).to have_content(/Names known/i)
     no_overflow
     page.save_screenshot Rails.root.join("tmp/screenshots/play-learning-home-mobile.png")
   end

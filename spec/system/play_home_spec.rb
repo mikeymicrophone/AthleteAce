@@ -71,7 +71,7 @@ RSpec.describe "Play home and quest browsing", type: :system do
     find(".round-choice[value='#{team.id}']").click
     expect(page).to have_css(".round-feedback", text: /Correct/i)
     visit strength_path
-    within(".play-misses") { expect(page).to have_content("No names to drill right now.") }
+    expect(page).to have_no_css(".play-misses")
     expect(page).to have_css(".play-scoreboard > div:last-child strong", text: "1")
     within(".play-rate-today") { click_link "Rate" }
     expect(page).to have_css("#player-ratings-title", text: /Player Ratings/i)
