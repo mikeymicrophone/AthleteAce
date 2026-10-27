@@ -10,7 +10,7 @@ class JerseyNumberLookup
 
     assignments = JerseyNumberAssignment.where(player: @player, team: @team)
     if @season
-      return unless @season.league_id == @team.league_id
+      return unless @season.league_id == @team.league_id || @season.campaigns.exists?(team: @team)
       from, through = @season.start_date, @season.playoff_end_date || @season.end_date
       # A season label/year alone cannot place a dated assignment in time.
       assignments = if from && through

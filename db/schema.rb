@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_25_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_26_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -121,6 +121,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_25_000000) do
     t.index ["entity_code"], name: "index_appearances_on_entity_code", unique: true
     t.index ["player_id"], name: "index_appearances_on_player_id"
     t.index ["stint_id"], name: "index_appearances_on_stint_id"
+  end
+
+  create_table "asset_representations", force: :cascade do |t|
+    t.string "subject_type", null: false
+    t.bigint "subject_id", null: false
+    t.string "file_format", null: false
+    t.string "view", default: "default", null: false
+    t.string "canonical_path", null: false
+    t.string "content_type", null: false
+    t.string "sha256", null: false
+    t.bigint "byte_size", null: false
+    t.jsonb "source", default: {}, null: false
+    t.jsonb "details", default: {}, null: false
+    t.string "entity_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["entity_code"], name: "index_asset_representations_on_entity_code", unique: true
+    t.index ["subject_type", "subject_id", "file_format", "view"], name: "unique_asset_representation", unique: true
+    t.index ["subject_type", "subject_id"], name: "index_asset_representations_on_subject"
+    t.check_constraint "byte_size > 0", name: "asset_file_not_empty"
+    t.check_constraint "sha256::text ~ '^[a-f0-9]{64}$'::text", name: "asset_sha256_format"
+    t.check_constraint "subject_type::text = ANY (ARRAY['Logo'::character varying, 'Uniform'::character varying, 'UniformPiece'::character varying]::text[])", name: "asset_subject_type"
   end
 
   create_table "campaigns", force: :cascade do |t|
@@ -536,6 +558,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_25_000000) do
     t.index ["jurisdiction_type", "jurisdiction_id"], name: "index_leagues_on_jurisdiction"
     t.index ["seed_version"], name: "index_leagues_on_seed_version"
     t.index ["sport_id"], name: "index_leagues_on_sport_id"
+  end
+
+  create_table "logos", force: :cascade do |t|
+    t.bigint "team_id", null: false
+    t.string "name", null: false
+    t.string "role"
+    t.date "start_date"
+    t.date "end_date"
+    t.boolean "ongoing", default: false, null: false
+    t.jsonb "source", default: {}, null: false
+    t.jsonb "details", default: {}, null: false
+    t.string "entity_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["entity_code"], name: "index_logos_on_entity_code", unique: true
+    t.index ["team_id"], name: "index_logos_on_team_id"
+    t.check_constraint "NOT ongoing OR end_date IS NULL", name: "logos_ongoing_without_end"
+    t.check_constraint "start_date IS NULL OR end_date IS NULL OR end_date >= start_date", name: "logos_ordered_dates"
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -1154,6 +1194,49 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_25_000000) do
     t.index ["entity_code"], name: "index_transactions_on_entity_code", unique: true
   end
 
+  create_table "uniform_campaigns", force: :cascade do |t|
+    t.bigint "uniform_id", null: false
+    t.bigint "campaign_id", null: false
+    t.string "entity_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["campaign_id"], name: "index_uniform_campaigns_on_campaign_id"
+    t.index ["entity_code"], name: "index_uniform_campaigns_on_entity_code", unique: true
+    t.index ["uniform_id", "campaign_id"], name: "index_uniform_campaigns_on_uniform_id_and_campaign_id", unique: true
+    t.index ["uniform_id"], name: "index_uniform_campaigns_on_uniform_id"
+  end
+
+  create_table "uniform_pieces", force: :cascade do |t|
+    t.bigint "uniform_id", null: false
+    t.string "name", null: false
+    t.jsonb "source", default: {}, null: false
+    t.jsonb "details", default: {}, null: false
+    t.string "entity_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["entity_code"], name: "index_uniform_pieces_on_entity_code", unique: true
+    t.index ["uniform_id", "name"], name: "index_uniform_pieces_on_uniform_id_and_name", unique: true
+    t.index ["uniform_id"], name: "index_uniform_pieces_on_uniform_id"
+  end
+
+  create_table "uniforms", force: :cascade do |t|
+    t.bigint "team_id", null: false
+    t.string "name", null: false
+    t.string "role"
+    t.date "start_date"
+    t.date "end_date"
+    t.boolean "ongoing", default: false, null: false
+    t.jsonb "source", default: {}, null: false
+    t.jsonb "details", default: {}, null: false
+    t.string "entity_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["entity_code"], name: "index_uniforms_on_entity_code", unique: true
+    t.index ["team_id"], name: "index_uniforms_on_team_id"
+    t.check_constraint "NOT ongoing OR end_date IS NULL", name: "uniforms_ongoing_without_end"
+    t.check_constraint "start_date IS NULL OR end_date IS NULL OR end_date >= start_date", name: "uniforms_ordered_dates"
+  end
+
   create_table "warnings", force: :cascade do |t|
     t.bigint "ace_id", null: false
     t.bigint "moderator_id"
@@ -1225,6 +1308,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_25_000000) do
   add_foreign_key "jersey_number_assignments", "players"
   add_foreign_key "jersey_number_assignments", "teams"
   add_foreign_key "leagues", "sports"
+  add_foreign_key "logos", "teams"
   add_foreign_key "memberships", "divisions"
   add_foreign_key "memberships", "teams"
   add_foreign_key "moderation_decisions", "aces", column: "actor_id", on_delete: :nullify
@@ -1296,6 +1380,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_25_000000) do
   add_foreign_key "transaction_players", "teams", column: "from_team_id"
   add_foreign_key "transaction_players", "teams", column: "to_team_id"
   add_foreign_key "transaction_players", "transactions"
+  add_foreign_key "uniform_campaigns", "campaigns"
+  add_foreign_key "uniform_campaigns", "uniforms"
+  add_foreign_key "uniform_pieces", "uniforms"
+  add_foreign_key "uniforms", "teams"
   add_foreign_key "warnings", "aces", column: "moderator_id", on_delete: :nullify
   add_foreign_key "warnings", "aces", on_delete: :cascade
 end

@@ -10,6 +10,8 @@ class Team < ApplicationRecord
   belongs_to :stadium, optional: true
   has_many :players
   has_many :jersey_number_assignments, dependent: :destroy
+  has_many :logos, dependent: :destroy
+  has_many :uniforms, dependent: :destroy
   has_many :contracts, dependent: :nullify
   has_many :contract_players, through: :contracts, source: :player
   has_many :stints, dependent: :restrict_with_error

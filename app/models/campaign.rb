@@ -12,6 +12,8 @@ class Campaign < ApplicationRecord
   has_many :title_awards, through: :contestants
   has_many :contests, through: :contestants
   has_many :activations, dependent: :destroy
+  has_many :uniform_campaigns, dependent: :destroy
+  has_many :uniforms, through: :uniform_campaigns
   has_many :contracts, -> { distinct }, through: :activations
   has_many :activated_players, -> { distinct }, through: :activations, source: :player
   has_many :rosters, dependent: :destroy

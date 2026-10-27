@@ -57,6 +57,15 @@ RSpec.describe JerseyNumberLookup do
     expect(lookup(season: season).number).to eq("00")
   end
 
+  it "uses a club's number history in another competition with a recorded campaign" do
+    competition = create(:league, sport: team.sport)
+    cup_season = create(:season, league: competition, start_date: "2024-10-01", end_date: "2025-04-30")
+    assign("3", start_date: "2023-01-01")
+    expect(lookup(season: cup_season)).to be_nil
+    Campaign.create!(team: team, season: cup_season)
+    expect(lookup(season: cup_season).number).to eq("3")
+  end
+
   it "withholds conflicting assignment and observation evidence" do
     assign("00", start_date: "2023-01-01")
     observation("7", on: "2025-01-02")

@@ -8,6 +8,7 @@ class UgcResetService
     Country, State, City, Stadium,
     Sport, League, Conference, Division, Team, Player,
     JerseyNumberAssignment, PlayerGroup, PlayerGroupMembership, Person, StaffTenure,
+    Logo, Uniform, UniformPiece, UniformCampaign, AssetRepresentation,
     
     # Organizational structure
     Organization, OrganizationAffiliation, Membership, Position, Role,

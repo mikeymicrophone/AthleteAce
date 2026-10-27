@@ -13,7 +13,9 @@ class League < ApplicationRecord
   has_many :contracts, through: :teams
   has_many :activations, through: :campaigns
   
-  belongs_to :country, foreign_key: :jurisdiction_id, class_name: "Country", optional: true
+  def country
+    jurisdiction if jurisdiction_type == "Country"
+  end
   
   def self.ransackable_attributes(auth_object = nil)
     column_names

@@ -14,6 +14,8 @@ module Seeds
       "Person" => Person, "StaffTenure" => StaffTenure,
       "Contract" => Contract, "Activation" => Activation,
       "JerseyNumberAssignment" => JerseyNumberAssignment,
+      "Logo" => Logo, "Uniform" => Uniform, "UniformPiece" => UniformPiece,
+      "UniformCampaign" => UniformCampaign, "AssetRepresentation" => AssetRepresentation,
       "Transaction" => Transaction, "TransactionPlayer" => TransactionPlayer,
       "Stint" => Stint, "Roster" => Roster, "RosterEntry" => RosterEntry,
       "Contest" => Contest, "Game" => Game, "ContestGame" => ContestGame,
@@ -29,13 +31,16 @@ module Seeds
       "Person" => %w[player], "StaffTenure" => %w[person organization team],
       "Contract" => %w[player organization], "Campaign" => %w[team], "Activation" => %w[player],
       "JerseyNumberAssignment" => %w[player team],
+      "Logo" => %w[team], "Uniform" => %w[team], "UniformPiece" => %w[uniform],
+      "UniformCampaign" => %w[uniform campaign], "AssetRepresentation" => %w[subject],
       "Stint" => %w[player team], "Roster" => %w[campaign], "RosterEntry" => %w[roster player],
       "Contestant" => %w[contest campaign], "Appearance" => %w[player contestant],
       "ContestGame" => %w[contest game], "TitleAward" => %w[contest winner],
       "TransactionPlayer" => %w[event player], "PlayerGroupMembership" => %w[player_group player]
     }.freeze
     POLYMORPHIC_TYPES = {
-      [ "League", "jurisdiction" ] => %w[Country State City],
+      [ "League", "jurisdiction" ] => %w[Country State City Federation],
+      [ "AssetRepresentation", "subject" ] => %w[Logo Uniform UniformPiece],
       [ "Contest", "context" ] => %w[League Conference Division Sport Federation Organization],
       [ "Game", "context" ] => %w[League Conference Division Sport Federation Organization]
     }.freeze
@@ -357,12 +362,17 @@ module Seeds
     end
 
     def natural_target(model, desired)
+      if model == JerseyNumberAssignment && desired["start_date"] && desired["player"] && desired["team"] && desired["number"]
+        return model.where(player: desired["player"], team: desired["team"], number: desired["number"])
+          .overlapping(desired["start_date"], desired["start_date"]).first
+      end
       keys = {
         Person => %w[player],
         Year => %w[number], Season => %w[year league], Campaign => %w[team season], Activation => %w[player campaign],
         PlayerGroupMembership => %w[player_group player], RosterEntry => %w[roster player], Contestant => %w[contest campaign],
         Appearance => %w[contestant player], TransactionPlayer => %w[event player],
-        ContestGame => %w[contest game], TitleAward => %w[contest key]
+        ContestGame => %w[contest game], TitleAward => %w[contest key],
+        UniformCampaign => %w[uniform campaign]
       }[model]
       return unless keys && keys.all? { |key| desired[key].present? }
       model.find_by(desired.slice(*keys))

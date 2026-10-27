@@ -181,6 +181,8 @@ Player groups and memberships belong to the reset service's core catalog. Ordina
 
 ## Coverage and remaining launch work
 
+The [2026 capture and asset extension](seed-library-2026.md) adds seven current-season competition datasets, three NBA participant-history datasets, the complete NHL regular-season schedule, persistent number assignments, and a local visual asset pilot. The counts below describe the earlier pilot. Current coverage comes from `rails seeds:coverage` and `sources/coverage_2026/report.json`.
+
 The first sample supplies 89 definitions and 94 code bindings: four Sports, two Countries, five Leagues, ten Years, 41 Seasons, eight Teams, three Players, ten Campaigns, and six Activations. It covers the 2016–2025 starting-year window for NBA/NFL/NHL/EPL, plus a Championship season for Fulham. The three sampled transfers, Raiders relocation, and Fulham promotion test the contract. They are not complete rosters.
 
 The `yaml/coverage_2025/` expansion supplies all 114 teams for the latest completed seasons (NBA/NHL/EPL `2025_2026`, NFL `2025`), at least two players per team, full captured Knicks/49ers roster listings, and all Blues regular-season participants. Its normalized official-source capture and offline/refresh generator live in the data repository's `sources/` and `scripts/` directories. Expanded-catalog tests compare imported memberships to that capture and verify replay. Campaign details label complete source listings separately from two-player samples. See the data repository's `sources/README.md` for the source-specific completeness boundaries.

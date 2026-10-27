@@ -26,4 +26,4 @@ Season-only Team Match questions use a number when an assignment covers the full
 
 Saved questions snapshot the resolved number and observation date. Later changes cannot rewrite a resumed round or misses drill. Portraits use a loaded photo, then a numbered jersey, then player initials when the number is unknown. No new tenure assignments are manufactured from the local catalog's isolated observations.
 
-Uniform designs and their nicknames remain separate from number assignments; one uniform can eventually be reused across seasons and composed with the player's applicable number.
+Uniform designs and their nicknames remain separate from number assignments. `UniformCampaign` reuses a design across seasons and competitions. `UniformPiece` names components within that uniform; there is no shared garment taxonomy. `Logo` periods may overlap. `AssetRepresentation` stores one canonical local file per owner, format, and view. The [2026 seed guide](seed-library-2026.md) describes the local visual pilot and current-number capture policy.

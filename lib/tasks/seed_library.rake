@@ -1,4 +1,61 @@
 namespace :seeds do
+  desc "Report captured 2026 coverage and imported season counts"
+  task coverage: :environment do
+    root = Pathname.new(ENV.fetch("SEED_LIBRARY_ROOT", Rails.root.join("db/seeds/athlete_ace_data/yaml").to_s)).parent
+    report = JSON.parse(root.join("sources/coverage_2026/report.json").read)
+    report.fetch("coverage").each do |name, capture|
+      league = League.find_by!(abbreviation: name.start_with?("nba") ? "NBA" : name.upcase)
+      season = league.seasons.find_by!(label: capture.fetch("season"))
+      capture["imported_teams"] = season.campaigns.count
+      capture["imported_memberships"] = season.activations.count
+    end
+    report.delete("identity_bindings")
+    puts JSON.pretty_generate(report)
+  end
+
+  namespace :assets do
+    desc "Verify every imported canonical asset file against its size and SHA-256"
+    task verify: :environment do
+      require "digest"
+      root = Pathname.new(ENV.fetch("SEED_LIBRARY_ROOT", Rails.root.join("db/seeds/athlete_ace_data/yaml").to_s)).parent
+      count = 0
+      AssetRepresentation.find_each do |asset|
+        path = asset.local_path(root: root)
+        raise "Missing asset: #{path}" unless path.file?
+        raise "Asset size differs: #{path}" unless path.size == asset.byte_size
+        raise "Asset checksum differs: #{path}" unless Digest::SHA256.file(path).hexdigest == asset.sha256
+        count += 1
+      end
+      raise "No asset representations imported" if count.zero?
+      puts "Verified #{count} canonical asset files."
+    end
+  end
+
+  desc "Apply the captured NHL schedule dates and scheduling details to existing seeded games"
+  task refresh_nhl_schedule: :environment do
+    root = Pathname.new(ENV.fetch("SEED_LIBRARY_ROOT", Rails.root.join("db/seeds/athlete_ace_data/yaml").to_s)).parent
+    capture = JSON.parse(root.join("sources/coverage_2026/nhl.json").read)
+    raise "Unexpected NHL season" unless capture.fetch("season") == "2026_2027"
+    games = capture.fetch("games")
+    raise "Incomplete NHL schedule" unless games.size == 1344 && games.map { |game| game.fetch("source_id") }.uniq.size == 1344
+    changed = 0
+    Game.transaction do
+      games.each do |incoming|
+        game = Game.find_by!(entity_code: "HCK-NHL-GAME_#{incoming.fetch('source_id')}")
+        expected = { "home" => incoming.fetch("home"), "away" => incoming.fetch("away") }
+        actual = game.contestants.includes(:campaign).to_h { |entry| [ entry.tiebreakers.fetch("side"), entry.campaign.abbreviation ] }
+        raise "NHL participants changed for #{game.entity_code}" unless actual == expected
+        details = game.details.merge(incoming.slice("start_time_utc", "venue", "state"))
+        game.assign_attributes(begin_date: incoming.fetch("date"), end_date: incoming.fetch("date"), details: details)
+        if game.changed?
+          game.save!
+          changed += 1
+        end
+      end
+    end
+    puts({ games: games.size, changed: changed }.to_json)
+  end
+
   desc "Export the live catalog field contract for portable schema generation (CHECK=1 verifies drift)"
   task schema_contract: :environment do
     require Rails.root.join("app/services/seeds/library_importer").to_s

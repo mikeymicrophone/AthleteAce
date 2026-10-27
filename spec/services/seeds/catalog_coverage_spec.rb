@@ -5,7 +5,7 @@ RSpec.describe "Expanded seasonal seed catalog" do
   let(:library) { root.join("yaml") }
   let(:capture) { JSON.parse(File.read(root.join("sources/coverage_2025.json"))) }
   let(:registry) { MICharismaSeeders::SequenceRegistry.read(library.join("entity_sequences.yaml")) }
-  let(:paths) { Dir.glob(library.join("**/*.yaml")).sort.reject { |path| path.end_with?("entity_sequences.yaml") } }
+  let(:paths) { Dir.glob(library.join("**/*.yaml")).sort.reject { |path| path.end_with?("entity_sequences.yaml") || path.include?("/coverage_2026/") } }
   let(:importer) { Seeds::LibraryImporter.new(registry: registry) }
   let(:full_rosters) { { "NBA" => "NYK", "NFL" => "SF", "NHL" => "STL" } }
 
