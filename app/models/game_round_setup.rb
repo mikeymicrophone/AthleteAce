@@ -14,14 +14,20 @@ class GameRoundSetup
   attribute :player_id, :integer
   attribute :fact_type, :string, default: "team"
   attribute :practice_filter, :string, default: "all"
+  attribute :delay, :integer, default: 0
   attr_accessor :ace
+
+  # Flash cards share the round setup but play without saving a round.
+  GAMES = GameRound::GAMES.merge("flash_cards" => "Flash Cards").freeze
+  DELAYS = [ 0, 2, 5 ].freeze
 
   FACTS = { "team" => [ "Team", "team" ], "birth_city" => [ "City", "birth_city" ], "birth_country" => [ "Country", "birth_country" ] }.freeze
   PRACTICE_FILTERS = { "all" => "All members", "remaining" => "Not yet answered correctly", "missed" => "Needs practice" }.freeze
   validates :practice_filter, inclusion: { in: PRACTICE_FILTERS.keys }
   validates :fact_type, inclusion: { in: FACTS.keys }
 
-  validates :game_type, inclusion: { in: GameRound::GAMES.keys }
+  validates :game_type, inclusion: { in: GAMES.keys }
+  validates :delay, inclusion: { in: DELAYS }
   validates :length, inclusion: { in: GameRound::LENGTHS }
   validate :valid_scope
 
@@ -65,7 +71,7 @@ class GameRoundSetup
   end
 
   def seasonal_game?
-    %w[player_team_match name_ciphers multiple_choice image_recognition].include?(game_type)
+    %w[player_team_match name_ciphers multiple_choice image_recognition flash_cards].include?(game_type)
   end
 
   def cipher_pool
@@ -147,7 +153,7 @@ class GameRoundSetup
   def subjects
     return Player.where(id: fact_pool.players.map(&:id)) if %w[multiple_choice image_recognition].include?(game_type)
     return Player.where(id: cipher_pool.players.map(&:id)) if game_type == "name_ciphers"
-    return practice_players(filter_players(season_pool.players)) if season && game_type == "player_team_match"
+    return practice_players(filter_players(season_pool.players)) if season && %w[player_team_match flash_cards].include?(game_type)
 
     if game_type == "guess_the_division"
       playable_leagues = Division.joins(:conference).group("conferences.league_id").having("COUNT(DISTINCT divisions.id) >= 2").select("conferences.league_id")
@@ -226,6 +232,7 @@ class GameRoundSetup
     fields = attributes.except("team_query").compact
     fields = fields.except("include_inactive") if season_id
     fields = fields.except("practice_filter") if practice_filter == "all"
+    fields = fields.except("delay") unless game_type == "flash_cards"
     team_ids.any? ? fields.except("team_id") : fields
   end
 
@@ -239,9 +246,19 @@ class GameRoundSetup
     question
   end
 
+  def flash_cards
+    players = subjects.includes(:team)
+    players = if selected_team_ids.size > 1
+      RoundSubjectPicker.pick(players.to_a, length: length) { |player| team_for(player).id }
+    else
+      players.reorder(Arel.sql("RANDOM()")).limit(length).to_a
+    end
+    players.map { |player| { player: player, team: team_for(player), position: player.current_position.presence } }
+  end
+
   def start!(ace)
     self.ace = ace
-    raise ActiveModel::ValidationError, self unless valid?
+    raise ActiveModel::ValidationError, self unless valid? && game_type != "flash_cards"
     if available_count.zero?
       errors.add :base, "No playable questions in this scope. Try another team or league."
       raise ActiveModel::ValidationError, self
@@ -328,6 +345,10 @@ class GameRoundSetup
     pool = selected_team_ids.size > 1 ? Team.where(id: selected_team_ids) : question_league.teams
     pool = pool.where(id: Campaign.where(season_id: season_id).select(:team_id)) if season_id
     pool.to_a
+  end
+
+  def team_for(player)
+    season ? season_pool.team_for(player) : player.team
   end
 
   def team_scope?

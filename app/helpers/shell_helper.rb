@@ -37,7 +37,7 @@ module ShellHelper
       { "players" => "Players", "teams" => "Teams" }.fetch(controller_name, "Latest")
     else
       return "History" if controller_name == "game_attempts" || (controller_name == "strength" && action_name.include?("game_attempts"))
-      return "Games" if %w[game_rounds strength division_guessing_games play_previews].include?(controller_name)
+      return "Games" if %w[game_rounds flash_cards strength division_guessing_games play_previews].include?(controller_name)
       return "Quests" if %w[quests goals achievements highlights].include?(controller_name)
       controller_name == "play" ? "Home" : "Browse"
     end

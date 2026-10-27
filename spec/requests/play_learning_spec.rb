@@ -7,11 +7,11 @@ RSpec.describe "Play learning flows", type: :request do
   let!(:player) { create(:player, team: team) }
   let!(:other_player) { create(:player, team: rival) }
 
-  it "offers six saved games and exposes only the signed-in ace's review count" do
+  it "offers six saved games plus flash cards and exposes only the signed-in ace's review count" do
     sign_in ace
     get new_game_round_path
     expect(response).to have_http_status(:ok)
-    expect(Nokogiri::HTML(response.body).css('input[type="radio"][name="game_type"]').map { |i| i["value"] }).to match_array(GameRound::GAMES.keys)
+    expect(Nokogiri::HTML(response.body).css('input[type="radio"][name="game_type"]').map { |i| i["value"] }).to match_array(GameRoundSetup::GAMES.keys)
     get strength_path
     expect(response).to have_http_status(:ok)
     expect(response.body).not_to include("Due for review", "You keep missing", "Rate who you met")

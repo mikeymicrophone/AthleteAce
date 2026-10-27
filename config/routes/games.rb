@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   get "strength" => "play#index"
   post "play/quick", to: "play#quick", as: :play_quick
   post "play/drill-misses" => "play#drill", as: :play_drill_misses
+  get "play/flash-cards", to: "flash_cards#show", as: :flash_cards
   resources :game_rounds, path: "play/rounds", only: [:new, :create, :show] do
     member do
       post :answer

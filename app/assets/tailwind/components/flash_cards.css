@@ -1,0 +1,16 @@
+.flash-card { @apply min-h-56; }
+.flash-card[hidden], .flash-card-finish[hidden] { display: none; }
+.flash-card-sentence { @apply font-display text-3xl sm:text-4xl font-bold leading-tight text-ink; overflow-wrap: anywhere; }
+.flash-card-player { @apply underline decoration-2 underline-offset-4 decoration-line-2; }
+.flash-card-player:hover { @apply decoration-accent-text; }
+.flash-card-team { @apply inline-flex items-center gap-2 align-middle; }
+.flash-card-team .round-team-badge { @apply w-10 h-11 text-base; }
+.flash-card-position { @apply block mt-3 font-sans text-lg sm:text-xl font-semibold text-ink-2; opacity: 0; transition: opacity 600ms ease-in; }
+.flash-card-revealed .flash-card-position { opacity: 1; }
+.flash-card-finish { @apply flex flex-col items-start gap-4; }
+.flash-card-finish .ace-icon { @apply text-accent-text; }
+.flash-card-finish-actions { @apply flex flex-wrap items-center gap-3; }
+.flash-card-controls .game-button { @apply inline-flex items-center gap-2; }
+@media (prefers-reduced-motion: reduce) {
+  .flash-card-position { transition: none; }
+}
