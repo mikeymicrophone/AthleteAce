@@ -5,12 +5,18 @@
 .flash-card-player:hover { @apply decoration-accent-text; }
 .flash-card-team { @apply inline-flex items-center gap-2 align-middle; }
 .flash-card-team .round-team-badge { @apply w-10 h-11 text-base; }
-.flash-card-position { @apply block mt-3 font-sans text-lg sm:text-xl font-semibold text-ink-2; opacity: 0; transition: opacity 600ms ease-in; }
-.flash-card-revealed .flash-card-position { opacity: 1; }
+.flash-card-position { @apply block mt-3 font-sans text-lg sm:text-xl font-semibold text-ink-2; }
+.flash-card-team-phrase, .flash-card-position { opacity: 0; transition: opacity 500ms ease-in; }
+.flash-card[data-step="2"] .flash-card-team-phrase, .flash-card[data-step="3"] .flash-card-team-phrase, .flash-card[data-step="3"] .flash-card-position { opacity: 1; }
 .flash-card-finish { @apply flex flex-col items-start gap-4; }
 .flash-card-finish .ace-icon { @apply text-accent-text; }
 .flash-card-finish-actions { @apply flex flex-wrap items-center gap-3; }
 .flash-card-controls .game-button { @apply inline-flex items-center gap-2; }
+.flash-card-delays { @apply flex gap-1 p-1 rounded-tool border border-line-2; }
+.flash-card-delay { @apply px-3 py-1.5 rounded-lg text-sm font-semibold text-ink-2 cursor-pointer; }
+.flash-card-delay:hover { @apply text-ink; }
+.flash-card-delay[aria-pressed="true"] { @apply bg-accent-tint text-ink; box-shadow: inset 0 0 0 1px var(--color-accent-text); }
+.flash-card-delay:focus-visible { @apply outline-2 outline-offset-2 outline-accent-text; }
 @media (prefers-reduced-motion: reduce) {
-  .flash-card-position { transition: none; }
+  .flash-card-team-phrase, .flash-card-position { transition: none; }
 }

@@ -7,7 +7,7 @@
     <% end %>
     <%= tag.div class: "round-game-progress" do %>
       <%= tag.strong "1 / #{@cards.size}", data: { flash_cards_target: "counter" } %>
-      <%= tag.span @setup.delay.zero? ? "At your pace" : "#{@setup.delay}s per card", class: "round-caption" %>
+      <%= tag.span @setup.delay.zero? ? "At your pace" : "#{@setup.delay}s per card", class: "round-caption", data: { flash_cards_target: "pace" } %>
     <% end %>
   <% end %>
   <%= tag.progress value: 1, max: @cards.size, aria: { label: "Cards seen" }, class: "round-progress", data: { flash_cards_target: "progress" } %>
@@ -15,14 +15,16 @@
   <%= tag.div class: "flash-card-deck", aria: { live: "polite" } do %>
     <% @cards.each_with_index do |card, index| %>
       <% player, team = card.values_at(:player, :team) %>
-      <%= tag.section class: "round-subject flash-card", hidden: index.positive?, data: { flash_cards_target: "card" } do %>
+      <%= tag.section class: "round-subject flash-card", hidden: index.positive?, data: { flash_cards_target: "card", step: @setup.delay.zero? ? 3 : 1 } do %>
         <%= round_player_portrait({ "subject_primary_color" => team.primary_color, "subject_secondary_color" => team.secondary_color, "subject_text_color" => team.text_color }, player) %>
         <%= tag.div class: "round-subject-details" do %>
           <%= tag.p "Listed for #{@setup.season.name}", class: "eyebrow" if @setup.season %>
           <%= tag.p class: "flash-card-sentence" do %>
             <%= link_to player.name, player_path(player), class: "flash-card-player" %>
-            is on the
-            <%= tag.span class: "flash-card-team" do %><%= round_team_badge team %><%= tag.strong team.name %><% end %>
+            <%= tag.span class: "flash-card-team-phrase" do %>
+              is on the
+              <%= tag.span class: "flash-card-team" do %><%= round_team_badge team %><%= tag.strong team.name %><% end %>
+            <% end %>
             <%= tag.span "(#{card[:position]})", class: "flash-card-position" if card[:position] %>
           <% end %>
         <% end %>
@@ -33,7 +35,7 @@
       <%= tag.h1 "That’s the deck.", class: "page-title" %>
       <%= tag.p "#{pluralize @cards.size, 'player'} and their teams. Shuffle for a fresh draw or test yourself on these names." %>
       <%= tag.div class: "flash-card-finish-actions" do %>
-        <%= link_to "Shuffle again", flash_cards_path(@setup.scope_params.except("game_type")), class: "game-button" %>
+        <%= link_to "Shuffle again", flash_cards_path(@setup.scope_params.except("game_type")), class: "game-button", data: { flash_cards_target: "paceLink" } %>
         <%= link_to "Quiz me on these", new_game_round_path(@setup.scope_params.except("game_type", "delay", "practice_filter").merge("game_type" => "player_team_match", "player_ids" => @cards.map { |card| card[:player].id })), class: "tool-button" %>
       <% end %>
     <% end %>
@@ -43,7 +45,14 @@
     <%= tag.button "Previous", type: "button", class: "tool-button", disabled: true, data: { flash_cards_target: "previous", action: "flash-cards#previous" } %>
     <%= tag.button "Pause", type: "button", class: "tool-button", hidden: @setup.delay.zero?, aria: { pressed: false }, data: { flash_cards_target: "pause", action: "flash-cards#toggle" } %>
     <%= tag.button type: "button", class: "game-button", data: { flash_cards_target: "next", action: "flash-cards#next" } do %>Next<%= icon "arrow-right", size: 18 %><% end %>
-    <%= link_to "Change setup", new_game_round_path(@setup.scope_params), class: "tool-link" %>
+    <%= tag.div class: "flash-card-delays", role: "group", aria: { label: "Advance" } do %>
+      <% GameRoundSetup::DELAYS.each do |delay| %>
+        <%= tag.button delay.zero? ? "Tap" : "#{delay}s", type: "button", class: "flash-card-delay",
+          aria: { pressed: @setup.delay == delay, label: delay.zero? ? "Advance at your pace" : "Advance every #{delay} seconds" },
+          data: { delay: delay, flash_cards_target: "delay", action: "flash-cards#changeDelay" } %>
+      <% end %>
+    <% end %>
+    <%= link_to "Change setup", new_game_round_path(@setup.scope_params), class: "tool-link", data: { flash_cards_target: "paceLink" } %>
     <%= tag.span "← → to flip · Space to pause", class: "round-caption" %>
   <% end %>
 <% end %>
