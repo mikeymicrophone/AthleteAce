@@ -22,7 +22,7 @@
           <%= tag.p class: "flash-card-sentence" do %>
             <%= link_to player.name, player_path(player), class: "flash-card-player" %>
             <%= tag.span class: "flash-card-team-phrase" do %>
-              is on the
+              <%= team.territory.present? ? "is on the" : "is on" %>
               <%= tag.span class: "flash-card-team" do %><%= round_team_badge team %><%= tag.strong team.name %><% end %>
             <% end %>
             <%= tag.span "(#{card[:position]})", class: "flash-card-position" if card[:position] %>

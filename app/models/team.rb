@@ -39,7 +39,7 @@ class Team < ApplicationRecord
   }
 
   def name
-    "#{territory} #{mascot}"
+    [ territory, mascot ].compact_blank.join(" ")
   end
   alias :full_name :name
   

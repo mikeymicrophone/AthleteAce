@@ -15,6 +15,14 @@ RSpec.describe "Flash cards", type: :request do
     expect(response.body).to include('data-flash-cards-delay-value="2"', "2s per card")
   end
 
+  it "names clubs without a place and without \"the\"" do
+    club = create(:team, territory: nil, mascot: "Real Madrid", league: team.league)
+    create(:player, first_name: "Jude", last_name: "Bellingham", team: club)
+    expect(club.name).to eq("Real Madrid")
+    get flash_cards_path, params: { team_ids: [ club.id ] }
+    expect(Nokogiri::HTML(response.body).at_css(".flash-card-sentence").text.squish).to match(/\AJude Bellingham is on \S*Real Madrid\z/)
+  end
+
   it "offers flash cards and their delays from the round setup" do
     get new_game_round_path, params: { game_type: "flash_cards", team_ids: [ team.id ], delay: 5 }
     doc = Nokogiri::HTML(response.body)

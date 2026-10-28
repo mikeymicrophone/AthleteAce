@@ -53,7 +53,7 @@ RSpec.describe "2026 seed coverage" do
     expect(rows.select { |row| row.type == "RosterEntry" }.none? { |row| row.attributes.key?("jersey_number") }).to be(true)
     arsenal = rows.select { |row| row.type == "Campaign" && row.references["team"] == "SOC-EPL-TEAM-ARS" }
     expect(arsenal.map { |row| row.references.fetch("season") }).to contain_exactly("SOC-EPL-SEASON_2026_2027", "SOC-UCL-SEASON_2026_2027")
-    bayern = rows.find { |row| row.type == "Team" && row.attributes["territory"] == "Bayern Munich" }
+    bayern = rows.find { |row| row.type == "Team" && row.attributes["mascot"] == "Bayern Munich" && !row.attributes.key?("territory") }
     expect(bayern.code).to eq("SOC-CLUB-ESPN_132")
   end
 

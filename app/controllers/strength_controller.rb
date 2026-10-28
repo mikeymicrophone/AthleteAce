@@ -253,7 +253,7 @@ class StrengthController < ApplicationController
     if @team_id.present? && @team_id.to_i > 0
       team = Team.find_by(id: @team_id)
       if team
-        Rails.logger.debug { "Found team: #{team.territory} #{team.mascot}" }
+        Rails.logger.debug { "Found team: #{team.name}" }
       else
         Rails.logger.warn "Team with ID #{@team_id} not found!"
         @team_id = nil # Reset if team doesn't exist

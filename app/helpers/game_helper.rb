@@ -98,7 +98,7 @@ module GameHelper
       question = if game_type == "team_match"
         "Who does #{subject.full_name || subject.name} play for?"
       else
-        "Which division do the #{subject.name} belong to?"
+        subject.territory.present? ? "Which division do the #{subject.name} belong to?" : "Which division does #{subject.name} belong to?"
       end
 
       tag.h3(question, class: "subject-question") +
