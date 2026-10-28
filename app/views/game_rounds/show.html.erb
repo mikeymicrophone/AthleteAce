@@ -1,0 +1,117 @@
+<% mode = round_question_mode(@round) %>
+<% content_for :title, GameRound::GAMES.fetch(@round.game_type) %>
+<%= tag.div class: "round-page round-play-page" do %>
+  <%= turbo_frame_tag dom_id(@round), data: { controller: "round", action: "keydown->round#key" }, tabindex: -1 do %>
+    <%= tag.p flash[:alert], role: "alert", class: "flash-alert" if flash[:alert] && turbo_frame_request? %>
+    <% if @round.repeats_subjects? %>
+      <%= tag.aside class: "round-panel" do %>
+        <%= tag.p "This older saved round includes repeated names. A fresh round uses the current pool without padding repeats.", class: "round-caption" %>
+        <%= link_to "Start a fresh round", new_game_round_path(round_replay_params(@round)), class: "tool-link", data: { turbo_frame: "_top" } %>
+      <% end %>
+    <% end %>
+    <%= tag.header class: "round-game-bar" do %>
+      <%= tag.div do %>
+        <%= tag.p GameRound::GAMES.fetch(@round.game_type), class: "eyebrow" %>
+        <%= tag.p @round.scope_label, class: "round-scope-summary" %>
+      <% end %>
+      <%= tag.div class: "round-game-progress" do %>
+        <%= tag.strong "#{@round.position + 1} / #{@round.length}" %>
+        <%= tag.span "Streak #{@stats[:streak]}", class: "round-caption" %>
+      <% end %>
+    <% end %>
+    <%= tag.progress value: @stats[:answered], max: @round.length, aria: { label: "Questions answered" }, class: "round-progress" %>
+
+    <% if @round.paused? %>
+      <%= tag.section class: "round-panel round-paused" do %>
+        <%= icon "player-pause", size: 40 %>
+        <%= tag.h1 "Take a breather", class: "page-title" %>
+        <%= tag.p "Your questions and answers are saved. Resume whenever you’re ready." %>
+        <%= button_to "Resume round", resume_game_round_path(@round), class: "game-button" %>
+        <%= link_to "Back to Play", strength_path, class: "tool-link", data: { turbo_frame: "_top" } %>
+      <% end %>
+    <% else %>
+      <%= tag.section class: "round-subject" do %>
+        <%= tag.p round_question_prompt(@round), class: "round-question-prompt" %>
+        <% if mode == "image_recognition" %>
+          <div data-controller="photo-question">
+            <h1 class="profile-section-title" data-round-target="heading" tabindex="-1">Who is this player?</h1>
+            <%= image_tag @round.question.fetch("subject_photo_url"), alt: "Player to identify", class: "round-recognition-photo", data: {action: "error->photo-question#failed"} %>
+            <p hidden data-photo-question-target="error" role="alert">This photo could not load. Pause this round and try another game.</p>
+          </div>
+        <% elsif mode == "name_ciphers" %>
+          <%= tag.h1 @round.question.fetch("scrambled_name"), class: "round-cipher-name", tabindex: -1, data: { round_target: "heading" } %>
+          <%= tag.p "Same letters. A familiar name.", class: "round-caption" %>
+        <% else %>
+          <% if mode == "player_team_match" %>
+            <%= round_player_portrait @round.question, @subject %>
+          <% else %>
+            <%= entity_avatar @subject, size: :large if @subject %>
+          <% end %>
+          <%= tag.div class: "round-subject-details" do %>
+            <%= tag.p mode == "player_team_match" ? "Know the player. Find the team." : "Find their place in the league.", class: "eyebrow" %>
+            <%= tag.h1 @round.question.fetch("subject_name"), class: "page-title", tabindex: -1, data: { round_target: "heading" } %>
+            <%= tag.p @round.question["subject_position"], class: "round-caption" if @round.question["subject_position"].present? %>
+            <% if (number_caption = round_jersey_caption(@round.question)) %>
+              <%= tag.p number_caption, class: "round-caption round-number-caption" %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+      <%= form_with url: answer_game_round_path(@round), data: { action: "turbo:submit-start->round#submitting turbo:submit-end->round#submitted" } do |form| %>
+        <%= form.hidden_field :position, value: @round.position %>
+        <%= tag.div class: ["round-choices", ("round-name-choices" if mode == "name_ciphers")] do %>
+          <% @round.question.fetch("choices").each_with_index do |choice, index| %>
+            <%= button_tag type: "submit", name: "choice_id", value: choice.fetch("id"), disabled: @attempt.present?,
+              class: round_choice_class(choice, @attempt, @round.question), data: { round_target: "choice" } do %>
+              <%= tag.span index + 1, class: "round-choice-key", aria: { hidden: true } %>
+              <% if %w[name_ciphers multiple_choice image_recognition].include?(mode) %>
+                <%= tag.strong choice.fetch("name"), class: "round-choice-name" %>
+              <% elsif mode == "player_team_match" %>
+                <%= tag.span class: "round-team-answer" do %>
+                  <%= round_answer_badge choice %>
+                  <%= tag.span class: "round-answer-identity" do %>
+                    <% if choice["territory"].present? && choice["mascot"].present? %>
+                      <%= tag.span choice.fetch("territory"), class: "round-answer-territory" %>
+                      <%= tag.strong choice.fetch("mascot"), class: "round-answer-club" %>
+                    <% else %>
+                      <%= tag.strong choice.fetch("name"), class: "round-answer-club" %>
+                    <% end %>
+                  <% end %>
+                <% end %>
+              <% else %>
+                <%= tag.strong choice["abbreviation"].presence || choice.fetch("name"), class: "round-choice-abbreviation" %>
+                <%= tag.span choice.fetch("name") %>
+              <% end %>
+              <% if @attempt && choice.fetch("id") == @round.question.fetch("target_id") %>
+                <%= tag.span class: "round-choice-status" do %><%= icon "check", size: 18 %>Correct<% end %>
+              <% elsif @attempt && choice.fetch("id") == @attempt.chosen_entity_id %>
+                <%= tag.span class: "round-choice-status" do %><%= icon "x", size: 18 %>Your answer<% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+        <%= button_tag "I don’t know — show me", type: "submit", name: "choice_id", value: "", class: "tool-link round-skip", disabled: @attempt.present? %>
+      <% end %>
+
+      <% if @attempt %>
+        <%= tag.section class: "round-feedback #{@attempt.correct? ? 'round-feedback-correct' : 'round-feedback-wrong'}", role: "status", tabindex: -1, data: { round_target: "feedback" } do %>
+          <%= tag.h2 "#{@attempt.correct? ? 'Correct' : 'Not quite'} — #{@round.question.fetch('target_name')}", class: "profile-section-title" %>
+          <% if @attempt.correct? %>
+            <%= tag.p "Streak #{@stats[:streak]} this round." %>
+          <% else %>
+            <%= tag.p "Missed #{@miss_count}× on this matchup · Saved to this round’s misses.", class: "round-miss-count" %>
+            <%= tag.p "You can drill it after the round." %>
+          <% end %>
+        <% end %>
+        <%= button_to @round.position == @round.length - 1 ? "Round summary" : "Next", advance_game_round_path(@round),
+          params: { position: @round.position }, class: "game-button round-next", data: { round_target: "next" },
+          form: { data: { turbo_frame: @round.position == @round.length - 1 ? "_top" : dom_id(@round) } } %>
+      <% end %>
+      <%= tag.footer class: "round-play-footer" do %>
+        <%= button_to "Pause round", pause_game_round_path(@round), class: "tool-button" %>
+        <%= link_to "New round", new_game_round_path, class: "tool-link", data: { turbo_frame: "_top" } %>
+        <%= tag.span "Keys 1–6 to answer · Enter for next", class: "round-caption" %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

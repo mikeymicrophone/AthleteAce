@@ -1,0 +1,59 @@
+<% content_for :title, "Content catalog" %>
+<div class="content-catalog people-page">
+  <header class="browse-header">
+    <div><p class="eyebrow">Admin</p><h1 class="page-title">Content catalog</h1><p class="round-caption">Manage quests, achievements, and rating spectrums.</p></div>
+    <div class="page-actions"><%= link_to "Review queue", moderation_path, class: "tool-button" %><%= link_to "Decision log", moderation_log_path, class: "tool-button" %><%= link_to "Moderation oversight", admin_moderation_oversight_path, class: "tool-button" %></div>
+  </header>
+
+  <section class="content-catalog-totals" aria-label="All content totals">
+    <% @counts.each do |type, count| %>
+      <div class="round-panel"><p class="eyebrow"><%= type.pluralize %></p><strong><%= number_with_delimiter count %></strong><p class="round-caption">All statuses</p></div>
+    <% end %>
+  </section>
+
+  <%= form_with url: admin_content_catalog_path, method: :get, class: "people-filters" do |form| %>
+    <div><%= form.label :q, "Search content" %><%= form.search_field :q, value: @directory.query, maxlength: 80, placeholder: "Name or description", class: "account-input" %></div>
+    <div><%= form.label :item_type, "Content type" %><%= form.select :item_type, options_for_select(Admin::ContentDirectory::TYPES.keys.map { |type| [type.pluralize, type] }, @directory.type), { include_blank: "All content" }, class: "account-input" %></div>
+    <div><%= form.label :status, "Status" %><%= form.select :status, options_for_select(Moderation::Queue::STATUSES.map { |status| [status.titleize, status] }, @directory.status), { include_blank: "All statuses" }, class: "account-input" %></div>
+    <div><%= form.label :creator_id, "Creator" %><%= form.select :creator_id, options_for_select([["System or deleted account", "unattributed"]] + @creators.map { |ace| ["#{ace.public_name} · #{ace.handle}", ace.id.to_s] }, @directory.creator_id), { include_blank: "All creators" }, class: "account-input" %></div>
+    <div><%= form.label :sort, "Sort" %><%= form.select :sort, options_for_select(Admin::ContentDirectory::SORTS.invert, @directory.sort), {}, class: "account-input" %></div>
+    <div class="page-actions"><%= form.submit "Filter content", class: "tool-button" %><%= link_to "Clear", admin_content_catalog_path, class: "tool-link" %></div>
+  <% end %>
+
+  <div class="page-actions"><%= link_to "New quest", new_quest_path(side: "admin"), class: "tool-button" %><%= link_to "New achievement", new_achievement_path(side: "admin"), class: "tool-button" %><%= link_to "New Spectrum", new_spectrum_path(side: "admin"), class: "tool-button" %></div>
+  <p class="round-caption content-catalog-result-count"><%= pluralize @pagy.count, "matching record" %> · <%= Admin::ContentDirectory::SORTS.fetch(@directory.sort) %></p>
+
+  <% if @records.empty? %>
+    <section class="round-panel"><h2 class="profile-section-title">No matching content</h2><p>Try another name or change the filters.</p></section>
+  <% else %>
+    <div class="people-table content-catalog-table">
+      <table>
+        <thead><tr><th scope="col">Content</th><th scope="col">Status</th><th scope="col">Creator</th><th scope="col">Updated</th><th scope="col">Actions</th></tr></thead>
+        <tbody>
+          <% @records.each do |record| %>
+            <tr id="content_<%= dom_id(record) %>">
+              <td data-label="Content"><div>
+                <p class="eyebrow"><%= icon_for_resource record.model_name.singular, size: 16 %> <%= record.model_name.human %></p>
+                <%= link_to record.name, polymorphic_path(record, side: "admin"), class: "content-catalog-name" %>
+                <% if record.description.present? %><p class="round-caption"><%= truncate record.description, length: 160 %></p><% end %>
+                <% if record.is_a?(Spectrum) %><p class="round-caption"><%= record.low_label %> to <%= record.high_label %></p><% elsif record.is_a?(Achievement) %><%= entity_link record.target %><% end %>
+              </div></td>
+              <td data-label="Status"><div>
+                <span class="content-catalog-status" data-status="<%= record.moderation_status %>"><%= icon({ "pending" => "history", "approved" => "check", "rejected" => "x", "hidden" => "lock" }.fetch(record.moderation_status), size: 14) %><%= record.moderation_status.titleize %></span>
+                <p class="round-caption">Revision <%= record.moderation_revision %></p>
+                <% if (escalation = @escalations[[record.class.name, record.id]]) %><%= link_to "Open escalation", escalation_path(escalation), class: "tool-link" %><% end %>
+              </div></td>
+              <td data-label="Creator"><div><% if record.created_by %><%= link_to record.created_by.public_name, admin_person_path(record.created_by) %><p class="round-caption"><%= record.created_by.handle %></p><% else %><span class="round-caption">System or deleted account</span><% end %></div></td>
+              <td data-label="Updated"><div><time datetime="<%= record.updated_at.utc.iso8601 %>"><%= record.updated_at.utc.strftime("%b %-d, %Y") %></time><p class="round-caption"><%= record.updated_at.utc.strftime("%H:%M UTC") %></p></div></td>
+              <td data-label="Actions"><div class="page-actions">
+                <%= link_to "Edit", edit_polymorphic_path(record, side: "admin"), class: "tool-button", aria: { label: "Edit #{record.name}" } %>
+                <%= link_to "Review & history", moderation_item_path(type: record.class.name, id: record.id, queue_status: record.moderation_status, item_type: record.class.name), class: "tool-button", aria: { label: "Review and history for #{record.name}" } %>
+              </div></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+  <%== @pagy.series_nav if @pagy.pages > 1 %>
+</div>

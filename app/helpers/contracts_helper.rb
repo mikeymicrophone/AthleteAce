@@ -3,15 +3,14 @@ module ContractsHelper
     tag.div class: "contract-name" do
       display_name_with_lazy_logo(contract.player, name_attribute: :full_name, logo_attribute: :image_url) +
       " with ".html_safe +
-      display_name_with_lazy_logo(contract.team)
+      display_name_with_lazy_logo(contract.organization)
     end
   end
 
   def contract_metadata_display(contract)
     tag.div class: "contract-metadata" do
-      link_to_name(contract.team.league) +
-      link_to_name(contract.team.league.sport) +
-      contract_date_range_display(contract)
+      sport = contract.player.sport
+      safe_join([ sport && link_to_name(sport), contract_date_range_display(contract) ].compact, " · ")
     end
   end
 
@@ -38,21 +37,15 @@ module ContractsHelper
   def contract_stats_display(contract)
     tag.div class: "contract-stats" do
       tag.span("#{pluralize(contract.activations.count, 'activation')}", class: "contract-stat-item") +
-      tag.span("#{pluralize(contract.duration, 'day')} duration", class: "contract-stat-item")
+      tag.span(contract.duration ? "#{pluralize(contract.duration, 'day')} duration" : "Duration unknown", class: "contract-stat-item")
     end
   end
 
   def contract_show_display(contract)
     tag.div class: "contract-show" do
-      contract_show_header(contract) +
+      browse_header("Contract ##{contract.id}") +
       contract_show_content(contract) +
       contract_show_actions(contract)
-    end
-  end
-
-  def contract_show_header(contract)
-    tag.div class: "contract-show-header" do
-      tag.h1 "Contract ##{contract.id}", class: "contract-show-title"
     end
   end
 
@@ -69,7 +62,7 @@ module ContractsHelper
       tag.h2("Contract Information", class: "contract-section-title") +
       tag.div(class: "contract-info-grid") do
         contract_info_item("Player", link_to(contract.player.name, player_path(contract.player))) +
-        contract_info_item("Team", link_to(contract.team.name, team_path(contract.team))) +
+        contract_info_item("Organization", link_to(contract.organization.name, organization_path(contract.organization))) +
         contract_info_item("Start Date", contract.start_date&.strftime("%B %d, %Y") || "Not specified") +
         contract_info_item("End Date", contract.end_date&.strftime("%B %d, %Y") || "Not specified") +
         contract_dollar_value(contract)

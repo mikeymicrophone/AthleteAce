@@ -1,0 +1,3 @@
+<%= browse_header "Edit #{@player_group.name}" %>
+<%= render "form" %>
+<%= button_to "Delete group", @player_group, method: :delete, class: "tool-button", data: { turbo_confirm: "Delete this group? Saved rounds and adopted quest rosters stay recorded." } %>

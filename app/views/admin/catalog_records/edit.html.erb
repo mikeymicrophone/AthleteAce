@@ -1,0 +1,20 @@
+<% content_for :title, "Edit #{@record.name}" %>
+<div class="moderation-page people-page">
+  <%= link_to "Back to #{@kind}", admin_catalog_records_path(kind: @kind), class: "tool-link" %>
+  <header class="browse-header"><div><p class="eyebrow">Admin · Sports data</p><h1 class="page-title">Edit <%= @record.name %></h1><p><%= @record.entity_code.presence || "No entity code" %> · <%= @record.league&.name || "League unknown" %></p></div></header>
+  <% if @kind == "players" %><%= link_to "Player history", admin_player_history_path(@record), class: "tool-button" %><% end %>
+  <% if @error %><div role="alert" class="round-panel"><p><%= @error %></p><%= link_to "Reload current record", edit_admin_catalog_record_path(@record, kind: @kind), class: "tool-link" %></div><% end %>
+  <section class="round-panel">
+    <%= form_with url: admin_catalog_record_path(@record, kind: @kind), method: :patch, class: "people-actions catalog-form" do |form| %>
+      <%= form.hidden_field :version, value: @version %><%= form.hidden_field :request_key, value: @request_key %>
+      <%= render "fields" %>
+      <p class="round-caption">Save first, then add a reason to the recorded change. Corrections need to be copied into seed sources before a rebuild.</p>
+      <div class="page-actions"><%= form.submit "Save changes", class: "tool-button" %><%= link_to "Cancel", admin_catalog_records_path(kind: @kind), class: "tool-link" %></div>
+    <% end %>
+  </section>
+  <section class="round-panel"><h2 class="profile-section-title">Recent corrections</h2>
+    <% if @history.empty? %><p>No recorded edits.</p><% end %>
+    <ul class="wallet-history"><% @history.each do |edit| %><li><%= link_to "Edit ##{edit.id}", admin_catalog_edit_path(edit) %> · <%= edit.actor_name %> · <%= l edit.created_at, format: :long %><p><%= edit.reason.presence || "Reason not supplied" %></p></li><% end %></ul>
+    <%= link_to "All correction history", admin_catalog_edits_path, class: "tool-link" %>
+  </section>
+</div>

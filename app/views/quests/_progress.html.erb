@@ -1,0 +1,5 @@
+<% progress = quest_progress(goal) %>
+<div class="quest-progress">
+  <div class="quest-progress-label"><span><%= goal.status.humanize %> · <%= progress[:completed] %> of <%= progress[:required] %> required achievements</span><strong><%= progress[:percent] %>%</strong></div>
+  <progress value="<%= progress[:percent] %>" max="100" aria-label="<%= goal.quest.name %> progress"><%= progress[:percent] %>%</progress>
+</div>

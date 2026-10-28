@@ -1,20 +1,12 @@
-<%= tag.header @city.name, class: "city-name" %>
-<%= display_name_with_lazy_logo @city.state, logo_attribute: :flag_url %>
-<%= display_name_with_lazy_logo @city.country, logo_attribute: :flag_url %>
-
-<%= render_collection(@city.stadiums) %>
-
-<% @city.stadiums.each do |stadium| %>
-  <%= tag.div class: "stadium-details" do %>
-    <%= stadium.address %>
-    <%= stadium.capacity %> capacity
-  <% end %>
+<% content_for :title, @city.name %>
+<%= browse_header @city.name %>
+<%= browse_metadata "State" => entity_link(@city.state), "Country" => entity_link(@city.country) %>
+<%= render_collection @city.stadiums.order(stadiums: { name: :asc }), parent: @city, link_to_collection: true %>
+<% if @city.stadiums.any? %>
+  <section class="related-section">
+    <h2 class="profile-section-title">Venue details</h2>
+    <%= browse_metadata @city.stadiums.to_h { |stadium| [stadium.name, safe_join([stadium.address, ("#{number_with_delimiter(stadium.capacity)} capacity" if stadium.capacity)].compact_blank, " · ")] } %>
+  </section>
 <% end %>
-
-<%= render_teams_collection(@city.teams) %>
-
-<% @city.teams.each do |team| %>
-  <%= display_name_with_lazy_logo team.league %>
-  <%= display_name_with_lazy_logo team.sport %>
-  <%= render_players_collection(team.players, sport_name: team.sport.name) %>
-<% end %>
+<%= render_collection @city.teams.distinct.order(:territory, :mascot), parent: @city, link_to_collection: true %>
+<%= render_collection @city.players.order(:last_name, :first_name), parent: @city, link_to_collection: true, title: "Players born here", limit: 12, logo_attribute: :photo_url %>

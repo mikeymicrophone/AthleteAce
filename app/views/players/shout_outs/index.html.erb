@@ -1,0 +1,15 @@
+<% content_for :title, "Shout-outs for #{@player.name}" %>
+<header class="browse-header">
+  <div><p class="eyebrow">Feed</p><h1 class="page-title">Shout-outs for <%= @player.name %></h1><p class="round-intro">Public, live posts for this player.</p></div>
+  <%= link_to "Player profile", player_path(@player, side: "feed"), class: "tool-button" %>
+</header>
+<div class="page-actions"><%= link_to "Write a shout-out draft", new_shout_out_draft_path(target_type: "Player", target_id: @player.id), class: "game-button" %></div>
+<% if @posts.any? %>
+  <section aria-label="Player shout-outs" class="shout-out-stream">
+    <p class="round-caption">Bid-weighted order with a random boost for each visitor.</p>
+    <%= render partial: "shout_outs/card", collection: @posts, as: :post, locals: { reactions: ShoutOutReactionSummary.new(posts: @posts, ace: current_ace) } %>
+    <%== @pagy.series_nav if @pagy.pages > 1 %>
+  </section>
+<% else %>
+  <section class="round-panel"><h2 class="profile-section-title">No live shout-outs yet.</h2><p>Approved, funded shout-outs for <%= @player.name %> appear here.</p></section>
+<% end %>

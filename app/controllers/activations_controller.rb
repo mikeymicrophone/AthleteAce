@@ -4,9 +4,8 @@ class ActivationsController < ApplicationController
 
   def index
     base_query = apply_filter :activations
-    base_query = base_query.includes(:contract, :campaign, 
-                                   contract: [:player, :team], 
-                                   campaign: [:season, season: :league])
+    base_query = base_query.includes(:player, :contract,
+                                   campaign: [ :team, :season, season: :league ])
     @pagy, @activations = pagy(base_query.order(start_date: :desc, created_at: :desc), limit: 25)
   end
 

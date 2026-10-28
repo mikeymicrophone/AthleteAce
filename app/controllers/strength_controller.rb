@@ -14,71 +14,16 @@ class StrengthController < ApplicationController
     @include_inactive = params[:include_inactive]
   end
 
-  # Multiple choice quiz for learning names
   def multiple_choice
-    filter_params = strength_filter_params
-    @players = fetch_players_with_params(filter_params)
-    
-    if @players.empty?
-      flash.now[:alert] = "No players found with the selected filters. Showing all players instead."
-      @players = Player.limit(50).to_a
-    end
-    
-    @correct_player = @players.sample
-    @options = [@correct_player] + (@players - [@correct_player]).sample([3, @players.size - 1].min)
-    @options.shuffle!
+    redirect_to new_game_round_path(strength_filter_params.merge(game_type: "multiple_choice"))
   end
 
-  # Phased repetition for spaced learning
   def phased_repetition
-    Rails.logger.debug { "PHASED REPETITION PARAMS: #{params.inspect}" }
-    
-    # Collect and process filter parameters
-    id_collect
-    
-    # Force debug logging to ensure we can see what's happening
-    Rails.logger.debug { "AFTER ID_COLLECT - Team ID: #{@team_id.inspect} (#{@team_id.class})" }
-    
-    # Double-check team_id is properly set
-    if @team_id.present?
-      team = Team.find_by(id: @team_id)
-      if team
-        Rails.logger.debug { "TEAM FOUND: #{team.territory} #{team.mascot} with #{Player.where(team_id: @team_id).count} players" }
-      else
-        Rails.logger.warn "TEAM NOT FOUND for ID: #{@team_id}"
-        @team_id = nil # Reset if team doesn't exist
-      end
-    end
-    
-    filter_params = strength_filter_params
-    Rails.logger.debug { "USING FILTER PARAMS: #{filter_params.inspect}" }
-    
-    @players = fetch_players_with_params(filter_params)
-    Rails.logger.debug { "PLAYERS FOUND: #{@players.count}" }
-    
-    if @players.empty?
-      flash.now[:alert] = "No players found with the selected filters. Showing all players instead."
-      @team_id = @sport_id = @league_id = nil
-      @players = Player.limit(50).to_a
-      Rails.logger.debug { "AFTER CLEARING FILTERS, players found: #{@players.count}" }
-    end
-    
-    @current_player = @players.sample
-    Rails.logger.debug { "SELECTED PLAYER: #{@current_player.inspect}" }
-    
-    @phase = params[:phase].present? ? params[:phase].to_i : 1
+    redirect_to new_game_round_path(strength_filter_params.merge(game_type: "phased_repetition"))
   end
 
-  # Image-based learning
   def images
-    filter_params = strength_filter_params
-    @players = fetch_players_with_params(filter_params).select { |p| p.photo_urls.present? }
-    
-    if @players.empty?
-      @players = Player.where.not(photo_urls: [nil, '']).limit(50).to_a
-    end
-    
-    @current_player = @players.sample
+    redirect_to new_game_round_path(strength_filter_params.merge(game_type: "image_recognition"))
   end
 
   # Team matching game
@@ -113,10 +58,15 @@ class StrengthController < ApplicationController
       # Important: Restrict to ONLY these teams
       filter_params[:team_ids] = teams_pool.map(&:id)
       Rails.logger.debug { "TEAM MATCH: Restricting to teams: #{filter_params[:team_ids]}" }
+    elsif filter_params[:team_ids].present?
+      teams_pool = Team.where(id: filter_params[:team_ids]).to_a
+      return redirect_to(strength_game_attempts_path, alert: "Those teams are no longer available.") if teams_pool.empty?
+
+      filter_params[:team_ids] = teams_pool.map &:id
     elsif ace_signed_in? && no_scope_specified? &&
           filter_params[:team_id].blank? && filter_params[:sport_id].blank? && filter_params[:league_id].blank?
       # No scope specified, use quest teams for logged-in users
-      quest_teams = current_ace.active_goals.flat_map { |g| g.quest.associated_teams }.uniq
+      quest_teams = current_ace.active_goals.where(quest: Quest.approved).flat_map { |g| g.quest.associated_teams }.uniq
       unless quest_teams.empty?
         cross_sport = params[:cross_sport] == 'true'
         teams_pool  = cross_sport ? quest_teams : quest_teams.select { |t| t.sport.id == quest_teams.first.sport.id }
@@ -130,6 +80,9 @@ class StrengthController < ApplicationController
     Rails.logger.debug { "TEAM MATCH: Found #{players.size} players with filter params: #{filter_params}" }
 
     if players.empty?
+      if filter_params[:team_id].present? || params[:team_ids].present?
+        return redirect_to strength_game_attempts_path, alert: "No players are available for those teams."
+      end
       Rails.logger.debug { "TEAM MATCH: No players found with filtered teams, using sample" }
       players = Player.sampled(50)
     end
@@ -212,18 +165,9 @@ class StrengthController < ApplicationController
 
   # Cipher-based learning (scrambled names)
   def ciphers
-    filter_params = strength_filter_params
-    @players = fetch_players_with_params(filter_params)
-    
-    if @players.empty?
-      flash.now[:alert] = "No players found with the selected filters. Showing all players instead."
-      @players = Player.limit(50).to_a
-    end
-    
-    @current_player = @players.sample
-    
-    full_name = "#{@current_player.first_name} #{@current_player.last_name}"
-    @scrambled_name = full_name.chars.shuffle.join
+    scope = params.permit(:length, :sport_id, :league_id, :season_id, :conference_id, :division_id,
+      :city_id, :state_id, :team_id, :include_inactive, team_ids: [])
+    redirect_to new_game_round_path(scope.merge(game_type: "name_ciphers"))
   end
   
   # Method to handle quiz submissions
@@ -239,77 +183,22 @@ class StrengthController < ApplicationController
   end
   
   def game_attempts
-    @game_attempts = current_ace.game_attempts.order(created_at: :desc)
-    
-    # Calculate team statistics for teams with attempts
-    @team_stats = {}
-    
-    # Get all teams that have attempts
-    team_attempts = @game_attempts.where(target_entity_type: 'Team')
-    teams_with_attempts = Team.where(id: team_attempts.pluck(:target_entity_id).uniq)
-    
-    # For each team, calculate stats
-    teams_with_attempts.each do |team|
-      team_attempts_array = team_attempts.where(target_entity_id: team.id)
-      
-      total_attempts = team_attempts_array.size
-      correct_attempts = team_attempts_array.count(&:correct?)
-      
-      @team_stats[team] = {
-        total_attempts: total_attempts,
-        correct_attempts: correct_attempts,
-        accuracy: total_attempts > 0 ? (correct_attempts.to_f / total_attempts * 100).round : 0
-      }
-    end
-    
-    # Group teams by sport
-    @teams_by_sport = {}
-    @team_stats.keys.each do |team|
-      sport = team.sport || 'Other'
-      @teams_by_sport[sport] ||= []
-      @teams_by_sport[sport] << team
-    end
-    
-    # Sort sports alphabetically and teams within each sport
-    @sports = @teams_by_sport.keys.sort
-    @teams_by_sport.each do |sport, teams|
-      @teams_by_sport[sport] = teams.sort_by(&:name)
-    end
+    load_game_history
   end
 
-  # Team-specific game attempts grouped by player
   def team_game_attempts
-    @team = Team.find(params[:team_id])
-    
-    # Find all game attempts where this team was the target
-    @attempts_by_player = {}
-    @player_stats = {}
-    
-    # Get all attempts for this team
-    attempts = current_ace.game_attempts.where(target_entity_type: 'Team', target_entity_id: @team.id)
-    
-    # Get unique player IDs from the attempts
-    player_ids = attempts.select(:subject_entity_id).distinct.pluck(:subject_entity_id)
-
-    # For each player, calculate stats and store their attempts relation
-    player_ids.each do |player_id|
-      player = Player.find_by(id: player_id)
-      next unless player # Skip if player not found
-
-      player_specific_attempts = attempts.where(subject_entity_id: player_id)
-      
-      # Store the player's attempts (as a relation)
-      @attempts_by_player[player] = player_specific_attempts
-      
-      # Calculate stats using the Player model method, passing the relation
-      @player_stats[player] = player.calculate_attempt_stats(player_specific_attempts)
-    end
-    
-    # Sort players by name
-    @players = @attempts_by_player.keys.sort_by(&:full_name)
+    @team = Team.find params[:team_id]
+    load_game_history
+    render :game_attempts
   end
   
   private
+
+  def load_game_history
+    @history = GameHistory.new ace: current_ace, game_type: params[:game_type], team: @team
+    @history_tab = @team || params[:view] == "teams" ? "teams" : "overall"
+    @pagy, @game_attempts = pagy @history.recent_attempts, limit: 20
+  end
   
   def no_scope_specified?
     params[:division_id].blank? && params[:conference_id].blank? && params[:league_id].blank? && params[:city_id].blank? && params[:state_id].blank? && params[:team_id].blank?
@@ -317,7 +206,7 @@ class StrengthController < ApplicationController
 
   # Strong parameter helper
   def strength_filter_params
-    params.permit(:team_id, :conference_id, :division_id, :sport_id, :league_id, :include_inactive, :cross_sport, team_ids: [])
+    params.permit(:team_id, :conference_id, :division_id, :sport_id, :league_id, :season_id, :length, :include_inactive, :cross_sport, team_ids: [])
   end
 
   FILTER_PARENTS = {
@@ -364,7 +253,7 @@ class StrengthController < ApplicationController
     if @team_id.present? && @team_id.to_i > 0
       team = Team.find_by(id: @team_id)
       if team
-        Rails.logger.debug { "Found team: #{team.territory} #{team.mascot}" }
+        Rails.logger.debug { "Found team: #{team.name}" }
       else
         Rails.logger.warn "Team with ID #{@team_id} not found!"
         @team_id = nil # Reset if team doesn't exist

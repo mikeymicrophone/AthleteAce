@@ -1,0 +1,46 @@
+class FeedController < ApplicationController
+  def index
+    @view = params[:view].presence || "all"
+    @query = params[:q].to_s.strip.first(80)
+    raise ActionController::BadRequest unless %w[all my_teams].include?(@view)
+    raise ActionController::BadRequest if @query.present? && @query.length < 2
+    @sport = Sport.find(params.expect(:sport_id)) if params[:sport_id].present?
+    @league = League.find(params.expect(:league_id)) if params[:league_id].present?
+    @sports = Sport.order(:name)
+    @leagues = League.order(:name)
+    response.headers["Cache-Control"] = "private, no-store"
+    load_posts unless @view == "my_teams" && !current_ace
+    return unless @view == "my_teams" && current_ace
+
+    followed = current_ace.follows.where(followable_type: "Team")
+    affinity = current_ace.ratings.active.where(target_type: "Team", spectrum: Spectrum.approved.where(name: "Affinity"))
+      .where("value >= 5000")
+    teams = Team.where(id: followed.select(:followable_id)).or(Team.where(id: affinity.select(:target_id)))
+    teams = teams.where(league: @league) if @league
+    teams = teams.where(league: League.where(sport: @sport)) if @sport
+    @pagy, @teams = pagy(teams.includes(:league).order(:territory, :mascot, :id))
+    ids = @teams.map(&:id)
+    @followed_ids = followed.where(followable_id: ids).pluck(:followable_id)
+    @affinity_ids = affinity.where(target_id: ids).pluck(:target_id)
+  end
+
+  private
+
+  def load_posts
+    posts = ShoutOut.live
+    if current_ace && @query.blank?
+      posts = posts.or(ShoutOut.where(created_by: current_ace, moderation_status: "pending", funding_status: "reserved"))
+    end
+    posts = posts.matching_text(@query) if @query.present?
+    if @view == "my_teams"
+      followed = current_ace.follows.where(followable_type: "Team").select(:followable_id)
+      affinity = current_ace.ratings.active.where(target_type: "Team", spectrum: Spectrum.approved.where(name: "Affinity"))
+        .where("value >= 5000").select(:target_id)
+      posts = posts.where(team_id: followed).or(posts.where(team_id: affinity))
+    end
+    posts = posts.where(league_id: @league.id) if @league
+    posts = posts.where(league_id: League.where(sport: @sport).select(:id)) if @sport
+    seed = session[:shout_out_feed_seed] ||= SecureRandom.hex(16)
+    @posts_pagy, @posts = pagy(ShoutOutFeed.ranked(posts.preload(:created_by, :target), seed: seed), page_key: "posts_page")
+  end
+end

@@ -1,0 +1,38 @@
+<div class="posting-action-forms">
+  <details class="round-panel"><summary class="profile-section-title">Warn</summary>
+    <%= form_with url: ace_profile_posting_actions_path(@ace), scope: :posting_action, class: "posting-action-form" do |form| %>
+      <%= hidden_field_tag :kind, "warn" %><%= form.hidden_field :request_key, value: SecureRandom.uuid %>
+      <%= form.label :reason, "Warning reason", for: "warning-reason" %><%= form.text_area :reason, id: "warning-reason", required: true, maxlength: 2000, class: "account-input" %>
+      <%= form.label :related_item, "Related submission", for: "warning-related" %><%= form.select :related_item, @submissions.map { |record| [moderation_item_name(record), "#{record.class.name}:#{record.id}"] }, { include_blank: "No related submission" }, id: "warning-related", class: "account-input" %>
+      <p class="round-caption">The ace can see this warning reason. It does not hide content.</p><%= form.submit "Record warning", class: "tool-button" %>
+    <% end %>
+  </details>
+  <% if @active_mute %>
+    <details class="round-panel"><summary class="profile-section-title">End mute early</summary>
+      <%= form_with url: ace_profile_posting_actions_path(@ace), scope: :posting_action, class: "posting-action-form" do |form| %>
+        <%= hidden_field_tag :kind, "end_mute" %><%= form.hidden_field :mute_id, value: @active_mute.id %>
+        <%= form.label :reason, "Reason for ending mute", for: "end-mute-reason" %><%= form.text_area :reason, id: "end-mute-reason", required: true, maxlength: 2000, class: "account-input" %>
+        <p class="round-caption">The ace can see this reason. The original mute remains in history.</p><%= form.submit "End mute", class: "tool-button" %>
+      <% end %>
+    </details>
+  <% else %>
+    <details class="round-panel"><summary class="profile-section-title">Mute from posting</summary>
+      <p>They can still play and read. New shout-outs and proposals are blocked until the mute ends.</p>
+      <%= form_with url: ace_profile_posting_actions_path(@ace), scope: :posting_action, class: "posting-action-form" do |form| %>
+        <%= hidden_field_tag :kind, "mute" %><%= form.hidden_field :request_key, value: SecureRandom.uuid %>
+        <%= form.label :duration_hours, "Duration" %><%= form.select :duration_hours, Mute::DURATIONS, { selected: 168 }, class: "account-input" %>
+        <%= form.label :reason, "Mute reason", for: "mute-reason" %><%= form.text_area :reason, id: "mute-reason", required: true, maxlength: 2000, class: "account-input" %>
+        <%= form.label :note, "Private note for moderators" %><%= form.text_area :note, maxlength: 2000, class: "account-input" %>
+        <%= form.label :hide_post_id, "Hide their live shout-out that was reported" %><%= form.select :hide_post_id, @reported_posts.map { |post| ["#{post.target_name}: #{post.message}", post.id] }, { include_blank: "Do not hide a post" }, class: "account-input" %>
+        <p class="round-caption">Hiding returns the full bid as wallet credit. Mute and hide succeed together.</p><%= form.submit "Mute from posting", class: "tool-button" %>
+      <% end %>
+    </details>
+  <% end %>
+  <details class="round-panel"><summary class="profile-section-title">Add moderator note</summary>
+    <%= form_with url: ace_profile_posting_actions_path(@ace), scope: :posting_action, class: "posting-action-form" do |form| %>
+      <%= hidden_field_tag :kind, "note" %><%= form.hidden_field :request_key, value: SecureRandom.uuid %>
+      <%= form.label :body, "Internal note" %><%= form.text_area :body, required: true, maxlength: 2000, class: "account-input" %>
+      <p class="round-caption">Reviewers can read this note. It stays private from this ace, including if they are a reviewer.</p><%= form.submit "Save moderator note", class: "tool-button" %>
+    <% end %>
+  </details>
+</div>

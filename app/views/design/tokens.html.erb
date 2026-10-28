@@ -1,0 +1,13 @@
+<% content_for :title, "Design tokens" %>
+
+<%= tag.div class: "flex flex-col gap-6 pb-12" do %>
+  <%= tag.header class: "flex flex-col gap-2" do %>
+    <%= tag.h1 "Design tokens", class: "font-display text-display-lg uppercase" %>
+    <%= tag.p "The redesign's type, color, radius and shadow tokens (AA-168). Each panel pins its theme with data-theme; the System panel follows this device's setting.",
+              class: "max-w-3xl text-body text-ink-2" %>
+  <% end %>
+
+  <%= tag.div class: "grid gap-6 xl:grid-cols-2" do %>
+    <%= render partial: "design/token_sheet", collection: %w[light dark system], as: :theme %>
+  <% end %>
+<% end %>

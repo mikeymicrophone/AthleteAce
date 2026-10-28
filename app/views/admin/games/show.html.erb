@@ -1,0 +1,29 @@
+<% content_for :title, contest_display_name(@game) %>
+<div class="moderation-page people-page">
+  <%= link_to "Back to games", admin_games_path, class: "tool-link" %>
+  <header class="browse-header"><div><p class="eyebrow">Admin · Sports data · Game</p><h1 class="page-title"><%= contest_display_name(@game) %></h1><p><%= @game.begin_date&.iso8601 || "Date unknown" %> · <%= @game.entity_code.presence || "No entity code" %></p></div></header>
+  <section class="round-panel"><h2 class="profile-section-title">Participants</h2>
+    <% @contestants.each do |entry| %><p><%= entry.campaign.name %> · <%= entry.campaign.season.name %></p><% end %>
+    <% if @contestants.empty? %><p>No recorded participants.</p><% end %>
+    <h2 class="profile-section-title">Competitions</h2>
+    <% @memberships.each do |membership| %><p><%= link_to contest_display_name(membership.contest), admin_competition_path(membership.contest) %> · <%= competition_game_summary(membership) %></p><% end %>
+    <% if @memberships.empty? %><p>No linked competitions.</p><% end %>
+  </section>
+  <div class="page-actions"><%= link_to "Appearances", admin_game_path(@game), class: "tool-button", aria: { current: @tab == "appearances" ? "page" : nil } %><%= link_to "Roster entries", admin_game_path(@game, tab: "rosters"), class: "tool-button", aria: { current: @tab == "rosters" ? "page" : nil } %></div>
+  <% if @tab == "rosters" %>
+    <p class="round-caption">Only observations explicitly referencing this game's entity code and a participating campaign appear here. Same-day rosters and contracts alone do not establish game availability.</p>
+    <% @rosters.includes(campaign: :team).order(:id).each do |roster| %>
+      <section class="round-panel"><h2 class="profile-section-title"><%= roster.campaign.name %> · <%= roster.kind.humanize %></h2><p>Coverage: <%= roster.coverage %> · Effective: <%= roster.effective_on&.iso8601 || "Unknown" %> · Observed: <%= roster.observed_at&.utc&.iso8601 || "Unknown" %></p><p><%= roster.entity_code.presence || "No entity code" %></p></section>
+    <% end %>
+  <% end %>
+  <p class="round-caption"><%= pluralize @pagy.count, @tab == "rosters" ? "recorded roster entry" : "recorded appearance" %>. Missing records do not establish absence.</p>
+  <div class="people-table"><table><thead><tr><th>Player</th><th>Team</th><th>Jersey</th><th><%= @tab == "rosters" ? "Status" : "Starter" %></th><th>Recorded details</th></tr></thead><tbody>
+    <% @entries.each do |entry| %>
+      <tr><td><%= link_to entry.player.name, admin_player_history_path(entry.player) %><p class="round-caption"><%= entry.entity_code.presence || "No entity code" %></p></td><td><%= (@tab == "rosters" ? entry.roster : entry.contestant).campaign.name %></td><td><%= entry.jersey_number.presence || "Unknown" %></td>
+        <td><%= @tab == "rosters" ? entry.status.presence || "Unknown" : entry.starter.nil? ? "Unknown" : entry.starter ? "Yes" : "No" %></td>
+        <td><%= (@tab == "rosters" ? entry.details : entry.statistics).to_json %></td></tr>
+    <% end %>
+  </tbody></table></div>
+  <% if @entries.empty? %><section class="round-panel"><h2>No recorded <%= @tab == "rosters" ? "roster entries" : "appearances" %>.</h2></section><% end %>
+  <%== @pagy.series_nav if @pagy.pages > 1 %>
+</div>

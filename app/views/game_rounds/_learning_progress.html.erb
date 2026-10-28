@@ -1,0 +1,32 @@
+<% goal = entry.goal %>
+<% title_id = dom_id(entry, :round_quest_progress_title) %>
+<section class="round-panel round-learning-progress" aria-labelledby="<%= title_id %>">
+  <h2 id="<%= title_id %>" class="profile-section-title"><%= goal.status == "completed" ? "Quest complete" : "Your quest progress" %></h2>
+  <%= link_to goal.quest.name, quest_path(goal.quest), class: "play-quest-name" %>
+  <% recorded = @round.scope["quest_progress"]&.find { |snapshot| snapshot["goal_id"] == goal.id } %>
+  <% if recorded && recorded["after"] %>
+    <dl class="round-stats round-recorded-quest-progress" aria-label="Recorded quest progress">
+      <% { "before" => "At round start", "after" => "At round finish" }.each do |key, label| %>
+        <% progress = recorded.fetch(key) %>
+        <div><dt><%= label %></dt><dd data-quest-progress-point="<%= key %>"><%= progress.fetch("percent") %>% · <%= progress.fetch("completed") %> of <%= progress.fetch("required") %> required achievements</dd></div>
+      <% end %>
+    </dl>
+  <% end %>
+  <%= render "quests/progress", goal: goal %>
+  <h3><%= entry.achievement.name %></h3>
+  <p><%= entry.progress %> of <%= entry.required_player_ids.size %> players answered correctly since adoption.</p>
+  <p class="round-caption">Current progress for your adopted roster. Your saved round score stays recorded above.</p>
+  <% if entry.completed_at %><p class="round-caption">Achievement complete.</p><% end %>
+  <% if goal.status == "completed" %>
+    <%= link_to "Explore quests", quests_path, class: "game-button" %>
+  <% else %>
+    <% achievement = entry.completed_at ? goal.next_achievement : entry.achievement %>
+    <% path = quest_practice_path(achievement, goal: goal, remaining: true) if achievement %>
+    <% if path %>
+      <% label = achievement.id == entry.achievement_id ? "Continue achievement: #{achievement.name}" : "Next achievement: #{achievement.name}" %>
+      <%= link_to label, path, class: "game-button" %>
+    <% else %>
+      <%= link_to "View quest", quest_path(goal.quest), class: "game-button" %>
+    <% end %>
+  <% end %>
+</section>

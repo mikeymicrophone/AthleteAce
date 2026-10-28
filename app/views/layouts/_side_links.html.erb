@@ -1,0 +1,8 @@
+<nav class="shell-tabs shell-tabs-<%= location %>" aria-label="<%= { 'play' => 'Play', 'feed' => 'Feed', 'mod' => 'Moderate', 'admin' => 'Admin' }.fetch(current_side) %> navigation<%= ' mobile' if location == 'mobile' %>">
+  <% shell_tabs.each do |label, glyph, path| %>
+    <%= link_to path, class: "shell-tab", aria: { current: active_shell_tab == label ? "page" : nil } do %>
+      <%= icon glyph, size: 20 %><span><%= label %></span>
+      <% if current_side == "mod" && label == "Queue" && shell_pending_count.positive? %><span class="shell-badge"><%= shell_pending_count %></span><% end %>
+    <% end %>
+  <% end %>
+</nav>

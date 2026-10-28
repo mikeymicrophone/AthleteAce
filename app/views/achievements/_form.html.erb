@@ -24,14 +24,14 @@
 
   <div class="my-5">
     <%= form.label :quest_id, "Add to Quest (optional)" %>
-    <%= form.select :quest_id, options_from_collection_for_select(Quest.all, :id, :name, params[:quest_id]), { include_blank: "-- Select a Quest --" }, class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
+    <%= form.select :quest_id, options_from_collection_for_select(Quest.visible_to(current_ace), :id, :name, params[:quest_id]), { include_blank: "-- Select a Quest --" }, class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
     <p class="text-sm text-gray-500 mt-1">If selected, this achievement will be added to the quest</p>
   </div>
 
   <div data-controller="dynamic-select" data-dynamic-select-selected-id-value="<%= achievement.target_id.to_i %>">
     <div class="my-5">
       <%= form.label :target_type %>
-      <%= form.select :target_type, options_for_select([['Player', 'Player'], ['Team', 'Team'], ['League', 'League'], ['Sport', 'Sport'], ['City', 'City'], ['State', 'State'], ['Country', 'Country'], ['Federation', 'Federation']], achievement.target_type), {}, class: "block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", data: { action: "change->dynamic-select#updateTargetOptions", dynamic_select_target: "targetType" } %>
+      <%= form.select :target_type, options_for_select(Achievement::TARGET_TYPES.map { |type| [type == 'PlayerGroup' ? 'Player group' : type, type] }, achievement.target_type), {}, class: "block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", data: { action: "change->dynamic-select#updateTargetOptions", dynamic_select_target: "targetType" } %>
     </div>
 
     <div class="my-5">

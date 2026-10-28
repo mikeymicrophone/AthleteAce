@@ -11,7 +11,7 @@
       <div class="filter-badge">
         <span class="filter-label">Team:</span>
         <% team = Team.find_by(id: @team_id) %>
-        <span class="filter-value"><%= team ? "#{team.territory} #{team.mascot}" : "Unknown Team" %></span>
+        <span class="filter-value"><%= team ? team.name : "Unknown Team" %></span>
         <% 
           # Create a hash of the current filter parameters, excluding team_id
           clear_params = {
@@ -79,7 +79,7 @@
               id: dom_id(@current_player, :last_name_of), 
               class: "name-part last-name",
               data: { name_pulse_target: "lastName" }) %>
-  <%= tag.div("is on the ", id: dom_id(@current_player, :is_on_the)) %>
+  <%= tag.div(@current_player.team&.territory.present? ? "is on the " : "is on ", id: dom_id(@current_player, :is_on_the)) %>
   <%= tag.div(link_to_name(@current_player.team), id: dom_id(@current_player, :team_of)) %>
 </div>
 

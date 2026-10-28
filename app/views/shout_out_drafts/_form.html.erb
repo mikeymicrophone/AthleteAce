@@ -1,0 +1,35 @@
+<div class="draft-composer" data-controller="draft-composer">
+  <p class="round-caption">Save a private draft. Saved drafts can be submitted with your chosen bid.</p>
+  <% if @draft.errors.any? %><div role="alert"><%= safe_join @draft.errors.full_messages.map { |message| tag.p(message) } %></div><% end %>
+  <div class="draft-grid">
+    <section class="round-panel">
+      <h2 class="profile-section-title">Who's it for?</h2>
+      <p class="draft-selected" data-draft-composer-target="selected"><%= @draft.target&.name || "Choose a player or team" %></p>
+      <%= form_with url: targets_shout_out_drafts_path, method: :get, data: { turbo_frame: "draft-target-results", draft_composer_target: "searchForm" } do |search| %>
+        <%= search.label :q, "Search players and teams", class: "eyebrow" %>
+        <%= search.search_field :q, maxlength: 80, class: "account-input", data: { action: "input->draft-composer#search" } %>
+        <%= search.submit "Search", class: "tool-button" %>
+      <% end %>
+      <%= turbo_frame_tag "draft-target-results" %>
+      <%= form_with model: @draft do |form| %>
+        <%= form.hidden_field :target_type, data: { draft_composer_target: "type" } %>
+        <%= form.hidden_field :target_id, data: { draft_composer_target: "id" } %>
+        <%= form.hidden_field :lock_version %>
+        <%= form.label :message, "Your message", class: "eyebrow" %>
+        <%= form.text_area :message, rows: 5, required: true, class: "account-input", data: { draft_composer_target: "message", action: "input->draft-composer#update" } %>
+        <p class="round-caption">Text and emoji. No links or web addresses.</p>
+        <p class="round-caption" data-draft-composer-target="count" aria-live="polite"><%= @draft.message.to_s.length %> / 200 characters</p>
+        <div class="page-actions" aria-label="Add emoji">
+          <% { "Applause" => "👏", "Celebration" => "🎉", "Strength" => "💪" }.each do |label, emoji| %>
+            <%= button_tag emoji, type: "button", class: "tool-button", aria: { label: "Add #{label.downcase} emoji" }, data: { action: "draft-composer#emoji", emoji: emoji } %>
+          <% end %>
+        </div>
+        <%= form.submit "Save draft", class: "game-button", data: { draft_composer_target: "save" } %>
+      <% end %>
+    </section>
+    <section class="round-panel draft-card" aria-labelledby="draft-preview-title">
+      <p class="eyebrow">Private preview</p><h2 id="draft-preview-title" class="profile-section-title" data-draft-composer-target="previewName"><%= @draft.target&.name || "Choose a player or team" %></h2>
+      <p class="draft-message" data-draft-composer-target="preview"><%= @draft.message.presence || "Your message will appear here." %></p>
+    </section>
+  </div>
+</div>

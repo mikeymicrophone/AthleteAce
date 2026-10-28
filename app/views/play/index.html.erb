@@ -1,0 +1,124 @@
+<% content_for :title, "Play" %>
+<div class="play-home">
+  <header class="browse-header">
+    <div><p class="eyebrow">A little practice. A lot more familiar.</p><h1 class="page-title">Make names stick.</h1></div>
+    <%= link_to "Game history", strength_game_attempts_path, class: "tool-button" if current_ace %>
+  </header>
+
+  <% if current_ace %>
+    <section class="play-scoreboard" aria-label="Your learning progress">
+      <div><span class="eyebrow">Accuracy · 7 days</span><strong><%= @week[:accuracy] ? "#{@week[:accuracy].round}%" : "—" %></strong><span><%= @week[:total].positive? ? pluralize(@week[:correct], "correct answer") : "Your first answer starts the story" %></span></div>
+      <div><span class="eyebrow">Day streak</span><strong><%= @progress.streaks[:current] %></strong><span>Best <%= @progress.streaks[:best] %> · <%= @progress.time_zone.name %></span></div>
+      <div><span class="eyebrow">Names known</span><strong><%= @progress.names_known %></strong><span>All player games · correct twice, including your latest answer</span></div>
+    </section>
+  <% end %>
+
+  <div class="play-home-grid <%= 'play-has-round' if current_ace && @unfinished_rounds.any? %>">
+    <section class="play-launch" aria-labelledby="play-launch-title">
+      <div class="play-launch-top"><span class="eyebrow">Your next ten</span><%= icon "player-play", size: 40 %></div>
+      <h2 id="play-launch-title">Meet your<br>next lineup.</h2>
+      <p>Practice due reviews and missed names first, then players you follow and teams you follow or rate highly.</p>
+      <% if current_ace %>
+        <%= button_to play_quick_path, class: "game-button" do %>Quick round <%= icon "arrow-right", size: 20 %><% end %>
+      <% else %>
+        <%= link_to "Try one question", play_preview_path, class: "game-button" %>
+        <p class="play-guest-note">Try Team Match without an account, then sign in to save your progress.</p>
+      <% end %>
+      <%= link_to "Pick game & scope", new_game_round_path, class: "tool-link" %>
+    </section>
+
+    <section class="play-panel round-continue" aria-labelledby="play-continue-title">
+      <div class="play-section-heading"><h2 id="play-continue-title">Keep going</h2><%= icon "barbell", size: 24 %></div>
+      <% if current_ace && @unfinished_rounds.any? %>
+        <% @unfinished_rounds.each do |round| %>
+          <div class="play-list-row">
+            <div><p class="eyebrow"><%= round.paused? ? "Paused" : "In progress" %></p><h3><%= GameRound::GAMES.fetch(round.game_type) %></h3><p><%= round.scope_label %></p><p><%= round.game_attempts.size %> of <%= round.length %> answered · <%= time_ago_in_words(round.updated_at) %> ago</p></div>
+            <%= link_to "Continue", game_round_path(round), class: "tool-button", aria: { label: "Continue #{GameRound::GAMES.fetch(round.game_type)}: #{round.scope_label}" } %>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="play-empty"><%= icon "flag", size: 36 %><h3><%= current_ace ? "A clean slate." : "Your progress has a home." %></h3><p><%= current_ace ? "Start a round. If you need a break, it will be waiting right here." : "Saved rounds, your recent results, and the quests you choose—all in one place." %></p></div>
+      <% end %>
+    </section>
+  </div>
+
+  <% if current_ace && (@misses.any? || @due_count.positive? || @players_today.any?) %>
+    <div class="play-home-grid">
+      <% if @misses.any? %>
+        <section class="play-panel play-misses" aria-labelledby="play-misses-title">
+          <div class="play-section-heading"><h2 id="play-misses-title">You keep missing</h2><%= link_to "History", strength_game_attempts_path, class: "tool-link" %></div>
+          <p class="round-caption">All player games · unresolved misses</p>
+          <ul class="play-player-list">
+            <% @misses.each do |miss| %>
+              <% player = miss.fetch(:player) %>
+              <li><%= entity_avatar player %><div><%= link_to player.name, player_path(player), class: "play-quest-name" %><p><%= miss[:team]&.name || "Recorded question" %><% if miss[:season_name].present? %> · <%= miss[:season_name] %><% end %><% if player.current_position.present? %> · <%= player.current_position %><% end %></p><span class="play-miss-count">Missed <%= miss[:misses] %>×</span></div></li>
+            <% end %>
+          </ul>
+          <%= button_to "Drill these #{@misses.size}", play_drill_misses_path, class: "game-button" %>
+          <p class="round-caption">A correct answer clears a name from this list.</p>
+        </section>
+      <% end %>
+      <% if @due_count.positive? %>
+        <section class="play-panel" aria-labelledby="play-review-title">
+          <h2 id="play-review-title" class="profile-section-title">Due for review</h2>
+          <p><%= pluralize @due_count, "question" %> ready to revisit.</p>
+          <%= button_to "Review now", game_rounds_path, params: {game_type: "phased_repetition", include_inactive: true}, class: "game-button" %>
+          <p class="round-caption">A miss returns in 10 minutes. Correct answers gradually space reviews farther apart.</p>
+        </section>
+      <% end %>
+      <% if @players_today.any? %>
+        <section class="play-panel play-rate-today" aria-labelledby="play-rate-title">
+          <div class="play-section-heading"><h2 id="play-rate-title">Rate who you met</h2><span class="eyebrow">Today’s practice</span></div>
+          <ul class="play-player-list">
+            <% @players_today.each do |player| %>
+              <li><%= entity_avatar player %><div><h3><%= player.name %></h3><p><%= player.team&.name %></p></div><%= link_to "Rate", player_path(player, anchor: "player-ratings-title"), class: "tool-button", aria: { label: "Rate #{player.name}" } %></li>
+            <% end %>
+          </ul>
+        </section>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if current_ace && @group_overviews.any? %>
+    <section class="play-groups" aria-labelledby="play-groups-title">
+      <div class="play-section-heading"><h2 id="play-groups-title">Your groups</h2><%= link_to "All groups", player_groups_path, class: "tool-link" %></div>
+      <p class="round-caption">Recent group rounds · your lifetime answers for current members.</p>
+      <div class="play-home-grid">
+        <%= render partial: "player_groups/practice_card", collection: @group_overviews, as: :overview %>
+      </div>
+    </section>
+  <% end %>
+
+  <section class="play-games" aria-labelledby="play-games-title">
+    <div class="play-section-heading"><h2 id="play-games-title">Find your game</h2><span class="eyebrow">One more rep</span></div>
+    <div class="play-game-grid">
+      <% [["Team Match", "Put a team to every player.", "shirt-sport", new_game_round_path(game_type: "player_team_match")], ["Guess the Division", "Know where each team belongs.", "tournament", new_game_round_path(game_type: "guess_the_division")], ["Name Ciphers", "Unscramble the names you know.", "bolt", new_game_round_path(game_type: "name_ciphers")], ["Multiple Choice", "Test recorded player facts.", "target", new_game_round_path(game_type: "multiple_choice")], ["Phased Repetition", "Review names when they are due.", "history", new_game_round_path(game_type: "phased_repetition")], ["Image Recognition", "Put a name to a face.", "photo", new_game_round_path(game_type: "image_recognition")], ["Flash Cards", "See who plays where. No score.", "stack-2", new_game_round_path(game_type: "flash_cards")]].each do |name, description, glyph, path| %>
+        <%= link_to path, class: "play-game-card" do %><%= icon glyph, size: 28 %><h3><%= name %></h3><p><%= description %></p><span class="play-card-arrow"><%= icon "arrow-right", size: 22 %></span><% end %>
+      <% end %>
+    </div>
+  </section>
+
+  <div class="play-home-grid">
+    <section class="play-panel" aria-labelledby="play-quests-title">
+      <div class="play-section-heading"><h2 id="play-quests-title">Your quests</h2><%= link_to "All quests", quests_path, class: "tool-link" %></div>
+      <% if current_ace && @active_goals.any? %>
+        <% @active_goals.each do |goal| %>
+          <div class="play-list-row play-quest-row"><%= link_to goal.quest.name, quest_path(goal.quest), class: "play-quest-name" %><%= render "quests/progress", goal: goal %>
+            <% if (achievement = goal.next_achievement) %><%= link_to "Play next: #{achievement.name}", quest_practice_path(achievement, goal: goal), class: "tool-button" %><% end %></div>
+        <% end %>
+      <% else %>
+        <div class="play-empty"><%= icon "script", size: 36 %><h3>Pick something to work toward.</h3><p>Explore quests built around the teams and players you want to know.</p><%= link_to "Explore quests", quests_path, class: "tool-button" %></div>
+      <% end %>
+    </section>
+    <section class="play-panel" aria-labelledby="play-results-title">
+      <div class="play-section-heading"><h2 id="play-results-title">Recent rounds</h2></div>
+      <% if current_ace && @recent_rounds.any? %>
+        <% @recent_rounds.each do |round| %>
+          <div class="play-list-row"><div><h3><%= GameRound::GAMES.fetch(round.game_type) %></h3><p><%= round.scope_label %></p><p>Finished <%= time_ago_in_words(round.finished_at) %> ago</p></div><%= link_to "Results", summary_game_round_path(round), class: "tool-button" %></div>
+        <% end %>
+      <% else %>
+        <div class="play-empty"><%= icon "medal", size: 36 %><h3>Your next finish starts here.</h3><p>Complete a round to see your results and practice the ones you missed.</p></div>
+      <% end %>
+    </section>
+  </div>
+</div>

@@ -185,6 +185,7 @@ export default class extends Controller {
     if (event.target.id !== this.frameIdValue) return
 
     this.startTime = Date.now()
+    this.updatePauseUI()
 
     if (this.hasProgressCounterTarget) {
       this.progressCounterTarget.textContent = this.correctAnswers
@@ -304,7 +305,7 @@ export default class extends Controller {
       subjectImage.src = attempt.subject_entity.logo_url
       subjectImage.alt = `${attempt.subject_entity.name} logo`
     } else {
-      subjectImage.parentElement.innerHTML = '<i class="fas fa-shield-alt text-3xl text-gray-400"></i>'
+      subjectImage.classList.add('hidden')
     }
 
     const answerImage = card.querySelector(".attempt-answer-image")
@@ -336,13 +337,14 @@ export default class extends Controller {
 
   togglePause() {
     this.gamePaused = !this.gamePaused
-    this.pauseButtonTextTarget.textContent = this.gamePaused ? "Resume" : "Pause"
+    this.updatePauseUI()
+  }
 
-    if (this.gameTypeValue === "team_match") {
-      this.pauseButtonTarget.querySelector("i").classList.toggle("fa-pause")
-      this.pauseButtonTarget.querySelector("i").classList.toggle("fa-play")
-    } else {
-      this.pauseButtonTarget.querySelector("i").classList.toggle("fa-pause")
-    }
+  updatePauseUI() {
+    if (!this.hasPauseButtonTarget) return
+    this.pauseButtonTarget.dataset.paused = String(this.gamePaused)
+    this.pauseButtonTarget.setAttribute("aria-pressed", String(this.gamePaused))
+    this.pauseButtonTextTarget.textContent = this.gamePaused ? "Resume" : "Pause"
+    this.answerChoiceTargets.forEach(choice => choice.disabled = this.gamePaused || this.animatingTransition)
   }
 }

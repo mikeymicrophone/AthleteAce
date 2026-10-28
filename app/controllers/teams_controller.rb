@@ -46,7 +46,7 @@ class TeamsController < ApplicationController
     # Paginate the teams collection
     @pagy, @teams = pagy @teams, limit: per_page
 
-    @spectrums = Spectrum.all
+    @spectrums = Spectrum.visible_to(current_ace)
     
     # Set current spectrum ID if provided in params
     set_current_spectrum_id(params[:spectrum_id]) if params[:spectrum_id].present?
@@ -54,6 +54,9 @@ class TeamsController < ApplicationController
 
   # GET /teams/1 or /teams/1.json
   def show
+    @tab = params[:tab].presence || "wall"
+    @wall_filter = params[:wall_filter].presence || "all"
+    raise ActionController::BadRequest unless %w[wall roster staff ratings].include?(@tab) && %w[all team players].include?(@wall_filter)
     # Load any filters that were applied when navigating to this show page
     load_current_filters
     
@@ -65,6 +68,20 @@ class TeamsController < ApplicationController
     
     # Create a filtered breadcrumb for this team
     @filtered_breadcrumb = build_filtered_breadcrumb @team, @current_filters
+    if @tab == "wall"
+      posts = ShoutOut.approved.where(funding_status: "spent", team_id: @team.id)
+      weekly = posts.where(id: ModerationDecision.where(subject_type: "ShoutOut", action: "approved", created_at: Time.current.beginning_of_week..).select(:subject_id))
+      @weekly_count = weekly.count
+      @most_shouted = weekly.where(target_type: "Player").group(:target_id, :target_name)
+        .order(Arel.sql("COUNT(*) DESC"), :target_name, :target_id).limit(5).pluck(:target_name, Arel.sql("COUNT(*)"))
+      posts = posts.where(target_type: @wall_filter == "team" ? "Team" : "Player") unless @wall_filter == "all"
+      seed = session[:shout_out_feed_seed] ||= SecureRandom.hex(16)
+      @pagy, @posts = pagy(ShoutOutFeed.ranked(posts.includes(:created_by, :target), seed: seed), limit: 25)
+    elsif @tab == "roster"
+      @pagy, @players = pagy(@team.players.order(:last_name, :first_name, :id), limit: 25)
+    elsif @tab == "staff"
+      @staff_tenures = @team.staff_tenures.includes(:person, :organization, :team).chronological
+    end
   end
 
   private

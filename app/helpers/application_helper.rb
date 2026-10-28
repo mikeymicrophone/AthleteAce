@@ -62,38 +62,35 @@ module ApplicationHelper
   # @option options [Symbol] :logo_attribute The attribute to use for the logo URL (defaults to :logo_url)
   # @return [ActiveSupport::SafeBuffer] HTML for the collection
   def render_collection(collection, **options)
-    return content_tag(:div, "No items", class: "empty-collection") if collection.empty? && !options[:show_empty]
-    
-    # Determine collection name and CSS classes
     collection_name = collection.model_name.plural
     item_name = collection.model_name.singular
-    
-    # Set up options with defaults
     title = options.fetch(:title, collection.model_name.human.pluralize)
-    link_to_collection = options.fetch(:link_to_collection, false)
     parent = options.fetch(:parent, nil)
-    css_class = options.fetch(:css_class, collection_name)
-    item_css_class = options.fetch(:item_css_class, item_name)
     logo_attribute = options.fetch(:logo_attribute, :logo_url)
-    
-    content_tag :div, class: css_class do
-      # Display the count/title, optionally as a link
-      concat(
-        if link_to_collection && parent
-          link_to pluralize(collection.count, title), [parent, collection_name.to_sym]
+    count = collection.count
+    items = options[:limit] ? collection.limit(options[:limit]) : collection
+
+    tag.section class: [ "related-section", options.fetch(:css_class, collection_name) ] do
+      tag.header(class: "related-header") do
+        tag.div do
+          tag.h2(title, class: "profile-section-title") +
+            tag.p(pluralize(count, collection.model_name.human.downcase), class: "related-count")
+        end +
+          if options[:link_to_collection] && parent
+            link_to("View all #{title.downcase}", [ parent, collection_name.to_sym ], class: "tool-button")
+          end.to_s.html_safe
+      end +
+        if count.zero?
+          tag.p("No #{title.downcase} recorded.", class: "related-empty")
         else
-          pluralize(collection.count, title)
-        end
-      )
-      
-      # Display each item in the collection
-      collection.each do |item|
-        concat(
-          content_tag(:div, id: dom_id(item), class: item_css_class) do
-            display_name_with_lazy_logo(item, logo_attribute: logo_attribute)
+          tag.div(class: "related-grid") do
+            safe_join(items.map do |item|
+              link_to(item, id: dom_id(item), class: [ "related-record", options.fetch(:item_css_class, item_name) ]) do
+                display_name_with_lazy_logo(item, logo_attribute: logo_attribute, link: false)
+              end
+            end)
           end
-        )
-      end
+        end
     end
   end
   

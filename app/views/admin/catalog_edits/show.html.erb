@@ -1,0 +1,23 @@
+<% content_for :title, "Catalog edit ##{@edit.id}" %>
+<div class="moderation-page people-page">
+  <%= link_to "Correction history", admin_catalog_edits_path, class: "tool-link" %>
+  <header class="browse-header"><div><p class="eyebrow">Admin · Sports data · Edit #<%= @edit.id %></p><h1 class="page-title"><%= @edit.record_name %></h1><p><%= @edit.actor_name %> · <%= l @edit.created_at, format: :long %></p><p class="round-caption"><%= @edit.record_type %> · <%= @edit.entity_code.presence || "No entity code" %> · Record #<%= @edit.record_id %></p></div></header>
+  <section class="round-panel"><h2 class="profile-section-title">Saved changes</h2>
+    <% if @edit.before_values.empty? %><p>Created a new <%= @edit.record_type.downcase %>. There was no previous record.</p><% end %>
+    <% @edit.after_values.each do |field, value| %><div class="catalog-change"><h3><%= field.humanize %></h3><dl class="catalog-diff"><div><dt>Before</dt><dd><%= catalog_value @edit.before_values[field] %></dd></div><div><dt>After</dt><dd><%= catalog_value value %></dd></div></dl></div><% end %>
+  </section>
+  <% if @error %><p role="alert"><%= @error %></p><% end %>
+  <section class="round-panel"><h2 class="profile-section-title">Reason</h2>
+    <% if @edit.reason.present? %><p class="catalog-reason"><%= @edit.reason %></p><p class="round-caption">Supplied <%= l @edit.reason_supplied_at, format: :long %>. This explanation belongs to edit #<%= @edit.id %>.</p>
+    <% else %><p>Reason not supplied</p>
+      <% if @edit.actor_id == current_ace.id %>
+        <%= form_with url: admin_catalog_edit_path(@edit), method: :patch, class: "people-actions" do |form| %>
+          <div><%= form.label :reason, "Why did you make this change?" %><%= form.text_area :reason, value: params[:reason].is_a?(String) ? params[:reason] : nil, required: true, maxlength: 2000, rows: 4, class: "moderation-reason" %></div>
+          <p class="round-caption">Your change is already saved. Add a reason now or return to this edit later. The submitted reason stays with this edit.</p>
+          <div class="page-actions"><%= form.submit "Save reason", class: "tool-button" %><%= link_to "Skip for now", admin_catalog_records_path(kind: catalog_kind(@edit)), class: "tool-link" %></div>
+        <% end %>
+      <% else %><p class="round-caption">The admin who made this edit can add the reason.</p><% end %>
+    <% end %>
+  </section>
+  <%= link_to "Back to sports data", admin_catalog_records_path(kind: catalog_kind(@edit)), class: "tool-link" %>
+</div>

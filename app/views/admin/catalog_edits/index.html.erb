@@ -1,0 +1,9 @@
+<% content_for :title, "Correction history" %>
+<div class="moderation-page people-page">
+  <header class="browse-header"><div><p class="eyebrow">Admin · Sports data</p><h1 class="page-title">Correction history</h1><p><%= pluralize @pagy.count, "recorded edit" %><%= " without a reason" if @pending %></p></div></header>
+  <div class="page-actions"><%= link_to "Sports data", admin_catalog_records_path, class: "tool-button" %><%= link_to @pending ? "Show all edits" : "Reasons not supplied", admin_catalog_edits_path(pending: @pending ? nil : "1"), class: "tool-link" %></div>
+  <p class="round-caption">Newest edits first. Each save has its own record. A saved correction may still need to be copied into the seed sources.</p>
+  <ul class="wallet-history"><% @edits.each do |edit| %><li><%= link_to "#{edit.record_name} · Edit ##{edit.id}", admin_catalog_edit_path(edit) %><p><%= edit.actor_name %> · <%= l edit.created_at, format: :long %> · <%= edit.after_values.keys.map(&:humanize).join(", ") %></p><p><%= edit.reason.presence || "Reason not supplied" %></p></li><% end %></ul>
+  <% if @edits.empty? %><section class="round-panel"><p>No matching edits.</p></section><% end %>
+  <%== @pagy.series_nav if @pagy.pages > 1 %>
+</div>

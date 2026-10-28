@@ -12,6 +12,54 @@ Rails.application.routes.draw do
   draw :ratings       # Rating system
   draw :quests        # Quest and achievement system
   draw :games         # Strength training and games
+  draw :design        # Design reference pages (not in production)
+
+  get "feed", to: "feed#index", as: :feed
+  get "feed/leaders", to: "shout_out_leaderboards#index", as: :shout_out_leaderboard
+  resources :feed_posts, path: "feed/posts", only: :show
+  resource :wallet, only: [ :show, :create ]
+  resources :stripe_purchases, only: :show do
+    post :pay, on: :member
+  end
+  post "stripe/webhook", to: "stripe_webhooks#create"
+  resources :shout_outs, only: [ :index, :show, :create ] do
+    post :pay, on: :member
+    post :copy_to_draft, on: :member
+    resources :shout_out_reports, path: "reports", only: [ :new, :create ]
+    resources :shout_out_reactions, path: "reactions", param: :kind, only: [ :update, :destroy ]
+  end
+  resources :shout_out_drafts, path: "feed/drafts", except: :show do
+    collection { get :targets }
+  end
+  resources :follows, only: [ :create, :destroy ]
+  resources :player_groups
+  get "browse", to: "browse#index", as: :browse
+  namespace :admin do
+    get "content-catalog", to: "content_catalog#index", as: :content_catalog
+    get "moderation-oversight", to: "moderation_oversight#index", as: :moderation_oversight
+    resources :player_histories, path: "player-history", only: :show
+    resources :competitions, only: [ :index, :show ]
+    resources :games, only: [ :index, :show ]
+    resources :people, only: [ :index, :show, :update ]
+    resources :catalog_records, path: "sports-data", only: [ :index, :new, :create, :edit, :update ]
+    resources :catalog_edits, only: [ :index, :show, :update ]
+  end
+  get "admin", to: "admin#index", as: :admin
+  resource :shout_out_revenue, path: "admin/revenue", only: :show
+  resource :theme_preference, only: :update
+  get "search", to: "searches#index", as: :search
+  resource :posting_status, only: :show, path: "account/posting"
+  resources :ace_profiles, only: :show, path: "moderate/aces" do
+    resources :posting_actions, only: :create
+  end
+
+  get "moderate", to: "moderation#index", as: :moderation
+  get "moderate/log", to: "moderation#log", as: :moderation_log
+  resources :escalations, path: "moderate/escalations", only: [ :index, :show, :create, :update ]
+  resources :reports, path: "moderate/reports", only: [ :index, :show, :update ]
+  get "moderate/:type/:id", to: "moderation#show", as: :moderation_item
+  patch "moderate/:type/:id", to: "moderation#update"
+  post "moderate/:type/:id/compare", to: "moderation#compare", as: :compare_moderation_item
 
   # Application health check
   get "up" => "rails/health#show", as: :rails_health_check
@@ -21,5 +69,5 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Root route
-  root "players#index"
+  root "home#index"
 end

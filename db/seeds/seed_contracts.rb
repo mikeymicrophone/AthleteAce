@@ -57,6 +57,11 @@ class SeedContracts
   end
   
   def self.create_contract(contract_data, team, sport)
+    organization = Organization.find_by(entity_code: contract_data['organization_code']) if contract_data['organization_code'].present?
+    unless organization
+      SeedHelpers.log_and_puts "Warning: Contract requires a verified organization_code: #{contract_data['player_name']}"
+      return
+    end
     # Find player by name within the sport
     player = find_player_by_name_and_sport(contract_data['player_name'], sport)
     unless player
@@ -71,6 +76,7 @@ class SeedContracts
     # Create or update contract
     contract = Contract.find_or_initialize_by(
       player: player,
+      organization: organization,
       team: team,
       start_date: start_date
     )

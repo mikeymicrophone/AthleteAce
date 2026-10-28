@@ -1,13 +1,5 @@
-<% content_for :title, "Showing federation" %>
-
-<div class="md:w-2/3 w-full">
-  <% if notice.present? %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
-  <% end %>
-
-  <h1 class="font-bold text-4xl">Showing federation</h1>
-
-  <%= render @federation %>
-
-  <%= link_to "Back to federations", federations_path, class: "w-full sm:w-auto text-center mt-2 sm:mt-0 sm:ml-2 rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
-</div>
+<% content_for :title, @federation.name %>
+<%= browse_header @federation.name do %>
+  <%= link_to "Back to federations", federations_path, class: "tool-button" %>
+<% end %>
+<%= browse_metadata "Abbreviation" => @federation.abbreviation, "Description" => @federation.description, "Url" => external_link_to(@federation.url), "Logo url" => external_link_to(@federation.logo_url) %>

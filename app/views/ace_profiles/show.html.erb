@@ -1,0 +1,41 @@
+<% content_for :title, @ace.public_name %>
+<section class="moderation-page">
+  <header class="browse-header"><div><p class="eyebrow">Ace</p><h1 class="page-title"><%= @ace.public_name %></h1><%= ace_identity @ace %><p class="round-caption">Joined <%= l @ace.created_at.to_date, format: :long %><% if @ace.current_sign_in_at %> · Last sign-in <%= l @ace.current_sign_in_at, format: :long %> UTC<% end %></p></div></header>
+  <section class="round-panel" aria-label="Posting moderation summary">
+    <p><%= @active_mute ? "Muted until #{@active_mute.ends_at.utc.strftime('%b %-d, %Y at %H:%M UTC')}" : "Posting active" %></p>
+    <p><%= pluralize @warning_count, "warning" %> · <%= pluralize @mute_count, "mute" %></p>
+    <p><%= pluralize @submission_counts.values.sum, "submission" %> · <%= @submission_counts.fetch("approved", 0) %> approved · <%= @submission_counts.fetch("rejected", 0) %> rejected · <%= @submission_counts.fetch("pending", 0) %> in review · <%= @submission_counts.fetch("hidden", 0) %> hidden</p>
+    <% unless @own_profile %><p><%= @report_count %> reports received · <%= @open_report_count %> open</p><% end %>
+  </section>
+  <% if @can_manage %><%= render "posting_forms" %><% else %><p class="round-caption">Self-actions and actions against admins are unavailable. An admin must handle another moderator's account.</p><% end %>
+  <%= render "escalations/entry", subject: @ace, escalation: @escalation %>
+  <nav class="history-tabs ace-moderation-tabs" aria-label="Ace moderation sections">
+    <% [["submissions", "Submissions"], ["reports", "Reports"], ["actions", "Warnings and mutes"], ["notes", "Moderator notes"]].each do |tab, label| %><%= link_to label, ace_profile_path(@ace, tab: tab), aria: { current: @tab == tab ? "page" : nil } %><% end %>
+  </nav>
+  <% if @tab == "submissions" %>
+    <h2 class="profile-section-title">Recent submissions</h2><p class="round-caption">The 10 most recent funded submissions and proposals.</p>
+    <% if @submissions.empty? %><p>No submissions yet.</p><% end %>
+    <ol class="moderation-list"><% @submissions.each do |record| %><li class="moderation-row"><div><p class="eyebrow"><%= record.model_name.human %> · <%= record.moderation_status %></p><%= link_to moderation_item_name(record), moderation_item_path(type: record.class.name, id: record.id), class: "tool-link" %></div></li><% end %></ol>
+  <% elsif @tab == "reports" %>
+    <% if @own_profile %><p>Another reviewer handles reports on your posts.</p><% else %>
+      <% if @reports.empty? %><p>No reports received.</p><% end %>
+      <ol class="moderation-list"><% @reports.each do |report| %><li class="moderation-row"><div><p><%= link_to report.shout_out.target_name, report_path(report.shout_out), class: "tool-link" %> · <%= report.reason %> · <%= report.resolution || "Open" %></p><p><%= report.note %></p><p class="round-caption"><%= report.reporter ? ace_identity(report.reporter) : "Deleted account" %> · <%= l report.created_at, format: :long %></p></div></li><% end %></ol>
+      <%== @pagy.series_nav if @pagy.pages > 1 %>
+    <% end %>
+  <% elsif @tab == "actions" %>
+    <h2 class="profile-section-title">Warnings</h2>
+    <% if @warnings.empty? %><p>No warnings.</p><% end %>
+    <ol class="moderation-list"><% @warnings.each do |warning| %><li class="moderation-row"><div><p><%= warning.reason %></p><p><%= warning.subject_name %></p><p class="round-caption"><%= warning.moderator ? ace_identity(warning.moderator) : "Deleted reviewer" %> · <%= l warning.created_at, format: :long %></p></div></li><% end %></ol>
+    <%== @warnings_pagy.series_nav if @warnings_pagy.pages > 1 %>
+    <h2 class="profile-section-title">Mutes</h2>
+    <% if @mutes.empty? %><p>No mutes.</p><% end %>
+    <ol class="moderation-list"><% @mutes.each do |mute| %><li class="moderation-row"><div><p class="eyebrow"><%= mute.active? ? "Active" : mute.ended_at? ? "Ended early" : "Expired" %></p><p><%= mute.reason %></p><p class="round-caption"><%= mute.moderator ? ace_identity(mute.moderator) : "Deleted reviewer" %> · Until <%= l mute.ends_at, format: :long %> UTC</p><% unless @own_profile %><p>Moderator note: <%= mute.note.presence || "None" %></p><% end %><% if mute.ended_at? %><p>Ended <%= l mute.ended_at, format: :long %> UTC · <%= mute.end_reason %></p><p class="round-caption"><%= mute.ended_by ? ace_identity(mute.ended_by) : "Deleted reviewer" %></p><% end %></div></li><% end %></ol>
+    <%== @mutes_pagy.series_nav if @mutes_pagy.pages > 1 %>
+  <% else %>
+    <% if @own_profile %><p>Internal moderator notes are unavailable on your own account.</p><% else %>
+      <% if @notes.empty? %><p>No moderator notes.</p><% end %>
+      <ol class="moderation-list"><% @notes.each do |note| %><li class="moderation-row"><div><p><%= note.body %></p><p class="round-caption"><%= note.moderator ? ace_identity(note.moderator) : "Deleted reviewer" %> · <%= l note.created_at, format: :long %></p></div></li><% end %></ol>
+      <%== @pagy.series_nav if @pagy.pages > 1 %>
+    <% end %>
+  <% end %>
+</section>

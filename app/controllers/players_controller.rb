@@ -31,7 +31,7 @@ class PlayersController < ApplicationController
       @players = base_query.order(:first_name)
     end
     
-    @spectrums = Spectrum.all
+    @spectrums = Spectrum.visible_to(current_ace)
     
     set_current_spectrum_id params[:spectrum_id] if params[:spectrum_id].present?
     
@@ -42,19 +42,27 @@ class PlayersController < ApplicationController
 
   # GET /players/1 or /players/1.json
   def show
-    # Load any filters that were applied when navigating to this show page
     load_current_filters
-    
-    # Load related ratings
-    @ratings = @player.ratings.includes(:ace)
-    @player_ratings = @player.ratings.includes(:ace).order(created_at: :desc).limit(10)
-    @team_ratings = @player.team.ratings.includes(:ace).order(created_at: :desc).limit(10) if @player.team
-    
-    # Set up filter options for navigation to related resources
-    load_filter_options
-    
-    # Create a filtered breadcrumb for this player
     @filtered_breadcrumb = build_filtered_breadcrumb @player, @current_filters
+    @spectrums = Spectrum.visible_to(current_ace).order :name
+    @seasons = Season.where(id: @player.campaigns.select(:season_id)).includes(:year, :league).recent
+    @weekly_shout_out_count = ShoutOutLeaderboard.new.posts.where(target: @player).count
+    seed = session[:shout_out_feed_seed] ||= SecureRandom.hex(16)
+    @shout_outs = ShoutOutFeed.ranked(@player.shout_outs.live, seed: seed).includes(:created_by, :target).limit(3)
+    response.headers["Cache-Control"] = "private, no-store"
+
+    if ace_signed_in?
+      attempts = current_ace.game_attempts.where subject_entity: @player
+      seen = attempts.count
+      right = attempts.where(is_correct: true).count
+      last_miss = attempts.where(is_correct: false).maximum :created_at
+      @memory_stats = {
+        seen: seen,
+        accuracy: seen.positive? ? "#{(right.fdiv(seen) * 100).round}%" : "—",
+        quests: current_ace.goals.where(quest: Quest.approved).joins(:goal_achievements).where("goal_achievements.required_player_ids @> ?::jsonb", [ @player.id ].to_json).distinct.count,
+        last_miss: last_miss ? last_miss.in_time_zone(current_ace.play_time_zone).to_date.strftime("%b %-d, %Y") : "—"
+      }
+    end
   end
 
   private

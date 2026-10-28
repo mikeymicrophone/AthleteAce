@@ -1,19 +1,32 @@
 class Player < ApplicationRecord
+  has_one :person, dependent: :nullify
+  after_create :create_person_identity!
+  has_many :shout_outs, as: :target, dependent: :nullify
+  has_many :shout_out_drafts, as: :target, dependent: :nullify
+  has_many :follows, as: :followable, dependent: :destroy
   include Ratable
   
   belongs_to :birth_city, class_name: 'City', optional: true
   belongs_to :birth_country, class_name: 'Country', optional: true
-  belongs_to :team
-  delegate :sport, to: :team
-  delegate :league, to: :team
+  belongs_to :team, optional: true
+  belongs_to :sport, optional: true
+  delegate :league, to: :team, allow_nil: true
   delegate :current_organization, to: :team, allow_nil: true
   
+  has_many :player_group_memberships, dependent: :destroy
+  has_many :player_groups, through: :player_group_memberships
   has_many :roles, dependent: :destroy
+  has_many :jersey_number_assignments, dependent: :destroy
   has_many :positions, through: :roles
   has_many :contracts, dependent: :destroy
   has_many :contract_teams, through: :contracts, source: :team
-  has_many :activations, through: :contracts
-  has_many :campaigns, through: :activations
+  has_many :contract_organizations, -> { distinct }, through: :contracts, source: :organization
+  has_many :stints, dependent: :destroy
+  has_many :roster_entries, dependent: :destroy
+  has_many :appearances, dependent: :destroy
+  has_many :transaction_players, dependent: :destroy
+  has_many :activations, dependent: :destroy
+  has_many :campaigns, -> { distinct }, through: :activations
   
   # Ransack configuration
   # Define searchable attributes and associations
@@ -51,10 +64,14 @@ class Player < ApplicationRecord
   end
   
   def self.ransackable_associations(auth_object = nil)
-    ["birth_city", "birth_country", "positions", "ratings", "roles", "team"]
+    ["birth_city", "birth_country", "positions", "ratings", "roles", "sport", "team"]
   end
   
   scope :sampled, ->(n = 50) { order(Arel.sql('RANDOM()')).limit(n) }
+
+  def sport
+    super || team&.sport
+  end
   
   def name
     "#{first_name} #{last_name}"
@@ -96,5 +113,22 @@ class Player < ApplicationRecord
       recent_correct: recent_correct,
       recent_accuracy: recent_total > 0 ? (recent_correct.to_f / recent_total * 100).round : 0
     }
+  end
+
+  private
+
+  def create_person_identity!
+    code = "PERSON-#{entity_code.presence || SecureRandom.uuid.upcase}"
+    identity = Person.find_or_create_by!(entity_code: code) do |record|
+      record.name = name.strip.presence || "Unnamed athlete"
+      record.player = self
+    end
+    identity.with_lock do
+      if identity.player_id.present? && identity.player_id != id
+        errors.add :person, "is already linked to another athletic profile"
+        raise ActiveRecord::RecordInvalid, self
+      end
+      identity.update! player: self if identity.player_id.nil?
+    end
   end
 end

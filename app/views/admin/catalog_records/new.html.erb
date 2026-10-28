@@ -1,0 +1,16 @@
+<% content_for :title, "Add player" %>
+<div class="moderation-page people-page">
+  <%= link_to "Back to players", admin_catalog_records_path(kind: "players"), class: "tool-link" %>
+  <header class="browse-header"><div><p class="eyebrow">Admin · Sports data</p><h1 class="page-title">Add player</h1><p>Create an unassigned player, then explain the saved addition.</p></div></header>
+  <% if @error %><p role="alert"><%= @error %></p><% end %>
+  <section class="round-panel">
+    <%= form_with url: admin_catalog_records_path(kind: "players"), method: :post, class: "people-actions catalog-form" do |form| %>
+      <%= form.hidden_field :request_key, value: @request_key %>
+      <div><%= form.label :entity_code, "Entity code" %><%= form.text_field :entity_code, value: params[:entity_code].is_a?(String) ? params[:entity_code] : nil, required: true, maxlength: 120, class: "account-input", placeholder: "PLAYER-JORDAN-REED-1998" %><p class="round-caption">A unique local seed code using letters, digits, underscores and hyphens. Keep this code when adding the player to seed sources.</p></div>
+      <div><%= form.label :sport_id, "Sport" %><%= form.select :sport_id, options_from_collection_for_select(@sports, :id, :name, params[:sport_id].is_a?(String) ? params[:sport_id] : nil), { include_blank: "Unknown" }, class: "account-input" %></div>
+      <%= render "fields" %>
+      <p class="round-caption">This creates profile data only. Team assignment, contracts, jersey numbers and game participation require separate records. Add this player to seed sources before a database rebuild.</p>
+      <div class="page-actions"><%= form.submit "Create player", class: "tool-button" %><%= link_to "Cancel", admin_catalog_records_path(kind: "players"), class: "tool-link" %></div>
+    <% end %>
+  </section>
+</div>

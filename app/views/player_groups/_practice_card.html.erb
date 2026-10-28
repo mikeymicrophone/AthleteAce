@@ -1,0 +1,20 @@
+<% group = overview.fetch(:group) %>
+<article class="play-panel group-practice-card" aria-labelledby="group-card-<%= group.id %>">
+  <h3 id="group-card-<%= group.id %>" class="profile-section-title"><%= link_to group.name, player_group_path(group), class: "tool-link" %></h3>
+  <% if overview.fetch(:total).positive? %>
+    <p><strong><%= overview.fetch(:correct) %> of <%= overview.fetch(:total) %></strong> answered correctly at least once</p>
+    <progress class="round-progress" value="<%= overview.fetch(:correct) %>" max="<%= overview.fetch(:total) %>" aria-label="<%= group.name %>: members answered correctly"></progress>
+    <% if overview.fetch(:remaining).positive? %>
+      <%= link_to "Practice remaining #{overview.fetch(:remaining)}", new_game_round_path(player_group_id: group.id, practice_filter: "remaining", game_type: "name_ciphers"), class: "game-button", aria: { label: "Practice remaining #{overview.fetch(:remaining)}: #{group.name}" } %>
+    <% else %>
+      <p class="round-caption">Every current member answered correctly.</p>
+      <%= link_to "Practice group", new_game_round_path(player_group_id: group.id, game_type: "name_ciphers"), class: "game-button", aria: { label: "Practice group: #{group.name}" } %>
+    <% end %>
+    <% if overview.fetch(:missed).positive? %>
+      <p class="round-caption"><%= pluralize overview.fetch(:missed), "member" %> with a missed latest answer.</p>
+      <%= link_to "Practice misses", new_game_round_path(player_group_id: group.id, practice_filter: "missed", game_type: "name_ciphers"), class: "tool-button", aria: { label: "Practice misses: #{group.name}" } %>
+    <% end %>
+  <% else %>
+    <p class="round-caption">No members yet.</p>
+  <% end %>
+</article>

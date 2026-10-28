@@ -1,0 +1,7 @@
+<% if spectrums.any? %>
+  <% spectrums.each do |spectrum| %>
+    <%= render "ratings/slider", record: record, spectrum: spectrum %>
+  <% end %>
+<% else %>
+  <%= tag.p "Select a spectrum to see rating sliders.", class: "empty-state-message" %>
+<% end %>

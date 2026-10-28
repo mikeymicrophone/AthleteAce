@@ -1,0 +1,68 @@
+<% content_for :title, "Round complete" %>
+<%= tag.div class: "round-page round-summary" do %>
+  <%= turbo_frame_tag dom_id(@round), target: "_top" do %>
+  <%= tag.header class: "browse-header" do %>
+    <%= tag.div do %>
+      <%= tag.p GameRound::GAMES.fetch(@round.game_type), class: "eyebrow" %>
+      <%= tag.h1 "Round complete", class: "page-title" %>
+      <%= tag.p @round.scope_label, class: "round-intro" %>
+    <% end %>
+    <%= link_to "Game history", strength_game_attempts_path, class: "tool-button" %>
+  <% end %>
+  <%= tag.section class: "round-panel round-scorecard", aria: { label: "Round results" } do %>
+    <%= tag.div do %>
+      <%= tag.strong "#{@stats[:correct]} / #{@round.length}", class: "round-final-score" %>
+      <%= tag.p "Correct answers", class: "eyebrow" %>
+    <% end %>
+    <%= tag.dl class: "round-stats" do %>
+      <% { "Accuracy" => "#{(@stats[:correct].fdiv(@round.length) * 100).round}%", "Best streak" => @stats[:best_streak], "Answer time" => round_duration(@stats[:elapsed_ms]), "Names newly known" => @round.newly_known_player_ids.size }.each do |label, value| %>
+        <%= tag.div do %><%= tag.dt label %><%= tag.dd value %><% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+  <% if @learning_entries.any? %>
+    <%= render partial: "learning_progress", collection: @learning_entries, as: :entry %>
+  <% elsif @group_overview %>
+    <section class="round-learning-progress" aria-labelledby="round-group-progress-title">
+      <h2 id="round-group-progress-title" class="profile-section-title">Current group progress</h2>
+      <p class="round-caption">Your latest lifetime answers for current members. The round score above remains recorded.</p>
+      <%= render "player_groups/practice_card", overview: @group_overview %>
+    </section>
+  <% end %>
+  <% if @round.scope["player_group_id"] && !@summary_group %>
+    <p class="round-caption">This group is no longer available. Your saved round results remain recorded.</p>
+  <% end %>
+  <%= tag.div class: "round-summary-actions" do %>
+    <% if @stats[:correct] < @round.length %>
+      <%= button_to "Drill misses", drill_game_round_path(@round), class: "game-button" %>
+    <% end %>
+    <% unless @round.scope["player_group_id"] && !@summary_group %>
+      <%= link_to "Play again", new_game_round_path(round_replay_params(@round)), class: "tool-button" %>
+    <% end %>
+    <%= link_to "Choose another game", new_game_round_path, class: "tool-link" %>
+  <% end %>
+  <%= tag.section class: "round-panel", aria: { labelledby: "round-results-title" } do %>
+    <%= tag.h2 "Every question, in order", id: "round-results-title", class: "profile-section-title" %>
+    <%= tag.p "#{pluralize(@round.length - @stats[:correct], 'miss')} · Choose a subject to review and rate.", class: "round-caption" %>
+    <%= tag.ol class: "round-results" do %>
+      <% @results.each do |attempt| %>
+        <% question = @round.questions.fetch(attempt.round_position) %>
+        <%= tag.li class: "round-result" do %>
+          <%= tag.span attempt.round_position + 1, class: "round-result-number" %>
+          <%= tag.div do %>
+            <%= link_to question.fetch("subject_name"), question.fetch("subject_type") == "Team" ? team_path(question.fetch("subject_id")) : player_path(question.fetch("subject_id")), class: "round-result-subject" %>
+            <%= tag.p "Answer: #{question.fetch('target_name')}", class: "round-caption" %>
+            <% unless attempt.correct? %>
+              <% chosen = question.fetch("choices").find { |choice| choice.fetch("id") == attempt.chosen_entity_id } %>
+              <%= tag.p "You chose: #{chosen ? chosen.fetch('name') : 'I don’t know'}", class: "round-caption" %>
+            <% end %>
+          <% end %>
+          <%= tag.span class: "history-result #{attempt.correct? ? 'history-correct' : 'history-incorrect'}" do %>
+            <%= icon attempt.correct? ? "check" : "x", size: 16 %><%= attempt.correct? ? "Correct" : "Miss" %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
+<% end %>

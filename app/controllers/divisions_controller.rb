@@ -25,7 +25,7 @@ class DivisionsController < ApplicationController
       @divisions = base_query.order(:name)
     end
     
-    @spectrums = Spectrum.all
+    @spectrums = Spectrum.visible_to(current_ace)
     
     # Set current spectrum ID if provided in params
     set_current_spectrum_id params[:spectrum_id] if params[:spectrum_id].present?

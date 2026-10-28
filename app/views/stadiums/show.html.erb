@@ -1,21 +1,5 @@
-
-<%= tag.header @stadium.name, class: "stadium-name" %>
-<%= display_name_with_lazy_logo @stadium.city %>
-<%= display_name_with_lazy_logo @stadium.state, logo_attribute: :flag_url %>
-<%= display_name_with_lazy_logo @stadium.country, logo_attribute: :flag_url %>
-<br>
-<%= @stadium.capacity %>
-
-<% @stadium.teams.each do |team| %>
-  <%= tag.div id: dom_id(team), class: "team" do %>
-    <%= display_name_with_lazy_logo team %>
-    <%= display_name_with_lazy_logo team.league %>
-    <%= display_name_with_lazy_logo team.sport %>
-    <%= tag.div class: "players" do %>
-      <%= pluralize team.players.count, "#{team.sport.name} Player" %>
-      <% team.players.each do |player| %>
-        <%= display_name_with_lazy_logo player %>
-      <% end %>
-    <% end %>
-  <% end %>
-<% end %>
+<% content_for :title, @stadium.name %>
+<%= browse_header @stadium.name %>
+<%= browse_metadata "City" => entity_link(@stadium.city), "State" => entity_link(@stadium.state), "Country" => entity_link(@stadium.country), "Capacity" => (@stadium.capacity && number_with_delimiter(@stadium.capacity)), "Address" => @stadium.address %>
+<%= render_collection @stadium.teams, parent: @stadium, link_to_collection: true %>
+<%= render_collection @stadium.players.order(:last_name, :first_name), parent: @stadium, link_to_collection: true, limit: 12, logo_attribute: :photo_url %>

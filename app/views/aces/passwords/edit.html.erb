@@ -1,25 +1,10 @@
-<h2>Change your password</h2>
-
-<%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put }) do |f| %>
-  <%= render "aces/shared/error_messages", resource: resource %>
-  <%= f.hidden_field :reset_password_token %>
-
-  <div class="field">
-    <%= f.label :password, "New password" %><br />
-    <% if @minimum_password_length %>
-      <em>(<%= @minimum_password_length %> characters minimum)</em><br />
-    <% end %>
-    <%= f.password_field :password, autofocus: true, autocomplete: "new-password" %>
-  </div>
-
-  <div class="field">
-    <%= f.label :password_confirmation, "Confirm new password" %><br />
-    <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
-  </div>
-
-  <div class="actions">
-    <%= f.submit "Change my password" %>
-  </div>
+<%= account_card "New password", "Choose a new password for your Athlete Ace account." do %>
+  <%= form_for resource, as: resource_name, url: password_path(resource_name), html: { method: :put, class: "account-form" } do |form| %>
+    <%= render "aces/shared/error_messages", resource: resource %>
+    <%= form.hidden_field :reset_password_token %>
+    <%= account_field form, :password, type: :password, label: "New password", autofocus: true, autocomplete: "new-password", required: true, hint: account_password_hint %>
+    <%= account_field form, :password_confirmation, type: :password, label: "Confirm new password", autocomplete: "new-password", required: true %>
+    <%= form.submit "Change my password", class: "game-button" %>
+  <% end %>
+  <%= render "aces/shared/links" %>
 <% end %>
-
-<%= render "aces/shared/links" %>

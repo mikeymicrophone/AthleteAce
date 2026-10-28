@@ -1,5 +1,7 @@
 module SeasonsHelper
   def season_display_name(season)
+    return season.label if season.label.present?
+
     case season.league.sport.name.downcase
     when 'baseball'
       # MLB uses single year for season name
@@ -28,14 +30,11 @@ module SeasonsHelper
   
   def seasons_index_page
     tag.div class: "seasons-index-page" do
-      tag.header(class: "seasons-hero") do
-        tag.p("Calendar of competition", class: "seasons-eyebrow") +
-        tag.h1("Seasons", class: "seasons-page-title") +
-        tag.p("Browse every year by league, with the year front and center and the competition highlighted at a glance.", class: "seasons-intro")
-      end +
-      tag.main(class: "seasons-grid") do
+      browse_header("Seasons") +
+      tag.div(class: "seasons-grid") do
         @seasons.map { |season| season_item(season) }.join.html_safe
       end +
+      browse_empty(@seasons, "Seasons").to_s.html_safe +
       (@pagy.series_nav if @pagy.pages > 1).to_s.html_safe
     end
   end
@@ -52,14 +51,13 @@ module SeasonsHelper
           tag.p(season_display_name(season), class: "season-format")
         end +
         tag.div(class: "season-details") do
-          season_champion_badge(season) +
           tag.p(season.league.sport.name, class: "season-sport") +
           season_date_range(season)
         end +
         tag.footer(class: "season-actions") do
           tag.span("View season", class: "season-cta")
         end
-      end
+      end + season_champion_badge(season)
     end
   end
 
@@ -101,10 +99,8 @@ module SeasonsHelper
   
   def season_show_page(season)
     tag.div class: "season-show-page" do
-      tag.div(class: "season-show-header") do
-        link_to("← Back to Seasons", seasons_path, class: "season-back-link") +
-        tag.h1(season_full_name(season), class: "season-title") +
-        tag.p(season_display_name(season), class: "season-subtitle")
+      browse_header(season_full_name(season)) do
+        link_to("← Back to Seasons", seasons_path, class: "tool-button")
       end +
       tag.div(class: "season-content") do
         season_info_section(season) +
@@ -126,11 +122,11 @@ module SeasonsHelper
       tag.div(class: "info-grid") do
         tag.div(class: "info-item") do
           tag.dt("League") +
-          tag.dd(season.league.name)
+            tag.dd(entity_link(season.league))
         end +
         tag.div(class: "info-item") do
           tag.dt("Year") +
-          tag.dd(season.year.number.to_s)
+            tag.dd(entity_link(season.year))
         end +
         tag.div(class: "info-item") do
           tag.dt("Status") +
@@ -180,7 +176,7 @@ module SeasonsHelper
           end
         end
         
-        dates_content.html_safe
+        dates_content.presence&.html_safe || tag.p("No dates recorded.", class: "related-empty")
       end
     end
   end
@@ -191,7 +187,8 @@ module SeasonsHelper
 
     tag.section class: "season-link-banks" do
       season_team_bank(ordered_teams) +
-      season_campaign_bank(ordered_campaigns)
+      season_campaign_bank(ordered_campaigns) +
+      render_collection(season.contests.competitions, title: "Competitions", parent: season, link_to_collection: true)
     end
   end
 

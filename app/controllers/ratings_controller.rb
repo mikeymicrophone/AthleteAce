@@ -1,5 +1,5 @@
 class RatingsController < ApplicationController
-  before_action :authenticate_ace!
+  before_action :authenticate_ace!, except: :for_spectrums
   before_action :set_rating, only: [:show, :edit, :update, :destroy]
   before_action :set_target, only: [:new, :create, :for_spectrums]
   before_action :authorize_rating, only: [:edit, :update, :destroy]
@@ -7,9 +7,9 @@ class RatingsController < ApplicationController
   # GET /ratings
   def index
     @ratings = if params[:spectrum_id].present?
-      Spectrum.find(params[:spectrum_id]).ratings.active.includes(:target).order(created_at: :desc)
+      Spectrum.visible_to(current_ace).find(params[:spectrum_id]).ratings.active.includes(:target).order(created_at: :desc)
     else
-      current_ace.ratings.active.includes(:spectrum, :target).order(created_at: :desc)
+      current_ace.ratings.active.where(spectrum: Spectrum.visible_to(current_ace)).includes(:spectrum, :target).order(created_at: :desc)
     end
   end
 
@@ -25,11 +25,11 @@ class RatingsController < ApplicationController
     @spectrum_id = params[:spectrum_id]
     
     if @spectrum_id.present?
-      @spectrum = Spectrum.find(@spectrum_id)
+      @spectrum = Spectrum.visible_to(current_ace).find(@spectrum_id)
       @rating = current_ace.ratings.active.find_or_initialize_by(target: @target, spectrum: @spectrum)
     else
       @rating = Rating.new(target: @target)
-      @spectrums = Spectrum.all
+      @spectrums = Spectrum.visible_to(current_ace)
     end
   end
 
@@ -48,17 +48,22 @@ class RatingsController < ApplicationController
     respond_to do |format|
       format.html { redirect_to after_rating_path }
       format.json { render json: { success: true, rating: @rating }, status: :created }
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(helpers.rating_row_id(@target, @rating.spectrum),
+          partial: "ratings/slider", locals: { record: @target, spectrum: @rating.spectrum, saved: true })
+      end
       format.js { head :ok }
     end
   rescue ActiveRecord::RecordInvalid => e
     @rating = e.record
     respond_to do |format|
       format.html do
-        @spectrum = Spectrum.find_by(id: @rating.spectrum_id)
-        @spectrums = @spectrum ? [@spectrum] : Spectrum.all
+        @spectrum = Spectrum.visible_to(current_ace).find_by(id: @rating.spectrum_id)
+        @spectrums = @spectrum ? [@spectrum] : Spectrum.visible_to(current_ace)
         render :new, status: :unprocessable_content
       end
       format.json { render json: { success: false, errors: @rating.errors.full_messages }, status: :unprocessable_content }
+      format.turbo_stream { head :unprocessable_content }
       format.js { head :unprocessable_content }
     end
   end
@@ -95,16 +100,11 @@ class RatingsController < ApplicationController
     spectrum_ids = spectrum_ids.split(',') if spectrum_ids.is_a?(String)
     spectrum_ids = spectrum_ids.map(&:to_i).reject(&:zero?)
     
-    if spectrum_ids.empty?
-      render json: { ratings: {} }
-      return
-    end
-    
     # Find existing ratings for this ace, target, and spectrums
-    ratings = current_ace.ratings.active
+    ratings = current_ace ? current_ace.ratings.active
                          .where(target: @target)
-                         .where(spectrum_id: spectrum_ids)
-                         .includes(:spectrum)
+                         .where(spectrum_id: Spectrum.visible_to(current_ace).where(id: spectrum_ids).select(:id))
+                         .includes(:spectrum) : Rating.none
     
     # Build response hash with spectrum_id as key and rating data as value
     ratings_hash = {}
@@ -119,13 +119,17 @@ class RatingsController < ApplicationController
     
     respond_to do |format|
       format.json { render json: { ratings: ratings_hash } }
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.update(helpers.rating_rows_id(@target),
+          partial: "ratings/slider_rows", locals: { record: @target, spectrums: Spectrum.visible_to(current_ace).where(id: spectrum_ids).order(:name) })
+      end
     end
   end
 
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_rating
-      @rating = Rating.find(params[:id])
+      @rating = Rating.where(spectrum: Spectrum.visible_to(current_ace)).find(params[:id])
     end
     
     # Set the target for the rating based on the ratable_models configuration

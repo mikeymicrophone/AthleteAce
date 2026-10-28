@@ -1,93 +1,149 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe "Navigation", type: :system do
-  before do
-    driven_by(:selenium_chrome_headless)
+  after { page.driver.browser.execute_cdp "Emulation.clearDeviceMetricsOverride" }
+
+  def phone_viewport
+    page.driver.browser.execute_cdp "Emulation.setDeviceMetricsOverride", width: 390, height: 844, deviceScaleFactor: 1, mobile: false
   end
-  
-  context "when user is not signed in" do
-    it "shows sign in and sign up links" do
-      visit root_path
-      
-      within ".navigation-container" do
-        expect(page).to have_link("Sign In")
-        expect(page).to have_link("Sign Up")
-        expect(page).not_to have_link("Begin Quest")
-      end
-    end
-    
-    it "allows navigation through dropdown menus", js: true do
-      # Create some data to ensure links have destinations
-      create(:sport)
-      create(:team)
-      create(:quest)
-      
-      visit root_path
-      
-      # Open Sports & Teams dropdown
-      find(".nav-group-title", match: :first).click
-      
-      # Dropdown content should be visible
-      expect(page).to have_css(".nav-dropdown", visible: true)
-      
-      # Should see the links in the dropdown
-      within(".nav-dropdown", match: :first) do
-        expect(page).to have_link("Sports")
-        expect(page).to have_link("Teams")
-      end
-    end
+
+  def expect_no_overflow
+    expect(page.evaluate_script("document.documentElement.scrollWidth <= window.innerWidth")).to be(true)
   end
-  
-  context "when user is signed in" do
-    let(:ace) { create(:ace) }
-    
-    before do
-      sign_in ace
+
+  def open_menu(label = "Account menu")
+    expect(page).to have_css('[data-controller~="shell"]') {
+      page.evaluate_script("!document.documentElement.hasAttribute('data-turbo-preview') && Boolean(window.Stimulus?.getControllerForElementAndIdentifier(document.querySelector('[data-controller~=shell]'), 'shell'))")
+    }
+    find("button[aria-label='#{label}']").click
+    expect(page).to have_css("dialog[open]")
+  end
+
+  it "opens Feed for visitors and offers Play preview and sign-in" do
+    visit root_path
+    expect(page).to have_current_path(feed_path)
+    within('[aria-label="Switch sides"]') do
+      expect(page).to have_link("Play")
+      expect(page).to have_link("Feed")
+      expect(page).not_to have_link("Moderate")
+      expect(page).not_to have_link("Admin")
+      expect(page).to have_content(/preview/i)
     end
-    
-    it "shows account and sign out links" do
-      visit root_path
-      
-      within ".navigation-container" do
-        # The email is used instead of "Account"
-        expect(page).to have_link(ace.email)
-        expect(page).to have_link("Sign Out")
-        expect(page).to have_link("Begin Quest")
-      end
+    expect(page).to have_link("Sign In")
+    expect(page).not_to have_link("Sign Up")
+    within('[aria-label="Switch sides"]') { click_link "Play" }
+    expect(page).to have_current_path(strength_path)
+    within('[aria-label="Play navigation"]') { click_link "Browse" }
+    expect(page).to have_css("h1", text: /browse/i)
+    within("#browse-sports") do
+      expect(page).to have_link("Sports")
+      click_link "Teams"
     end
-    
-    it "navigates to random quest when clicking Begin Quest" do
-      create_list(:quest, 3)
-      visit root_path
-      
-      within ".navigation-container" do
-        click_link "Begin Quest"
-      end
-      
-      # Should be on a quest page with the discovery section
-      expect(page).to have_content("Quest Discovery")
-      expect(page).to have_button("Begin Quest")
-      expect(page).to have_link("Next Quest")
+    expect(page).to have_current_path(teams_path)
+    expect(page).to have_css('body[data-side="play"]')
+  end
+
+  it "saves a visitor's appearance without an account" do
+    phone_viewport
+    visit feed_path
+    open_menu "Appearance"
+    expect(page).to have_css("dialog[open]")
+    within("dialog[open]") { click_button "Dark" }
+    expect(page).to have_css('html[data-theme="dark"]')
+    page.refresh
+    expect(page).to have_css('html[data-theme="dark"]')
+    open_menu "Appearance"
+    within("dialog[open]") { click_button "System" }
+    expect(page).to have_css('html[data-theme="system"]')
+    expect_no_overflow
+  end
+
+  it "keeps five mobile Play tabs and an accessible account sheet with saved themes and sign-out" do
+    ace = create(:ace, email: "tess.moreno@example.test")
+    sign_in ace
+    phone_viewport
+    visit root_path
+    expect(page).to have_current_path(strength_path)
+    within('[aria-label="Play navigation mobile"]') do
+      expect(all("a").map(&:text)).to eq(%w[Home Games Quests History Browse])
+      all("a").each { |link| expect(link.native.rect.height).to be >= 44 }
     end
-    
-    it "opens and closes dropdown menus", js: true do
-      visit root_path
-      
-      # Initially, dropdown menus should be hidden
-      expect(page).not_to have_css(".nav-dropdown", visible: true)
-      
-      # Open first dropdown
-      first_dropdown = find(".nav-group-title", match: :first)
-      first_dropdown.click
-      
-      # Dropdown should now be visible
-      expect(page).to have_css(".nav-dropdown", visible: true)
-      
-      # Click elsewhere to close the dropdown
-      find("body").click
-      
-      # Dropdown should be hidden again
-      expect(page).not_to have_css(".nav-dropdown", visible: true)
+    expect_no_overflow
+    open_menu
+    expect(page).to have_css("dialog[open]", text: ace.handle)
+    page.save_screenshot Rails.root.join("tmp/screenshots/shell-account-mobile.png")
+    page.driver.browser.action.send_keys(:escape).perform
+    expect(page).not_to have_css("dialog[open]")
+    expect(page.evaluate_script("document.activeElement.getAttribute('aria-label')")).to eq("Account menu")
+    open_menu
+    within("dialog[open]") do
+      expect(page).to have_link("My ratings")
+      expect(page).to have_link("Settings")
+      expect(page).to have_link("Begin Quest")
+      click_button "Dark"
     end
+    expect(page).to have_css('html[data-theme="dark"]')
+    expect(ace.reload.theme).to eq("dark")
+    within('[aria-label="Play navigation mobile"]') { click_link "Browse" }
+    expect(page).to have_css('html[data-theme="dark"]')
+    expect_no_overflow
+    open_menu
+    within("dialog[open]") { click_button "Sign Out" }
+    expect(page).to have_link("Sign In")
+    expect(page).to have_current_path(feed_path)
+    expect(page).to have_css('html[data-theme="system"]')
+  end
+
+  it "keeps the moderation side on shared pages and exposes its mobile queue and log" do
+    reviewer = create(:ace, moderator: true, email: "sam.carter@example.test")
+    player = create(:player, first_name: "Jalen", last_name: "Brunson")
+    create(:quest, created_by: create(:ace), name: "Learn the Knicks starting five")
+    sign_in reviewer
+    visit moderation_path
+    expect(page).to have_css(".shell-sidebar", visible: true)
+    page.save_screenshot Rails.root.join("tmp/screenshots/shell-moderate-desktop.png")
+    visit player_path(player)
+    expect(page).to have_css('body[data-side="mod"]')
+    within('[aria-label="Switch sides"]') { click_link "Play" }
+    expect(page).to have_current_path(strength_path)
+    visit player_path(player)
+    expect(page).to have_css('body[data-side="play"]')
+    phone_viewport
+    within('[aria-label="Switch sides"]') { click_link "Moderate" }
+    within('[aria-label="Moderate navigation mobile"]') { click_link "Decision log" }
+    expect(page).to have_current_path(moderation_log_path)
+    expect_no_overflow
+    page.save_screenshot Rails.root.join("tmp/screenshots/shell-moderate-mobile.png")
+    expect(page).not_to have_css(".shell-sidebar", visible: true)
+  end
+
+  it "provides admin catalog navigation and remembers the Admin side" do
+    sign_in create(:ace, :admin, email: "alex.rivera@example.test")
+    visit root_path
+    expect(page).to have_current_path(admin_path)
+    within('[aria-label="Switch sides"]') { expect(all("a").size).to eq(4) }
+    within(".shell-sidebar") { click_link "Sports data" }
+    click_link "Other sports data"
+    within("#browse-sports") { click_link "Teams" }
+    expect(page).to have_css('body[data-side="admin"]')
+    phone_viewport
+    expect_no_overflow
+    within('[aria-label="Admin navigation mobile"]') { click_link "Content catalog" }
+    expect(page).to have_current_path(admin_content_catalog_path)
+    expect(page).to have_content("Manage quests, achievements, and rating spectrums.")
+    expect(page).to have_css('body[data-side="admin"]')
+    page.save_screenshot Rails.root.join("tmp/screenshots/shell-admin-mobile.png")
+  end
+
+  it "keeps quest discovery reachable through the account menu" do
+    sign_in create(:ace)
+    create_list(:quest, 3)
+    visit root_path
+    open_menu
+    within("dialog[open]") { click_link "Begin Quest" }
+    expect(page).to have_content("Quest Discovery")
+    expect(page).to have_button("Begin Quest")
+    expect(page).to have_link("Next Quest")
+    expect(page).not_to have_css("dialog[open]")
   end
 end

@@ -1,0 +1,23 @@
+<% settings = shell_search_settings(@search.query) %>
+<% if @search.query.length < 2 %>
+  <p class="search-empty">Enter at least 2 characters.</p>
+<% elsif @groups.empty? && settings.empty? %>
+  <p class="search-empty">No results for "<%= @search.query %>".</p>
+<% end %>
+<% @groups.each do |name, records| %>
+  <section class="search-group" role="group" aria-label="<%= name %>"><h3><%= name %></h3>
+    <% records.each do |record| %>
+      <%= link_to shell_search_path(record), class: "search-result entity-chip", role: "option", aria: { selected: false },
+        id: "search-#{record.model_name.singular}-#{record.id}", data: { search_target: "result", action: "click->search#choose", entity: record.model_name.singular } do %>
+        <%= icon_for_resource record.model_name.singular, size: 18 %><span><%= shell_search_name record %><small><%= record.is_a?(Ace) ? record.handle : record.model_name.human %></small></span>
+      <% end %>
+    <% end %>
+  </section>
+<% end %>
+<% if settings.any? %>
+  <section class="search-group" role="group" aria-label="Settings"><h3>Settings</h3>
+    <% settings.each_with_index do |(name, path), index| %>
+      <%= link_to name, path, class: "search-result", role: "option", aria: { selected: false }, id: "search-setting-#{index}", data: { search_target: "result", action: "click->search#choose" } %>
+    <% end %>
+  </section>
+<% end %>

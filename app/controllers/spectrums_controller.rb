@@ -1,11 +1,12 @@
 class SpectrumsController < ApplicationController
   before_action :authenticate_ace!, except: [:index, :show]
+  before_action :require_posting_access!, only: %i[new create]
   before_action :require_admin!, only: [:edit, :update, :destroy]
   before_action :set_spectrum, only: [:show, :edit, :update, :destroy]
 
   # GET /spectrums
   def index
-    @spectrums = Spectrum.all.order(:name)
+    @spectrums = Spectrum.visible_to(current_ace).order(:name)
   end
 
   # GET /spectrums/1
@@ -24,6 +25,7 @@ class SpectrumsController < ApplicationController
   # POST /spectrums
   def create
     @spectrum = Spectrum.new(spectrum_params)
+    @spectrum.created_by = current_ace
 
     if @spectrum.save
       redirect_to @spectrum, notice: 'Spectrum was successfully created.'
@@ -34,6 +36,7 @@ class SpectrumsController < ApplicationController
 
   # PATCH/PUT /spectrums/1
   def update
+    @spectrum.moderation_editor = current_ace
     if @spectrum.update(spectrum_params)
       redirect_to @spectrum, notice: 'Spectrum was successfully updated.'
     else
@@ -50,7 +53,7 @@ class SpectrumsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_spectrum
-      @spectrum = Spectrum.find(params[:id])
+      @spectrum = Spectrum.visible_to(current_ace).find(params[:id])
     end
 
     # Only allow a list of trusted parameters through.

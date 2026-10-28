@@ -1,0 +1,5 @@
+<% content_for :title, "Edit shout-out draft" %>
+<%= browse_header "Edit shout-out draft", eyebrow: "Feed" do %><%= link_to "My drafts", shout_out_drafts_path, class: "tool-button" %><% end %>
+<%= render "form" %>
+
+<%= render "submission" %>

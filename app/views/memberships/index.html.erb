@@ -1,22 +1,17 @@
-<p style="color: green"><%= notice %></p>
-
 <% content_for :title, "Memberships" %>
-
-<h1>Memberships</h1>
-
+<%= browse_header "Memberships" %>
 <div id="memberships">
   <% @memberships.each do |membership| %>
-    <%= tag.div(id: dom_id(membership), class: "index-record") do %>
-      <div class="membership-status <%= membership.active? ? 'active' : 'inactive' %>">
-        <%= membership.active? ? 'Active' : 'Inactive' %>
+    <%= index_record membership do %>
+      <div>
+        <span class="record-tag"><%= membership.active? ? "Active" : "Inactive" %></span>
+        <%= link_to "View", membership, class: "tool-button" %>
       </div>
-      <%= display_name_with_lazy_logo membership.team %>
-      <%= display_name_with_lazy_logo membership.division %>
-      <%= display_name_with_lazy_logo membership.conference %>
-      <div class="membership-dates">
-        <%= membership.start_date&.strftime('%Y-%m-%d') %> to <%= membership.end_date&.strftime('%Y-%m-%d') || 'Present' %>
-      </div>
-      <%= link_to "View", membership %>
+      <%= entity_link membership.team %>
+      <%= entity_link membership.division %>
+      <%= entity_link membership.conference %>
+      <p class="text-sm text-ink-3"><%= membership.start_date&.strftime("%Y-%m-%d") || "Unknown start" %> to <%= membership.end_date&.strftime("%Y-%m-%d") || "Present" %></p>
     <% end %>
   <% end %>
 </div>
+<%= browse_empty @memberships, "Memberships" %>

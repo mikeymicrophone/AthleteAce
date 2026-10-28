@@ -1,0 +1,54 @@
+<% content_for :title, "Review submission" %>
+<div class="moderation-page" data-controller="moderation" data-action="keydown@window->moderation#keydown">
+  <%= link_to "Back to queue", moderation_path(**queue_context), class: "tool-link" %>
+  <header class="browse-header"><div><p class="eyebrow"><%= @item.class.name %> · <%= @item.moderation_status %> · revision <%= @item.moderation_revision %></p><h1 class="page-title"><%= moderation_item_name(@item) %></h1></div></header>
+  <nav class="moderation-pagination" aria-label="Review navigation">
+    <p class="round-caption"><%= @position ? "#{@queue.offset + @position + 1} of #{@queue.total}" : "Outside this queue" %> · <%= @queue.type&.pluralize || "All submissions" %> · <%= @queue.status %></p>
+    <div class="page-actions">
+      <% if @previous_item %>
+        <%= link_to "Previous (K)", moderation_item_path(type: @previous_item.class.name, id: @previous_item.id, **queue_context.merge(page: @position == 0 ? @queue.page - 1 : @queue.page)), class: "tool-button", data: { moderation_target: "previous" }, aria: { keyshortcuts: "k" } %>
+      <% end %>
+      <% if @next_item %>
+        <%= link_to "Next (J)", moderation_item_path(type: @next_item.class.name, id: @next_item.id, **queue_context.merge(page: @position == Moderation::Queue::PAGE_SIZE - 1 ? @queue.page + 1 : @queue.page)), class: "tool-button", data: { moderation_target: "next" }, aria: { keyshortcuts: "j" } %>
+      <% end %>
+    </div>
+  </nav>
+  <%= render "shortcuts", review: true %>
+  <section class="round-panel"><h2 class="profile-section-title">Submission</h2><%= render "aces/attribution", ace: @item.created_by %><dl class="moderation-fields"><% @item.moderation_snapshot.except("id", "type").each do |key, value| %><dt><%= key.humanize %></dt><dd><%= value %></dd><% end %></dl></section>
+  <section class="round-panel"><h2 class="profile-section-title">Your decision</h2>
+    <% if @escalation %>
+      <p>An admin must resolve this case through Escalations.</p>
+    <% elsif @item.created_by_id == current_ace.id %>
+      <p>Another reviewer must decide your submission.</p>
+    <% else %>
+      <%= form_with url: moderation_item_path(type: @item.class.name, id: @item.id, **queue_context), method: :patch do |form| %>
+        <%= form.hidden_field :revision, value: @item.moderation_revision %><%= form.hidden_field :status, value: @item.moderation_status %>
+        <%= form.label :reason, "Reason or note" %><%= form.text_area :reason, maxlength: 2000, class: "moderation-reason", data: { moderation_target: "reason" } %><p class="round-caption">A reason is required when rejecting or hiding content.</p>
+        <div class="page-actions">
+          <% actions = @item.moderation_status == "pending" ? %w[approve reject] : (@item.approved? ? %w[hide] : %w[reopen]) %>
+          <% actions = [] if @item.is_a?(ShoutOut) && @item.funding_status == "refunded" %>
+          <% actions.each do |action| %><%= form.button action.titleize, name: :decision, value: action, class: action == "approve" ? "game-button" : "tool-button", data: { moderation_target: action }, aria: { keyshortcuts: { "approve" => "a", "reject" => "r" }[action] } %><% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </section>
+  <%= render "escalations/entry", subject: @item, escalation: @escalation %>
+  <section class="round-panel"><h2 class="profile-section-title">AI comparison</h2><p class="round-intro">Jev and Luna offer recommendations. Your decision controls publication.</p>
+    <ul class="moderation-providers" aria-label="AI provider configuration">
+      <% @providers.each do |client| %>
+        <li><%= client.provider == "jev" ? "Jev" : "OpenAI Luna" %> · <%= client.configured? ? "Key configured" : "Key missing" %></li>
+      <% end %>
+    </ul>
+    <p class="round-caption">Configured keys do not confirm provider availability. Each comparison records its result or failure.</p>
+    <%= button_to "Compare with AI", compare_moderation_item_path(type: @item.class.name, id: @item.id, **queue_context), params: { comparison_key: SecureRandom.uuid }, class: "tool-button" %>
+    <% @evaluations.each do |evaluation| %>
+      <article class="moderation-evaluation"><h3><%= evaluation.provider == "jev" ? "Jev" : "OpenAI Luna" %> · <%= evaluation.choice&.titleize || evaluation.status.titleize %></h3>
+        <p class="round-caption">Revision <%= evaluation.revision %><%= " · older content" if evaluation.revision != @item.moderation_revision %> · <%= evaluation.model %></p>
+        <% if evaluation.status == "completed" %>
+          <p>Confidence <%= number_to_percentage(evaluation.answer["confidence"] * 100, precision: 1) %> · <%= evaluation.input_tokens || "Unknown" %> input tokens · <%= evaluation.estimated_usd ? "$#{format('%.8f', evaluation.estimated_usd)} estimated" : "Cost unknown" %> · <%= evaluation.latency_ms %> ms</p>
+        <% else %><p><%= evaluation.error_code&.humanize || "Comparison in progress" %></p><% end %>
+      </article>
+    <% end %>
+  </section>
+  <section class="round-panel"><h2 class="profile-section-title">Decision history</h2><%= render "decisions", decisions: @decisions %></section>
+</div>

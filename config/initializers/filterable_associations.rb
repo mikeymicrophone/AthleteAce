@@ -15,7 +15,7 @@ module FilterableAssociations
     leagues: [:sport, :country, :contest],
     states: [:country, :sport],
     seasons: [:contest],
-    contracts: [:player, :team, :sport, :league, :conference, :division, :state, :city, :stadium],
+    contracts: [ :organization, :player, :team, :sport, :league, :conference, :division, :state, :city, :stadium ],
     activations: [:contract, :campaign, :player, :team, :season, :league, :sport, :state, :city, :stadium]
   }.freeze
 

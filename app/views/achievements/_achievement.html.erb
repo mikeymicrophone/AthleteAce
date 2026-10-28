@@ -1,4 +1,5 @@
 <div id="<%= dom_id achievement %>" class="w-full sm:w-auto my-5 space-y-5">
+  <%= moderation_notice(achievement) %>
   <div>
     <strong class="block font-medium mb-1">Name:</strong>
     <%= achievement.name %>
@@ -9,14 +10,14 @@
   </div>
   <div>
     <strong class="block font-medium mb-1">Quests:</strong>
-    <% if achievement.quests.any? %>
+    <% if achievement.quests.visible_to(current_ace).merge(Highlight.visible_to(current_ace)).any? %>
       <ul class="list-disc ml-5">
-        <% achievement.quests.each do |quest| %>
-          <li><%= link_to quest.name, quest, class: "text-blue-600 hover:text-blue-800" %></li>
+        <% achievement.quests.visible_to(current_ace).merge(Highlight.visible_to(current_ace)).each do |quest| %>
+          <li><%= link_to quest.name, quest, class: "text-accent-text hover:underline" %></li>
         <% end %>
       </ul>
     <% else %>
-      <span class="text-gray-500 italic">Not part of any quests</span>
+      <span class="text-ink-3 italic">Not part of any quests</span>
     <% end %>
   </div>
   <div>

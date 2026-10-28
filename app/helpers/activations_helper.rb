@@ -24,6 +24,8 @@ module ActivationsHelper
   end
 
   def activation_contract_display(activation)
+    return unless activation.contract
+
     tag.span class: "activation-contract-tag" do
       link_to "Contract ##{activation.contract.id}", contract_path(activation.contract)
     end
@@ -49,7 +51,7 @@ module ActivationsHelper
     tag.div class: "activation-stats" do
       content = []
       
-      if activation.contract.total_dollar_value
+      if activation.contract&.total_dollar_value
         content << tag.span(number_to_currency(activation.contract.total_dollar_value, precision: 0), class: "activation-stat-item")
       end
       
@@ -70,19 +72,13 @@ module ActivationsHelper
 
   def activation_show_display(activation)
     tag.div class: "activation-show" do
-      activation_show_header(activation) +
+      browse_header("Activation ##{activation.id}") +
       activation_show_content(activation) +
       activation_show_actions(activation)
     end
   end
 
   private
-
-  def activation_show_header(activation)
-    tag.div class: "activation-show-header" do
-      tag.h1 "Activation ##{activation.id}", class: "activation-show-title"
-    end
-  end
 
   def activation_show_content(activation)
     tag.div class: "activation-show-content" do
@@ -97,7 +93,9 @@ module ActivationsHelper
       tag.h2("Activation Information", class: "activation-section-title") +
       tag.div(class: "activation-info-grid") do
         content = []
-        content << activation_info_item("Contract", link_to("Contract ##{activation.contract.id}", contract_path(activation.contract)))
+        if activation.contract
+          content << activation_info_item("Contract", link_to("Contract ##{activation.contract.id}", contract_path(activation.contract)))
+        end
         content << activation_info_item("Player", link_to(activation.player.name, player_path(activation.player)))
         content << activation_info_item("Team", link_to(activation.team.name, team_path(activation.team)))
         content << activation_info_item("Campaign", link_to("#{activation.campaign.team.name} - #{activation.campaign.season.year}", campaign_path(activation.campaign)))
@@ -117,7 +115,7 @@ module ActivationsHelper
         content << activation_info_item("League", link_to(activation.campaign.season.league.name, league_path(activation.campaign.season.league)))
         content << activation_info_item("Sport", link_to(activation.campaign.season.league.sport.name, sport_path(activation.campaign.season.league.sport)))
         
-        if activation.contract.total_dollar_value
+        if activation.contract&.total_dollar_value
           content << activation_info_item("Contract Value", number_to_currency(activation.contract.total_dollar_value, precision: 0))
         end
         

@@ -1,0 +1,54 @@
+<%# Every token in one theme: light, dark, or system %>
+<%= tag.section id: "#{theme}_token_sheet", data: { theme: theme }, aria: { label: "#{theme.capitalize} theme" },
+                class: "flex flex-col gap-8 rounded-panel bg-ground p-6 text-ink" do %>
+  <%= tag.header class: "flex items-center justify-between gap-4" do %>
+    <%= tag.span theme.capitalize, class: "font-display text-display uppercase" %>
+    <%# [display:none] rather than hidden: game_styles.css redefines .hidden outside Tailwind's layers, so dark:inline can't override it %>
+    <%= tag.span "dark: variant on", class: "rounded-full bg-surface-3 px-2.5 py-1 font-mono text-xs [display:none] dark:inline" %>
+    <%= tag.span "dark: variant off", class: "rounded-full bg-surface-3 px-2.5 py-1 font-mono text-xs dark:hidden" %>
+  <% end %>
+
+  <%= token_section "Type" do %>
+    <%= type_sample "Know every name", "font-display text-display-lg uppercase", "Display · Big Shoulders 800 · 64px" %>
+    <%= type_sample "Team Match", "font-display text-display uppercase", "Display · Big Shoulders 800 · 30px" %>
+    <%= type_sample "Active quests", "font-display text-section uppercase", "Section · Big Shoulders 800 · 20px" %>
+    <%= type_sample "Moderation queue", "text-title", "Tool title · Instrument Sans 600 · 24px" %>
+    <%= type_sample "Every answer is a game attempt. Every miss comes back tomorrow.", "text-body",
+                    "Body · Instrument Sans 500 · 15px / 1.45" %>
+    <%= type_sample "Accuracy · 7 days", "text-eyebrow uppercase text-ink-3", "Eyebrow · Instrument Sans 700 · 11px" %>
+    <%= type_sample "82% · 214 · 6", "font-display text-display-lg tabular-nums", "Numbers · Big Shoulders" %>
+    <%= type_sample "v2026.09.3 · $9,537.00 · 1h 12m", "font-mono text-sm", "Mono · JetBrains Mono" %>
+  <% end %>
+
+  <% DesignHelper::COLOR_TOKENS.each do |group, tokens| %>
+    <%= token_section group do %>
+      <%= swatch_grid tokens %>
+    <% end %>
+  <% end %>
+
+  <%= token_section "Sides" do %>
+    <%= tag.div class: "grid grid-cols-2 gap-3 sm:grid-cols-4" do %>
+      <%= safe_join DesignHelper::SIDES.map { |side, label| side_sample side, label } %>
+    <% end %>
+  <% end %>
+
+  <%= token_section "Entity families" do %>
+    <%= safe_join DesignHelper::ENTITY_FAMILIES.map { |family, models| entity_family_row family, models } %>
+  <% end %>
+
+  <%= token_section "Radii and shadows" do %>
+    <%= tag.div class: "flex flex-wrap items-end gap-4" do %>
+      <%= radius_sample "rounded-md", "md · 6" %>
+      <%= radius_sample "rounded-lg", "lg · 8" %>
+      <%= radius_sample "rounded-tool", "tool · 12" %>
+      <%= radius_sample "rounded-card", "card · 16" %>
+      <%= radius_sample "rounded-panel", "panel · 22" %>
+      <%= radius_sample "rounded-full", "full · pill" %>
+    <% end %>
+    <%= tag.div class: "flex flex-wrap items-center gap-6 pt-2" do %>
+      <%= tag.span "shadow-card", class: "rounded-card bg-surface px-5 py-4 font-mono text-xs shadow-card" %>
+      <%= tag.span "Quick round", class: "rounded-[14px] border-2 border-edge bg-accent px-5 py-3 font-display text-section uppercase text-on-accent shadow-press" %>
+      <%= tag.span "shadow-press-sm", class: "rounded-tool border-2 border-edge bg-accent px-4 py-2 font-mono text-xs text-on-accent shadow-press-sm" %>
+    <% end %>
+  <% end %>
+<% end %>

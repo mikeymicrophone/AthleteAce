@@ -1,0 +1,34 @@
+<% content_for :title, @ace.public_name %>
+<div class="moderation-page people-page">
+  <%= link_to "Back to people", admin_people_path, class: "tool-link" %>
+  <header class="browse-header"><div><p class="eyebrow">Admin · People</p><h1 class="page-title"><%= @ace.public_name %></h1><%= ace_identity @ace %><p><%= @ace.email %></p></div></header>
+  <section class="round-panel"><h2 class="profile-section-title">Account</h2><p><%= @ace.role.titleize %> · <%= @ace.suspended? ? "Suspended" : @ace.confirmed? ? "Sign-in enabled" : "Email confirmation required" %> · Joined <%= l @ace.created_at.to_date, format: :long %></p><p><%= pluralize @submission_count, "submission" %> · <%= number_to_currency @spent_cents.to_i / 100.to_d %> net credit spent · <%= pluralize @warning_count, "warning" %></p>
+    <% if @active_mute %><p>Posting muted until <%= l @active_mute.ends_at, format: :long %>.</p><% end %>
+    <%= link_to "View as moderator", ace_profile_path(@ace, side: "mod"), class: "tool-button" %>
+    <p class="round-caption">Opens the moderator profile with your own permissions.</p>
+  </section>
+  <% if @ace.id == current_ace.id %><section class="round-panel"><p>Another admin must change your role or account access.</p></section>
+  <% else %>
+    <section class="round-panel"><h2 class="profile-section-title">Manage account</h2>
+      <%= form_with url: admin_person_path(@ace), method: :patch, class: "people-actions" do |form| %>
+        <%= form.hidden_field :version, value: @ace.account_version %><%= form.hidden_field :request_key, value: SecureRandom.uuid %>
+        <div><%= form.label :role, "Role" %><%= form.select :role, options_for_select([["Fan", "fan"], ["Moderator", "moderator"], ["Admin", "admin"]], @ace.role), {}, class: "account-input" %></div>
+        <p class="round-caption">Moderators review submissions and manage fan posting. Admins also manage roles, sports data and money.</p>
+        <div><%= form.label :reason, "Action reason" %><%= form.text_area :reason, required: true, maxlength: 2000, class: "moderation-reason" %></div>
+        <div><%= form.label :current_password, "Your current password" %><%= form.password_field :current_password, required: true, autocomplete: "current-password", class: "account-input" %></div>
+        <div class="page-actions"><%= form.button "Save role", name: :account_action, value: "role", class: "tool-button" %><%= form.button @ace.suspended? ? "Reactivate account" : "Suspend account", name: :account_action, value: @ace.suspended? ? "reactivate" : "suspend", class: "tool-button" %><%= form.button "Send password reset", name: :account_action, value: "password_reset", class: "tool-button" %></div>
+        <p class="round-caption">Suspension blocks sign-in and revokes existing sessions. Content, credit and payment history stay intact. Password resets run as background jobs and do not reactivate suspended accounts. Reversing a role change requires a new audited action.</p>
+      <% end %>
+    </section>
+  <% end %>
+  <section class="round-panel"><h2 class="profile-section-title">Account action history</h2>
+    <% if @actions.empty? %><p>No recorded account actions.</p><% end %>
+    <ul class="wallet-history"><% @actions.each do |action| %><li><strong><%= action.action.humanize %></strong> · <%= action.actor ? ace_identity(action.actor) : "Deleted admin" %> · <%= l action.created_at, format: :long %><p><%= action.reason %></p><p class="round-caption"><%= action.before_state["role"].titleize %>, <%= action.before_state["suspended"] ? "suspended" : "active" %> → <%= action.after_state["role"].titleize %>, <%= action.after_state["suspended"] ? "suspended" : "active" %></p></li><% end %></ul>
+    <%== @actions_pagy.series_nav if @actions_pagy.pages > 1 %>
+  </section>
+  <section class="round-panel"><h2 class="profile-section-title">Sign-in activity</h2><p class="round-caption">Events start when this feature is installed. IP addresses and reported browser details are recorded without location lookup. Failed attempts for unknown accounts are not retained.</p>
+    <% if @events.empty? %><p>No sign-in events recorded yet.</p><% end %>
+    <ul class="wallet-history"><% @events.each do |event| %><li><strong><%= event.outcome == "success" ? "Signed in" : "Failed sign-in" %></strong> · <%= l event.created_at, format: :long %><p><%= event.ip_address.presence || "IP unavailable" %></p><p class="round-caption"><%= event.user_agent.presence || "Browser unavailable" %></p></li><% end %></ul>
+    <%== @events_pagy.series_nav if @events_pagy.pages > 1 %>
+  </section>
+</div>

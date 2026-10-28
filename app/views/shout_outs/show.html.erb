@@ -1,0 +1,28 @@
+<% content_for :title, "Your shout-out" %>
+<%= browse_header "Your shout-out", eyebrow: "Feed" do %><%= link_to "My shout-outs", shout_outs_path, class: "tool-button" %><%= link_to "Credit wallet", wallet_path, class: "tool-button" %><% end %>
+<section class="round-panel shout-out-card">
+  <h2 class="profile-section-title"><%= @shout_out.target_name %></h2>
+  <p class="draft-message"><%= @shout_out.message %></p>
+  <p>Bid: <%= number_to_currency @shout_out.bid_cents / 100.to_d %></p>
+  <% if @shout_out.funding_status == "unfunded" %>
+    <p>Awaiting payment. This shout-out is not in the review queue yet.</p>
+    <p class="round-caption">Stripe charges your card now. Your full payment is reserved as credit during review. Rejection or removal returns the amount to your credit wallet.</p>
+    <%= button_to "Pay with Stripe", pay_shout_out_path(@shout_out), class: "game-button", disabled: !StripeCheckout.configured?, data: { turbo: false } %>
+    <% unless StripeCheckout.configured? %><p class="round-caption">Stripe payments are not configured yet.</p><% end %>
+  <% elsif @shout_out.funding_status == "refunded" %>
+    <p><%= @shout_out.moderation_status.humanize %>. The full bid has been returned to your credit wallet.</p>
+    <% decision = @shout_out.moderation_decisions.where(action: %w[rejected hidden]).order(id: :desc).first %>
+    <% if decision&.reason.present? %><p><%= decision.reason %></p><% end %>
+  <% elsif @shout_out.moderation_status == "pending" %>
+    <p>In review. Your bid is reserved. Only you and reviewers can see this submission.</p>
+  <% else %>
+    <p>Live. Your bid has been spent.</p><%= link_to "View Feed", feed_path, class: "tool-button" %>
+  <% end %>
+</section>
+<% if @shout_out.target && !current_ace.active_posting_mute %>
+  <section class="round-panel">
+    <h2 class="profile-section-title">Start another submission</h2>
+    <p>Copy this message and target into a private draft. Choose and fund a new bid when you submit it.</p>
+    <%= button_to "Copy to new draft", copy_to_draft_shout_out_path(@shout_out), class: "tool-button" %>
+  </section>
+<% end %>

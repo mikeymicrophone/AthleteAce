@@ -1,0 +1,4 @@
+<p class="round-caption">Number assignments belong to a player and team over an inclusive date range. Missing bounds are open-ended in this model. A number assignment does not establish team membership, availability, or an actual appearance.</p>
+<div class="people-table"><table><thead><tr><th>Team</th><th>Number</th><th>From</th><th>Through</th><th>Recorded metadata</th></tr></thead><tbody>
+  <% @records.each do |assignment| %><tr><td><%= assignment.team.name %><p class="round-caption"><%= assignment.entity_code.presence || "No entity code" %></p></td><td><%= assignment.number %></td><td><%= assignment.start_date&.iso8601 || "Open start" %></td><td><%= assignment.end_date&.iso8601 || "Open end" %></td><td><%= render "metadata", source: assignment.source, details: assignment.details %></td></tr><% end %>
+</tbody></table></div>

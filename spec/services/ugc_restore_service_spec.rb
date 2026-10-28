@@ -24,7 +24,7 @@ RSpec.describe UgcRestoreService do
 
     described_class.new(backup_dir).restore_all
 
-    expect(Quest.find_by!(name: "Restored Quest").creator).to eq(ace)
+    expect(Quest.find_by!(name: "Restored Quest").created_by).to eq(ace)
   end
 
   it "restores quests without a creator" do
@@ -32,6 +32,6 @@ RSpec.describe UgcRestoreService do
 
     described_class.new(backup_dir).restore_all
 
-    expect(Quest.find_by!(name: "Seeded Quest").creator).to be_nil
+    expect(Quest.find_by!(name: "Seeded Quest").created_by).to be_nil
   end
 end

@@ -1,0 +1,22 @@
+<section class="round-panel" aria-label="Coaches, staff and broadcasters">
+  <h2 class="profile-section-title">Coaches, staff and broadcasters</h2>
+  <% if staff_tenures.any? %>
+    <ul class="wallet-history">
+      <% staff_tenures.each do |tenure| %>
+        <li id="<%= dom_id(tenure) %>">
+          <p><%= link_to tenure.person.name, person_path(tenure.person), class: "tool-link" %> · <%= tenure.title %> · <%= tenure.role.humanize %></p>
+          <p><%= link_to tenure.organization.name, organization_path(tenure.organization), class: "tool-link" %><% if tenure.team %> · Team context: <%= link_to tenure.team.name, team_path(tenure.team, tab: "staff"), class: "tool-link" %><% else %> · Organization-wide<% end %></p>
+          <p class="round-caption"><%= tenure.start_date.presence || "Unknown start" %> to <%= tenure.end_date.presence || (tenure.ongoing? ? "Present" : "Unknown end") %></p>
+          <% if tenure.source["url"].present? %>
+            <p class="round-caption">Source: <%= tenure.source["title"].presence || "Appointment record" %></p>
+            <%= external_link_to tenure.source["url"], class: "tool-link" %>
+          <% elsif tenure.source["title"].present? %>
+            <p class="round-caption">Source: <%= tenure.source["title"] %></p>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="round-caption">No coaching, staff or broadcasting appointments recorded.</p>
+  <% end %>
+</section>

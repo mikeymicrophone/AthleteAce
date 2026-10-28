@@ -1,4 +1,5 @@
 class Spectrum < ApplicationRecord
+  include Moderatable
   has_many :ratings, dependent: :destroy
   
   validates :name, presence: true, uniqueness: true

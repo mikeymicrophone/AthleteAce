@@ -1,0 +1,23 @@
+<% content_for :title, "Sports data · Competitions" %>
+<div class="moderation-page people-page">
+  <div class="page-actions"><%= link_to "Back to sports data", admin_catalog_records_path, class: "tool-link" %><%= link_to "Games", admin_games_path, class: "tool-link" %></div>
+  <header class="browse-header"><div><p class="eyebrow">Admin · Sports data</p><h1 class="page-title">Competitions</h1><p>Inspect regular seasons, playoffs, cups, and recorded titles.</p></div></header>
+  <%= form_with url: admin_competitions_path, method: :get, class: "people-filters" do |form| %>
+    <div><%= form.label :q, "Search competitions" %><%= form.search_field :q, value: @directory.query, maxlength: 80, placeholder: "Name or entity code", class: "account-input" %></div>
+    <div><%= form.label :kind, "Kind" %><%= form.select :kind, options_for_select(@kinds.map { |kind| [kind.humanize, kind] }, @directory.kind), { include_blank: "All kinds" }, class: "account-input" %></div>
+    <div><%= form.label :season_id, "Participating season" %><%= form.select :season_id, options_from_collection_for_select(@seasons, :id, :name, @directory.season_id), { include_blank: "All seasons" }, class: "account-input" %></div>
+    <div><%= form.label :team_id, "Participating team" %><%= form.select :team_id, options_from_collection_for_select(@teams, :id, :name, @directory.team_id), { include_blank: "All teams" }, class: "account-input" %></div>
+    <div><%= form.label :titles, "Titles" %><%= form.select :titles, options_for_select([["All competitions", ""], ["Recorded awards", "awarded"], ["No recorded awards", "none"]], @directory.titles), {}, class: "account-input" %></div>
+    <div class="page-actions"><%= form.submit "Filter competitions", class: "tool-button" %><%= link_to "Clear", admin_competitions_path, class: "tool-link" %></div>
+  <% end %>
+  <p class="round-caption"><%= pluralize @pagy.count, "matching competition" %> · Newest dated competitions first. Counts describe recorded data.</p>
+  <div class="people-table"><table><thead><tr><th>Competition</th><th>Kind</th><th>Dates</th><th>Assigned season</th><th>Entrants</th><th>Games</th><th>Title awards</th></tr></thead><tbody>
+    <% @competitions.each do |competition| %>
+      <tr><td><%= link_to contest_display_name(competition), admin_competition_path(competition) %><p class="round-caption"><%= competition.entity_code.presence || "No entity code" %></p></td>
+        <td><%= competition.kind&.humanize.presence || "Unspecified" %></td><td><%= competition.begin_date&.iso8601 || "Unknown start" %> · <%= competition.end_date&.iso8601 || "Unknown end" %></td>
+        <td><%= competition.season&.name || "Not set" %></td><td><%= @entrant_counts.fetch(competition.id, 0) %></td><td><%= @game_counts.fetch(competition.id, 0) %></td><td><%= @title_counts.fetch(competition.id, 0) %></td></tr>
+    <% end %>
+  </tbody></table></div>
+  <% if @competitions.empty? %><section class="round-panel"><h2>No matching competitions.</h2><p>Try another name or change the filters.</p></section><% end %>
+  <%== @pagy.series_nav if @pagy.pages > 1 %>
+</div>

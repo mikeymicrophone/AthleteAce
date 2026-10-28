@@ -4,7 +4,7 @@ class ContractsController < ApplicationController
 
   def index
     base_query = apply_filter :contracts
-    base_query = base_query.includes(:player, :team, player: :team, team: [:league, league: :sport])
+    base_query = base_query.includes(:organization, :team, player: [ :sport, :team ])
     @pagy, @contracts = pagy(base_query.order(start_date: :desc, created_at: :desc), limit: 25)
   end
 

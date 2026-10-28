@@ -1,0 +1,215 @@
+<% available = @setup.available_count %>
+<% season_suggestion = @setup.season_suggestion %>
+<% flash_cards = @setup.game_type == "flash_cards" %>
+<% if @setup.errors.any? %>
+  <%= tag.div class: "flash-alert", role: "alert" do %>
+    <%= safe_join @setup.errors.full_messages.map { |message| tag.p message } %>
+  <% end %>
+<% end %>
+<%= form_with url: new_game_round_path, method: :get, class: "round-setup-form", data: { controller: "round-setup" } do |form| %>
+  <% [:conference_id, :division_id, :city_id, :state_id, :player_id, :goal_achievement_id].each do |key| %>
+    <%= form.hidden_field key, value: @setup.public_send(key) if @setup.public_send(key) %>
+  <% end %>
+  <% @setup.player_ids.each do |id| %>
+    <%= hidden_field_tag "player_ids[]", id %>
+  <% end %>
+  <%= tag.fieldset class: "round-panel" do %>
+    <%= tag.legend "01 · Pick a game", class: "round-step" %>
+    <%= tag.div class: "round-game-options" do %>
+      <% [["player_team_match", "Player → team", "shield"], ["guess_the_division", "Team → division", "target"], ["name_ciphers", "Unscramble the player’s name", "bolt"], ["multiple_choice", "Four choices about a player", "target"], ["phased_repetition", "Review names when they are due", "history"], ["image_recognition", "Name the face", "shirt-sport"], ["flash_cards", "See each player’s team", "stack-2"]].each do |value, description, glyph| %>
+        <%= tag.label class: "round-option round-game-option" do %>
+          <%= form.radio_button :game_type, value, checked: @setup.game_type == value, data: { action: "change->round-setup#gameChanged" } %>
+          <%= icon glyph, size: 24 %>
+          <%= tag.span do %>
+            <%= tag.strong GameRoundSetup::GAMES.fetch(value) %>
+            <%= tag.span description, class: "round-caption" %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <% if @setup.game_type == "multiple_choice" %>
+    <div class="round-panel">
+      <%= form.label :fact_type, "Question topic" %>
+      <%= form.select :fact_type, [["Current team", "team"], ["Birth city", "birth_city"], ["Birth country", "birth_country"]], {}, data: {action: "change->round-setup#update"} %>
+      <p class="round-caption">Choices stay within your player scope. At least two different recorded answers are needed.</p>
+    </div>
+  <% end %>
+  <%= tag.fieldset class: "round-panel" do %>
+    <%= tag.legend "02 · Find your scope", class: "round-step" %>
+    <% if @setup.player_ids.any? %>
+      <p class="round-caption">Focused players · <%= Player.where(id: @setup.player_ids).order(:last_name, :first_name).map(&:name).join(" · ") %></p>
+      <%= link_to "Any players", new_game_round_path(@setup.scope_params.except("player_ids")), class: "tool-link", data: { turbo_frame: "_top" } %>
+    <% end %>
+    <div class="round-season-select">
+      <%= form.label :player_group_id, "Player group" %>
+      <%= form.collection_select :player_group_id, PlayerGroup.order(:name), :id, :name, { include_blank: "Any players", selected: @setup.player_group_id }, data: { action: "change->round-setup#groupChanged" } %>
+      <% if @setup.player_group %>
+        <%= form.label :practice_filter, "Members to practice" %>
+        <%= form.select :practice_filter, GameRoundSetup::PRACTICE_FILTERS.map { |value, label| [label, value] }, { selected: @setup.practice_filter }, data: { action: "change->round-setup#update" } %>
+        <p class="round-caption">Progress filters choose the questions. Other members in this scope may appear as answer choices.</p>
+      <% end %>
+      <% if @setup.goal_achievement %>
+        <p class="round-caption">Practicing the members saved when you adopted this quest.</p>
+        <p class="round-caption">Remaining members use your quest progress since adoption.</p>
+      <% end %>
+      <p class="round-caption">Groups include their inactive members. Other filters narrow the group. Team → division uses the members' current teams.</p>
+      <%= link_to "Browse player groups", player_groups_path, class: "tool-link", data: { turbo_frame: "_top" } %>
+    </div>
+    <%= tag.p @setup.scope_label, class: "round-scope-summary" %>
+    <%= tag.fieldset class: "round-sports" do %>
+      <%= tag.legend "Sport", class: "round-filter-label" %>
+      <%= tag.div class: "round-sport-options" do %>
+        <%= tag.label class: "round-option round-sport-option" do %>
+          <%= icon "layout-grid", size: 24 %>
+          <%= tag.span "All sports" %>
+          <%= form.radio_button :sport_id, "", checked: @setup.sport_id.nil?, data: { action: "change->round-setup#sportChanged" } %>
+        <% end %>
+        <% @sports.each do |sport| %>
+          <%= tag.label class: "round-option round-sport-option" do %>
+            <%= icon_for_sport sport, size: 24 %>
+            <%= tag.span sport.name %>
+            <%= form.radio_button :sport_id, sport.id, checked: @setup.sport_id == sport.id, data: { action: "change->round-setup#sportChanged" } %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+    <%= tag.div class: "round-scope-selects" do %>
+      <%= tag.div do %>
+        <%= form.label :league_id, "League" %>
+        <%= form.collection_select :league_id, @setup.leagues, :id, :name, { include_blank: @setup.sport ? "All #{@setup.sport.name.downcase} leagues" : "All leagues", selected: @setup.league_id }, data: { action: "change->round-setup#leagueChanged" } %>
+      <% end %>
+      <% if @setup.seasonal_game? %>
+        <%= tag.div class: "round-season-select" do %>
+          <%= form.label :season_id, "Roster season" %>
+          <%= form.collection_select :season_id, @setup.seasons, :id, :name, {include_blank: "Current teams", selected: @setup.season_id}, data: {action: "change->round-setup#seasonChanged"} %>
+          <% if @setup.season %>
+            <%= tag.p "Uses recorded memberships and roster listings for this season, including players who are inactive today. Coverage may be partial.", class: "round-caption" %>
+            <% if @setup.valid? && @setup.season_pool.ambiguous_count.positive? %>
+              <%= tag.p "#{pluralize(@setup.season_pool.ambiguous_count, 'player')} listed with multiple teams this season left out to keep answers unambiguous.", class: "round-caption" %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+    <% if @setup.conference_id || @setup.division_id || @setup.city_id || @setup.state_id %>
+      <%= tag.p "Focused scope · #{@setup.scope_label}", class: "round-caption" %>
+      <%= link_to "Choose a different scope", new_game_round_path(game_type: @setup.game_type, length: @setup.length), class: "tool-link" %>
+    <% end %>
+    <%= tag.div class: "round-team-search" do %>
+      <%= form.label :team_query, "Search teams" %>
+      <%= form.search_field :team_query, value: @setup.team_query, placeholder: "Team name or abbreviation" %>
+      <%= form.submit "Search", class: "tool-button" %>
+    <% end %>
+    <%= tag.div class: "round-team-selection" do %>
+      <%= tag.p "#{pluralize(@setup.selected_team_ids.size, 'team')} selected · Choose up to 30. Leave all unchecked for any team.", class: "round-caption" %>
+      <%= tag.button "Any team", type: "button", class: "tool-button", disabled: @setup.selected_team_ids.empty?, data: { action: "round-setup#anyTeam" } %>
+    <% end %>
+    <% team_options = @setup.team_options %>
+    <%= tag.div class: "round-team-options", role: "group", aria: { label: "Teams" } do %>
+      <% team_options.each do |team| %>
+        <%= tag.label class: "round-option round-team-option" do %>
+          <%= round_team_badge team %>
+          <%= tag.span class: "round-team-name" do %>
+            <%= tag.strong team.name %>
+            <%= tag.span @setup.selected_team_ids.include?(team.id) ? "Selected" : "Add to round", class: "round-caption" %>
+          <% end %>
+          <%= check_box_tag "team_ids[]", team.id, @setup.selected_team_ids.include?(team.id), id: "round_team_#{team.id}", aria: { label: team.name }, data: { action: "change->round-setup#update" } %>
+        <% end %>
+      <% end %>
+    <% end %>
+    <% if team_options.empty? %>
+      <%= tag.p @setup.team_query.present? ? "No teams match your search. Try a team name or abbreviation." : "No teams recorded in this scope. Try another league or season.", class: "round-team-empty", role: "status" %>
+    <% end %>
+    <%= tag.p "Showing up to 100 matches plus your selected teams. Search to narrow the list.", class: "round-caption" if @setup.teams.count > 100 %>
+    <% if @setup.seasonal_game? && !@setup.season_id && !@setup.player_group_id %>
+      <%= tag.label class: "round-inactive" do %>
+        <%= form.check_box :include_inactive, { checked: @setup.include_inactive, data: { action: "change->round-setup#update" } }, "true", "false" %>
+        <%= tag.span "Include inactive players" %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= tag.fieldset class: "round-panel" do %>
+    <%= tag.legend "03 · Set your pace", class: "round-step" %>
+    <%= tag.div class: "round-lengths" do %>
+      <% GameRound::LENGTHS.each do |length| %>
+        <%= tag.label class: "round-option" do %>
+          <%= form.radio_button :length, length, checked: @setup.length == length, data: { action: "change->round-setup#update" } %>
+          <%= tag.strong length %><%= tag.span flash_cards ? "cards" : "questions" %>
+        <% end %>
+      <% end %>
+    <% end %>
+    <% if flash_cards %>
+      <%= tag.fieldset class: "round-delays" do %>
+        <%= tag.legend "Advance", class: "round-filter-label" %>
+        <%= tag.div class: "round-lengths" do %>
+          <% GameRoundSetup::DELAYS.each do |delay| %>
+            <%= tag.label class: "round-option" do %>
+              <%= form.radio_button :delay, delay, checked: @setup.delay == delay, data: { action: "change->round-setup#update" } %>
+              <%= tag.strong delay.zero? ? "Tap" : "#{delay}s" %><%= tag.span delay.zero? ? "at your pace" : "per card" %>
+            <% end %>
+          <% end %>
+        <% end %>
+        <%= tag.p "With a delay, each card shows the team, then the position, then moves on. Nothing is scored or saved.", class: "round-caption" %>
+      <% end %>
+    <% end %>
+    <%= tag.p "#{pluralize available, @setup.game_type == 'guess_the_division' ? 'team' : 'player'} available.", class: "round-caption" %>
+    <%= tag.p "Choose the original name from up to four options. At least two distinct player names are needed.", class: "round-caption" if @setup.game_type == "name_ciphers" %>
+    <% if available.positive? && @setup.seasonal_game? %>
+      <%= tag.details class: "round-pool-coverage" do %>
+        <%= tag.summary "See the player pool by team", class: "round-caption" %>
+        <%= tag.ul do %>
+          <% @setup.pool_coverage.each do |entry| %>
+            <%= tag.li "#{entry.fetch(:team)&.name || 'Unassigned players'} · #{pluralize(entry.fetch(:count), 'player')}", class: "round-caption" %>
+          <% end %>
+        <% end %>
+        <%= tag.p "Recorded players only; some rosters are samples. Multi-team rounds spread picks across these teams as far as the pool allows, without repeating a player.", class: "round-caption" %>
+      <% end %>
+    <% end %>
+    <% if available.positive? && available < @setup.length.to_i %>
+      <%= tag.p "This round will have #{pluralize(@setup.question_count, 'question')}. This pool is smaller than your chosen length, so names won’t repeat to fill it. Choose more teams or another season for more variety.", class: "round-caption" %>
+    <% elsif available.zero? %>
+      <%= tag.p season_suggestion ? "Choose a recorded roster season below to use the player lists for these teams." : "Try another season or a broader scope. A playable question needs at least two answer choices.", class: "round-caption" %>
+    <% end %>
+    <% if @setup.game_type == "phased_repetition" %>
+      <p class="round-caption">Misses return in 10 minutes. Correct answers return after 1, 3, 7, 14, then 30 days. Only due questions in this scope appear.</p>
+    <% elsif @setup.game_type == "image_recognition" %>
+      <p class="round-caption">Only players with recorded photos are available. At least two distinct player names are needed. No other teams are substituted when this scope has no photos.</p>
+    <% end %>
+    <%= form.submit "Update setup", class: "tool-button round-update", data: { round_setup_target: "fallback" } %>
+  <% end %>
+<% end %>
+<%= tag.div class: "round-start-dock" do %>
+  <%= tag.div do %>
+    <%= tag.strong "#{GameRoundSetup::GAMES[@setup.game_type]} · #{pluralize(@setup.question_count, flash_cards ? 'card' : 'question')}" %>
+    <%= tag.p @setup.scope_label, class: "round-caption" %>
+    <% if available.zero? %>
+      <% reason = if season_suggestion
+        "No current-team player data for this selection. Choose a roster season to start."
+      elsif @setup.practice_filter != "all"
+        "No playable questions match this progress filter. Choose All members, another game, or a recorded season."
+      else
+        "No playable questions in this scope. Review the filters above."
+      end %>
+      <%= tag.p reason, id: "round-start-reason", class: "round-caption", role: "status" %>
+      <% if season_suggestion %>
+        <%= link_to "Use #{season_suggestion.season.name} · #{pluralize(season_suggestion.available_count, 'player')}", new_game_round_path(season_suggestion.scope_params), class: "tool-button round-use-season" %>
+      <% end %>
+    <% end %>
+  <% end %>
+  <% if flash_cards %>
+    <%= form_with url: flash_cards_path, method: :get, namespace: "start_flash_cards", data: { turbo_frame: "_top" } do |form| %>
+      <%= round_scope_fields form, @setup, except: [:game_type] %>
+      <%= form.submit "Start flash cards", name: nil, class: "game-button", disabled: available.zero?, aria: { describedby: available.zero? ? "round-start-reason" : nil } %>
+    <% end %>
+  <% elsif ace_signed_in? %>
+    <%= form_with url: game_rounds_path, namespace: "start_round", data: { turbo_frame: "_top" } do |form| %>
+      <%= round_scope_fields form, @setup %>
+      <%= form.submit "Start round", class: "game-button", disabled: available.zero?, aria: { describedby: available.zero? ? "round-start-reason" : nil } %>
+    <% end %>
+  <% else %>
+    <%= link_to "Sign in to start", new_ace_session_path, class: "game-button", data: { turbo_frame: "_top" } %>
+  <% end %>
+<% end %>

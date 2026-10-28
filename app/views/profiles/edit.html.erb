@@ -1,0 +1,20 @@
+<%= account_card(current_ace.username? ? "Edit profile" : "Choose your handle", "Your name and handle appear with your submissions. Your email stays in account settings.") do %>
+  <%= ace_identity @ace %>
+  <%= form_with model: @ace, url: profile_path, class: "account-form" do |form| %>
+    <%= render "aces/shared/error_messages", resource: @ace %>
+    <% if @ace.username_in_database.blank? %>
+      <%= account_field form, :username, type: :text, label: "Handle", autofocus: true, autocomplete: "username", required: true, minlength: 3, maxlength: 24, pattern: "[A-Za-z0-9_]{3,24}", hint: "3–24 letters, numbers, or underscores. Your handle stays fixed." %>
+    <% else %>
+      <p class="account-hint">Your handle <%= @ace.handle %> stays fixed.</p>
+    <% end %>
+    <%= account_field form, :display_name, type: :text, label: "Display name", autocomplete: "nickname", required: true, maxlength: 60 %>
+    <%= form.label :time_zone, "Time zone for daily streaks" %>
+    <%= form.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, {include_blank: "Use application time zone"}, {class: "account-input min-w-0 max-w-full"} %>
+    <fieldset class="avatar-colors"><legend>Avatar color</legend>
+      <% Ace::AVATAR_COLORS.each do |name, color| %>
+        <label class="avatar-color"><%= form.radio_button :avatar_color, color %><span class="avatar-swatch" style="background-color: <%= color %>"></span><%= name %></label>
+      <% end %>
+    </fieldset>
+    <%= form.submit "Save profile", class: "game-button" %>
+  <% end %>
+<% end %>

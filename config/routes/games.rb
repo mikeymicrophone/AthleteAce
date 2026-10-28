@@ -1,7 +1,22 @@
 # Routes for game-related functionality
 Rails.application.routes.draw do
   # Strength training routes for learning athlete names
-  get "strength" => "strength#index"
+  get "play/preview", to: "play_previews#show", as: :play_preview
+  post "play/preview", to: "play_previews#answer"
+  get "strength" => "play#index"
+  post "play/quick", to: "play#quick", as: :play_quick
+  post "play/drill-misses" => "play#drill", as: :play_drill_misses
+  get "play/flash-cards", to: "flash_cards#show", as: :flash_cards
+  resources :game_rounds, path: "play/rounds", only: [:new, :create, :show] do
+    member do
+      post :answer
+      post :advance
+      post :pause
+      post :resume
+      post :drill
+      get :summary
+    end
+  end
   get "strength/multiple_choice" => "strength#multiple_choice"
   get "strength/phased_repetition" => "strength#phased_repetition"
   get "strength/images" => "strength#images"

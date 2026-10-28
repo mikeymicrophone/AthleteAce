@@ -1,0 +1,4 @@
+<p class="round-caption">Organization contracts do not establish a team assignment or game availability. The optional legacy team is shown as recorded.</p>
+<div class="people-table"><table><thead><tr><th>Organization</th><th>Start</th><th>End</th><th>Legacy team</th><th>Recorded details</th></tr></thead><tbody>
+  <% @records.each do |contract| %><tr><td><%= contract.organization.name %><p class="round-caption"><%= contract.entity_code.presence || "No entity code" %></p></td><td><%= contract.start_date&.iso8601 || "Unknown" %></td><td><%= contract.end_date&.iso8601 || "Unknown" %></td><td><%= contract.team&.name || "Not set" %></td><td><%= contract.details.to_json %></td></tr><% end %>
+</tbody></table></div>

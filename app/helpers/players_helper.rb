@@ -2,32 +2,24 @@ module PlayersHelper
   # Display player name with logo
   def player_name_display player
     tag.div class: "record-name" do
-      display_name_with_lazy_logo(player, logo_attribute: :image_url)
+      record_identity player
     end
   end
-  
+
   # Display player metadata (team, league, sport)
   def player_metadata_display player
-    metadata_items = [
-      link_to_name(player.team)
-    ]
-
-    metadata_items << display_name_with_lazy_logo(player.current_organization) if player.current_organization.present?
-    metadata_items << display_name_with_lazy_logo(player.league)
-    metadata_items << display_name_with_lazy_logo(player.sport, logo_attribute: :icon_url)
-
     tag.div class: "record-metadata" do
-      safe_join metadata_items, " | "
+      safe_join [player.team, player.current_organization, player.league, player.sport].compact.map { |record| entity_link record }
     end
   end
-  
+
   # Display player position tag if available
   def player_position_display player
     if player.primary_position
       tag.div player.primary_position.name, class: "record-tag"
     end
   end
-  
+
   # Combine all player info elements
   def player_info_display player
     player_name_display(player) +
@@ -41,7 +33,7 @@ module PlayersHelper
         tag.img src: player.photo_urls.sample, alt: player.full_name, class: "player-photo"
       else
         tag.div class: "player-photo-placeholder" do
-          tag.i class: "fa-solid fa-user"
+          icon "shirt-sport", size: 48
         end
       end
     end

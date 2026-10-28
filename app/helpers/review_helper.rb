@@ -6,7 +6,7 @@ module ReviewHelper
         if team.logo_url.present?
           tag.img src: team.logo_url, alt: "#{team.name} logo", class: "team-button-logo"
         else
-          tag.i class: "fa-solid fa-shield-alt team-button-icon"
+          icon "shield", class: "team-button-icon"
         end +
         tag.span(team.name, class: "team-button-name") +
         tag.span("#{@team_stats[team][:correct_attempts]}/#{@team_stats[team][:total_attempts]}", class: "team-button-stats")
@@ -39,7 +39,7 @@ module ReviewHelper
           display_name_with_lazy_logo attempt.target_entity
         end
       end +
-      
+
       (show_player_name ? tag.div(class: "attempt-player-part") do
         tag.div(class: "attempt-player-photo-container") do
           display_name_with_lazy_logo attempt.subject_entity

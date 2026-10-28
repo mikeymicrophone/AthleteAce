@@ -1,0 +1,36 @@
+.admin-today strong { @apply text-3xl; overflow-wrap: anywhere; }
+.admin-cash-days { @apply grid gap-3 mt-5 text-sm; list-style: none; padding-left: 0; }
+.admin-cash-days li { display: grid; grid-template-columns: 6rem minmax(0, 1fr) 5rem; gap: .6rem; align-items: center; }
+.admin-cash-days li > span { @apply text-right font-mono; overflow-wrap: anywhere; }
+.admin-cash-track { @apply h-3 rounded bg-surface-2 overflow-hidden; }
+.admin-cash-track span { @apply block h-full bg-accent; }
+.admin-review-counts, .admin-escalation-list { @apply grid gap-4 my-5; list-style: none; padding-left: 0; }
+.admin-review-counts li, .admin-escalation-list li { @apply flex flex-wrap justify-between items-center gap-3 border-b border-line pb-3; }
+.admin-escalation-list h3 { @apply font-semibold; overflow-wrap: anywhere; }
+
+.admin-review-counts span { overflow-wrap: anywhere; min-width: 0; }
+
+@layer components {
+  .moderation-oversight { @apply w-full; }
+  .moderation-oversight .page-title { overflow-wrap: anywhere; }
+  .oversight-metrics { @apply grid grid-cols-3 gap-3 mb-5 lg:gap-4; }
+  .oversight-metrics .round-panel { @apply mb-0 min-w-0; }
+  .oversight-metrics strong { @apply block font-display text-4xl my-2; overflow-wrap: anywhere; }
+  .oversight-metrics [data-oversight="wait"] { @apply text-2xl lg:text-4xl; }
+  @media (max-width: 640px) {
+    .oversight-metrics .round-panel { @apply p-3; }
+    .oversight-metrics .eyebrow { @apply text-[0.6rem] tracking-wider; }
+    .oversight-metrics .round-caption { @apply text-[0.65rem]; }
+  }
+  .oversight-chart { @apply flex items-end gap-1 h-40 border-b border-line mt-6; }
+  .oversight-chart li { @apply flex items-end h-full min-w-0 flex-1 bg-surface-2; }
+  .oversight-chart li > span:first-child { @apply block w-full bg-accent-text; }
+  .oversight-axis { @apply flex flex-wrap justify-between gap-3 mt-3 text-xs text-ink-3; }
+  .oversight-daily-values { @apply mt-5; }
+  .oversight-daily-values summary { @apply cursor-pointer text-sm font-semibold; }
+  .oversight-daily-values ul { @apply grid gap-x-6 sm:grid-cols-2 lg:grid-cols-3; }
+  .oversight-daily-values li { @apply flex items-center justify-between gap-3 text-sm border-b border-line; }
+  .moderation-oversight .people-table table { min-width: 560px; }
+  .moderation-oversight .people-table th, .moderation-oversight .people-table td { @apply p-2; }
+  .moderation-oversight > .round-panel > p { @apply mt-3 text-sm text-ink-2; }
+}

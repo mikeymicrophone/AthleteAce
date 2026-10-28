@@ -1,0 +1,69 @@
+<% content_for :title, @view == "my_teams" ? "My teams" : "Feed" %>
+<% turbo_refreshes_with method: :morph, scroll: :preserve %>
+<%= turbo_stream_from "public_shout_outs" %>
+<div class="feed-home">
+  <header class="browse-header"><div><p class="eyebrow">Feed</p><h1 class="page-title"><%= @view == "my_teams" ? "My teams" : "Latest" %></h1><p class="round-intro">For the players and teams worth talking about.</p></div></header>
+  <nav class="history-tabs" aria-label="Feed views">
+    <%= link_to "All", feed_path(q: @query.presence, sport_id: @sport&.id, league_id: @league&.id), aria: { current: @view == "all" ? "page" : nil } %>
+    <%= link_to "My teams", feed_path(view: "my_teams", q: @query.presence, sport_id: @sport&.id, league_id: @league&.id), aria: { current: @view == "my_teams" ? "page" : nil } %>
+    <%= link_to "Leaders", shout_out_leaderboard_path %>
+  </nav>
+  <%= form_with url: feed_path, method: :get, class: "feed-team-filters", role: "search", id: "feed-filters", data: { controller: "feed-filters", action: "turbo:before-morph-element->feed-filters#preserve" } do |form| %>
+    <%= form.hidden_field :view, value: @view %>
+    <div><%= form.label :sport_id, "Sport" %><%= form.collection_select :sport_id, @sports, :id, :name, { include_blank: "All sports", selected: @sport&.id } %></div>
+    <div><%= form.label :league_id, "League" %><%= form.collection_select :league_id, @leagues, :id, :name, { include_blank: "All leagues", selected: @league&.id } %></div>
+    <div><%= form.label :q, "Search live shout-outs" %><%= form.search_field :q, value: @query, minlength: 2, maxlength: 80, class: "account-input" %></div>
+    <%= form.submit "Search posts", class: "tool-button" %>
+    <% if @query.present? %><%= link_to "Clear search", feed_path(view: @view, sport_id: @sport&.id, league_id: @league&.id), class: "tool-link" %><% end %>
+    <%= link_to "Clear filters", feed_path(view: @view, q: @query.presence), class: "tool-link" if @sport || @league %>
+  <% end %>
+
+  <div class="page-actions"><%= link_to "Write a draft", new_shout_out_draft_path, class: "game-button" %><% if current_ace %><%= link_to "My drafts", shout_out_drafts_path, class: "tool-button" %><%= link_to "My shout-outs", shout_outs_path, class: "tool-button" %><%= link_to "Credit wallet", wallet_path, class: "tool-button" %><% end %></div>
+
+  <% if @view == "my_teams" %>
+    <% if current_ace %>
+      <section class="round-panel" aria-labelledby="feed-teams-title">
+        <h2 id="feed-teams-title" class="profile-section-title">Your teams</h2>
+        <p class="round-caption">Teams you follow or rate at least +5,000 on Affinity.</p>
+        <% if @teams.any? %>
+          <div class="feed-team-grid">
+            <% @teams.each do |team| %>
+              <article class="feed-team-card" aria-label="<%= team.name %>">
+                <%= record_identity team %>
+                <p class="round-caption"><%= team.league.name %></p>
+                <div class="profile-chips"><% if @followed_ids.include?(team.id) %><span>Following</span><% end %><% if @affinity_ids.include?(team.id) %><span>High Affinity</span><% end %></div>
+                <%= link_to "Practice team", new_game_round_path(team_id: team.id), class: "tool-button", aria: { label: "Practice #{team.name}" } %>
+              </article>
+            <% end %>
+          </div>
+          <%== @pagy.series_nav if @pagy.pages > 1 %>
+        <% else %>
+          <h3>No teams match this view.</h3>
+          <p>Follow a team or give it an Affinity rating of at least +5,000 to find it here.</p>
+          <%= link_to "Browse teams", teams_path(side: "feed"), class: "tool-link" %>
+        <% end %>
+      </section>
+    <% else %>
+      <section class="round-panel"><h2 class="profile-section-title">Find your teams here</h2><p>Sign in to see teams you follow and rate highly.</p><%= link_to "Sign in", new_ace_session_path, class: "game-button" %></section>
+    <% end %>
+  <% end %>
+
+  <% unless current_ace %>
+    <section class="round-panel"><p class="eyebrow">From Play</p><h2 class="profile-section-title">Know every name</h2><p>Try one Team Match question, no account needed.</p><%= link_to "Try", play_preview_path, class: "game-button" %></section>
+  <% end %>
+  <% if @posts&.any? %>
+    <section aria-label="Shout-outs" class="shout-out-stream">
+      <p class="round-caption">Bid-weighted order with a random boost for each visitor.</p>
+      <% reactions = ShoutOutReactionSummary.new(posts: @posts, ace: current_ace) %>
+      <% @posts.each do |post| %>
+        <%= render "shout_outs/card", post: post, reactions: reactions %>
+      <% end %>
+      <%== @posts_pagy.series_nav if @posts_pagy.pages > 1 %>
+    </section>
+  <% elsif @posts %>
+    <% filtered = @query.present? || @sport || @league %>
+    <section class="shell-empty"><%= icon "star", size: 40 %><h2><%= filtered ? "No matching shout-outs." : "No shout-outs yet." %></h2><p><%= filtered ? "Try another search or reset this view." : "Get to know the players and teams around the leagues." %></p>
+      <div class="page-actions"><% if filtered %><%= link_to "Reset view", feed_path(view: @view), class: "tool-button" %><% end %><%= link_to "Browse players", players_path(side: "feed"), class: "tool-button" %><%= link_to "Browse teams", teams_path(side: "feed"), class: "tool-button" %></div>
+    </section>
+  <% end %>
+</div>

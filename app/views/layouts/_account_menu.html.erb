@@ -1,0 +1,17 @@
+<dialog id="shell-account" class="shell-account-dialog" data-shell-target="account" data-action="close->shell#closed click->shell#backdrop" aria-labelledby="shell-account-title">
+  <div class="shell-account-heading"><h2 id="shell-account-title"><%= current_ace ? "Your account" : "Appearance" %></h2><button type="button" class="shell-account-close" aria-label="Close account menu" data-action="shell#close"><%= icon "x", size: 20 %></button></div>
+  <% if current_ace %>
+    <%= ace_identity current_ace %><p class="shell-account-since">Fan since <%= current_ace.created_at.year %></p>
+    <nav class="shell-account-links" aria-label="Your account">
+      <%= link_to "Profile", profile_path %><%= link_to "My ratings", ratings_path %><%= link_to "Settings", edit_ace_registration_path %>
+      <%= link_to "Posting status", posting_status_path %>
+      <%= link_to "Begin Quest", random_quests_path %>
+      <%= button_to "Sign Out", destroy_ace_session_path, method: :delete, class: "shell-sign-out" %>
+    </nav>
+  <% end %>
+  <section class="shell-theme" aria-labelledby="shell-theme-title"><h3 id="shell-theme-title">Theme</h3>
+    <div class="shell-theme-options">
+      <% Ace::THEMES.each do |theme| %><%= button_to theme.titleize, theme_preference_path, method: :patch, params: { theme: theme }, class: "shell-theme-choice", aria: { pressed: current_theme == theme } %><% end %>
+    </div>
+  </section>
+</dialog>

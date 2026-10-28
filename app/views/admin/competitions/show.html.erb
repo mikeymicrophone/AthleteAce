@@ -1,0 +1,31 @@
+<% content_for :title, contest_display_name(@competition) %>
+<div class="moderation-page people-page">
+  <%= link_to "Back to competitions", admin_competitions_path, class: "tool-link" %>
+  <header class="browse-header"><div><p class="eyebrow">Admin · Sports data · Competition</p><h1 class="page-title"><%= contest_display_name(@competition) %></h1><p><%= @competition.kind&.humanize.presence || "Unspecified kind" %> · <%= @competition.entity_code.presence || "No entity code" %></p></div></header>
+  <section class="round-panel">
+    <p>Context: <%= @competition.context.name %></p><p>Assigned season: <%= @competition.season&.name || "Not set" %></p>
+    <p><%= @competition.begin_date&.iso8601 || "Unknown start" %> · <%= @competition.end_date&.iso8601 || "Unknown end" %></p>
+    <% if @competition.description.present? %><p><%= @competition.description %></p><% end %>
+    <p><%= pluralize @entrant_count, "recorded entrant" %> · <%= pluralize @game_count, "linked game" %> · <%= pluralize @title_count, "recorded title award" %></p>
+    <%= link_to "View games", admin_games_path(competition_id: @competition.id), class: "tool-button" %>
+  </section>
+  <section class="round-panel"><h2 class="profile-section-title">Format rules</h2>
+    <% if @competition.format_rules.empty? %><p>No recorded format rules.</p><% else %>
+      <ul><% @competition.format_rules.fetch("rounds", []).each do |round| %><li><%= round["name"].presence || round["key"].humanize %><% if round["best_of"] %> · Best of <%= round["best_of"] %><% end %></li><% end %></ul>
+      <details><summary>All recorded rules</summary><div class="people-table"><pre><%= JSON.pretty_generate(@competition.format_rules) %></pre></div></details>
+    <% end %>
+  </section>
+  <div class="page-actions"><%= link_to "Entrants", admin_competition_path(@competition), class: "tool-button", aria: { current: @tab == "entrants" ? "page" : nil } %><%= link_to "Title awards", admin_competition_path(@competition, tab: "titles"), class: "tool-button", aria: { current: @tab == "titles" ? "page" : nil } %></div>
+  <p class="round-caption">Entrants use their recorded campaigns and seasons. Titles appear only when an award record exists; standings and legacy champion fields do not create awards.</p>
+  <div class="people-table"><table><thead><tr><% if @tab == "titles" %><th>Title</th><th>Winning campaign</th><th>Season</th><th>Awarded on</th><% else %><th>Campaign</th><th>Season</th><th>Placing</th><th>Wins</th><th>Losses</th><% end %></tr></thead><tbody>
+    <% @records.each do |record| %>
+      <% if @tab == "titles" %>
+        <tr><td><%= record.name %><p class="round-caption"><%= record.key %> · <%= record.entity_code.presence || "No entity code" %></p></td><td><%= record.winner.campaign.name %></td><td><%= record.winner.campaign.season.name %></td><td><%= record.awarded_on&.iso8601 || "Unknown" %></td></tr>
+      <% else %>
+        <tr><td><%= link_to record.campaign.name, team_path(record.campaign.team, side: "admin") %><p class="round-caption"><%= record.entity_code.presence || "No entity code" %></p></td><td><%= record.campaign.season.name %></td><td><%= record.placing || "Unknown" %></td><td><%= record.wins || "Unknown" %></td><td><%= record.losses || "Unknown" %></td></tr>
+      <% end %>
+    <% end %>
+  </tbody></table></div>
+  <% if @records.empty? %><section class="round-panel"><h2>No recorded <%= @tab == "titles" ? "title awards" : "entrants" %>.</h2></section><% end %>
+  <%== @pagy.series_nav if @pagy.pages > 1 %>
+</div>

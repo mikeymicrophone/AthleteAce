@@ -8,14 +8,15 @@ export default class extends Controller {
     this.isOpen = this.contentTarget.classList.contains("hidden") ? false : true
   }
 
-  toggle() {
+  toggle(event) {
     this.isOpen = !this.isOpen
 
     this.contentTarget.classList.toggle("hidden", !this.isOpen)
 
+    event.currentTarget.setAttribute("aria-expanded", String(this.isOpen))
+
     if (this.hasIconTarget) {
-      this.iconTarget.classList.toggle("fa-chevron-down", !this.isOpen)
-      this.iconTarget.classList.toggle("fa-chevron-up", this.isOpen)
+      this.iconTarget.style.transform = this.isOpen ? "rotate(180deg)" : ""
     }
   }
 }

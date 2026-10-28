@@ -9,8 +9,9 @@ Rails.application.configure do
   # Do not eager load code on boot.
   config.eager_load = false
 
-  # Show full error reports.
-  config.consider_all_requests_local = true
+  # Public tunnel requests must not expose development error reports.
+  config.consider_all_requests_local = false
+  config.hosts << "ace.mikeymicrophone.fun"
 
   # Enable server timing.
   config.server_timing = true

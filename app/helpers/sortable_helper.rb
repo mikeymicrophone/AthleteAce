@@ -60,7 +60,7 @@ module SortableHelper
           
           sort_resource = determine_sort_resource(sort[:attribute], resource_type)
           
-          tag.div(class: "sort-chain-item", data: { sort_resource: sort_resource }) do
+          tag.div(class: "sort-chain-item", data: { entity: sort_resource }) do
             tag.span("#{index + 1}.", class: "sort-chain-priority") +
             tag.span(humanize_sort_attribute_for(sort[:attribute], resource_type), class: "sort-chain-attribute") +
             tag.span(humanize_sort_direction(sort[:direction], sort[:attribute]), class: "sort-chain-direction") +
@@ -88,7 +88,7 @@ module SortableHelper
     
     link_to send(path_method, url_params), 
             class: css_classes, 
-            data: { turbo_prefetch: false, resource: sort_resource } do
+            data: { turbo_prefetch: false, entity: sort_resource } do
       content = ""
       
       if priority

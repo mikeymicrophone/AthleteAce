@@ -1,0 +1,22 @@
+<% content_for :title, "Player groups" %>
+<%= browse_header "Player groups" do %>
+  <%= link_to "New group", new_player_group_path, class: "game-button" if admin_signed_in? %>
+<% end %>
+<%== @pagy.series_nav %>
+<% if @player_groups.empty? %>
+  <section class="round-panel"><h2>No player groups yet</h2><p>Groups can be populated by seeds or added by an admin.</p></section>
+<% elsif @group_overviews %>
+  <section aria-labelledby="group-overview-title">
+    <h2 id="group-overview-title" class="profile-section-title">Your group practice</h2>
+    <p class="round-caption">Current members · your lifetime player answers.</p>
+    <div class="play-home-grid">
+      <%= render partial: "practice_card", collection: @group_overviews, as: :overview %>
+    </div>
+  </section>
+<% else %>
+  <div class="shell-browse-links">
+    <% @player_groups.each do |group| %>
+      <%= link_to group.name, player_group_path(group), class: "shell-browse-link" %>
+    <% end %>
+  </div>
+<% end %>

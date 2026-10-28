@@ -1,0 +1,31 @@
+<% content_for :title, "Play Preview" %>
+<div class="round-page">
+  <header class="browse-header"><div><p class="eyebrow">Play · preview</p><h1 class="page-title">Know every name</h1><p class="round-intro">Ten-name rounds that turn the players you watch into names you know, with spaced review for the ones you miss.</p></div></header>
+  <% if @preview %>
+    <% question = @preview.fetch("question") %>
+    <section class="round-panel">
+      <h2 class="profile-section-title">Try one · Team Match</h2>
+      <p class="round-caption"><%= question["season_name"] %></p>
+      <h3 class="page-title"><%= question.fetch("subject_name") %></h3>
+      <p>Which team is this player <%= question["season_name"] ? "listed with for #{question['season_name']}" : "on" %>?</p>
+      <% if @preview.key?("correct") %>
+        <p role="status" class="profile-section-title"><%= @preview["correct"] ? "Correct" : "Not quite" %>. <%= question.fetch("target_name") %></p>
+        <p>Sign in to start saved rounds and track your streak.</p>
+      <% else %>
+        <%= form_with url: play_preview_path do |form| %>
+          <%= form.hidden_field :token, value: @preview.fetch("token") %>
+          <div class="round-choices">
+            <% question.fetch("choices").each do |choice| %>
+              <%= button_tag choice.fetch("name"), type: "submit", name: "choice_id", value: choice.fetch("id"), class: "round-choice" %>
+            <% end %>
+          </div>
+          <%= button_tag "I don't know", type: "submit", name: "choice_id", value: "", class: "tool-button" %>
+        <% end %>
+      <% end %>
+    </section>
+  <% else %>
+    <section class="round-panel"><h2 class="profile-section-title">No preview question available</h2><p>This scope needs recorded players and at least two teams. Explore Browse or choose another scope.</p><%= link_to "Browse", browse_path, class: "tool-button" %></section>
+  <% end %>
+  <section class="round-panel"><h2 class="profile-section-title">Six ways to play</h2><ul><% GameRound::GAMES.each_value do |name| %><li><%= name %></li><% end %></ul></section>
+  <div class="round-summary-actions"><%= link_to "Sign in to play", new_ace_session_path, class: "game-button" %><%= link_to "New here? Create a free account", new_ace_registration_path, class: "tool-button" %></div>
+</div>
