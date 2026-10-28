@@ -91,11 +91,14 @@ namespace :seeds do
     require Rails.root.join("app/services/seeds/library_importer").to_s
     paths, registry = library_paths
     root = Pathname.new(ENV.fetch("SEED_LIBRARY_ROOT", Rails.root.join("db/seeds/athlete_ace_data/yaml").to_s))
-    photos = Seeds::PlayerPhotoImporter.new(source: root.parent.join("sources/nba_player_photos.json")).call
-    puts({ player_photos: photos.transform_values(&:length) }.to_json)
+    # Fill photos on existing players before the library compares values, then
+    # again for players the library has just created.
+    photos = Seeds::PlayerPhotoImporter.new(source: root.parent.join("sources/nba_player_photos.json"))
+    puts({ player_photos: photos.call.transform_values(&:length) }.to_json)
     report = Seeds::LibraryImporter.new(registry: registry).call(paths)
     puts report.transform_values(&:length).to_json
     report[:conflicts].each { |conflict| puts conflict.to_json }
+    puts({ new_player_photos: photos.call.transform_values(&:length) }.to_json)
     # A custom YAML library may have its own sibling sports catalog. Do not apply
     # the default catalog's palettes to an unrelated library.
     palettes = Seeds::TeamPaletteImporter.new(root: root.parent.join("sports")).call
