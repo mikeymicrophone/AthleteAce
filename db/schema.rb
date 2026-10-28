@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_26_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_27_010000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -588,7 +588,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_26_000000) do
     t.datetime "updated_at", null: false
     t.string "seed_version", comment: "Version of the seed file that created or last updated this record"
     t.datetime "last_seeded_at", comment: "When this record was last updated by a seed"
+    t.string "entity_code"
     t.index ["division_id"], name: "index_memberships_on_division_id"
+    t.index ["entity_code"], name: "index_memberships_on_entity_code", unique: true
     t.index ["seed_version"], name: "index_memberships_on_seed_version"
     t.index ["team_id"], name: "index_memberships_on_team_id"
   end

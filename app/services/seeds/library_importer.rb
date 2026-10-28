@@ -21,7 +21,8 @@ module Seeds
       "Contest" => Contest, "Game" => Game, "ContestGame" => ContestGame,
       "TitleAward" => TitleAward, "Federation" => Federation,
       "Contestant" => Contestant, "Appearance" => Appearance,
-      "PlayerGroup" => PlayerGroup, "PlayerGroupMembership" => PlayerGroupMembership
+      "PlayerGroup" => PlayerGroup, "PlayerGroupMembership" => PlayerGroupMembership,
+      "Membership" => Membership
     }.freeze
     SCOPE_ASSOCIATIONS = {
       "State" => %w[country], "City" => %w[state], "Stadium" => %w[city],
@@ -36,7 +37,8 @@ module Seeds
       "Stint" => %w[player team], "Roster" => %w[campaign], "RosterEntry" => %w[roster player],
       "Contestant" => %w[contest campaign], "Appearance" => %w[player contestant],
       "ContestGame" => %w[contest game], "TitleAward" => %w[contest winner],
-      "TransactionPlayer" => %w[event player], "PlayerGroupMembership" => %w[player_group player]
+      "TransactionPlayer" => %w[event player], "PlayerGroupMembership" => %w[player_group player],
+      "Membership" => %w[team division]
     }.freeze
     POLYMORPHIC_TYPES = {
       [ "League", "jurisdiction" ] => %w[Country State City Federation],
@@ -372,7 +374,7 @@ module Seeds
         PlayerGroupMembership => %w[player_group player], RosterEntry => %w[roster player], Contestant => %w[contest campaign],
         Appearance => %w[contestant player], TransactionPlayer => %w[event player],
         ContestGame => %w[contest game], TitleAward => %w[contest key],
-        UniformCampaign => %w[uniform campaign]
+        UniformCampaign => %w[uniform campaign], Membership => %w[team division]
       }[model]
       return unless keys && keys.all? { |key| desired[key].present? }
       model.find_by(desired.slice(*keys))

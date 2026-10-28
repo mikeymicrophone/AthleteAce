@@ -179,6 +179,10 @@ An admin can edit groups in Browse. Seed replay preserves edited group fields an
 
 Player groups and memberships belong to the reset service's core catalog. Ordinary seeding remains additive. Apply the player-group migration before importing the expanded catalog or generating its schema contract.
 
+## Conferences, divisions, and team memberships
+
+`yaml/coverage_2026/divisions.yaml` defines the current conference and division alignment for MLB, NBA, NFL, NHL, and MLS: 10 Conferences, 26 Divisions, and one active `Membership` per 2026 team (154). `Team#division` and Guess the Division read these memberships. `scripts/build_divisions_2026.rb` generates the manifest from the legacy `sports/*/USA/*/conferences.json` and `memberships.json` files. It matches each legacy team to exactly one 2026 capture team by name, with explicit renames for changed club names. San Diego FC, which joined after the legacy catalog, is added with its own source note. Run it with `--check` to verify the committed manifest. A Membership's natural key is its team and division, so replay adopts an uncoded legacy membership instead of duplicating it. Apply the membership entity-code migration before importing.
+
 ## Coverage and remaining launch work
 
 The [2026 capture and asset extension](seed-library-2026.md) adds seven current-season competition datasets, three NBA participant-history datasets, the complete NHL regular-season schedule, persistent number assignments, and a local visual asset pilot. The counts below describe the earlier pilot. Current coverage comes from `rails seeds:coverage` and `sources/coverage_2026/report.json`.

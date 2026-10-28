@@ -81,6 +81,33 @@ RSpec.describe Seeds::LibraryImporter do
     expect(report[:conflicts].first[:differences]["first_name"]).to eq(existing: "Joshua", incoming: "Josh")
   end
 
+  it "imports conference and division memberships and adopts an uncoded legacy membership" do
+    seed_pilot
+    knicks = importer.resolve_code("Team", "BKT-NBA-TEAM-NYK")
+    blazers = importer.resolve_code("Team", "BKT-NBA-TEAM-POR")
+    path = write_document(records: [
+      definition("Conference", "BKT-NBA-CONFERENCE-EASTERN_CONFERENCE", { "name" => "Eastern Conference", "abbreviation" => "East" }, { "league" => "BKT-LEAGUE-NBA" }),
+      definition("Conference", "BKT-NBA-CONFERENCE-WESTERN_CONFERENCE", { "name" => "Western Conference", "abbreviation" => "West" }, { "league" => "BKT-LEAGUE-NBA" }),
+      definition("Division", "BKT-NBA-DIVISION-ATLANTIC_DIVISION", { "name" => "Atlantic Division" }, { "conference" => "BKT-NBA-CONFERENCE-EASTERN_CONFERENCE" }),
+      definition("Division", "BKT-NBA-DIVISION-NORTHWEST_DIVISION", { "name" => "Northwest Division" }, { "conference" => "BKT-NBA-CONFERENCE-WESTERN_CONFERENCE" }),
+      definition("Membership", "BKT-NBA-TEAM-NYK-MEMBERSHIP-ATLANTIC_DIVISION", { "active" => true },
+        { "team" => "BKT-NBA-TEAM-NYK", "division" => "BKT-NBA-DIVISION-ATLANTIC_DIVISION" }),
+      definition("Membership", "BKT-NBA-TEAM-POR-MEMBERSHIP-NORTHWEST_DIVISION", { "active" => true },
+        { "team" => "BKT-NBA-TEAM-POR", "division" => "BKT-NBA-DIVISION-NORTHWEST_DIVISION" })
+    ])
+    importer.call(paths.first(1) + [ path ]).then { |report| expect(report[:created].length).to eq(6) }
+    northwest = Division.find_by!(entity_code: "BKT-NBA-DIVISION-NORTHWEST_DIVISION")
+    legacy = Membership.find_by!(team: blazers)
+    legacy.update_columns(entity_code: nil)
+    EntityCode.where(code: "BKT-NBA-TEAM-POR-MEMBERSHIP-NORTHWEST_DIVISION").delete_all
+
+    report = importer.call(paths.first(1) + [ path ])
+    expect(report[:created]).to be_empty
+    expect(legacy.reload.entity_code).to eq("BKT-NBA-TEAM-POR-MEMBERSHIP-NORTHWEST_DIVISION")
+    expect([ knicks.reload.division.name, blazers.reload.division ]).to eq([ "Atlantic Division", northwest ])
+    expect(knicks.conference.league.abbreviation).to eq("NBA")
+  end
+
   it "reconstructs the complete pilot after a catalog wipe with different primary keys" do
     seed_pilot
     original_counts = counts
