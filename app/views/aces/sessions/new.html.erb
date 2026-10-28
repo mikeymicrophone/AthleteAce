@@ -1,4 +1,5 @@
 <%= account_card "Sign in", "Save your ratings and pick up where you left off." do %>
+  <%= render "aces/shared/google" %>
   <%= form_for resource, as: resource_name, url: session_path(resource_name), html: { class: "account-form" } do |form| %>
     <%= account_field form, :email, type: :email, autofocus: true, autocomplete: "email", required: true %>
     <%= account_field form, :password, type: :password, autocomplete: "current-password", required: true %>

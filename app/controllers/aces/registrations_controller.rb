@@ -1,4 +1,17 @@
 class Aces::RegistrationsController < Devise::RegistrationsController
+  def create
+    super do |ace|
+      if ace.persisted? && session.delete("devise.google_identity")
+        SignInEvent.record!(ace, request, outcome: "success")
+      end
+    end
+  rescue ActiveRecord::RecordNotUnique
+    resource.errors.add :base, "This account or handle was just registered. Please sign in or choose another handle."
+    clean_up_passwords resource
+    set_minimum_password_length
+    render :new, status: :unprocessable_content
+  end
+
   def destroy
     unless resource.destroy
       alert = if resource.errors.of_kind?(:base, :last_active_admin)
@@ -19,7 +32,16 @@ class Aces::RegistrationsController < Devise::RegistrationsController
 
   def build_resource(attributes = {})
     super
-    resource.skip_confirmation! if Rails.env.development? && request.host.end_with?(".test")
+    if (identity = session["devise.google_identity"])
+      resource.email = identity.fetch("email")
+      resource.google_uid = identity.fetch("uid")
+      resource.display_name = identity.fetch("name") unless attributes.key?(:display_name) || attributes.key?("display_name")
+      resource.password = Devise.friendly_token(32)
+      resource.password_confirmation = nil
+      resource.skip_confirmation!
+    elsif Rails.env.development? && request.host.end_with?(".test")
+      resource.skip_confirmation!
+    end
   end
 
   # Keep the saved destination while the ace confirms their email.

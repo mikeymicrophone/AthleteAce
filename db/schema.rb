@@ -57,9 +57,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_27_010000) do
     t.datetime "suspended_at"
     t.integer "account_version", default: 0, null: false
     t.integer "session_version", default: 0, null: false
+    t.string "google_uid"
     t.index "lower((username)::text)", name: "index_aces_on_lower_username", unique: true
     t.index ["confirmation_token"], name: "index_aces_on_confirmation_token", unique: true
     t.index ["email"], name: "index_aces_on_email", unique: true
+    t.index ["google_uid"], name: "index_aces_on_google_uid", unique: true, where: "(google_uid IS NOT NULL)"
     t.index ["reset_password_token"], name: "index_aces_on_reset_password_token", unique: true
     t.check_constraint "theme::text = ANY (ARRAY['light'::character varying, 'dark'::character varying, 'system'::character varying]::text[])", name: "aces_theme"
   end

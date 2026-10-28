@@ -1,5 +1,6 @@
 class Ace < ApplicationRecord
   class AccountSuspended < StandardError; end
+  class GoogleAuthenticationError < StandardError; end
 
   class PostingMuted < StandardError
     attr_reader :mute
@@ -23,6 +24,7 @@ class Ace < ApplicationRecord
     uniqueness: { case_sensitive: false }, exclusion: { in: RESERVED_USERNAMES }, allow_nil: true
   validates :display_name, presence: true, length: { maximum: 60 }, if: -> { username.present? }
   validates :avatar_color, inclusion: { in: AVATAR_COLORS.values }
+  validates :google_uid, uniqueness: true, length: { maximum: 255 }, allow_nil: true
   validate :keep_username
   before_destroy :keep_active_admin, prepend: true
 
@@ -30,7 +32,7 @@ class Ace < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
-         :trackable, :confirmable
+         :trackable, :confirmable, :omniauthable, omniauth_providers: [ :google_oauth2 ]
 
   has_one :credit_account, dependent: :restrict_with_error
   has_many :stripe_purchases, dependent: :restrict_with_error
@@ -48,6 +50,34 @@ class Ace < ApplicationRecord
   has_many :mutes
   has_many :moderator_notes
   validates :time_zone, inclusion: { in: ActiveSupport::TimeZone.all.map(&:name) }, allow_nil: true
+
+  def self.from_google(auth)
+    uid = auth&.[]("uid").to_s
+    email = auth&.dig("info", "email").to_s.strip.downcase
+    unless auth&.[]("provider") == "google_oauth2" && auth.dig("info", "email_verified") == true && uid.present? && email.present?
+      raise GoogleAuthenticationError, "Google could not verify your email address. Please try another sign-in method."
+    end
+
+    transaction do
+      ace = lock.find_by(google_uid: uid) || lock.find_by(email: email)
+      if ace
+        raise GoogleAuthenticationError, "Your account is suspended. Contact support for help." if ace.suspended?
+        if ace.google_uid.present? && ace.google_uid != uid
+          raise GoogleAuthenticationError, "This account is linked to a different Google account. Please sign in with your email and password."
+        end
+        ace.google_uid = uid
+        ace.skip_confirmation!
+        ace.save! if ace.changed?
+        ace
+      else
+        ace = new(email: email, google_uid: uid, display_name: auth.dig("info", "name").to_s.first(60), password: Devise.friendly_token(32))
+        ace.skip_confirmation!
+        ace
+      end
+    end
+  rescue ActiveRecord::RecordNotUnique
+    raise GoogleAuthenticationError, "Your Google account could not be linked. Please try signing in again."
+  end
 
   def play_time_zone
     ActiveSupport::TimeZone[time_zone.to_s] || Time.zone

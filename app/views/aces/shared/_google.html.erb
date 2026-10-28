@@ -1,0 +1,3 @@
+<% if Rails.application.config.x.google_oauth.enabled %>
+  <%= button_to "Continue with Google", ace_google_oauth2_omniauth_authorize_path, method: :post, class: "game-button account-google", form: { data: { turbo: false } } %>
+<% end %>
