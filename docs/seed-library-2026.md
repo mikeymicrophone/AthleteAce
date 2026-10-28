@@ -63,3 +63,24 @@ mise exec -- ruby db/seeds/athlete_ace_data/scripts/build_pseudo_games.rb --chec
 ```
 
 The simulated basketball library now stores persistent number assignments in `pseudo/hbl_numbers.yml`. Adjacent same-number periods merge across seasons. Its game roster entries and appearances no longer repeat those numbers.
+
+## Seed home venues and their geography
+
+The geography capture covers the current NBA, NFL, MLB, NHL, MLS, and EPL teams. It supplies 34 subdivisions, 89 cities or localities, and 160 distinct venues for 174 teams. The subdivision records comprise 27 US states, Washington, DC, five Canadian provinces, and England under the existing United Kingdom country. This is the geography needed by these venues, not a complete national city inventory.
+
+`db:seed` imports `yaml/coverage_2026/geography.yaml`, then applies `sources/geography_2026/bindings.json`. The home-venue importer fills missing `Team.stadium` and the selected season's `Campaign.stadium` and `Campaign.city`. It resolves catalog codes, checks the team, season, and stadium city, and leaves different existing selections intact as reported conflicts. Earlier season campaigns are unchanged. After a conflict-free import, replaying the same data must report zero home-venue updates and zero conflicts. A custom `SEED_LIBRARY_ROOT` uses only its own sibling binding file, if present.
+
+The primary venue is the one with the most non-neutral home observations in the selected ESPN season schedule. A tied primary fails generation. MLB uses its season team's venue listing. Alternate grounds are seeded as stadiums and retained in the capture and binding file; the current model has one primary home link. The manifest does not add game-to-stadium associations or assert a complete venue history. NHL games retain their captured venue names in `details`. Capacities, opening years, addresses, and stadium artwork are not populated by this batch.
+
+To recapture and regenerate:
+
+```sh
+mise exec -- bundle exec ruby db/seeds/athlete_ace_data/scripts/capture_geography_2026.rb --refresh --as-of 2026-10-27
+mise exec -- bundle exec ruby db/seeds/athlete_ace_data/scripts/build_geography_2026.rb
+mise exec -- bundle exec rails seeds:validate db:seed
+mise exec -- bundle exec ruby db/seeds/athlete_ace_data/scripts/build_geography_2026.rb --check
+```
+
+Use the actual observation date. Before running the builder, review `sources/geography_2026/venues.json` against the new capture and update its review date. The registry fixes venue identities across source spelling and naming changes. New or renamed observations must be mapped explicitly; missing mappings, contradictory geography, missing teams, and ambiguous primary venues stop generation. Keep a new building distinct from an older building with the same name, such as Buffalo's 2026 Highmark Stadium. The final `--check` command fails if either generated file differs.
+
+See the [geography source notes](../db/seeds/athlete_ace_data/sources/geography_2026/README.md) for source boundaries and reviewed locality corrections.

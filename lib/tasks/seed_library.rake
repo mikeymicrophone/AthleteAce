@@ -103,6 +103,9 @@ namespace :seeds do
     # the default catalog's palettes to an unrelated library.
     palettes = Seeds::TeamPaletteImporter.new(root: root.parent.join("sports")).call
     puts({ team_palettes: palettes.transform_values(&:length) }.to_json)
+    venues = Seeds::HomeVenueImporter.new(source: root.parent.join("sources/geography_2026/bindings.json")).call
+    puts({ home_venues: venues.transform_values(&:length) }.to_json)
+    venues[:conflicts].each { |conflict| puts conflict.to_json }
     Rake::Task["seeds:current_teams"].invoke
   end
 
