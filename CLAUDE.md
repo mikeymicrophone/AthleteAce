@@ -15,9 +15,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `bundle exec rspec spec/features/quest_management_spec.rb` - Run feature tests
 
 ### Code Quality
+These commands are optional manual tools. Automated CI is deferred until launch preparation; see `README.md`.
+
 - `bundle exec rubocop` - Run Ruby style linter
 - `bundle exec brakeman` - Run security analysis
-- `bin/ci` - Run the local CI steps from `config/ci.rb` (setup, importmap audit, Brakeman, RSpec)
 
 ### Development Server
 - `bin/dev` - Start development server with Procfile.dev (Rails + Tailwind CSS)

@@ -5,5 +5,5 @@
   <p class="quest-card-description"><%= quest.description %></p>
   <div class="quest-card-meta"><%= quest_participants_badge(quest) %></div>
   <% if (goal = quest_goal(quest)) %><%= render "quests/progress", goal: goal %><% end %>
-  <div class="page-actions"><%= link_to "View quest", quest_path(quest), class: "tool-button" %><%= begin_quest_button quest %><%= link_to "Edit", edit_quest_path(quest), class: "tool-link" if admin_signed_in? %></div>
+  <div class="page-actions"><%= link_to "View quest", quest_path(quest), class: "tool-button" %><%= begin_quest_button quest %><%= link_to "Edit", edit_quest_path(quest), class: "tool-link" if can_manage?(quest) %></div>
 </article>

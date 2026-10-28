@@ -1,8 +1,8 @@
 class QuestsController < ApplicationController
   before_action :authenticate_ace!, except: %i[ index show ]
   before_action :require_posting_access!, only: %i[new create]
-  before_action :require_admin!, only: %i[ edit update destroy ]
   before_action :set_quest, only: %i[ show edit update destroy ]
+  before_action -> { require_manager! @quest }, only: %i[ edit update destroy ]
 
   # GET /quests or /quests.json
   def index
@@ -26,8 +26,7 @@ class QuestsController < ApplicationController
 
   # POST /quests or /quests.json
   def create
-    @quest = Quest.new(quest_params)
-    @quest.created_by = current_ace
+    @quest = current_ace.created_quests.new(quest_params)
 
     respond_to do |format|
       if @quest.save

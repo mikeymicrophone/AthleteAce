@@ -12,6 +12,7 @@
     <div class="quest-card-meta"><%= quest_participants_badge @quest %><p><%= pluralize(highlights.count(&:required?), "achievement") %> required</p></div>
   </header>
   <%= render "aces/attribution", ace: @quest.created_by %>
+  <%= link_to "Edit quest", edit_quest_path(@quest), class: "tool-link" if can_manage?(@quest) %>
   <% if @quest.approved? %>
     <p class="round-caption quest-approval">
       <% if (approved_at = @quest.approved_at) %>
@@ -49,7 +50,7 @@
               <% if earned&.completed_at %><p class="round-caption">Done <%= l earned.completed_at.in_time_zone(current_ace.play_time_zone).to_date, format: :long %></p>
               <% elsif achievement.practice_scope %><p class="round-caption"><%= earned&.progress || 0 %> of <%= earned ? earned.required_player_ids.size : "the recorded" %> players answered correctly</p><% end %><span class="entity-chip"><%= icon_for_resource achievement.target_type.underscore, size: 16 %><%= achievement.target ? link_to_name(achievement.target) : "Target unavailable" %></span></div>
             <div class="page-actions"><% if (practice_path = quest_practice_path(achievement)) %><%= link_to "Practice", practice_path, class: "tool-button", aria: { label: "Practice #{achievement.name}" } %><% end %>
-              <% if admin_signed_in? %><%= link_to "Edit", edit_quest_highlight_path(@quest, highlight), class: "tool-link" %><%= button_to "Remove", quest_highlight_path(@quest, highlight), method: :delete, class: "tool-link", data: { turbo_confirm: "Remove this achievement from the quest?" } %><% end %>
+              <% if can_manage?(@quest) %><%= link_to "Edit", edit_quest_highlight_path(@quest, highlight), class: "tool-link" %><%= button_to "Remove", quest_highlight_path(@quest, highlight), method: :delete, class: "tool-link", data: { turbo_confirm: "Remove this achievement from the quest?" } %><% end %>
             </div>
           </li>
         <% end %>

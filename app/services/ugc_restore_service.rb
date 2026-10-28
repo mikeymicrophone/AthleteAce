@@ -124,8 +124,9 @@ class UgcRestoreService
       if quest
         log_success("Quest (existing)", quest_data["name"], quest.id)
       else
-        quest_attrs = quest_data.except("id", "achievements", "highlights", "goals").slice(*Quest.column_names)
-        quest = Quest.create!(quest_attrs)
+        # Backups made before the creator columns merged record creator_id.
+        quest_attrs = quest_data.except("id", "created_by_id", "creator_id", "achievements", "highlights", "goals").slice(*Quest.column_names)
+        quest = Quest.create!(quest_attrs.merge("created_by_id" => @ace_ids[quest_data["created_by_id"] || quest_data["creator_id"]]))
         log_success("Quest", quest_data["name"], quest.id)
       end
 
